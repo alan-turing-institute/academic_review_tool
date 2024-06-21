@@ -1,0 +1,102 @@
+import os
+
+import json
+
+import jsonlines
+
+import re
+
+import numpy as np
+
+import pandas as pd
+
+import scipy as sci
+import scipy.stats
+# import scipy.stats._stats_py
+from scipy.stats import pearsonr
+
+from PyPDF2 import PdfFileReader, PdfReader, PdfWriter
+
+import io
+
+import matplotlib.pyplot as plt
+
+import igraph as ig
+
+from igraph import Graph as Graph
+
+import webbrowser
+
+import urllib
+from urllib.parse import quote, urlparse
+
+import mpl_toolkits
+
+from datetime import datetime, date, timedelta
+
+import pickle
+
+import requests
+
+from bs4 import BeautifulSoup
+
+import requests_html
+from requests_html import HTML
+from requests_html import HTMLSession
+
+import sys
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+import math
+
+import itertools
+from itertools import product
+
+import nltk
+# Should consider using in place of custom text parsers I've built
+
+import gensim
+from gensim.models import Word2Vec
+# See https://pypi.org/project/gensim/
+
+# See https://enjoymachinelearning.com/blog/finding-semantic-similarity-between-sentences-in-python/
+
+import wayback
+from wayback import WaybackClient
+
+from htmldate import find_date
+
+import webbrowser
+
+import urllib
+from urllib.parse import quote, urlparse
+from urllib.request import Request, urlopen
+
+from selectolax.parser import HTMLParser
+
+# https://pypi.org/project/scholarly/. See site for citation if used in publication.
+
+from scholarly import scholarly
+
+# See https://pypi.org/project/pymed/
+
+from pymed import PubMed
+
+# See https://pypi.org/project/arxiv/
+
+import arxiv
+
+# See https://pypi.org/project/paperscraper/
+
+from paperscraper.pubmed import get_and_dump_pubmed_papers
+from paperscraper.arxiv import get_and_dump_arxiv_papers
+from paperscraper.xrxiv.xrxiv_query import XRXivQuery
+from paperscraper import dump_queries
+from paperscraper.scholar import get_and_dump_scholar_papers, get_citations_from_title
+from paperscraper.pdf import save_pdf
+
+# See https://pypi.org/project/litstudy/, https://nlesc.github.io/litstudy/example.html
+
+import litstudy
