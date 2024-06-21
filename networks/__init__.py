@@ -1,1 +1,0 @@
-"""Functions for generating and analysing networks."""
