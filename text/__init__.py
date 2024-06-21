@@ -1,0 +1,1 @@
+"""Functions for analysing texts and strings"""
