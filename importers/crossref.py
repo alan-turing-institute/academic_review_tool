@@ -226,25 +226,27 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
     if 'unstructured' in keys:
 
         unstr = reference['unstructured'].split('. ')
-
-        df_data['title'] = None
+        
         df_data['authors'] = unstr[0]
+        df_data['title'] = None
         df_data['date'] = None
         df_data['link'] = None
 
         for i in unstr:
             
-            if is_int(i) == True:
-                df_data['date'] = i
+            if i != df_data['authors']:
 
-            else:
-                if is_url(i) == True:
-                    df_data['link'] = i
+                if is_int(i) == True:
+                    df_data['date'] = i
 
                 else:
-                    
-                    if df_data['title'] == None:
-                        df_data['title'] = i
+                    if is_url(i) == True:
+                        df_data['link'] = i
+
+                    else:
+
+                        if df_data['title'] == None:
+                            df_data['title'] = i
 
         if (df_data['link'] != None) and ('doi.org/' in df_data['link']):
             try:

@@ -619,6 +619,39 @@ class Results(pd.DataFrame):
 
         return self.loc[output.index]
 
+class References(Results):
+
+    """
+    This is a References object. It is a modified Pandas Dataframe object designed to store References relating to an entry.
+    
+    Parameters
+    ----------
+    
+    
+    Attributes
+    ----------
+    """
+
+    def __init__(self, dataframe = None, index = []):
+        
+        """
+        Initialises References instance.
+        
+        Parameters
+        ----------
+        """
+
+        
+        # Inheriting methods and attributes from References class
+        super().__init__()
+            
+        self.replace(np.nan, None)
+    
+    def __repr__(self):
+
+        return f'References object containing {len(self)} references'
+
+
 class ActivityLog(pd.DataFrame):
 
     """
