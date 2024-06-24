@@ -3,7 +3,7 @@ from .utils.cleaners import strip_list_str
 from .exporters.general_exporters import obj_to_folder
 from .importers.pdf import read_pdf_to_table
 from .importers.jstor import import_jstor_metadata, import_jstor_full
-from .importers.crossref import items_to_df, search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
+from .importers.crossref import items_to_df, references_to_df, search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from .datasets import stopwords
 from .internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 
@@ -651,6 +651,35 @@ class References(Results):
 
         return f'References object containing {len(self)} references'
 
+def from_dataframe(dataframe):
+        
+        dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
+        results_table = References(index = dataframe.index)
+        results_table.columns = results_table.columns.astype(str).str.lower().str.replace(' ', '_')
+        dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
+
+        for c in dataframe.columns:
+            results_table[c] = dataframe[c]
+        
+        return results_table
+
+def extract_references(references_list: list):
+
+    df = pd.DataFrame(columns=results_cols, dtype=object)
+
+    if (type(references_list) == list) and (type(references_list[0]) == dict):
+        df = references_to_df(references_list)
+    
+    else:
+        if (type(references_list) == list) and (type(references_list[0]) == str):
+            df = pd.DataFrame(columns=results_cols, dtype=object)
+            df['link'] = pd.Series(references_list, dtype=object)
+
+    refs = References.from_dataframe(df)
+
+    return refs
+
+    
 
 class ActivityLog(pd.DataFrame):
 
