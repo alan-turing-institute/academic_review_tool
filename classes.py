@@ -619,10 +619,10 @@ class Results(pd.DataFrame):
 
         return self.loc[output.index]
     
-    def extract_references(self):
+    def extract_citations(self):
 
-        self['citations_data'] = self['citations_data'].apply(extract_references)
-        return self['citations_data']
+        self['citations'] = self['citations_data'].apply(extract_references)
+        return self['citations']
 
 class References(Results):
 
