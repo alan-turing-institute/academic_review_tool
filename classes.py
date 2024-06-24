@@ -201,6 +201,14 @@ class Results(pd.DataFrame):
             self.loc[index] = dataframe.loc[i]
             index += 1
 
+    def add_doi(self, doi: str = 'request_input', timeout: int = 60):
+        df = lookup_doi(doi=doi, timeout=timeout)
+        self.add_dataframe(dataframe=df)
+
+    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+        df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
+        self.add_dataframe(dataframe=df)
+
     def __add__(self, results_obj):
 
         left = self.copy(deep=True)
@@ -1185,9 +1193,15 @@ class Review:
 
     def lookup_doi(self, doi = 'request_input', timeout = 60):
         return lookup_doi(doi=doi, timeout=timeout)
+    
+    def add_doi(self, doi = 'request_input', timeout = 60):
+        return self.results.add_doi(doi=doi, timeout=timeout)
 
     def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
+    
+    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+        return self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
