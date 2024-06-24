@@ -1,6 +1,8 @@
 """Functions to load and parse JSTOR database files"""
 
 from ..utils.basics import results_cols
+from ..utils.cleaners import is_int
+from ..internet.webanalysis import is_url
 
 from time import sleep
 
@@ -196,10 +198,82 @@ def items_to_df(items: list) -> pd.DataFrame:
 def reference_to_df(reference: dict) -> pd.DataFrame:
 
     keys = list(reference.keys())
-    df = pd.DataFrame(columns = keys, dtype=object)
 
-    for k in keys:
-        df.at[0, k] = reference[k]
+    df_data = {}
+
+    if 'DOI' in keys:
+
+        try:
+            doi = reference['DOI']
+            df = lookup_doi(doi)
+            return df
+        
+        except:
+            pass
+    
+    if 'URL' in keys:
+
+        if 'doi.org/' in reference['URL']:
+            doi = reference['URL']
+
+            try:
+                df = lookup_doi(doi)
+                return df
+            
+            except:
+                pass
+
+    if 'unstructured' in keys:
+
+        unstr = reference['unstructured'].split('. ')
+
+        df_data['authors'] = unstr[0]
+        df_data['date'] = None
+        df_data['url'] = None
+
+        for i in unstr:
+            
+            if is_int(i) == True:
+                df_data['date'] = i
+            else:
+                if is_url(i) == True:
+                    df_data['url'] = i
+                else:
+                    df_data['title'] = i
+
+        if (df_data['url'] != None) and ('doi.org/' in df_data['url']):
+            try:
+                df = lookup_doi(df_data['url'])
+                return df
+            
+            except:
+                pass
+    
+    if 'year' in keys:
+        df_data['year'] = reference['year']
+
+    if 'author' in keys:
+        df_data['author'] = reference['author']
+    
+    if 'title' in keys:
+        df_data['title'] = reference['title']
+    else:
+        if 'article-title' in keys:
+            df_data['title'] = reference['article-title']
+        
+    if 'book-title' in keys:
+        df_data['source'] = reference['book-title']
+    
+    if 'journal-title' in keys:
+        df_data['source'] = reference['journal-title']
+
+    if len(df_data.keys()) == 0:
+        df_data = reference
+
+    df = pd.DataFrame(columns = list(df_data.keys()), dtype=object)
+
+    for key in df_data.keys():
+        df.at[0, key] = df_data[key]
     
     return df
 
