@@ -618,6 +618,11 @@ class Results(pd.DataFrame):
         print(f'Keywords: {frequent_kws}')
 
         return self.loc[output.index]
+    
+    def extract_references(self):
+
+        self['citations_data'] = self['citations_data'].apply(extract_references)
+        return self['citations_data']
 
 class References(Results):
 
@@ -649,7 +654,7 @@ class References(Results):
     
     def __repr__(self):
 
-        return f'{self.to_dict()}'
+        return f'References object containing {len(self)} items'
 
     def from_dataframe(dataframe):
         
