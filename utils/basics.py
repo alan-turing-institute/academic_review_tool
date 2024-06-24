@@ -1,8 +1,7 @@
 """Basic classes and functions."""
 
-from typing import List, Dict, Tuple
+from typing import List, Dict
 import math
-import copy
 from os import stat_result
 
 results_cols = [
@@ -21,8 +20,10 @@ results_cols = [
                             'extract',
                             'full_text',
                             'citations',
+                            'citation_count',
                             'citations_data',
                             'cited_by',
+                            'cited_by_count',
                             'recommendations',
                             'repository',
                             'doi',
