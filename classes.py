@@ -1057,20 +1057,23 @@ class Review:
         return string
     
     def to_dataframe(self):
-        return self.results.to_dataframe()
+        return self.results.to_dataframe() # type: ignore
 
-    def from_dataframe(dataframe):
+    def from_dataframe(dataframe): # type: ignore
         
         review = Review()
         review.results = Results.from_dataframe(dataframe)
 
         return review
 
+    def extract_citations(self):
+        return self.results.extract_citations() # type: ignore
+
     def import_excel(self, file_path = 'request_input', sheet_name = None):
         self.update_properties()
-        return self.results.import_excel(file_path, sheet_name)
+        return self.results.import_excel(file_path, sheet_name) # type: ignore
     
-    def from_excel(file_path = 'request_input', sheet_name = None):
+    def from_excel(file_path = 'request_input', sheet_name = None): # type: ignore
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name)
@@ -1079,7 +1082,7 @@ class Review:
 
     def import_csv(self, file_path = 'request_input'):
         self.update_properties()
-        return self.results.import_csv(file_path)
+        return self.results.import_csv(file_path) # type: ignore
     
     def from_csv(file_path = 'request_input'):
 
@@ -1090,7 +1093,7 @@ class Review:
 
     def import_json(self, file_path = 'request_input'):
         self.update_properties()
-        return self.results.import_json(file_path)
+        return self.results.import_json(file_path) # type: ignore
     
     def from_json(file_path = 'request_input'):
 
