@@ -1,7 +1,5 @@
 """Functions to load and parse JSTOR database files"""
 
-# from habanero import Crossref
-
 from ..utils.basics import results_cols
 
 from time import sleep

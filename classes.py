@@ -186,7 +186,7 @@ class Results(pd.DataFrame):
     def add_dataframe(self, dataframe):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
-            raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(data)}')
+            raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
 
         dataframe = dataframe.reset_index().drop('index', axis=1)
         dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
@@ -1134,7 +1134,203 @@ class Review:
 
         df = scrape_google_scholar_search(url)
         self.results.add_dataframe(df)
+    
+    def search_crossref(self,
+                bibliographic: str = None,
+                title: str = None,
+                author: str = None,
+                author_affiliation: str = None,
+                editor: str = None,
+                entry_type: str = None,
+                published_date: str = None,
+                DOI: str = None,
+                ISSN: str = None,
+                publisher_name: str = None,
+                funder_name = None,
+                source: str = None,
+                link: str = None,
+                filter: dict = None,
+                select: list = None,
+                sample: int = None,
+                limit: int = None,
+                rate_limit: float = 0.1,
+                timeout = 60,
+                add_to_results = False
+                ) -> pd.DataFrame:
+        
+        df = search_works(bibliographic = bibliographic,
+                title = title,
+                author = author,
+                author_affiliation = author_affiliation,
+                editor = editor,
+                entry_type = entry_type,
+                published_date = published_date,
+                DOI = DOI,
+                ISSN = ISSN,
+                publisher_name = publisher_name,
+                funder_name = funder_name,
+                source = source,
+                link = link,
+                filter = filter,
+                select = select,
+                sample = sample,
+                limit = limit,
+                rate_limit = rate_limit,
+                timeout = timeout)
+        
+        if add_to_results == True:
+            self.results.add_dataframe(dataframe=df)
+        
+        return df
 
+    def lookup_doi(self, doi = 'request_input', timeout = 60):
+        return lookup_doi(doi=doi, timeout=timeout)
+
+    def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+        return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
+    
+    def lookup_journal(self, issn = 'request_input', timeout = 60):
+        return lookup_journal(issn = issn, timeout = timeout)
+    
+    def lookup_journals(self, issns_list: list = [], rate_limit: float = 0.1, timeout: int = 60):
+        return lookup_journals(issns_list = issns_list, rate_limit = rate_limit, timeout = timeout)
+    
+    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60):
+        return search_journals(*args, limit = limit, rate_limit=rate_limit, timeout = timeout)
+    
+    def get_journal_entries(self,
+                        issn = 'request_input',
+                        filter: dict = None,
+                        select: list = None,
+                        sample: int = None,
+                        limit: int = None,
+                        rate_limit: float = 0.1,
+                        timeout = 60):
+        
+        return get_journal_entries(issn = issn, filter = filter, select = select, sample = sample, limit = limit, rate_limit = rate_limit, timeout = timeout)
+    
+    def search_journal_entries(
+                        self,
+                        issn = 'request_input',
+                        bibliographic: str = None,
+                        title: str = None,
+                        author: str = None,
+                        author_affiliation: str = None,
+                        editor: str = None,
+                        entry_type: str = None,
+                        published_date: str = None,
+                        DOI: str = None,
+                        publisher_name: str = None,
+                        funder_name: str = None,
+                        source: str = None,
+                        link: str = None,
+                        filter: dict = None,
+                        select: list = None,
+                        sample: int = None,
+                        limit: int = None,
+                        rate_limit: float = 0.1,
+                        timeout: int = 60,
+                        add_to_results: bool = False) -> pd.DataFrame:
+        
+            df = search_journal_entries(issn = issn,
+                                          bibliographic = bibliographic,
+                                          title=title,
+                                          author=author,
+                                          author_affiliation=author_affiliation,
+                                          editor=editor,
+                                          entry_type=entry_type,
+                                          published_date = published_date,
+                                          DOI = DOI,
+                                          publisher_name = publisher_name,
+                                          funder_name = funder_name,
+                                          source = source,
+                                          link=link,
+                                          filter=filter,
+                                          select = select,
+                                          sample=sample,
+                                          limit=limit,
+                                          rate_limit=rate_limit,
+                                          timeout=timeout
+                                          )
+            
+            if add_to_results == True:
+                self.results.add_dataframe(dataframe=df)
+        
+            return df
+    
+    def lookup_funder(self, funder_id = 'request_input', timeout = 60):
+        return lookup_funder(funder_id = funder_id, timeout = timeout)
+    
+    def lookup_funders(self, funder_ids: list = [], rate_limit: float = 0.1, timeout = 60):
+        return lookup_funders(funder_ids=funder_ids, rate_limit=rate_limit, timeout = timeout)
+    
+    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60):
+        return search_funders(*args, limit=limit, rate_limit=rate_limit, timeout=timeout)
+    
+    def get_funder_works(self,
+                        funder_id = 'request_input',
+                        filter: dict = None,
+                        select: list = None,
+                        sample: int = None,
+                        limit: int = None,
+                        rate_limit: float = 0.1,
+                        timeout: int = 60,
+                        add_to_results: bool = False):
+        
+        df = get_funder_works(funder_id=funder_id, filter=filter, select=select, sample=sample, limit=limit, rate_limit=rate_limit, timeout=timeout)
+
+        if add_to_results == True:
+                self.results.add_dataframe(dataframe=df)
+        
+        return df
+    
+    def search_funder_works(self,
+                        funder_id = 'request_input',
+                        bibliographic: str = None,
+                        title: str = None,
+                        author: str = None,
+                        author_affiliation: str = None,
+                        editor: str = None,
+                        entry_type: str = None,
+                        published_date: str = None,
+                        DOI: str = None,
+                        publisher_name: str = None,
+                        funder_name = None,
+                        source: str = None,
+                        link: str = None,
+                        filter: dict = None,
+                        select: list = None,
+                        sample: int = None,
+                        limit: int = None,
+                        rate_limit: float = 0.1,
+                        timeout: int = 60,
+                        add_to_results: bool = False):
+    
+        df = search_funder_works(
+                                funder_id=funder_id,
+                                bibliographic=bibliographic,
+                                title=title,
+                                author=author,
+                                author_affiliation=author_affiliation,
+                                editor=editor,
+                                entry_type=entry_type,
+                                published_date=published_date,
+                                DOI=DOI,
+                                publisher_name=publisher_name,
+                                funder_name=funder_name,
+                                source=source,
+                                link=link,
+                                filter=filter,
+                                select=select,
+                                sample=sample,
+                                limit=limit,
+                                rate_limit=rate_limit,
+                                timeout=timeout)
+            
+        if add_to_results == True:
+                self.results.add_dataframe(dataframe=df)
+        
+        return df
 
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 
