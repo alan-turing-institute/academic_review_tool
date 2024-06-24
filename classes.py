@@ -649,9 +649,9 @@ class References(Results):
     
     def __repr__(self):
 
-        return f'References object containing {len(self)} references'
+        return f'{self.to_dict()}'
 
-def from_dataframe(dataframe):
+    def from_dataframe(dataframe):
         
         dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
         results_table = References(index = dataframe.index)
