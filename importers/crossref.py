@@ -229,7 +229,7 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
 
         df_data['authors'] = unstr[0]
         df_data['date'] = None
-        df_data['url'] = None
+        df_data['link'] = None
 
         for i in unstr:
             
@@ -237,23 +237,23 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
                 df_data['date'] = i
             else:
                 if is_url(i) == True:
-                    df_data['url'] = i
+                    df_data['link'] = i
                 else:
                     df_data['title'] = i
 
-        if (df_data['url'] != None) and ('doi.org/' in df_data['url']):
+        if (df_data['link'] != None) and ('doi.org/' in df_data['link']):
             try:
-                df = lookup_doi(df_data['url'])
+                df = lookup_doi(df_data['link'])
                 return df
             
             except:
                 pass
     
     if 'year' in keys:
-        df_data['year'] = reference['year']
+        df_data['date'] = reference['year']
 
     if 'author' in keys:
-        df_data['author'] = reference['author']
+        df_data['authors'] = reference['author']
     
     if 'title' in keys:
         df_data['title'] = reference['title']
@@ -275,12 +275,14 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
     for key in df_data.keys():
         df.at[0, key] = df_data[key]
     
+    df.columns = df.columns.str.lower().str.replace(' ', '_')
+
     return df
 
 
 def references_to_df(references_list: list) -> pd.DataFrame:
 
-    df = pd.DataFrame(dtype=object)
+    df = pd.DataFrame(columns = results_cols, dtype=object)
 
     for i in references_list:
 
@@ -289,6 +291,11 @@ def references_to_df(references_list: list) -> pd.DataFrame:
     
     df = df.reset_index().drop('index', axis=1)
 
+    try:
+        df = df.drop('doi-asserted-by', axis=1).drop('key', axis=1)
+    except:
+        pass
+    
     return df
 
 def search_works(
