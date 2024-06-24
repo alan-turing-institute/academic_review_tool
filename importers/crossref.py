@@ -90,7 +90,7 @@ filters = ['alternative_id',
     'updates'
     ]
 
-my_etiquette = Etiquette('Academic Review Tool (ART)', '0.01', 'https://github.com/alan-turing-institute/academic-review-tool', 'academic_review_tool@outlook.com')
+my_etiquette = Etiquette('Academic Review Tool (ART)', '0.01', 'https://github.com/alan-turing-institute/academic_review_tool', 'academic_review_tool@outlook.com')
 
 def items_to_df(items: list) -> pd.DataFrame:
 
@@ -148,15 +148,35 @@ def items_to_df(items: list) -> pd.DataFrame:
         else:
             authors_data = []
 
+        if 'references-count' in i.keys():
+            citations_count = i['references-count']
+        else:
+            citations_count = None
+
         if 'reference' in i.keys():
             citations_data = i['reference']
         else:
             citations_data = None
 
+        if 'is-referenced-by-count' in i.keys():
+            cited_by_count = i['is-referenced-by-count']
+        else:
+            cited_by_count = None
+
         if 'URL' in i.keys():
             link = i['URL']
         else:
             link = None
+        
+        if 'score' in i.keys():
+            crossref_score = i['score']
+        else:
+            crossref_score = None
+        
+        if 'language' in i.keys():
+            language = i['language']
+        else:
+            language = None
         
         authors = []
         for a in authors_data:
@@ -190,7 +210,11 @@ def items_to_df(items: list) -> pd.DataFrame:
         df.loc[index, 'type'] = entry_type
         df.loc[index, 'authors_data'] = authors_data
         df.at[index, 'authors'] = authors
+        df.at[index, 'language'] = language
+        df.at[index, 'citation_count'] = citations_count
         df.at[index, 'citations_data'] = citations_data
+        df.at[index, 'cited_by_count'] = cited_by_count
+        df.at[index, 'crossref_score'] = crossref_score
         df.loc[index, 'link'] = link
     
     return df
