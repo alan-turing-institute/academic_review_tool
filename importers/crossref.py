@@ -227,6 +227,7 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
 
         unstr = reference['unstructured'].split('. ')
 
+        df_data['title'] = None
         df_data['authors'] = unstr[0]
         df_data['date'] = None
         df_data['link'] = None
@@ -235,11 +236,15 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
             
             if is_int(i) == True:
                 df_data['date'] = i
+
             else:
                 if is_url(i) == True:
                     df_data['link'] = i
+
                 else:
-                    df_data['title'] = i
+                    
+                    if df_data['title'] == None:
+                        df_data['title'] = i
 
         if (df_data['link'] != None) and ('doi.org/' in df_data['link']):
             try:
@@ -260,6 +265,10 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
     else:
         if 'article-title' in keys:
             df_data['title'] = reference['article-title']
+        
+        else:
+            if 'volume-title' in keys:
+                df_data['title'] = reference['volume-title']
         
     if 'book-title' in keys:
         df_data['source'] = reference['book-title']
@@ -295,7 +304,7 @@ def references_to_df(references_list: list) -> pd.DataFrame:
         df = df.drop('doi-asserted-by', axis=1).drop('key', axis=1)
     except:
         pass
-    
+
     return df
 
 def search_works(
