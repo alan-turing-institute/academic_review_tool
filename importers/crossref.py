@@ -199,7 +199,7 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
     df = pd.DataFrame(columns = keys, dtype=object)
 
     for k in keys:
-        df.loc[0, k] = reference[k]
+        df.at[0, k] = reference[k]
     
     return df
 
