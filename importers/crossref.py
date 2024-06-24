@@ -193,6 +193,30 @@ def items_to_df(items: list) -> pd.DataFrame:
     
     return df
 
+def reference_to_df(reference: dict) -> pd.DataFrame:
+
+    keys = list(reference.keys())
+    df = pd.DataFrame(columns = keys, dtype=object)
+
+    for k in keys:
+        df.loc[0, k] = reference[k]
+    
+    return df
+
+
+def references_to_df(references_list: list) -> pd.DataFrame:
+
+    df = pd.DataFrame(dtype=object)
+
+    for i in references_list:
+
+        row = reference_to_df(i)
+        df = pd.concat([df, row])
+    
+    df = df.reset_index().drop('index', axis=1)
+
+    return df
+
 def search_works(
                 bibliographic: str = None,
                 title: str = None,
