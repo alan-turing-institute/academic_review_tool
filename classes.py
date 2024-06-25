@@ -800,22 +800,22 @@ class Author():
     
     def update_full_name(self) -> str:
 
-            if self.details.loc[0, 'given_name'] != None:
-                given = str(self.details.loc[0, 'given_name'])
-            else:
+            given = self.details.loc[0, 'given_name']
+            family = self.details.loc[0, 'family_name']
+
+            if given == None:
                 given = ''
             
-            if self.details.loc[0, 'family_name'] != None:
-                family = str(self.details.loc[0, 'family_name'])
-            else:
+            if family == None:
                 family = ''
             
-            full = given + ' ' + family
+            full = given + ' ' + family     # type: ignore
 
             if (full == '') or (full == ' '):
                 full = 'no_name_given'
 
-            if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == ''):
+            full_name = self.details.loc[0, 'full_name']
+            if (full_name == None) or (full_name == '') or (full_name == 'no_name_given'):
                 self.details.loc[0, 'full_name'] = full
 
             return str(self.details.loc[0, 'full_name'])
