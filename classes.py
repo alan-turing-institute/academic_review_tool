@@ -809,7 +809,7 @@ class Author():
                 family = str(self.details.loc[0, 'family_name'])
             else:
                 family = ''
-            a
+            
             full = given + ' ' + family
 
             if (full == '') or (full == ' '):
