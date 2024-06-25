@@ -956,7 +956,7 @@ class Authors:
     def __repr__(self) -> str:
         return self.all['full_name'].to_list().__repr__()
     
-    def __add__(self, authors) -> Authors:
+    def __add__(self, authors):
 
         left = self.all.copy(deep=True)
         right = authors.all.copy(deep=True)
