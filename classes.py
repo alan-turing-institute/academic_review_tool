@@ -920,6 +920,7 @@ class Author():
 
         author = Author()
         author.import_crossref(crossref_result)
+        author.update_full_name()
 
         return author
     
