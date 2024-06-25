@@ -767,6 +767,8 @@ class Author():
                                 ],
                                 dtype = object)
         
+        self.details.loc[0] = pd.Series(dtype=object)
+
         self.details.loc[0, 'author_id'] = author_id
         self.details.loc[0, 'fulL_name'] = fulL_name
         self.details.loc[0, 'given_name'] = given_name
@@ -809,6 +811,9 @@ class Author():
                 family = ''
             
             full = given + ' ' + family
+
+            if full == '':
+                full = 'no_name_found'
 
             if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == '') or (len(str(self.details.loc[0, 'full_name'])) < len(full)):
                 self.details.loc[0, 'full_name'] = full
