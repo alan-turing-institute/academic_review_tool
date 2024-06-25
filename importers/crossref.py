@@ -351,7 +351,7 @@ def search_works(
                 select: list = None,
                 sample: int = None,
                 limit: int = None,
-                rate_limit: float = 0.1,
+                rate_limit: float = 0.05,
                 timeout = 60
                 ) -> pd.DataFrame:
 
@@ -418,7 +418,28 @@ def search_works(
         select_code = f'result.select({select_input})'
         result = exec(select_code)
 
-    print(f'{result.count()} results found')
+    print(f'{result.count()} results found') # type: ignore
+
+    if (limit == None) or (limit < 1):
+        if result.count() > 1000: # type: ignore
+            limit_decision = input(f'No limit set for the number of results to download, but {result.count()} results found. Would you like to set a limit? (yes/no) ') # type: ignore
+
+            if limit_decision.lower().strip() == 'yes':
+                new_limit = input('New limit: ')
+
+                if new_limit == '':
+                    new_limit = 1000
+                
+                limit = int(new_limit)
+            
+            if limit_decision.lower().strip() == 'no':
+                limit = None # type: ignore
+            
+            if limit_decision.lower().strip() == '':
+                limit = 1000
+
+
+
 
     items = []
     if result != None:
@@ -456,7 +477,7 @@ def lookup_doi(doi = 'request_input', timeout = 60):
 
     return df
 
-def lookup_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+def lookup_dois(dois_list: list = [], rate_limit: float = 0.05, timeout = 60):
 
     items = []
 
@@ -482,7 +503,7 @@ def lookup_journal(issn = 'request_input', timeout = 60):
 
     return pd.DataFrame.from_dict(result, orient='index').T
 
-def lookup_journals(issns_list: list = [], rate_limit: float = 0.1, timeout = 60):
+def lookup_journals(issns_list: list = [], rate_limit: float = 0.05, timeout = 60):
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout)
@@ -497,7 +518,7 @@ def lookup_journals(issns_list: list = [], rate_limit: float = 0.1, timeout = 60
 
     return output
 
-def search_journals(*args, limit: int = None, rate_limit: float = 0.1, timeout = 60):
+def search_journals(*args, limit: int = None, rate_limit: float = 0.05, timeout = 60):
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout).query(*args)
@@ -529,7 +550,7 @@ def get_journal_entries(issn = 'request_input',
                         select: list = None,
                         sample: int = None,
                         limit: int = None,
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout = 60):
 
     if issn == 'request_input':
@@ -603,7 +624,7 @@ def search_journal_entries(issn = 'request_input',
                         select: list = None,
                         sample: int = None,
                         limit: int = None,
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout = 60):
     
 
@@ -716,7 +737,7 @@ def lookup_funder(funder_id = 'request_input', timeout = 60):
 
     return output
 
-def lookup_funders(funder_ids: list = [], rate_limit: float = 0.1, timeout = 60):
+def lookup_funders(funder_ids: list = [], rate_limit: float = 0.05, timeout = 60):
 
     global my_etiquette
     funders = Funders(etiquette=my_etiquette, timeout=timeout)
@@ -748,7 +769,7 @@ def lookup_funders(funder_ids: list = [], rate_limit: float = 0.1, timeout = 60)
 
     return output
 
-def search_funders(*args, limit: int = None, rate_limit: float = 0.1, timeout = 60):
+def search_funders(*args, limit: int = None, rate_limit: float = 0.05, timeout = 60):
 
     global my_etiquette
     funders = Funders(etiquette=my_etiquette, timeout=timeout).query(*args)
@@ -791,7 +812,7 @@ def get_funder_works(funder_id = 'request_input',
                         select: list = None,
                         sample: int = None,
                         limit: int = None,
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout = 60):
 
     if funder_id == 'request_input':
@@ -865,7 +886,7 @@ def search_funder_works(funder_id = 'request_input',
                         select: list = None,
                         sample: int = None,
                         limit: int = None,
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout = 60):
     
 
