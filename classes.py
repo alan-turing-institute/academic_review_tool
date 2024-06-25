@@ -883,7 +883,9 @@ class Authors:
 
         self.all = pd.DataFrame(columns = [
                                 'author_id',
-                                'name',
+                                'full_name',
+                                'given_name',
+                                'family_name',
                                 'email',
                                 'affiliations',
                                 'publications',
@@ -933,6 +935,24 @@ class Authors:
     
     def __repr__(self) -> str:
         return self.all.__repr__()
+    
+    def add_author(self, author: Author):
+
+        data = author.details
+        self.all = pd.concat([self.all, data])
+
+    def import_crossref(self, crossref_result: list):
+
+        for i in crossref_result:
+
+            auth = Author.from_crossref(i) # type: ignore
+            self.add_author(author = auth)
+    
+    def from_crossref(crossref_result: list): # type: ignore
+
+        authors = Authors()
+        authors.import_crossref(crossref_result)
+
 
 class Review:
     
