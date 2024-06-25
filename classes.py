@@ -731,7 +731,19 @@ class Author():
     ----------
     """
 
-    def __init__(self):
+    def __init__(self,
+                 author_id: str = None, # type: ignore
+                 fulL_name: str = None, # type: ignore
+                 given_name: str = None, # type: ignore
+                 family_name: str = None, # type: ignore
+                 email: str = None, # type: ignore
+                 affiliations: str = None, # type: ignore
+                 publications: str = None, # type: ignore
+                 orcid: str = None, # type: ignore
+                 google_scholar: str = None, # type: ignore
+                 crossref: str = None, # type: ignore
+                 other_links: str = None # type: ignore
+                 ):
         
         """
         Initialises Author instance.
@@ -742,7 +754,9 @@ class Author():
 
         self.details = pd.DataFrame(columns = [
                                 'author_id',
-                                'name',
+                                'fulL_name',
+                                'given_name',
+                                'family_name',
                                 'email',
                                 'affiliations',
                                 'publications',
@@ -753,7 +767,23 @@ class Author():
                                 ],
                                 dtype = object)
         
+        self.details.loc[0, 'author_id'] = author_id
+        self.details.loc[0, 'fulL_name'] = fulL_name
+        self.details.loc[0, 'given_name'] = given_name
+        self.details.loc[0, 'family_name'] = family_name
+        self.details.loc[0, 'email'] = email
+        self.details.loc[0, 'affiliations'] = affiliations
+        self.details.loc[0, 'publications'] = publications
+        self.details.loc[0, 'orcid'] = orcid
+        self.details.loc[0, 'google_scholar'] = google_scholar
+        self.details.loc[0, 'crossref'] = crossref
+        self.details.loc[0, 'other_links'] = other_links
+
+        self.update_full_name()
+
         self.publications = Results()
+
+        
     
     def __getitem__(self, key):
         
@@ -764,7 +794,56 @@ class Author():
         return self.__dict__[key]
 
     def __repr__(self) -> str:
-        return self.details.__repr__()
+        return str(self.details.loc[0, 'full_name'])
+    
+    def update_full_name(self) -> str:
+
+            if self.details.loc[0, 'given_name'] != None:
+                given = str(self.details.loc[0, 'given_name'])
+            else:
+                given = ''
+            
+            if self.details.loc[0, 'family_name'] != None:
+                family = str(self.details.loc[0, 'family_name'])
+            else:
+                family = ''
+            
+            full = given + ' ' + family
+
+            if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == '') or (len(str(self.details.loc[0, 'full_name'] == None)) < len(full)):
+                self.details.loc[0, 'full_name'] = full
+
+            return str(self.details.loc[0, 'full_name'])
+
+    def name_set(self) -> set:
+
+        given = str(self.details.loc[0, 'given_name'])
+        family = str(self.details.loc[0, 'family_name'])
+
+        return set([given, family])
+
+    def import_crossref(self, crossref_result: dict):
+
+        if 'given' in crossref_result.keys():
+            self.details.loc[0, 'given_name'] = crossref_result['given']
+        
+        if 'family' in crossref_result.keys():
+            self.details.loc[0, 'family_name'] = crossref_result['family']
+        
+        if 'email' in crossref_result.keys():
+            self.details.loc[0, 'email'] = crossref_result['email']
+
+        if 'affiliation' in crossref_result.keys():
+            self.details.at[0, 'affiliations'] = crossref_result['affiliation'][0]
+
+        if 'ORCID' in crossref_result.keys():
+            self.details.loc[0, 'orcid'] = crossref_result['ORCID']
+
+        # self.details.loc[0, 'google_scholar'] = google_scholar
+        # self.details.loc[0, 'crossref'] = crossref
+        # self.details.loc[0, 'other_links'] = other_links
+    
+    
 
 class Authors:
 
