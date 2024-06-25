@@ -772,6 +772,12 @@ class Author():
         ----------
         """
 
+        if (',' in family_name) and ((given_name == None) or (given_name == '')):
+            split_name = family_name.split(',')
+            given_name = split_name[0].strip()
+            family_name = split_name[1].strip()
+
+
         self.details = pd.DataFrame(columns = [
                                 'author_id',
                                 'full_name',
@@ -820,8 +826,16 @@ class Author():
     
     def update_full_name(self) -> str:
 
-            given = self.details.loc[0, 'given_name']
-            family = self.details.loc[0, 'family_name']
+            given = str(self.details.loc[0, 'given_name'])
+            family = str(self.details.loc[0, 'family_name'])
+
+            if (',' in family) and ((given == None) or (given == '')):
+                split_name = family.split(',')
+                given = split_name[0].strip()
+                self.details.loc[0, 'given_name'] = given
+
+                family = split_name[1].strip()
+                self.details.loc[0, 'family_name'] = family
 
             if given == None:
                 given = ''
@@ -829,7 +843,7 @@ class Author():
             if family == None:
                 family = ''
             
-            full = given + ' ' + family     # type: ignore
+            full = given + ' ' + family
 
             if (full == '') or (full == ' '):
                 full = 'no_name_given'
