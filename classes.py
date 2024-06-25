@@ -957,14 +957,14 @@ class Authors:
     def __repr__(self) -> str:
         return self.all['full_name'].to_list().__repr__()
     
-    def __add__(self, authors):
+    def merge(self, authors):
 
         left = self.all.copy(deep=True)
         right = authors.all.copy(deep=True)
         
         merged = pd.concat([left, right])
 
-        self.all = merged
+        self.all = merged.drop_duplicates(subset=['author_id', 'given_name', 'family_name', 'orcid'], ignore_index=True)
 
         left_data = self.data
         right_data = authors.data
@@ -988,6 +988,8 @@ class Authors:
                 right_data = list(right_data.values())
 
         merged_data = left_data + right_data # type: ignore
+        merged_data = pd.Series(merged_data).value_counts().index.to_list()
+
         self.data = merged_data
 
         return self
@@ -1012,7 +1014,7 @@ class Authors:
     def import_crossref(self, crossref_result: list):
 
         for i in crossref_result:
-            
+
             auth = Author.from_crossref(i) # type: ignore
             self.add_author(author = auth, data = i)
     
