@@ -753,9 +753,9 @@ class Author():
 
     def __init__(self,
                  author_id: str = None, # type: ignore
-                 full_name: str = None, # type: ignore
-                 given_name: str = None, # type: ignore
-                 family_name: str = None, # type: ignore
+                 full_name = None, # type: ignore
+                 given_name = None, # type: ignore
+                 family_name = None, # type: ignore
                  email: str = None, # type: ignore
                  affiliations: str = None, # type: ignore
                  publications: str = None, # type: ignore
@@ -778,7 +778,7 @@ class Author():
         if type(family_name) == str:
             family_name = family_name.strip()
 
-        if (type(family_name) == str) and (',' in family_name) and ((given_name == None) or (given_name == '')):
+        if ((type(family_name) == str) and (',' in family_name)) and ((given_name == None) or (given_name == '')):
             split_name = family_name.split(',')
             given_name = split_name[0].strip()
             family_name = split_name[1].strip()
@@ -829,12 +829,12 @@ class Author():
     def __repr__(self) -> str:
         return str(self.details.loc[0, 'full_name'])
     
-    def update_full_name(self) -> str:
+    def update_full_name(self):
 
             given = str(self.details.loc[0, 'given_name'])
             family = str(self.details.loc[0, 'family_name'])
 
-            if (',' in family) and ((given == None) or (given == '')):
+            if (',' in family) and ((given == None) or (given == 'None') or (given == '')):
                 split_name = family.split(',')
                 given = split_name[0].strip()
                 self.details.loc[0, 'given_name'] = given
@@ -849,15 +849,16 @@ class Author():
                 family = ''
             
             full = given + ' ' + family
+            full = full.strip()
 
             if (full == '') or (full == ' '):
                 full = 'no_name_given'
 
             full_name = self.details.loc[0, 'full_name']
             if (full_name == None) or (full_name == '') or (full_name == 'no_name_given'):
-                self.details.loc[0, 'full_name'] = full.strip()
+                self.details.loc[0, 'full_name'] = full
 
-            return str(self.details.loc[0, 'full_name'])
+            return self.details.loc[0, 'full_name']
 
     def name_set(self) -> set:
 
