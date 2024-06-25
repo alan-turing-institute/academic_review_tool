@@ -1332,7 +1332,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
-        review.results.extract_authors()
+        review.extract_authors()
 
         return review
 
@@ -1370,7 +1370,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name)
-        review.results.extract_authors() # type: ignore
+        review.extract_authors() # type: ignore
 
         return review
 
@@ -1382,7 +1382,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_csv(file_path)
-        review.results.extract_authors()
+        review.extract_authors()
 
         return review
 
@@ -1394,7 +1394,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_json(file_path)
-        review.results.extract_authors() # type: ignore
+        review.extract_authors() # type: ignore
 
         return review
     
@@ -1406,7 +1406,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_file(file_path, sheet_name)
-        review.results.extract_authors() # type: ignore
+        review.extract_authors() # type: ignore
 
         return review
 
@@ -1555,6 +1555,7 @@ class Review:
         
         if add_to_results == True:
             self.results.add_dataframe(dataframe=df)
+            self.extract_authors()
         
         return df
 
@@ -1636,6 +1637,7 @@ class Review:
             
             if add_to_results == True:
                 self.results.add_dataframe(dataframe=df)
+                self.extract_authors()
         
             return df
     
@@ -1662,6 +1664,7 @@ class Review:
 
         if add_to_results == True:
                 self.results.add_dataframe(dataframe=df)
+                self.extract_authors()
         
         return df
     
@@ -1710,6 +1713,7 @@ class Review:
             
         if add_to_results == True:
                 self.results.add_dataframe(dataframe=df)
+                self.extract_authors()
         
         return df
 
