@@ -789,16 +789,16 @@ class Author():
         
         self.details.loc[0] = pd.Series(dtype=object)
 
-        self.details.loc[0, 'author_id'] = author_id
-        self.details.loc[0, 'full_name'] = full_name
-        self.details.loc[0, 'given_name'] = given_name
-        self.details.loc[0, 'family_name'] = family_name
-        self.details.loc[0, 'email'] = email
+        self.details.loc[0, 'author_id'] = author_id.strip()
+        self.details.loc[0, 'full_name'] = full_name.strip()
+        self.details.loc[0, 'given_name'] = given_name.strip()
+        self.details.loc[0, 'family_name'] = family_name.strip()
+        self.details.loc[0, 'email'] = email.strip()
         self.details.loc[0, 'affiliations'] = affiliations
         self.details.loc[0, 'publications'] = publications
-        self.details.loc[0, 'orcid'] = orcid
-        self.details.loc[0, 'google_scholar'] = google_scholar
-        self.details.loc[0, 'crossref'] = crossref
+        self.details.loc[0, 'orcid'] = orcid.strip()
+        self.details.loc[0, 'google_scholar'] = google_scholar.strip()
+        self.details.loc[0, 'crossref'] = crossref.strip()
         self.details.loc[0, 'other_links'] = other_links
 
         self.update_full_name()
@@ -836,7 +836,7 @@ class Author():
 
             full_name = self.details.loc[0, 'full_name']
             if (full_name == None) or (full_name == '') or (full_name == 'no_name_given'):
-                self.details.loc[0, 'full_name'] = full
+                self.details.loc[0, 'full_name'] = full.strip()
 
             return str(self.details.loc[0, 'full_name'])
 
@@ -869,6 +869,10 @@ class Author():
 
         if 'ORCID' in crossref_result.keys():
             self.details.loc[0, 'orcid'] = crossref_result['ORCID']
+        
+        else:
+            if 'orcid' in crossref_result.keys():
+                self.details.loc[0, 'orcid'] = crossref_result['orcid']
 
         # self.details.loc[0, 'google_scholar'] = google_scholar
         # self.details.loc[0, 'crossref'] = crossref
