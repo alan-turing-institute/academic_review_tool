@@ -940,6 +940,7 @@ class Authors:
 
         data = author.details
         self.all = pd.concat([self.all, data])
+        self.all = self.all.reset_index().drop('index', axis=1)
 
     def import_crossref(self, crossref_result: list):
 
