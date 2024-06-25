@@ -812,7 +812,7 @@ class Author():
             
             full = given + ' ' + family
 
-            if full == '':
+            if (full == '') or (full == ' '):
                 full = 'no_name_found'
 
             if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == ''):
