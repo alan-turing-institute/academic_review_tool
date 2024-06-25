@@ -809,11 +809,11 @@ class Author():
                 family = str(self.details.loc[0, 'family_name'])
             else:
                 family = ''
-            
+            a
             full = given + ' ' + family
 
             if (full == '') or (full == ' '):
-                full = 'no_name_found'
+                full = 'no_name_given'
 
             if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == ''):
                 self.details.loc[0, 'full_name'] = full
@@ -847,6 +847,15 @@ class Author():
         # self.details.loc[0, 'google_scholar'] = google_scholar
         # self.details.loc[0, 'crossref'] = crossref
         # self.details.loc[0, 'other_links'] = other_links
+
+        self.update_full_name()
+    
+    def from_crossref(crossref_result: dict): # type: ignore
+
+        author = Author()
+        author.import_crossref(crossref_result)
+
+        return author
     
 
 
