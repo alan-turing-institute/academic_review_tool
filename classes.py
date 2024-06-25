@@ -772,7 +772,7 @@ class Author():
         ----------
         """
 
-        if (',' in family_name) and ((given_name == None) or (given_name == '')):
+        if (type(family_name) == str) and (',' in family_name) and ((given_name == None) or (given_name == '')):
             split_name = family_name.split(',')
             given_name = split_name[0].strip()
             family_name = split_name[1].strip()
