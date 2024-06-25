@@ -167,6 +167,8 @@ class Results(pd.DataFrame):
         index = len(self)
         self.loc[index] = series
 
+        self.extract_authors()
+
         return self
     
     def add_row(self, data):
@@ -182,6 +184,7 @@ class Results(pd.DataFrame):
 
         index = len(self)
         self.loc[index] = data
+        self.extract_authors()
     
     def add_dataframe(self, dataframe):
         
@@ -200,6 +203,8 @@ class Results(pd.DataFrame):
         for i in dataframe.index:
             self.loc[index] = dataframe.loc[i]
             index += 1
+        
+        self.extract_authors()
 
     def add_doi(self, doi: str = 'request_input', timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
@@ -244,6 +249,8 @@ class Results(pd.DataFrame):
         for c in dataframe.columns:
             results_table[c] = dataframe[c]
         
+        results_table.extract_authors()
+
         return results_table
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
@@ -268,6 +275,8 @@ class Results(pd.DataFrame):
                     
                 except:
                     pass
+        
+        self.extract_authors()
 
         return self
 
@@ -275,6 +284,8 @@ class Results(pd.DataFrame):
 
         results_table = Results()
         results_table = results_table.import_excel(file_path, sheet_name).replace(np.nan, None)
+        results_table.extract_authors() # type: ignore
+
 
         return results_table
 
@@ -296,6 +307,8 @@ class Results(pd.DataFrame):
                         
                     except:
                         pass
+            
+            self.extract_authors()
 
             return self
     
@@ -303,7 +316,8 @@ class Results(pd.DataFrame):
 
         results_table = Results()
         results_table.import_csv(file_path).replace(np.nan, None)
-        
+
+
         return results_table
 
     def import_json(self, file_path = 'request_input'):
@@ -326,6 +340,7 @@ class Results(pd.DataFrame):
                         pass
 
         self = self.replace(np.nan, None)
+        self.extract_authors() # type: ignore
 
         return self
     
@@ -1232,6 +1247,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_dataframe(dataframe)
+        review.results.extract_authors()
 
         return review
 
@@ -1246,6 +1262,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name)
+        review.results.extract_authors() # type: ignore
 
         return review
 
@@ -1257,6 +1274,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_csv(file_path)
+        review.results.extract_authors()
 
         return review
 
@@ -1268,6 +1286,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_json(file_path)
+        review.results.extract_authors() # type: ignore
 
         return review
     
@@ -1279,6 +1298,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_file(file_path, sheet_name)
+        review.results.extract_authors() # type: ignore
 
         return review
 
