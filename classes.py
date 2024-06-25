@@ -621,8 +621,13 @@ class Results(pd.DataFrame):
     
     def extract_citations(self):
 
-        self['citations'] = self['citations_data'].apply(extract_references)
+        self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
         return self['citations']
+    
+    def extract_authors(self):
+
+        self['authors'] = self['authors_data'].apply(extract_authors) # type: ignore
+        return self['authors']
 
 class References(Results):
 
@@ -934,13 +939,20 @@ class Authors:
         return self.__dict__[key]
     
     def __repr__(self) -> str:
-        return self.all.__repr__()
+        return self.all['full_name'].to_list().__repr__()
     
+
     def add_author(self, author: Author):
 
         data = author.details
         self.all = pd.concat([self.all, data])
         self.all = self.all.reset_index().drop('index', axis=1)
+
+    def add_authors_list(self, authors_list: list):
+        
+        for i in authors_list:
+            if type(i) == Author:
+                self.add_author(author = i)
 
     def import_crossref(self, crossref_result: list):
 
@@ -956,6 +968,30 @@ class Authors:
 
         return authors
 
+def extract_authors(author_data: list):
+
+    try:
+        if (author_data == None) or (author_data == ''):
+            result = Authors()
+
+        if type(author_data) == Authors:
+            result = author_data
+
+        if (type(author_data) == list) and (type(author_data[0]) == Author):
+            result = Authors()
+            result.add_authors_list(author_data)
+
+        if (type(author_data) == list) and (type(author_data[0]) == dict)
+            result = Authors.from_crossref(author_data) # type: ignore
+
+        if (type(author_data) == dict) and (type(list(author_data.values())[0]) == str):
+            author = Author.from_crossref(author_data) # type: ignore
+            result = Authors()
+            result.add_author(author)
+    except:
+        result = Authors()
+    
+    return result
 
 class Review:
     
