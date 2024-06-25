@@ -1026,8 +1026,7 @@ class Authors:
         return authors
 
 def extract_authors(author_data: list):
-
-    try:
+        
         if (author_data == None) or (author_data == ''):
             result = Authors()
 
@@ -1045,10 +1044,9 @@ def extract_authors(author_data: list):
             author = Author.from_crossref(author_data) # type: ignore
             result = Authors()
             result.add_author(author)
-    except:
-        result = Authors()
     
-    return result
+    
+        return result
 
 class Review:
     
