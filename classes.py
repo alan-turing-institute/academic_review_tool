@@ -812,7 +812,8 @@ class Author():
         self.details.loc[0, 'crossref'] = crossref
         self.details.loc[0, 'other_links'] = other_links
 
-        self.update_full_name()
+        full_name = self.get_full_name()
+        print(full_name)
 
         self.publications = Results()
 
@@ -829,7 +830,7 @@ class Author():
     def __repr__(self) -> str:
         return str(self.details.loc[0, 'full_name'])
     
-    def update_full_name(self):
+    def get_full_name(self):
 
             given = str(self.details.loc[0, 'given_name'])
             family = str(self.details.loc[0, 'family_name'])
@@ -855,10 +856,18 @@ class Author():
                 full = 'no_name_given'
 
             full_name = self.details.loc[0, 'full_name']
-            if (full_name == None) or (full_name == '') or (full_name == 'no_name_given'):
-                self.details.loc[0, 'full_name'] = full
+            if (full_name == None) or (full_name == 'None') or (full_name == '') or (full_name == 'no_name_given'):
+                result = full
+            else:
+                result = full_name
+            
+            return result
 
-            return self.details.loc[0, 'full_name']
+
+    def update_full_name(self):
+
+            full_name = self.get_full_name()
+            self.details.loc[0, 'full_name'] = full_name
 
     def name_set(self) -> set:
 
