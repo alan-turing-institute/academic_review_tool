@@ -1033,14 +1033,14 @@ def extract_authors(author_data: list):
         if type(author_data) == Authors:
             result = author_data
 
-        if (type(author_data) == list) and (type(author_data[0]) == Author):
+        if (type(author_data) == list) and (len(author_data) > 0) and (type(author_data[0]) == Author):
             result = Authors()
             result.add_authors_list(author_data)
 
-        if (type(author_data) == list) and (type(author_data[0]) == dict):
+        if (type(author_data) == list) and (len(author_data) > 0) and (type(author_data[0]) == dict):
             result = Authors.from_crossref(author_data) # type: ignore
 
-        if (type(author_data) == dict) and (type(list(author_data.values())[0]) == str):
+        if (type(author_data) == dict) and (len(author_data.values()) > 0) and (type(list(author_data.values())[0]) == str):
             author = Author.from_crossref(author_data) # type: ignore
             result = Authors()
             result.add_author(author)
