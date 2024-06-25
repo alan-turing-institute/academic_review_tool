@@ -810,7 +810,7 @@ class Author():
             
             full = given + ' ' + family
 
-            if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == '') or (len(str(self.details.loc[0, 'full_name'] == None)) < len(full)):
+            if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == '') or (len(str(self.details.loc[0, 'full_name'])) < len(full)):
                 self.details.loc[0, 'full_name'] = full
 
             return str(self.details.loc[0, 'full_name'])
@@ -843,7 +843,7 @@ class Author():
         # self.details.loc[0, 'crossref'] = crossref
         # self.details.loc[0, 'other_links'] = other_links
     
-    
+
 
 class Authors:
 
