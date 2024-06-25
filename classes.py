@@ -981,7 +981,7 @@ def extract_authors(author_data: list):
             result = Authors()
             result.add_authors_list(author_data)
 
-        if (type(author_data) == list) and (type(author_data[0]) == dict)
+        if (type(author_data) == list) and (type(author_data[0]) == dict):
             result = Authors.from_crossref(author_data) # type: ignore
 
         if (type(author_data) == dict) and (type(list(author_data.values())[0]) == str):
