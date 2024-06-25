@@ -953,6 +953,8 @@ class Authors:
         authors = Authors()
         authors.import_crossref(crossref_result)
 
+        return authors
+
 
 class Review:
     
