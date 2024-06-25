@@ -774,11 +774,9 @@ class Author():
 
         if type(given_name) == str:
             given_name = given_name.strip()
-            print(True)
 
         if type(family_name) == str:
             family_name = family_name.strip()
-            print(True)
 
         if ((type(family_name) == str) and (',' in family_name)) and ((given_name == None) or (given_name == '')):
             split_name = family_name.split(',')
@@ -853,7 +851,7 @@ class Author():
 
                 family = split_name[1].strip()
                 self.details.loc[0, 'family_name'] = family
-                
+
             full = given + ' ' + family
             full = full.strip()
 
@@ -865,8 +863,6 @@ class Author():
                 result = full
             else:
                 result = full_name
-            
-            print(result)
 
             return result
 
