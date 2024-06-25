@@ -872,10 +872,10 @@ class Authors:
     ----------
     """
 
-    def __init__(self, authors_data: dict = {}):
+    def __init__(self, authors_data = None):
         
         """
-        Initialises Author instance.
+        Initialises Authors instance.
         
         Parameters
         ----------
@@ -896,13 +896,30 @@ class Authors:
         
         self.data = authors_data
 
-        index = len(self.all)
-        for a in self.data.keys():
-            data = authors_data[a].details.to_dict(orient='index')[0]
-            for key in data.keys():
-                self.all.loc[index, key] = data[key]
-            
-            self.all.loc[index, 'author_id'] = a
+        if (type(authors_data) == list) and (type(authors_data[0]) == Author):
+
+            for i in authors_data:
+                auth = i.details.copy(deep=True)
+                self.all = pd.concat([self.all, auth])
+
+            self.all = self.all.reset_index().drop('index',axis=1)
+
+        else:
+
+            if type(authors_data) == dict:
+                
+                values = list(authors_data.values())
+
+                if type(values[0]) == Author:
+
+                    for a in authors_data.keys():
+                        
+                        index = len(self.all)
+                        auth = a.details.copy(deep=True)
+                        self.all = pd.concat([self.all, auth])
+                        self.all.loc[index, 'author_id'] = a
+
+                    self.all = self.all.reset_index().drop('index',axis=1)
                 
 
 
