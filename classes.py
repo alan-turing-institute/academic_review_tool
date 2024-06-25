@@ -774,15 +774,18 @@ class Author():
 
         if type(given_name) == str:
             given_name = given_name.strip()
+            print(True)
 
         if type(family_name) == str:
             family_name = family_name.strip()
+            print(True)
 
         if ((type(family_name) == str) and (',' in family_name)) and ((given_name == None) or (given_name == '')):
             split_name = family_name.split(',')
             given_name = split_name[0].strip()
             family_name = split_name[1].strip()
 
+        
 
         self.details = pd.DataFrame(columns = [
                                 'author_id',
@@ -799,6 +802,7 @@ class Author():
                                 ],
                                 dtype = object)
         
+        
         self.details.loc[0] = pd.Series(dtype=object)
         self.details.loc[0, 'author_id'] = author_id
         self.details.loc[0, 'full_name'] = full_name
@@ -813,7 +817,8 @@ class Author():
         self.details.loc[0, 'other_links'] = other_links
 
         full_name = self.get_full_name()
-        print(full_name)
+        if full_name != self.details.loc[0, 'full_name']:
+            self.details.loc[0, 'full_name'] = full_name
 
         self.publications = Results()
 
