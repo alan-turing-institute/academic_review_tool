@@ -1288,13 +1288,36 @@ class Review:
     def from_dataframe(dataframe): # type: ignore
         
         review = Review()
-        review.results = Results.from_dataframe(dataframe)
+        review.results = Results.from_dataframe(dataframe) # type: ignore
         review.results.extract_authors()
 
         return review
 
     def extract_citations(self):
         return self.results.extract_citations() # type: ignore
+
+    def extract_authors(self):
+
+        self.results.extract_authors() # type: ignore
+
+        authors_data = self.results['authors'].to_list()
+
+        for i in authors_data:
+
+            if type(i) == Authors:
+                self.authors.merge(i)
+            
+            if (type(i) == str) and (len(i) > 0):
+                i = i.split(',')
+
+            if (type(i) == list) and (len(i) > 0):
+                auths = Authors()
+                for a in i:
+                    auth = Author(full_name=a.strip())
+                    auths.add_author(auth)
+                self.authors.merge(auths)
+                
+
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
         self.update_properties()
