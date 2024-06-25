@@ -916,7 +916,8 @@ class Authors:
                                 ],
                                 dtype = object)
         
-        self.data = authors_data
+        self.data = []
+        self.data.append(authors_data)
 
         if (type(authors_data) == list) and (type(authors_data[0]) == Author):
 
@@ -991,11 +992,16 @@ class Authors:
 
         return self
 
-    def add_author(self, author: Author):
+    def add_author(self, author: Author, data = None):
 
-        data = author.details
-        self.all = pd.concat([self.all, data])
+        self.all = pd.concat([self.all, author.details])
         self.all = self.all.reset_index().drop('index', axis=1)
+
+        if data == None:
+            data = author.details.to_dict(orient='index')
+        
+        self.data.append(data)
+
 
     def add_authors_list(self, authors_list: list):
         
@@ -1006,9 +1012,9 @@ class Authors:
     def import_crossref(self, crossref_result: list):
 
         for i in crossref_result:
-
+            
             auth = Author.from_crossref(i) # type: ignore
-            self.add_author(author = auth)
+            self.add_author(author = auth, data = i)
     
     def from_crossref(crossref_result: list): # type: ignore
 
