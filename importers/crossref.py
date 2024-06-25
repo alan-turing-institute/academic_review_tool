@@ -6,7 +6,7 @@ from ..internet.webanalysis import is_url
 
 from time import sleep
 
-from crossref.restful import Works, Journals, Funders, Etiquette
+from crossref.restful import Works, Journals, Funders, Etiquette # type: ignore
 import pandas as pd
 
 filters = ['alternative_id', 

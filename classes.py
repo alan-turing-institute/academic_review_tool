@@ -956,6 +956,35 @@ class Authors:
     def __repr__(self) -> str:
         return self.all['full_name'].to_list().__repr__()
     
+    def __add__(self, authors) -> Authors:
+
+        left = self.all.copy(deep=True)
+        right = authors.all.copy(deep=True)
+        
+        merged = pd.concat([left, right]).drop_duplicates(ignore_index=True)
+
+        self.all = merged
+
+        left_data = self.data
+        right_data = authors.data
+
+        if (type(left_data) == Author) or (type(left_data) == str):
+            left_data = [left_data]
+        
+        if (type(right_data) == Author) or (type(right_data) == str):
+            right_data = [right_data]
+        
+        if type(left_data) == dict:
+            left_data = list(left_data.values())
+        
+        if type(right_data) == dict:
+            right_data = list(right_data.values())
+
+        merged_data = left_data + right_data # type: ignore
+        merged_data = list(set(merged_data))
+        self.data = merged_data
+
+        return self
 
     def add_author(self, author: Author):
 
