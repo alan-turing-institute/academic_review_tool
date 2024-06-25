@@ -772,6 +772,12 @@ class Author():
         ----------
         """
 
+        if type(given_name) == str:
+            given_name = given_name.strip()
+
+        if type(family_name) == str:
+            family_name = family_name.strip()
+
         if (type(family_name) == str) and (',' in family_name) and ((given_name == None) or (given_name == '')):
             split_name = family_name.split(',')
             given_name = split_name[0].strip()
@@ -794,17 +800,16 @@ class Author():
                                 dtype = object)
         
         self.details.loc[0] = pd.Series(dtype=object)
-
-        self.details.loc[0, 'author_id'] = author_id.strip()
-        self.details.loc[0, 'full_name'] = full_name.strip()
-        self.details.loc[0, 'given_name'] = given_name.strip()
-        self.details.loc[0, 'family_name'] = family_name.strip()
-        self.details.loc[0, 'email'] = email.strip()
+        self.details.loc[0, 'author_id'] = author_id
+        self.details.loc[0, 'full_name'] = full_name
+        self.details.loc[0, 'given_name'] = given_name
+        self.details.loc[0, 'family_name'] = family_name
+        self.details.loc[0, 'email'] = email
         self.details.loc[0, 'affiliations'] = affiliations
         self.details.loc[0, 'publications'] = publications
-        self.details.loc[0, 'orcid'] = orcid.strip()
-        self.details.loc[0, 'google_scholar'] = google_scholar.strip()
-        self.details.loc[0, 'crossref'] = crossref.strip()
+        self.details.loc[0, 'orcid'] = orcid
+        self.details.loc[0, 'google_scholar'] = google_scholar
+        self.details.loc[0, 'crossref'] = crossref
         self.details.loc[0, 'other_links'] = other_links
 
         self.update_full_name()
