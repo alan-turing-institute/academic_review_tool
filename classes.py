@@ -1027,6 +1027,8 @@ class Authors:
 
 def extract_authors(author_data: list):
         
+        result = Authors()
+
         if (author_data == None) or (author_data == ''):
             result = Authors()
 
