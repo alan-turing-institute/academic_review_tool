@@ -837,23 +837,23 @@ class Author():
     
     def get_full_name(self):
 
-            given = str(self.details.loc[0, 'given_name'])
-            family = str(self.details.loc[0, 'family_name'])
-
-            if (',' in family) and ((given == None) or (given == 'None') or (given == '')):
-                split_name = family.split(',')
-                given = split_name[0].strip()
-                self.details.loc[0, 'given_name'] = given
-
-                family = split_name[1].strip()
-                self.details.loc[0, 'family_name'] = family
+            given = self.details.loc[0, 'given_name']
+            family = self.details.loc[0, 'family_name']
 
             if given == None:
                 given = ''
             
             if family == None:
                 family = ''
-            
+
+            if ((type(family) == str) and (',' in family)) and ((given == None) or (given == 'None') or (given == '')):
+                split_name = family.split(',')
+                given = split_name[0].strip()
+                self.details.loc[0, 'given_name'] = given
+
+                family = split_name[1].strip()
+                self.details.loc[0, 'family_name'] = family
+                
             full = given + ' ' + family
             full = full.strip()
 
