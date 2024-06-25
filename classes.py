@@ -733,7 +733,7 @@ class Author():
 
     def __init__(self,
                  author_id: str = None, # type: ignore
-                 fulL_name: str = None, # type: ignore
+                 full_name: str = None, # type: ignore
                  given_name: str = None, # type: ignore
                  family_name: str = None, # type: ignore
                  email: str = None, # type: ignore
@@ -754,7 +754,7 @@ class Author():
 
         self.details = pd.DataFrame(columns = [
                                 'author_id',
-                                'fulL_name',
+                                'full_name',
                                 'given_name',
                                 'family_name',
                                 'email',
@@ -770,7 +770,7 @@ class Author():
         self.details.loc[0] = pd.Series(dtype=object)
 
         self.details.loc[0, 'author_id'] = author_id
-        self.details.loc[0, 'fulL_name'] = fulL_name
+        self.details.loc[0, 'full_name'] = full_name
         self.details.loc[0, 'given_name'] = given_name
         self.details.loc[0, 'family_name'] = family_name
         self.details.loc[0, 'email'] = email
@@ -815,7 +815,7 @@ class Author():
             if full == '':
                 full = 'no_name_found'
 
-            if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == '') or (len(str(self.details.loc[0, 'full_name'])) < len(full)):
+            if (self.details.loc[0, 'full_name'] == None) or (self.details.loc[0, 'full_name'] == ''):
                 self.details.loc[0, 'full_name'] = full
 
             return str(self.details.loc[0, 'full_name'])
