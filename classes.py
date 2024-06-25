@@ -968,17 +968,23 @@ class Authors:
         left_data = self.data
         right_data = authors.data
 
+        if left_data == None:
+                left_data = []
+            
+        if right_data == None:
+                right_data = []
+
         if (type(left_data) == Author) or (type(left_data) == str):
-            left_data = [left_data]
-        
+                left_data = [left_data]
+            
         if (type(right_data) == Author) or (type(right_data) == str):
-            right_data = [right_data]
-        
+                right_data = [right_data]
+            
         if type(left_data) == dict:
-            left_data = list(left_data.values())
-        
+                left_data = list(left_data.values())
+            
         if type(right_data) == dict:
-            right_data = list(right_data.values())
+                right_data = list(right_data.values())
 
         merged_data = left_data + right_data # type: ignore
         self.data = merged_data
