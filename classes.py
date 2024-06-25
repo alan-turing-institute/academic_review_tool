@@ -859,7 +859,13 @@ class Author():
             self.details.loc[0, 'email'] = crossref_result['email']
 
         if 'affiliation' in crossref_result.keys():
-            self.details.at[0, 'affiliations'] = crossref_result['affiliation'][0]
+            if (type(crossref_result['affiliation']) == list) and (len(crossref_result['affiliation']) > 0):
+                self.details.at[0, 'affiliations'] = crossref_result['affiliation'][0]
+
+            else:
+                if (type(crossref_result['affiliation']) == dict) and (len(crossref_result['affiliation'].keys()) > 0):
+                    key = list(crossref_result['affiliation'].keys())[0]
+                    self.details.at[0, 'affiliations'] = crossref_result['affiliation'][key]
 
         if 'ORCID' in crossref_result.keys():
             self.details.loc[0, 'orcid'] = crossref_result['ORCID']
