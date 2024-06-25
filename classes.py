@@ -961,7 +961,7 @@ class Authors:
         left = self.all.copy(deep=True)
         right = authors.all.copy(deep=True)
         
-        merged = pd.concat([left, right]).drop_duplicates(ignore_index=True)
+        merged = pd.concat([left, right])
 
         self.all = merged
 
@@ -981,7 +981,6 @@ class Authors:
             right_data = list(right_data.values())
 
         merged_data = left_data + right_data # type: ignore
-        merged_data = list(set(merged_data))
         self.data = merged_data
 
         return self
