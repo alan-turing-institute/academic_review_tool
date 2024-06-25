@@ -866,6 +866,8 @@ class Author():
             else:
                 result = full_name
             
+            print(result)
+
             return result
 
 
