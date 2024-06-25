@@ -964,7 +964,7 @@ class Authors:
         
         merged = pd.concat([left, right])
 
-        self.all = merged.drop_duplicates(subset=['author_id', 'given_name', 'family_name', 'orcid'], ignore_index=True)
+        self.all = merged.drop_duplicates(subset=['author_id', 'family_name', 'orcid'], ignore_index=True)
 
         left_data = self.data
         right_data = authors.data
