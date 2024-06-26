@@ -738,6 +738,57 @@ class ActivityLog(pd.DataFrame):
         
         self.replace(np.nan, None)
 
+def generate_author_id(author_data: pd.Series):
+
+        author_id = 'A:'
+
+        given_name = author_data['given_name']
+        family_name = author_data['family_name']
+        full_name = author_data['full_name']
+
+        if (family_name == None) and (full_name != None):
+            
+            if full_name == 'no_name_given':
+                author_id = author_id + '-' + '000'
+            
+            else:
+            
+                full_split = full_name.lower().split(' ')
+                first = full_split[0]
+                first_shortened = first[0]
+                last = full_split[-1]
+
+                author_id = author_id + '-' + first_shortened + '-' + last
+
+        else:
+
+            if given_name != None:
+                given_shortened = given_name.lower()[0]
+                author_id = author_id + '-' + given_shortened
+            
+            
+            if family_name != None:
+                family_clean = family_name.lower().replace(' ', '-')
+                author_id = author_id + '-' + family_clean
+
+        uid = author_data['orcid']
+        if (uid == None) or (uid == 'None') or (uid == ''):
+            uid = author_data['google_scholar']
+            if (uid == None) or (uid == 'None') or (uid == ''):
+                uid = author_data['scopus']
+                if (uid == None) or (uid == 'None') or (uid == ''):
+                    uid = author_data['crossref']
+                    if (uid == None) or (uid == 'None') or (uid == ''):
+                        uid = ''
+        
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:20]
+
+        author_id = author_id + '-' + uid_shortened
+        author_id = author_id.replace('A:-', 'A:').strip('-')
+
+        return author_id
+
+
 class Author():
 
     """
@@ -820,9 +871,21 @@ class Author():
         full_name = self.get_full_name()
         if full_name != self.details.loc[0, 'full_name']:
             self.details.loc[0, 'full_name'] = full_name
+        
+        self.add_id()
 
         self.publications = Results()
 
+    def generate_id(self):
+        return generate_author_id(self.details.loc[0]) # type: ignore
+
+    def add_id(self):
+
+        current_id = self.details.loc[0, 'author_id']
+
+        if (current_id == None) or (current_id == 'None') or (current_id == ''):
+            auth_id = self.generate_id()
+            self.details.loc[0, 'author_id'] = auth_id
         
     
     def __getitem__(self, key):
@@ -923,55 +986,6 @@ class Author():
 
         return author
     
-def generate_author_id(author_data: pd.Series):
-
-        author_id = 'A@'
-
-        given_name = author_data['given_name']
-        family_name = author_data['family_name']
-        full_name = author_data['full_name']
-
-        if (family_name == None) and (full_name != None):
-            
-            if full_name == 'no_name_given':
-                author_id = author_id + '-' + '000'
-            
-            else:
-            
-                full_split = full_name.lower().split(' ')
-                first = full_split[0]
-                first_shortened = first[0]
-                last = full_split[-1]
-
-                author_id = author_id + '-' + first_shortened + '-' + last
-
-        else:
-
-            if given_name != None:
-                given_shortened = given_name.lower()[0]
-                author_id = author_id + '-' + given_shortened
-            
-            
-            if family_name != None:
-                family_clean = family_name.lower().replace(' ', '-')
-                author_id = author_id + '-' + family_clean
-
-        uid = author_data['orcid']
-        if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = author_data['google_scholar']
-            if (uid == None) or (uid == 'None') or (uid == ''):
-                uid = author_data['scopus']
-                if (uid == None) or (uid == 'None') or (uid == ''):
-                    uid = author_data['crossref']
-                    if (uid == None) or (uid == 'None') or (uid == ''):
-                        uid = ''
-        
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:20]
-
-        author_id = author_id + '-' + uid_shortened
-        author_id = author_id.replace('A@-', 'A@').strip('-')
-
-        return author_id
 
 
 
