@@ -227,25 +227,31 @@ class Results(pd.DataFrame):
 
     def update_from_doi(self, index, timeout: int = 60):
         
+        try:
+            old_series = self.loc[index]
+            doi = old_series['doi']
+
+            if (type(doi) != None) and (type(doi) != '') and (type(doi) != 'None'):
+                new_series = lookup_doi(doi=doi, timeout=timeout).loc[0]
+
+                for i in new_series.index:
+                    if i in old_series.index:
+                        old_val = old_series[i]
+                        new_val = new_series[i]
+                        if (new_val != None) and (new_val != np.nan) and (new_val != '') and (len(str(new_val)) > len(str(old_val))):
+                            old_series[i] = new_val
+                    
+                    else:
+                        old_series[i] = new_val
+        except:
+            pass
+
+    def update_from_dois(self, timeout: int = 60):
+
         self.correct_dois()
 
-        old_series = self.loc[index]
-        doi = old_series['doi']
-
-        if (type(doi) != None) and (type(doi) != '') and (type(doi) != 'None'):
-            new_series = lookup_doi(doi=doi, timeout=timeout).loc[0]
-
-            for i in new_series.index:
-                if i in old_series.index:
-                    old_val = old_series[i]
-                    new_val = new_series[i]
-                    if (new_val != None) and (new_val != np.nan) and (new_val != '') and (len(str(new_val)) > len(str(old_val))):
-                        old_series[i] = new_val
-                
-                else:
-                    old_series[i] = new_val
-
-
+        for i in self.index:
+            self.update_from_doi(index = i, timeout=timeout)
 
     def __add__(self, results_obj):
 
