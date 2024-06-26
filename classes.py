@@ -1022,6 +1022,23 @@ class Author():
 
         return author
     
+    def from_orcid(orcid_id: str): # type: ignore
+
+        author = Author()
+        author.import_orcid(orcid_id)
+        author.update_full_name()
+
+        return author
+    
+    def update_from_orcid(self):
+
+        orcid = self.details.loc[0, 'orcid']
+
+        if (orcid != None) and (orcid != '') and (orcid != 'None'):
+            self.import_orcid(orcid_id = orcid)
+
+        
+    
 
 
 
