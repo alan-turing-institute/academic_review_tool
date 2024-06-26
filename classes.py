@@ -208,7 +208,7 @@ class Results(pd.DataFrame):
                 self = Results.from_dataframe(dataframe = df)
 
     def get(self, work_id: str):
-        
+
         indexes = self[self['work_id'] == work_id].index.to_list()
         if len(indexes) > 0:
             index = indexes[0]
@@ -1489,29 +1489,27 @@ class Review:
         
         return Iterator(self)
     
-    def __getitem__(self, index, col_index = None):
+    def __getitem__(self, key):
         
         """
         Retrieves Review contents or results using an index/key.
         """
         
-        if index in self.__dict__.keys():
-            return self.__dict__[index]
+        if key in self.__dict__.keys():
+            return self.__dict__[key]
 
-        else:
+        if key in self.results['work_id']:
+            return self.results.get(key)
+        
+        if key in self.authors.details.keys():
+            return self.authors[key]
+        
+        if key in self.results.columns:
+            return self.results[key]
+        
+        if key in self.authors.all.columns:
+            return self.authors.all[key]
 
-            if col_index == None:
-
-                try:
-                    self.results[index]
-                except:
-                    try:
-                        self.results.loc[index]
-                    except:
-                        raise KeyError('Index not found')
-            
-            else:
-                self.results.loc[index, col_index]
 
     def __setitem__(self, index, data):
         
