@@ -761,6 +761,7 @@ class Author():
                  publications: str = None, # type: ignore
                  orcid: str = None, # type: ignore
                  google_scholar: str = None, # type: ignore
+                 scopus: str = None, # type: ignore
                  crossref: str = None, # type: ignore
                  other_links: str = None # type: ignore
                  ):
@@ -795,6 +796,7 @@ class Author():
                                 'publications',
                                 'orcid',
                                 'google_scholar',
+                                'scopus',
                                 'crossref',
                                 'other_links'
                                 ],
@@ -811,6 +813,7 @@ class Author():
         self.details.loc[0, 'publications'] = publications
         self.details.loc[0, 'orcid'] = orcid
         self.details.loc[0, 'google_scholar'] = google_scholar
+        self.details.loc[0, 'scopus'] = scopus
         self.details.loc[0, 'crossref'] = crossref
         self.details.loc[0, 'other_links'] = other_links
 
@@ -922,20 +925,25 @@ class Author():
     
 def generate_author_id(author_data: pd.Series):
 
-        author_id = 'A#'
+        author_id = 'A@'
 
         given_name = author_data['given_name']
         family_name = author_data['family_name']
         full_name = author_data['full_name']
 
         if (family_name == None) and (full_name != None):
+            
+            if full_name == 'no_name_given':
+                author_id = author_id + '-' + '000'
+            
+            else:
+            
+                full_split = full_name.lower().split(' ')
+                first = full_split[0]
+                first_shortened = first[0]
+                last = full_split[-1]
 
-            full_split = full_name.lower().split(' ')
-            first = full_split[0]
-            first_shortened = first[0]
-            last = full_split[-1]
-
-            author_id = author_id + '-' + first_shortened + '-' + last
+                author_id = author_id + '-' + first_shortened + '-' + last
 
         else:
 
@@ -949,17 +957,19 @@ def generate_author_id(author_data: pd.Series):
                 author_id = author_id + '-' + family_clean
 
         uid = author_data['orcid']
-        if uid == None:
+        if (uid == None) or (uid == 'None') or (uid == ''):
             uid = author_data['google_scholar']
-            if uid == None:
-                uid = author_data['crossref']
-                if uid == None:
-                    uid = ''
+            if (uid == None) or (uid == 'None') or (uid == ''):
+                uid = author_data['scopus']
+                if (uid == None) or (uid == 'None') or (uid == ''):
+                    uid = author_data['crossref']
+                    if (uid == None) or (uid == 'None') or (uid == ''):
+                        uid = ''
         
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:20]
 
         author_id = author_id + '-' + uid_shortened
-        author_id = author_id.replace('A#-', 'A#')
+        author_id = author_id.replace('A@-', 'A@').strip('-')
 
         return author_id
 
