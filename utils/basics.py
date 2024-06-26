@@ -5,7 +5,7 @@ import math
 from os import stat_result
 
 results_cols = [
-                            'id',
+                            'work_id',
                             'title',
                             'authors',
                             'authors_data',

@@ -118,7 +118,56 @@ class Properties:
         
         self.last_changed_at = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
+def generate_work_id(work_data: pd.Series):
 
+        work_id = 'W:'
+
+        authors = work_data['authors']
+        title = work_data['title']
+        date = work_data['date']
+
+        if (authors != None) and (authors != '') and (authors != 'None'):
+            authors_str = str(authors).lower().strip().replace('[','').replace(']','').strip()
+            authors_list = authors_str.split(',')
+            authors_list = [i.strip() for i in authors_list]
+            if len(authors_list) > 0:
+                first_author = authors_list[0]
+            else:
+                first_author = ''
+            
+            work_id = work_id + '-' + first_author
+
+        if (title != None) and (title != '') and (title != 'None'):
+            title = title.strip().lower()
+            title_words = list(word_tokenize(title))
+            title_first3 = '-'.join(title_words[:3])
+            if len(title_words) > 3:
+                title_last = title_words[-1]
+            else:
+                title_last = ''
+            title_shortened = title_first3 + '-' + title_last
+            work_id = work_id + '-' + title_shortened
+        
+        if (date != None) and (date != '') and (date != 'None'):
+            work_id = work_id + '-' + str(date)
+
+        uid = work_data['doi']
+        if (uid == None) or (uid == 'None') or (uid == ''):
+            uid = work_data['isbn']
+            if (uid == None) or (uid == 'None') or (uid == ''):
+                uid = work_data['issn']
+                if (uid == None) or (uid == 'None') or (uid == ''):
+                    uid = work_data['link']
+                    if (uid == None) or (uid == 'None') or (uid == ''):
+                        uid = ''
+        
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:25]
+
+        work_id = work_id + '-' + uid_shortened
+        work_id = work_id.replace('W:-', 'W:').strip('-')
+
+        return work_id
+    
 
 class Results(pd.DataFrame):
 
