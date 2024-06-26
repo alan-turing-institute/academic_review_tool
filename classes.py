@@ -984,15 +984,27 @@ class Author():
     def import_orcid(self, orcid_id: str):
 
         auth_df = lookup_orcid(orcid_id)
+        cols = auth_df.columns.to_list()
 
         if len(auth_df) > 0:
 
             author_details = auth_df.loc[0]
-            self.details.loc[0, 'given_name'] = author_details['name']
-            self.details.loc[0, 'family_name'] = author_details['family name']
-            self.details.at[0, 'email'] = author_details['emails']
-            self.details.at[0, 'affiliations'] = author_details['employment']
-            self.details.at[0, 'publications'] = author_details['works']
+
+            if 'name' in cols:
+                self.details.loc[0, 'given_name'] = author_details['name']
+            
+            if 'family name' in cols:
+                self.details.loc[0, 'family_name'] = author_details['family name']
+            
+            if 'emails' in cols:
+                self.details.at[0, 'email'] = author_details['emails']
+            
+            if 'employment' in cols:
+                self.details.at[0, 'affiliations'] = author_details['employment']
+            
+            if 'works' in cols:
+                self.details.at[0, 'publications'] = author_details['works']
+            
             self.details.loc[0, 'orcid'] = orcid_id
 
             self.update_full_name()
