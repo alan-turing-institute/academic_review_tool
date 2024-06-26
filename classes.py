@@ -118,6 +118,8 @@ class Properties:
         
         self.last_changed_at = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
+
+
 class Results(pd.DataFrame):
 
     """
@@ -1810,6 +1812,11 @@ class Review:
         self.results.update_from_dois(timeout=timeout) # type: ignore
         self.extract_authors()
         self.extract_citations()
+
+    def update(self, timeout: int = 60):
+
+        self.update_from_dois(timeout=timeout)
+        self.update_from_orcid()
 
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
