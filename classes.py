@@ -140,12 +140,12 @@ def generate_work_id(work_data: pd.Series):
         if (title != None) and (title != '') and (title != 'None'):
             title = title.strip().lower()
             title_words = list(word_tokenize(title))
-            title_first3 = '-'.join(title_words[:3])
+            title_first2 = '-'.join(title_words[:2])
             if len(title_words) > 3:
                 title_last = title_words[-1]
             else:
                 title_last = ''
-            title_shortened = title_first3 + '-' + title_last
+            title_shortened = title_first2 + '-' + title_last
             work_id = work_id + '-' + title_shortened
         
         if (date != None) and (date != '') and (date != 'None'):
