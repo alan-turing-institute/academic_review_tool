@@ -1032,7 +1032,7 @@ class Authors:
                                 dtype = object)
         
 
-        self.author_entries = {}
+        self.author_entries = dict()
 
         self.data = []
         self.data.append(authors_data)
@@ -1125,6 +1125,7 @@ class Authors:
 
         self.all = pd.concat([self.all, author.details])
         self.all = self.all.reset_index().drop('index', axis=1)
+
         self.author_entries[author_id] = author
 
         if data == None:
