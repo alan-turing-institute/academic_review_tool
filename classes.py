@@ -1806,6 +1806,11 @@ class Review:
     def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
+    def update_from_dois(self, timeout: int = 60):
+        self.results.update_from_dois(timeout=timeout) # type: ignore
+        self.extract_authors()
+        self.extract_citations()
+
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
     
