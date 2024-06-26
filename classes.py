@@ -4,6 +4,7 @@ from .exporters.general_exporters import obj_to_folder
 from .importers.pdf import read_pdf_to_table
 from .importers.jstor import import_jstor_metadata, import_jstor_full
 from .importers.crossref import items_to_df, references_to_df, search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
+from .importers.orcid import lookup_orcid
 from .datasets import stopwords
 from .internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 
@@ -980,6 +981,27 @@ class Author():
 
         self.update_full_name()
     
+    def import_orcid(self, orcid_id: str):
+
+        auth_df = lookup_orcid(orcid_id)
+
+        if len(auth_df) > 0:
+
+            author_details = auth_df.loc[0]
+            self.details.loc[0, 'given'] = author_details['name']
+            self.details.loc[0, 'family'] = author_details['family name']
+            self.details.at[0, 'email'] = author_details['emails']
+            self.details.at[0, 'affiliations'] = author_details['employment']
+            self.details.at[0, 'publications'] = author_details['works']
+            self.details.loc[0, 'orcid'] = orcid_id
+
+            self.update_full_name()
+        
+        else:
+            self.details.loc[0, 'orcid'] = orcid_id
+            self.update_full_name()
+        
+
     def from_crossref(crossref_result: dict): # type: ignore
 
         author = Author()

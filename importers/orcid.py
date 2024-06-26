@@ -27,6 +27,7 @@ def lookup_orcid(orcid_id = 'request_input'):
         df = pd.DataFrame.from_dict(result, orient='index').T
         df.columns = df.columns.str.lower()
     except:
+        print(f'ORCiD lookup for {orcid_id} failed.')
         df = pd.DataFrame(columns = ['orcid id', 'last modified', 'name', 'family name', 'credit name', 'other names', 'biography', 'emails', 'research tags (keywords)', 'employment', 'distinctions', 'fundings', 'works'],
                           dtype=object)
 
