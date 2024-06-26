@@ -127,7 +127,7 @@ def generate_work_id(work_data: pd.Series):
         date = work_data['date']
 
         if (authors != None) and (authors != '') and (authors != 'None'):
-            authors_str = str(authors).lower().strip().replace('[','').replace(']','').strip()
+            authors_str = str(authors).lower().strip().replace('[','').replace(']','').replace("'", "").replace('"', '').replace(' ','-')
             authors_list = authors_str.split(',')
             authors_list = [i.strip() for i in authors_list]
             if len(authors_list) > 0:
@@ -161,7 +161,7 @@ def generate_work_id(work_data: pd.Series):
                     if (uid == None) or (uid == 'None') or (uid == ''):
                         uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:25]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:30]
 
         work_id = work_id + '-' + uid_shortened
         work_id = work_id.replace('W:-', 'W:').strip('-')
