@@ -164,7 +164,7 @@ def generate_work_id(work_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:30]
 
         work_id = work_id + '-' + uid_shortened
-        work_id = work_id.replace('W:-', 'W:').strip('-')
+        work_id = work_id.replace('W:-', 'W:').strip('-').strip('.')
 
         return work_id
     
@@ -215,6 +215,8 @@ class Results(pd.DataFrame):
         table = table.replace(np.nan, None).astype(object)
 
         series = table.loc[0]
+        work_id = generate_work_id(series)
+        series['work_id'] = work_id
 
         index = len(self)
         self.loc[index] = series
@@ -234,9 +236,13 @@ class Results(pd.DataFrame):
                 if c not in self.columns:
                     self[c] = pd.Series(dtype=object)
 
+        work_id = generate_work_id(data)
+        data['work_id'] = work_id
+
         index = len(self)
         self.loc[index] = data
         self.extract_authors()
+        
     
     def add_dataframe(self, dataframe):
         
@@ -254,6 +260,8 @@ class Results(pd.DataFrame):
         index = len(self)
         for i in dataframe.index:
             self.loc[index] = dataframe.loc[i]
+            work_id = generate_work_id(dataframe.loc[i])
+            self.loc[index, 'work_id'] = work_id
             index += 1
         
         self.extract_authors()
