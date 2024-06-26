@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize # type: ignore
 
 class Properties:
     
