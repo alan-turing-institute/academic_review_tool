@@ -1035,6 +1035,9 @@ class Author():
         orcid = self.details.loc[0, 'orcid']
 
         if (orcid != None) and (orcid != '') and (orcid != 'None'):
+            
+            orcid = str(orcid).replace('https://', '').replace('http://', '').replace('orcid.org/', '')
+
             self.import_orcid(orcid_id = orcid)
 
         

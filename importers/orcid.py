@@ -20,6 +20,8 @@ def lookup_orcid(orcid_id = 'request_input'):
     if orcid_id == 'request_input':
         orcid_id = input('ORCID ID: ')
     
+    orcid_id = str(orcid_id).replace('https://', '').replace('http://', '').replace('orcid.org/', '')
+
     try:
         orcid = pyorcid.OrcidScrapper(orcid_id=orcid_id)
 
