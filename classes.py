@@ -165,7 +165,7 @@ def generate_work_id(work_data: pd.Series):
 
         work_id = work_id + '-' + uid_shortened
         work_id = work_id.replace('W:-', 'W:').strip('-').strip('.')
-        work_id = work_id[:50]
+        work_id = work_id[:35]
 
         return work_id
     
@@ -1498,16 +1498,16 @@ class Review:
         if key in self.__dict__.keys():
             return self.__dict__[key]
 
-        if key in self.results['work_id']:
+        if key in self.results['work_id'].to_list():
             return self.results.get(key)
         
         if key in self.authors.details.keys():
             return self.authors[key]
         
-        if key in self.results.columns:
+        if key in self.results.columns.to_list():
             return self.results[key]
         
-        if key in self.authors.all.columns:
+        if key in self.authors.all.columns.to_list():
             return self.authors.all[key]
 
 
