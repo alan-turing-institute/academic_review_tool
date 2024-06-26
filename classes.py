@@ -1224,14 +1224,31 @@ class Authors:
         author_ids = self.details.keys()
 
         for a in author_ids:
-            
+
             self.details[a].update_from_orcid()
             details = self.details[a].details.loc[0]
             
             df_index = self.all[self.all['author_id'] == a].index.to_list()[0]
             self.all.loc[df_index] = details
 
+            new_id = details['author_id']
+            if new_id != a:
+                self.details[new_id] = self.details[a]
+                del self.details[a]
 
+    def import_orcid_ids(self, orcid_ids: list):
+
+        for i in orcid_ids:
+
+            auth = Author.from_orcid(i) # type: ignore
+            self.add_author(author = auth, data = i)
+
+    def from_orcid_ids(orcid_ids: list): # type: ignore
+
+        authors = Authors()
+        authors.import_orcid_ids(orcid_ids)
+
+        return authors
 
     def import_crossref(self, crossref_result: list):
 
@@ -1539,7 +1556,8 @@ class Review:
                     auths.add_author(auth)
                 self.authors.merge(auths)
                 
-
+    def update_from_orcid(self):
+        self.authors.update_from_orcid()
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
         self.update_properties()
