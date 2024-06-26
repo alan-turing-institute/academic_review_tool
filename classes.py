@@ -920,6 +920,51 @@ class Author():
 
         return author
     
+def generate_author_id(author_details: pd.DataFrame):
+
+        author_id = 'a'
+        author_data = author_details.loc[0]
+
+        given_name = author_data['given_name']
+        family_name = author_data['family_name']
+        full_name = author_data['full_name']
+
+        if (family_name == None) and (full_name != None):
+
+            full_split = full_name.lower().split(' ')
+            first = full_split[0]
+            first_shortened = first[0]
+            last = full_split[-1]
+
+            author_id = author_id + '-' + first_shortened + '-' + last
+
+        else:
+
+            if given_name != None:
+                given_shortened = given_name.lower()[0]
+                author_id = author_id + '-' + given_shortened
+            
+            
+            if family_name != None:
+                family_clean = family_name.lower().replace(' ', '-')
+                author_id = author_id + '-' + family_clean
+
+        uid = author_data['orcid']
+        if uid == None:
+            uid = author_data['google_scholar']
+            if uid == None:
+                uid = author_data['crossref']
+                if uid == None:
+                    uid = ''
+        
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:15]
+
+        author_id = author_id + '-' + uid_shortened
+
+        return author_id
+
+
+
 
 
 class Authors:
