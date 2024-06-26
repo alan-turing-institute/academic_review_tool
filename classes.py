@@ -238,13 +238,21 @@ class Results(pd.DataFrame):
                     self[c] = pd.Series(dtype=object)
 
         work_id = generate_work_id(data)
+        work_id = self.increment_id(work_id)
         data['work_id'] = work_id
 
         index = len(self)
         self.loc[index] = data
         self.extract_authors()
         
-    
+    def increment_id(self, work_id):
+
+        if work_id in self['work_id'].to_list():
+            id_count = len(self[self['work_id'].str.contains(work_id)]) # type: ignore
+            work_id = work_id + f'#{id_count + 1}'
+        
+        return work_id
+
     def add_dataframe(self, dataframe):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
@@ -262,6 +270,7 @@ class Results(pd.DataFrame):
         for i in dataframe.index:
             self.loc[index] = dataframe.loc[i]
             work_id = generate_work_id(dataframe.loc[i])
+            work_id = self.increment_id(work_id)
             self.loc[index, 'work_id'] = work_id
             index += 1
         
@@ -284,6 +293,14 @@ class Results(pd.DataFrame):
             link = str(doi_in_link.loc[i, 'link'])
             doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip()
             doi_in_link.loc[i, 'doi'] = doi
+
+    def update_work_ids(self):
+
+        for i in self.index:
+            work_id = generate_author_id(self.loc[i])
+            work_id = self.increment_id(work_id)
+            self.loc[i, 'work_id'] = work_id
+
 
     def update_from_doi(self, index, timeout: int = 60):
         
