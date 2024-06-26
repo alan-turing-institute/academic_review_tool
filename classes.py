@@ -1186,11 +1186,12 @@ class Authors:
 
         return self
 
-    def add_author(self, author: Author, data = None):
+    def add_author(self, author: Author, data = None, update_from_orcid = False):
 
-        orcid = author.details.loc[0,'orcid']
-        if (orcid != None) and (orcid != '') and (orcid != 'None'):
-            author.update_from_orcid()
+        if update_from_orcid == True:
+            orcid = author.details.loc[0,'orcid']
+            if (orcid != None) and (orcid != '') and (orcid != 'None'):
+                author.update_from_orcid()
 
         author.update_id()
 
@@ -1217,6 +1218,20 @@ class Authors:
         for i in authors_list:
             if type(i) == Author:
                 self.add_author(author = i)
+
+    def update_from_orcid(self):
+
+        author_ids = self.details.keys()
+
+        for a in author_ids:
+            
+            self.details[a].update_from_orcid()
+            details = self.details[a].details.loc[0]
+            
+            df_index = self.all[self.all['author_id'] == a].index.to_list()[0]
+            self.all.loc[df_index] = details
+
+
 
     def import_crossref(self, crossref_result: list):
 
