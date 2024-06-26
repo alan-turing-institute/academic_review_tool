@@ -121,7 +121,7 @@ class Properties:
 def generate_work_id(work_data: pd.Series):
 
         work_id = 'W:'
-
+        work_data = work_data.astype(str)
         authors = work_data['authors']
         title = work_data['title']
         date = work_data['date']
