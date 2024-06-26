@@ -1188,6 +1188,10 @@ class Authors:
 
     def add_author(self, author: Author, data = None):
 
+        orcid = author.details.loc[0,'orcid']
+        if (orcid != None) and (orcid != '') and (orcid != 'None'):
+            author.update_from_orcid()
+
         author.update_id()
 
         author_id = str(author.details.loc[0, 'author_id'])
