@@ -872,18 +872,21 @@ class Author():
         if full_name != self.details.loc[0, 'full_name']:
             self.details.loc[0, 'full_name'] = full_name
         
-        self.add_id()
+        self.update_id()
 
         self.publications = Results()
 
     def generate_id(self):
-        return generate_author_id(self.details.loc[0]) # type: ignore
 
-    def add_id(self):
+        author_data = self.details.loc[0]
+
+        return generate_author_id(author_data) # type: ignore
+
+    def update_id(self):
 
         current_id = self.details.loc[0, 'author_id']
 
-        if (current_id == None) or (current_id == 'None') or (current_id == ''):
+        if (current_id == None) or (current_id == 'None') or (current_id == '') or (current_id == 'A:000'):
             auth_id = self.generate_id()
             self.details.loc[0, 'author_id'] = auth_id
         
