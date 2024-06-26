@@ -871,8 +871,6 @@ class Author():
         full_name = self.get_full_name()
         if full_name != self.details.loc[0, 'full_name']:
             self.details.loc[0, 'full_name'] = full_name
-        
-        self.update_id()
 
         self.publications = Results()
 
@@ -1033,6 +1031,9 @@ class Authors:
                                 ],
                                 dtype = object)
         
+
+        self.author_entries = {}
+
         self.data = []
         self.data.append(authors_data)
 
@@ -1113,8 +1114,18 @@ class Authors:
 
     def add_author(self, author: Author, data = None):
 
+        author.update_id()
+
+        author_id = str(author.details.loc[0, 'author_id'])
+
+        if author_id in self.all['author_id'].to_list():
+            id_count = len(self.all[self.all['author_id'].str.contains(author_id)]) # type: ignore
+            author_id = author_id + f'#{id_count + 1}'
+            author.details.loc[0, 'author_id'] = author_id
+
         self.all = pd.concat([self.all, author.details])
         self.all = self.all.reset_index().drop('index', axis=1)
+        self.author_entries[author_id] = author
 
         if data == None:
             data = author.details.to_dict(orient='index')
