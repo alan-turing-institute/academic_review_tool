@@ -1083,6 +1083,10 @@ class Authors:
 
         self.all = merged.drop_duplicates(subset=['author_id', 'family_name', 'orcid'], ignore_index=True)
 
+        for i in authors.author_entries.keys():
+            if i not in self.author_entries.keys():
+                self.author_entries[i] = authors.author_entries[i]
+
         left_data = self.data
         right_data = authors.data
 
