@@ -1130,7 +1130,17 @@ class Authors:
         Retrieves Authors attribute using a key.
         """
         
-        return self.__dict__[key]
+        if key in self.__dict__.keys():
+            return self.__dict__[key]
+        
+        if key in self.details.keys():
+            return self.details[key]
+
+        if key in self.all.columns:
+            return self.all.loc[key]
+        
+        if (type(key) == int) and (key <= len(self.data)):
+            return self.data[key]
     
     def __repr__(self) -> str:
         return self.all['full_name'].to_list().__repr__()
