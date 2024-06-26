@@ -920,10 +920,9 @@ class Author():
 
         return author
     
-def generate_author_id(author_details: pd.DataFrame):
+def generate_author_id(author_data: pd.Series):
 
-        author_id = 'a'
-        author_data = author_details.loc[0]
+        author_id = 'A#'
 
         given_name = author_data['given_name']
         family_name = author_data['family_name']
@@ -957,9 +956,10 @@ def generate_author_id(author_details: pd.DataFrame):
                 if uid == None:
                     uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:15]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:20]
 
         author_id = author_id + '-' + uid_shortened
+        author_id = author_id.replace('A#-', 'A#')
 
         return author_id
 
