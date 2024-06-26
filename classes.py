@@ -215,6 +215,38 @@ class Results(pd.DataFrame):
         df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
         self.add_dataframe(dataframe=df)
 
+    def correct_dois(self):
+
+        no_doi = self[(self['doi'] == None) | (self['doi'] == np.nan) | (self['doi'] == 'None')]
+        doi_in_link = no_doi[no_doi['link'].str.contains('doi.org')]
+
+        for i in doi_in_link.index:
+            link = str(doi_in_link.loc[i, 'link'])
+            doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip()
+            doi_in_link.loc[i, 'doi'] = doi
+
+    def update_from_doi(self, index, timeout: int = 60):
+        
+        self.correct_dois()
+
+        old_series = self.loc[index]
+        doi = old_series['doi']
+
+        if (type(doi) != None) and (type(doi) != '') and (type(doi) != 'None'):
+            new_series = lookup_doi(doi=doi, timeout=timeout).loc[0]
+
+            for i in new_series.index:
+                if i in old_series.index:
+                    old_val = old_series[i]
+                    new_val = new_series[i]
+                    if (new_val != None) and (new_val != np.nan) and (new_val != '') and (len(str(new_val)) > len(str(old_val))):
+                        old_series[i] = new_val
+                
+                else:
+                    old_series[i] = new_val
+
+
+
     def __add__(self, results_obj):
 
         left = self.copy(deep=True)
