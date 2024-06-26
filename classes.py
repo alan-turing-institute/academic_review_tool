@@ -207,6 +207,15 @@ class Results(pd.DataFrame):
             if type(dataframe) == pd.DataFrame:
                 self = Results.from_dataframe(dataframe = df)
 
+    def get(self, work_id: str):
+        
+        indexes = self[self['work_id'] == work_id].index.to_list()
+        if len(indexes) > 0:
+            index = indexes[0]
+            return self.loc[index]
+        else:
+            raise KeyError('work_id not found')
+
     def add_pdf(self, path = 'request_input'):
         
         if path == 'request_input':
