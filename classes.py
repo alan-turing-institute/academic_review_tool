@@ -1137,7 +1137,7 @@ class Authors:
             return self.details[key]
 
         if key in self.all.columns:
-            return self.all.loc[key]
+            return self.all[key]
         
         if (type(key) == int) and (key <= len(self.data)):
             return self.data[key]
