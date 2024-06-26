@@ -165,6 +165,7 @@ def generate_work_id(work_data: pd.Series):
 
         work_id = work_id + '-' + uid_shortened
         work_id = work_id.replace('W:-', 'W:').strip('-').strip('.')
+        work_id = work_id[:50]
 
         return work_id
     
