@@ -879,7 +879,6 @@ class Author():
         author_data = self.details.loc[0]
 
         author_id = generate_author_id(author_data) # type: ignore
-        print(author_id)
         return author_id
 
     def update_id(self):
