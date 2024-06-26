@@ -897,7 +897,14 @@ class Author():
         Retrieves Author attribute using a key.
         """
         
-        return self.__dict__[key]
+        if key in self.__dict__.keys():
+            return self.__dict__[key]
+        
+        if key in self.details.columns:
+            return self.details.loc[0, key]
+        
+        if key in self.publications.columns:
+            return self.publications[key]
 
     def __repr__(self) -> str:
         return str(self.details.loc[0, 'full_name'])
@@ -1085,7 +1092,7 @@ class Authors:
                                 dtype = object)
         
 
-        self.author_entries = dict()
+        self.details = dict()
 
         self.data = []
         self.data.append(authors_data)
@@ -1137,9 +1144,9 @@ class Authors:
 
         self.all = merged.drop_duplicates(subset=['author_id', 'family_name', 'orcid'], ignore_index=True)
 
-        for i in authors.author_entries.keys():
-            if i not in self.author_entries.keys():
-                self.author_entries[i] = authors.author_entries[i]
+        for i in authors.details.keys():
+            if i not in self.details.keys():
+                self.details[i] = authors.details[i]
 
         left_data = self.data
         right_data = authors.data
@@ -1183,7 +1190,7 @@ class Authors:
         self.all = pd.concat([self.all, author.details])
         self.all = self.all.reset_index().drop('index', axis=1)
 
-        self.author_entries[author_id] = author
+        self.details[author_id] = author
 
         if data == None:
             data = author.details.to_dict(orient='index')
