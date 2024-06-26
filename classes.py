@@ -247,17 +247,18 @@ class Results(pd.DataFrame):
                     self[c] = pd.Series(dtype=object)
 
         work_id = generate_work_id(data)
-        work_id = self.increment_id(work_id)
+        work_id = self.get_unique_id(work_id)
         data['work_id'] = work_id
 
         index = len(self)
         self.loc[index] = data
         self.extract_authors()
         
-    def increment_id(self, work_id):
+    def get_unique_id(self, work_id):
 
         if work_id in self['work_id'].to_list():
-            id_count = len(self[self['work_id'].str.contains(work_id)]) # type: ignore
+            df = self.copy(deep=True).astype(str)
+            id_count = len(df[df['work_id'].str.contains(work_id)]) # type: ignore
             work_id = work_id + f'#{id_count + 1}'
         
         return work_id
@@ -279,7 +280,7 @@ class Results(pd.DataFrame):
         for i in dataframe.index:
             self.loc[index] = dataframe.loc[i]
             work_id = generate_work_id(dataframe.loc[i])
-            work_id = self.increment_id(work_id)
+            work_id = self.get_unique_id(work_id)
             self.loc[index, 'work_id'] = work_id
             index += 1
         
@@ -307,7 +308,7 @@ class Results(pd.DataFrame):
 
         for i in self.index:
             work_id = generate_author_id(self.loc[i])
-            work_id = self.increment_id(work_id)
+            work_id = self.get_unique_id(work_id)
             self.loc[i, 'work_id'] = work_id
 
 
@@ -764,6 +765,23 @@ class Results(pd.DataFrame):
         self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
         return self['citations']
     
+    def add_citations_to_results(self):
+        
+        self.extract_citations()
+        citations = self['citations'].to_list()
+        
+        for i in citations:
+            if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+                df = i.copy(deep=True)
+                self.add_dataframe(dataframe=df)
+        
+        self = self.drop_duplicates()
+
+        return self
+
+
+
+
     def extract_authors(self):
 
         self['authors'] = self['authors_data'].apply(extract_authors) # type: ignore
