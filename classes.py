@@ -802,8 +802,6 @@ class Results(pd.DataFrame):
             for i in indices:
                 refs = extract_references(self.loc[i, 'citations_data'])
                 self.at[i, 'citations'] = refs
-            
-            return self['citations']
     
     def format_authors(self):
 
@@ -815,6 +813,7 @@ class Results(pd.DataFrame):
     def add_citations_to_results(self):
 
         self.format_citations()
+
         citations = self['citations'].to_list()
         existing_ids = set(self['work_id'].to_list())
         
@@ -835,7 +834,34 @@ class Results(pd.DataFrame):
 
         return self
     
-    # def iter_add_citations(self, depth=2):
+
+    def crawl_stored_citations(self, max_depth=2, processing_limit=100):
+
+        iteration = 0
+        processed_indexes = []
+
+        while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
+            
+            indexes = self.index
+            to_process = list(set(indexes).difference(set(processed_indexes)))
+
+            rows = self.loc[to_process]
+
+            self.format_citations()
+
+            citations = rows['citations'].to_list()
+
+            for i in citations:
+
+                if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+                    self.add_dataframe(dataframe=i)
+            
+            processed_indexes = processed_indexes + to_process
+            iteration += 1
+            
+
+        self.update_work_ids()
+        self.format_authors()
 
 
 
