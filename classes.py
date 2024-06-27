@@ -861,7 +861,7 @@ def extract_references(references_list: list):
     if type(references_list) == References:
         return references_list
     
-    if (type(references_list) == float) or (type(references_list) == np.float64) or (type(references_list) == np.float32) or (references_list is np.nan) or (references_list == None):
+    if (type(references_list) != References) and (type(references_list) != str) and (type(references_list) != list):
         return refs
 
     if (type(references_list) == list) and (type(references_list[0]) == dict):
