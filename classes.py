@@ -798,6 +798,8 @@ class Results(pd.DataFrame):
             if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
                 df = i.copy(deep=True)
                 self.add_dataframe(dataframe=df)
+        
+        self.format_authors()
 
         return self
 
