@@ -784,7 +784,8 @@ class Results(pd.DataFrame):
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
 
         for i in self.index:
-            self.loc[i, 'citations'] = extract_references(self.loc[i, 'citations_data'])
+            refs = extract_references(self.loc[i, 'citations_data'])
+            self.at[i, 'citations'] = refs
         
         return self['citations']
     
