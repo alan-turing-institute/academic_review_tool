@@ -778,6 +778,9 @@ class Results(pd.DataFrame):
 
         return self.loc[output.index]
     
+    def has_citations_data(self):
+        return self[(~self['citations_data'].isna()) & (~self['citations_data'] == '') & (~self['citations_data'].astype(str) == '[]')]
+
     def format_citations(self):
 
         self['citations'] = self['citations'].replace({np.nan: None})
@@ -804,7 +807,9 @@ class Results(pd.DataFrame):
                 df = i.copy(deep=True)
                 self.add_dataframe(dataframe=df)
         
+        self.update_work_ids()
         self.format_authors()
+
 
         return self
 
