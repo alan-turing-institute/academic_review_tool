@@ -782,7 +782,9 @@ class Results(pd.DataFrame):
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
-        self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
+
+        for i in self.index:
+            self.loc[i, 'citations'] = extract_references(self.loc[i, 'citations_data'])
         
         return self['citations']
     
@@ -854,7 +856,7 @@ class References(Results):
         
         return results_table
 
-def extract_references(references_list: list):
+def extract_references(references_list):
 
     refs = References()
 
