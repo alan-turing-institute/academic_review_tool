@@ -854,7 +854,8 @@ class Results(pd.DataFrame):
             for i in citations:
 
                 if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
-                    self.add_dataframe(dataframe=i)
+                    res = i.copy(deep=True)
+                    self.add_dataframe(dataframe=res)
             
             processed_indexes = processed_indexes + to_process
             iteration += 1
