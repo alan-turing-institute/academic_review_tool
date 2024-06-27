@@ -780,8 +780,8 @@ class Results(pd.DataFrame):
     
     def format_citations(self):
 
-        self['citations'] = self['citations'].replace(np.nan, [])
-        self['citations_data'] = self['citations_data'].replace(np.nan, [])
+        self['citations'] = self['citations'].replace({np.nan: None})
+        self['citations_data'] = self['citations_data'].replace({np.nan: None})
         self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
         
         return self['citations']
@@ -863,17 +863,20 @@ def extract_references(references_list: list):
 
     if (references_list is np.nan) or (references_list == None):
         df = pd.DataFrame(columns=results_cols, dtype=object)
+        df.replace({np.nan: None})
         refs = References.from_dataframe(df) # type: ignore
         refs.generate_work_ids()
 
     if (type(references_list) == list) and (type(references_list[0]) == dict):
         df = references_to_df(references_list)
+        df.replace({np.nan: None})
         refs = References.from_dataframe(df) # type: ignore
         refs.generate_work_ids()
     
     if (type(references_list) == list) and (type(references_list[0]) == str):
         df = pd.DataFrame(columns=results_cols, dtype=object)
         df['link'] = pd.Series(references_list, dtype=object)
+        df.replace({np.nan: None})
 
         refs = References.from_dataframe(df) # type: ignore
         refs.generate_work_ids()
