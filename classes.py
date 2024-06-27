@@ -859,13 +859,10 @@ def extract_references(references_list: list):
     refs = References()
 
     if type(references_list) == References:
-        refs = references_list
-
-    if (references_list is np.nan) or (references_list == None):
-        df = pd.DataFrame(columns=results_cols, dtype=object)
-        df.replace({np.nan: None})
-        refs = References.from_dataframe(df) # type: ignore
-        refs.generate_work_ids()
+        return references_list
+    
+    if (type(references_list) == float) or (references_list is np.nan) or (references_list == None):
+        return refs
 
     if (type(references_list) == list) and (type(references_list[0]) == dict):
         df = references_to_df(references_list)
