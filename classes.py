@@ -795,8 +795,6 @@ class Results(pd.DataFrame):
                 df = i.copy(deep=True)
                 self.add_dataframe(dataframe=df)
 
-        self.format_authors()
-
         return self
 
 
