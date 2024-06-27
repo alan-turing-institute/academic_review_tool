@@ -1410,13 +1410,11 @@ class Authors:
 
         for i in self.details.keys():
             author = self.details[i]
+            author.update_id()
             series = author.details.loc[0]
-            index = len(self.all)
-            self.all.loc[index] = series
-        
-        self.all = self.all.drop_duplicates(subset=['author_id'], keep='last').reset_index().drop('index', axis=1)
-
-            
+            all = self.all.copy(deep=True).astype(str)
+            auth_index = all[all['author_id'] == i].index.to_list()[0]
+            self.all.loc[auth_index] = series
 
     def update_from_orcid(self):
 
