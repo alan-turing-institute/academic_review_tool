@@ -779,7 +779,7 @@ class Results(pd.DataFrame):
             refs = self.loc[i, 'citations']
             if (type(refs) == References) and (len(refs) > 0): # type: ignore
                 refs.update_work_ids() # type: ignore
-                refs.format_authors() # type: ignore
+                # refs.format_authors() # type: ignore
                 self.at[i, 'citations'] = refs
 
         return self['citations']
