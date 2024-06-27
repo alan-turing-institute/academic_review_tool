@@ -1118,6 +1118,30 @@ class Author():
 
         return set([given, family])
 
+    def has_orcid(self) -> bool:
+
+        orcid = self.details.loc[0, 'orcid']
+
+        if (type(orcid) == str) and (orcid != ''):
+            return True
+        else:
+            return False
+
+    def add_series(self, series: pd.Series):
+        self.details.loc[0] = series
+
+    def from_series(series: pd.Series): # type: ignore
+        author = Author()
+        author.add_series(series)
+    
+    def add_dataframe(self, dataframe: pd.DataFrame):
+        series = dataframe.loc[0]
+        self.add_series(series) # type: ignore
+
+    def from_dataframe(dataframe: pd.DataFrame): # type: ignore
+        author = Author()
+        author.add_dataframe(dataframe)
+
     def import_crossref(self, crossref_result: dict):
 
         if 'given' in crossref_result.keys():
@@ -1382,6 +1406,18 @@ class Authors:
             if type(i) == Author:
                 self.add_author(author = i)
 
+    def sync_all(self):
+
+        for i in self.details.keys():
+            author = self.details[i]
+            series = author.details.loc[0]
+            index = len(self.all)
+            self.all.loc[index] = series
+        
+        self.all = self.all.drop_duplicates(subset=['author_id'], keep='last').reset_index().drop('index', axis=1)
+
+            
+
     def update_from_orcid(self):
 
         author_ids = self.details.keys()
@@ -1412,6 +1448,9 @@ class Authors:
         authors.import_orcid_ids(orcid_ids)
 
         return authors
+
+    def with_orcid(self):
+        return self.all[~self.all['orcid'].isna()]
 
     def import_crossref(self, crossref_result: list):
 
