@@ -246,11 +246,13 @@ class Results(pd.DataFrame):
                 if c not in self.columns:
                     self[c] = pd.Series(dtype=object)
 
+        index = len(self)
+
         work_id = generate_work_id(data)
-        work_id = self.get_unique_id(work_id)
+        work_id = self.get_unique_id(work_id, index)
         data['work_id'] = work_id
 
-        index = len(self)
+        
         self.loc[index] = data
         self.extract_authors()
         
@@ -285,7 +287,7 @@ class Results(pd.DataFrame):
         for i in dataframe.index:
             self.loc[index] = dataframe.loc[i]
             work_id = generate_work_id(dataframe.loc[i])
-            work_id = self.get_unique_id(work_id)
+            work_id = self.get_unique_id(work_id, i)
             self.loc[index, 'work_id'] = work_id
             index += 1
         
