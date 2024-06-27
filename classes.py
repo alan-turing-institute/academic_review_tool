@@ -827,7 +827,7 @@ class Results(pd.DataFrame):
 
         return self
     
-    def iter_add_citations(self, depth=2):
+    # def iter_add_citations(self, depth=2):
 
 
 
