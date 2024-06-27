@@ -753,7 +753,7 @@ class Results(pd.DataFrame):
 
         keywords_freq = self.keyword_frequencies()
 
-        frequent_kws = keywords_freq[keywords_freq.values > cutoff]
+        frequent_kws = keywords_freq[keywords_freq.values > cutoff] # type: ignore
         frequent_kws = list(frequent_kws.index)
         
         output = pd.DataFrame(dtype=object)
@@ -783,7 +783,7 @@ class Results(pd.DataFrame):
     
     def format_authors(self):
 
-        self['authors'] = self['authors_data'].apply(extract_authors) # type: ignore
+        self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
         return self['authors']
 
     def add_citations_to_results(self):
