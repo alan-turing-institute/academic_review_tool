@@ -231,7 +231,7 @@ class Results(pd.DataFrame):
         index = len(self)
         self.loc[index] = series
 
-        self.extract_authors()
+        self.format_authors()
 
         return self
     
@@ -254,7 +254,7 @@ class Results(pd.DataFrame):
 
         
         self.loc[index] = data
-        self.extract_authors()
+        self.format_authors()
         
     def get_unique_id(self, work_id, index):
 
@@ -291,7 +291,7 @@ class Results(pd.DataFrame):
             self.loc[index, 'work_id'] = work_id
             index += 1
         
-        self.extract_authors()
+        self.format_authors()
 
     def add_doi(self, doi: str = 'request_input', timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
@@ -383,7 +383,7 @@ class Results(pd.DataFrame):
         for c in dataframe.columns:
             results_table[c] = dataframe[c]
         
-        results_table.extract_authors()
+        results_table.format_authors()
 
         return results_table
 
@@ -410,7 +410,7 @@ class Results(pd.DataFrame):
                 except:
                     pass
         
-        self.extract_authors()
+        self.format_authors()
 
         return self
 
@@ -418,7 +418,7 @@ class Results(pd.DataFrame):
 
         results_table = Results()
         results_table = results_table.import_excel(file_path, sheet_name).replace(np.nan, None)
-        results_table.extract_authors() # type: ignore
+        results_table.format_authors() # type: ignore
 
 
         return results_table
@@ -442,7 +442,7 @@ class Results(pd.DataFrame):
                     except:
                         pass
             
-            self.extract_authors()
+            self.format_authors()
 
             return self
     
@@ -474,7 +474,7 @@ class Results(pd.DataFrame):
                         pass
 
         self = self.replace(np.nan, None)
-        self.extract_authors() # type: ignore
+        self.format_authors() # type: ignore
 
         return self
     
@@ -768,19 +768,27 @@ class Results(pd.DataFrame):
 
         return self.loc[output.index]
     
-    def extract_citations(self):
+    def format_citations(self):
 
         self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
+        for i in self.index:
+            refs = self.loc[i, 'citations']
+            if (type(refs) == References) and (len(refs) > 0): # type: ignore
+                refs.update_work_ids() # type: ignore
+                refs.format_citations() # type: ignore
+                refs.format_authors() # type: ignore
+                self.loc[i, 'citations'] = refs
+
         return self['citations']
     
-    def extract_authors(self):
+    def format_authors(self):
 
         self['authors'] = self['authors_data'].apply(extract_authors) # type: ignore
         return self['authors']
 
     def add_citations_to_results(self):
         
-        self.extract_citations()
+        self.format_citations()
         citations = self['citations'].to_list()
         
         for i in citations:
@@ -788,7 +796,7 @@ class Results(pd.DataFrame):
                 df = i.copy(deep=True)
                 self.add_dataframe(dataframe=df)
 
-        self.extract_authors()
+        self.format_authors()
 
         return self
 
@@ -1416,7 +1424,7 @@ class Authors:
 
         return authors
 
-def extract_authors(author_data: list):
+def format_authors(author_data: list):
         
         result = Authors()
 
@@ -1678,16 +1686,16 @@ class Review:
         
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
-        review.extract_authors()
+        review.format_authors()
 
         return review
 
-    def extract_citations(self):
-        return self.results.extract_citations() # type: ignore
+    def format_citations(self):
+        return self.results.format_citations() # type: ignore
 
-    def extract_authors(self):
+    def format_authors(self):
 
-        self.results.extract_authors() # type: ignore
+        self.results.format_authors() # type: ignore
 
         authors_data = self.results['authors'].to_list()
 
@@ -1717,7 +1725,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name)
-        review.extract_authors() # type: ignore
+        review.format_authors() # type: ignore
 
         return review
 
@@ -1729,7 +1737,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_csv(file_path)
-        review.extract_authors()
+        review.format_authors()
 
         return review
 
@@ -1741,7 +1749,7 @@ class Review:
 
         review = Review()
         review.results = Results.from_json(file_path)
-        review.extract_authors() # type: ignore
+        review.format_authors() # type: ignore
 
         return review
     
@@ -1753,7 +1761,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_file(file_path, sheet_name)
-        review.extract_authors() # type: ignore
+        review.format_authors() # type: ignore
 
         return review
 
@@ -1902,7 +1910,7 @@ class Review:
         
         if add_to_results == True:
             self.results.add_dataframe(dataframe=df)
-            self.extract_authors()
+            self.format_authors()
         
         return df
 
@@ -1920,8 +1928,8 @@ class Review:
     
     def update_from_dois(self, timeout: int = 60):
         self.results.update_from_dois(timeout=timeout) # type: ignore
-        self.extract_authors()
-        self.extract_citations()
+        self.format_authors()
+        self.format_citations()
 
     def sync_apis(self, timeout: int = 60):
 
@@ -1994,7 +2002,7 @@ class Review:
             
             if add_to_results == True:
                 self.results.add_dataframe(dataframe=df)
-                self.extract_authors()
+                self.format_authors()
         
             return df
     
@@ -2021,7 +2029,7 @@ class Review:
 
         if add_to_results == True:
                 self.results.add_dataframe(dataframe=df)
-                self.extract_authors()
+                self.format_authors()
         
         return df
     
@@ -2070,7 +2078,7 @@ class Review:
             
         if add_to_results == True:
                 self.results.add_dataframe(dataframe=df)
-                self.extract_authors()
+                self.format_authors()
         
         return df
 
