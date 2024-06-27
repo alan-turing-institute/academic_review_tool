@@ -779,7 +779,7 @@ class Results(pd.DataFrame):
         return self.loc[output.index]
     
     def has_citations_data(self):
-        return self[~((self['citations_data'].isna()) & (~self['citations_data'] == ''))]
+        return self[~self['citations_data'].isna()]
 
     def format_citations(self):
 
