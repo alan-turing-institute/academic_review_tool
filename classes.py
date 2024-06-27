@@ -780,8 +780,8 @@ class Results(pd.DataFrame):
     
     def format_citations(self):
 
-        self['citations'] = self['citations'].replace({np.nan: None}).replace({np.float32: None}).replace({np.float64: None})
-        self['citations_data'] = self['citations_data'].replace({np.nan: None}).replace({np.float32: None}).replace({np.float64: None})
+        self['citations'] = self['citations'].replace({np.nan: None})
+        self['citations_data'] = self['citations_data'].replace({np.nan: None})
         self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
         
         return self['citations']
