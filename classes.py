@@ -315,6 +315,12 @@ class Results(pd.DataFrame):
             doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip()
             doi_in_link.loc[i, 'doi'] = doi
 
+    def generate_work_ids(self):
+
+        for i in self.index:
+            work_id = generate_work_id(self.loc[i])
+            self.loc[i, 'work_id'] = work_id
+
     def update_work_ids(self):
 
         for i in self.index:
@@ -774,14 +780,10 @@ class Results(pd.DataFrame):
     
     def format_citations(self):
 
+        self['citations'] = self['citations'].replace(np.NaN, []).replace(np.nan, [])
+        self['citations_data'] = self['citations_data'].replace(np.NaN, []).replace(np.nan, [])
         self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
-        for i in self.index:
-            refs = self.loc[i, 'citations']
-            if (type(refs) == References) and (len(refs) > 0): # type: ignore
-                refs.update_work_ids() # type: ignore
-                # refs.format_authors() # type: ignore
-                self.at[i, 'citations'] = refs
-
+        
         return self['citations']
     
     def format_authors(self):
@@ -854,17 +856,27 @@ class References(Results):
 
 def extract_references(references_list: list):
 
-    df = pd.DataFrame(columns=results_cols, dtype=object)
+    refs = References()
+
+    if type(references_list) == References:
+        refs = references_list
+
+    if (references_list is np.nan) or (references_list == None):
+        df = pd.DataFrame(columns=results_cols, dtype=object)
+        refs = References.from_dataframe(df) # type: ignore
+        refs.generate_work_ids()
 
     if (type(references_list) == list) and (type(references_list[0]) == dict):
         df = references_to_df(references_list)
+        refs = References.from_dataframe(df) # type: ignore
+        refs.generate_work_ids()
     
-    else:
-        if (type(references_list) == list) and (type(references_list[0]) == str):
-            df = pd.DataFrame(columns=results_cols, dtype=object)
-            df['link'] = pd.Series(references_list, dtype=object)
+    if (type(references_list) == list) and (type(references_list[0]) == str):
+        df = pd.DataFrame(columns=results_cols, dtype=object)
+        df['link'] = pd.Series(references_list, dtype=object)
 
-    refs = References.from_dataframe(df) # type: ignore
+        refs = References.from_dataframe(df) # type: ignore
+        refs.generate_work_ids()
 
     return refs
 
@@ -1731,7 +1743,7 @@ class Review:
         return review
 
     def format_citations(self):
-        return self.results.format_citations() # type: ignore
+        self.results.format_citations() # type: ignore
 
     def format_authors(self):
 
@@ -1753,7 +1765,12 @@ class Review:
                     auth = Author(full_name=a.strip())
                     auths.add_author(auth)
                 self.authors.merge(auths)
-                
+    
+    def add_citations_to_results(self):
+        self.results.add_citations_to_results()
+        self.format_authors()
+
+
     def update_from_orcid(self):
         self.authors.update_from_orcid()
 
