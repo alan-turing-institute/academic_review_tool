@@ -307,7 +307,7 @@ class Results(pd.DataFrame):
     def update_work_ids(self):
 
         for i in self.index:
-            work_id = generate_author_id(self.loc[i])
+            work_id = generate_work_id(self.loc[i])
             work_id = self.get_unique_id(work_id)
             self.loc[i, 'work_id'] = work_id
 
@@ -765,6 +765,11 @@ class Results(pd.DataFrame):
         self['citations'] = self['citations_data'].apply(extract_references) # type: ignore
         return self['citations']
     
+    def extract_authors(self):
+
+        self['authors'] = self['authors_data'].apply(extract_authors) # type: ignore
+        return self['authors']
+
     def add_citations_to_results(self):
         
         self.extract_citations()
@@ -775,15 +780,14 @@ class Results(pd.DataFrame):
                 df = i.copy(deep=True)
                 self.add_dataframe(dataframe=df)
 
+        self.extract_authors()
+
         return self
 
 
 
 
-    def extract_authors(self):
-
-        self['authors'] = self['authors_data'].apply(extract_authors) # type: ignore
-        return self['authors']
+    
 
 class References(Results):
 
@@ -841,7 +845,7 @@ def extract_references(references_list: list):
             df = pd.DataFrame(columns=results_cols, dtype=object)
             df['link'] = pd.Series(references_list, dtype=object)
 
-    refs = References.from_dataframe(df)
+    refs = References.from_dataframe(df) # type: ignore
 
     return refs
 
@@ -1911,7 +1915,7 @@ class Review:
         self.extract_authors()
         self.extract_citations()
 
-    def update(self, timeout: int = 60):
+    def sync_apis(self, timeout: int = 60):
 
         self.update_from_dois(timeout=timeout)
         self.update_from_orcid()
