@@ -256,6 +256,8 @@ class Results(pd.DataFrame):
         
     def get_unique_id(self, work_id):
 
+        work_id = work_id.split('#')[0]
+
         if work_id in self['work_id'].to_list():
             df = self.copy(deep=True).astype(str)
             id_count = len(df[df['work_id'].str.contains(work_id)]) # type: ignore
