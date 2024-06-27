@@ -843,7 +843,7 @@ class Results(pd.DataFrame):
         while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
             
             indexes = self.index
-            to_process = list(set(indexes).difference(set(processed_indexes)))
+            to_process = pd.Series(list(set(indexes).difference(set(processed_indexes)))).sort_values().to_list()
 
             rows = self.loc[to_process]
 
