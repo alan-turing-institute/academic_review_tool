@@ -776,7 +776,7 @@ class Results(pd.DataFrame):
             if (type(refs) == References) and (len(refs) > 0): # type: ignore
                 refs.update_work_ids() # type: ignore
                 refs.format_authors() # type: ignore
-                self.loc[i, 'citations'] = refs
+                self.at[i, 'citations'] = refs
 
         return self['citations']
     
