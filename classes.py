@@ -861,7 +861,7 @@ def extract_references(references_list: list):
     if type(references_list) == References:
         return references_list
     
-    if (type(references_list) == float) or (references_list is np.nan) or (references_list == None):
+    if (type(references_list) == float) or (type(references_list) == np.float64) or (type(references_list) == np.float32) or (references_list is np.nan) or (references_list == None):
         return refs
 
     if (type(references_list) == list) and (type(references_list[0]) == dict):
@@ -869,6 +869,7 @@ def extract_references(references_list: list):
         df.replace({np.nan: None})
         refs = References.from_dataframe(df) # type: ignore
         refs.generate_work_ids()
+        return refs
     
     if (type(references_list) == list) and (type(references_list[0]) == str):
         df = pd.DataFrame(columns=results_cols, dtype=object)
@@ -877,8 +878,9 @@ def extract_references(references_list: list):
 
         refs = References.from_dataframe(df) # type: ignore
         refs.generate_work_ids()
+        return refs
 
-    return refs
+    
 
     
 
