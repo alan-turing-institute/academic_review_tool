@@ -259,18 +259,19 @@ class Results(pd.DataFrame):
     def get_unique_id(self, work_id, index):
 
         if (type(work_id) == str) and (work_id != ''):
-
-            work_id = str(work_id.split('#')[0])
-            if work_id in self['work_id'].to_list():
-            
-                df = self.copy(deep=True).astype(str)
-                df['work_id'] = df['work_id'].astype(str)
-                masked = df[df['work_id'].str.contains(work_id)]
-                masked_indexes = masked.index.to_list()
-                if index not in masked_indexes:
-                    id_count = len(masked) # type: ignore
-                    work_id = work_id + f'#{id_count + 1}'
-        
+            try:
+                work_id = str(work_id.split('#')[0])
+                if work_id in self['work_id'].to_list():
+                
+                    df = self.copy(deep=True).astype(str)
+                    df['work_id'] = df['work_id'].astype(str)
+                    masked = df[df['work_id'].str.contains(work_id)]
+                    masked_indexes = masked.index.to_list()
+                    if index not in masked_indexes:
+                        id_count = len(masked) # type: ignore
+                        work_id = work_id + f'#{id_count + 1}'
+            except:
+                pass
         return work_id
 
     def add_dataframe(self, dataframe):
