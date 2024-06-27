@@ -781,7 +781,12 @@ class Results(pd.DataFrame):
     def has_citations_data(self):
         return self[~self['citations_data'].isna()]
 
+    def has(self, column):
+        return self[~self[column].isna()]
+
     def format_citations(self):
+
+        # unformatted = 
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
@@ -797,26 +802,45 @@ class Results(pd.DataFrame):
         self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
         return self['authors']
 
+
+
     def add_citations_to_results(self):
         
         self.format_citations()
         citations = self['citations'].to_list()
+        existing_ids = set(self['work_id'].to_list())
         
         for i in citations:
+
             if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
                 df = i.copy(deep=True)
-                self.add_dataframe(dataframe=df)
+
+                new_ids = set(df['work_id'].to_list())
+                diff_len = len(new_ids.difference(existing_ids))
+
+                if diff_len > 0:
+                    self.add_dataframe(dataframe=df)
         
         self.update_work_ids()
         self.format_authors()
 
 
         return self
-
-
-
-
     
+    def iter_add_citations(self, depth=2):
+
+
+
+
+
+
+
+def is_formatted_reference(item):
+
+    if type(item) == References:
+        return True
+    else:
+        return False
 
 class References(Results):
 
