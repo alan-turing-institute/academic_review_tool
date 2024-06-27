@@ -254,14 +254,17 @@ class Results(pd.DataFrame):
         self.loc[index] = data
         self.extract_authors()
         
-    def get_unique_id(self, work_id):
+    def get_unique_id(self, work_id, index):
 
         work_id = work_id.split('#')[0]
 
         if work_id in self['work_id'].to_list():
             df = self.copy(deep=True).astype(str)
-            id_count = len(df[df['work_id'].str.contains(work_id)]) # type: ignore
-            work_id = work_id + f'#{id_count + 1}'
+            masked = df[df['work_id'].str.contains(work_id)]
+            masked_indexes = masked.index.to_list()
+            if index not in masked_indexes:
+                id_count = len(masked) # type: ignore
+                work_id = work_id + f'#{id_count + 1}'
         
         return work_id
 
@@ -310,8 +313,9 @@ class Results(pd.DataFrame):
 
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
-            work_id = self.get_unique_id(work_id)
-            self.loc[i, 'work_id'] = work_id
+            if self.loc[i, 'work_id'] != work_id:
+                work_id = self.get_unique_id(work_id, i)
+                self.loc[i, 'work_id'] = work_id
 
 
     def update_from_doi(self, index, timeout: int = 60):
