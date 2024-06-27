@@ -784,28 +784,36 @@ class Results(pd.DataFrame):
     def has(self, column):
         return self[~self[column].isna()]
 
-    def format_citations(self):
+    def has_formatted_citations(self):
+        return self[self['citations'].apply(is_formatted_reference)]
 
-        # unformatted = 
+    def lacks_formatted_citations(self):
+        return self[~self['citations'].apply(is_formatted_reference)]
+
+    def format_citations(self):
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
 
-        for i in self.index:
-            refs = extract_references(self.loc[i, 'citations_data'])
-            self.at[i, 'citations'] = refs
-        
-        return self['citations']
+        unformatted = self.lacks_formatted_citations()
+
+        if len(unformatted) > 0:
+            indices = unformatted.index
+            for i in indices:
+                refs = extract_references(self.loc[i, 'citations_data'])
+                self.at[i, 'citations'] = refs
+            
+            return self['citations']
     
     def format_authors(self):
 
         self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
         return self['authors']
 
-
+    
 
     def add_citations_to_results(self):
-        
+
         self.format_citations()
         citations = self['citations'].to_list()
         existing_ids = set(self['work_id'].to_list())
