@@ -287,13 +287,16 @@ class Results(pd.DataFrame):
                 if c not in self.columns:
                     self[c] = pd.Series(dtype=object)
 
-        if update_work_ids == True:
-            index = len(self)
-            for i in dataframe.index:
+        
+        index = len(self)
+        for i in dataframe.index:
                 self.loc[index] = dataframe.loc[i]
-                work_id = generate_work_id(dataframe.loc[i])
-                work_id = self.get_unique_id(work_id, i)
-                self.loc[index, 'work_id'] = work_id
+
+                if update_work_ids == True:
+                    work_id = generate_work_id(dataframe.loc[i])
+                    work_id = self.get_unique_id(work_id, i)
+                    self.loc[index, 'work_id'] = work_id
+                    
                 index += 1
         
         if format_authors == True:
