@@ -2279,6 +2279,14 @@ class Review:
         
         return df
 
+
+    def crawl_stored_citations(self, max_depth=2, processing_limit=100, format_authors = True, update_from_doi = False):
+
+        self.results.crawl_stored_citations(max_depth=max_depth, processing_limit=processing_limit, format_authors = format_authors, update_from_doi = update_from_doi) # type: ignore
+
+        if format_authors == True:
+            self.format_authors()
+
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 
     # def save_as(self, file_name = 'request_input', file_address = 'request_input', file_type = 'request_input'):
