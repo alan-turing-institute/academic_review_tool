@@ -890,8 +890,12 @@ class Results(pd.DataFrame):
         
         if add_to_results == True:
 
-            self.add_dataframe(result) # type: ignore
-            self = self.drop(labels=1, axis=0).reset_index().drop('index', axis=1)
+            df = self.copy(deep=True)
+            df = pd.concat([df, result])
+            df = df.drop(labels=1, axis=0).reset_index().drop('index', axis=1)
+            
+            self = Results()
+            self = self.add_dataframe(df)
             self.format_citations() # type: ignore
             self.format_authors() # type: ignore
         
