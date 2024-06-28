@@ -837,38 +837,42 @@ class Results(pd.DataFrame):
 
     def crawl_stored_citations(self, max_depth=2, processing_limit=100):
 
-        iteration = 0
+        iteration = 1
         processed_indexes = []
         original_len = len(self)
 
         while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
             
+            print('Formatting citations...')i
             self.format_citations()
 
             indexes = self.index
-            to_process = pd.Series(list(set(indexes).difference(set(processed_indexes)))).sort_values().to_list()
+            to_process = pd.Series(list(set(indexes).difference(set(processed_indexes))), dtype=object).sort_values().to_list()
 
-            rows = self.loc[to_process]
+            if len(to_process) > 0:
 
-            citations = rows['citations'].to_list()
+                rows = self.loc[to_process]
+                citations = rows['citations'].to_list()
+                
+                for i in citations:
 
-            for i in citations:
-
-                if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
-                    res = i.copy(deep=True)
-                    self.add_dataframe(dataframe=res)
-                    print(True)
+                    if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+                        res = i.copy(deep=True)
+                        self.add_dataframe(dataframe=res)
+                        print(True)
             
             processed_indexes = processed_indexes + to_process
             iteration += 1
             print(f'Entries processed: {len(processed_indexes)}')
 
         len_diff = len(self) - original_len
-        df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
-        self = Results.from_dataframe(df)
-        self.update_work_ids()
-        self.format_authors()
         print(f'Crawl complete:\n    - {len(processed_indexes)} entries processed\n    - {len_diff} works added to results.')
+        
+        # df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
+        # self = Results.from_dataframe(df)
+        # self.update_work_ids()
+        # self.format_authors()
+        
         return 
 
 
