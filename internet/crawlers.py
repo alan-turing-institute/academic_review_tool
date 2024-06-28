@@ -368,7 +368,7 @@ def select_crawled_links(
                         iteration: int,
                          source_domain: str, 
                          link_elements, 
-                         urls: queue, 
+                         urls: queue.PriorityQueue, 
                          visited_urls: list, 
                          ignore_urls: list, 
                          ignore_domains: list,
