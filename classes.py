@@ -2615,8 +2615,7 @@ def citation_crawler_scraper(entry, be_polite = True):
     url = entry['link']
 
     # Checking if URL is bad. If True, tries to correct it.
-    if check_bad_url(url) == True:
-        url = correct_seed_url_errors(url)
+    url = correct_seed_url_errors(url)
         
     # If be_polite is True, checks if crawler has permission to crawl/scrape URL
     if be_polite == True:
@@ -2649,21 +2648,54 @@ def citation_crawler_scraper(entry, be_polite = True):
         
     
 
-def citation_crawler_doi_retriver(entry: pd.Series, timeout = 60):
+def citation_crawler_doi_retriver(entry: pd.Series, be_polite = True, timeout = 60):
 
     doi = entry['doi']
+    link = entry['link']
 
-    try:
-        res_df = lookup_doi(doi, timeout=timeout)
+    if type(doi) == str:
+        try:
+            res_df = lookup_doi(doi, timeout=timeout)
 
-        if len(res_df) > 0:
-            res_series = res_df.loc[0]
-            for i in res_series.index:
-                entry[i] = res_series[i]
-    except:
-        pass
+            if len(res_df) > 0:
+                res_series = res_df.loc[0]
+                for i in res_series.index:
+                    entry[i] = res_series[i]
+            
+            return entry
+    
+        except:
+                doi = doi.replace('https://', '').replace('http://', '').replace('dx.', '').replace('doi.org/', '')
+                doi = 'https://doi.org' + doi
+                
+                try:
+                    entry['link'] = doi
+                    return citation_crawler_scraper(entry, be_polite = be_polite)
+                except:
 
-    return entry
+                    try:
+                        entry['link'] = link
+                        return citation_crawler_scraper(entry, be_polite = be_polite)
+                    except:
+
+                        try:
+                            return scrape_url(doi)
+                        except:
+                            return entry
+        
+    else:
+        if link != None:
+            try:
+                    return citation_crawler_scraper(entry, be_polite = be_polite)
+            except:
+                    try:
+                        return scrape_url(link)
+                    except:
+                        return entry
+            
+        else:
+            return entry
+
 
 def citation_crawler_data_retriever(entry):
 
