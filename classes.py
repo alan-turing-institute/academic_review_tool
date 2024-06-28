@@ -792,7 +792,7 @@ class Results(pd.DataFrame):
     def lacks_formatted_citations(self):
         return self[~self['citations'].apply(is_formatted_reference)]
 
-    def format_citations(self):
+    def format_citations(self, add_work_ids = False, update_from_doi = False):
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
@@ -810,7 +810,7 @@ class Results(pd.DataFrame):
             indices = unformatted.index
             processing_count = 0
             for i in indices:
-                refs = extract_references(self.loc[i, 'citations_data'])
+                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
                 refs_count = len(refs) # type: ignore
                 processing_count = processing_count + refs_count
                 self.at[i, 'citations'] = refs
@@ -828,11 +828,11 @@ class Results(pd.DataFrame):
 
     
 
-    def add_citations_to_results(self):
+    def add_citations_to_results(self, add_work_ids = False, update_from_doi = False):
 
         unformatted = self.lacks_formatted_citations()
         if len(unformatted) > 0:
-            self.format_citations()
+            self.format_citations(add_work_ids = add_work_ids, update_from_doi = update_from_doi)
 
         citations = self['citations'].to_list()
         existing_ids = set(self['work_id'].to_list())
@@ -855,7 +855,7 @@ class Results(pd.DataFrame):
         return self
     
 
-    def crawl_stored_citations(self, max_depth=2, processing_limit=100):
+    def crawl_stored_citations(self, max_depth=2, processing_limit=100, update_from_doi = False):
 
         iteration = 1
         processed_indexes = []
@@ -868,7 +868,7 @@ class Results(pd.DataFrame):
 
             unformatted = self.lacks_formatted_citations()
             if len(unformatted) > 0:
-                self.format_citations()
+                self.format_citations(add_work_ids = False, update_from_doi = update_from_doi)
 
             indexes = self.index
             to_process = pd.Series(list(set(indexes).difference(set(processed_indexes))), dtype=object).sort_values().to_list()
@@ -975,7 +975,7 @@ class References(Results):
         
         return results_table
 
-def extract_references(references_list, add_work_ids = True):
+def extract_references(references_list, add_work_ids = True, update_from_doi = False):
 
     refs = References()
 
@@ -986,10 +986,10 @@ def extract_references(references_list, add_work_ids = True):
         return refs
 
     if (type(references_list) == list) and (type(references_list[0]) == dict):
-        df = references_to_df(references_list)
+        df = references_to_df(references_list, update_from_doi = update_from_doi)
         df.replace({np.nan: None})
         refs = References.from_dataframe(df) # type: ignore
-        
+
         if add_work_ids == True:
             refs.generate_work_ids()
 
