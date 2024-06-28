@@ -2274,13 +2274,13 @@ class Review:
                                 timeout=timeout)
             
         if add_to_results == True:
-                self.results.add_dataframe(dataframe=df)
+                self.results.add_dataframe(dataframe=df) # type: ignore
                 self.format_authors()
         
         return df
 
 
-    def crawl_stored_citations(self, max_depth=2, processing_limit=100, format_authors = True, update_from_doi = False):
+    def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format_authors = True, update_from_doi = False):
 
         self.results.crawl_stored_citations(max_depth=max_depth, processing_limit=processing_limit, format_authors = format_authors, update_from_doi = update_from_doi) # type: ignore
 
