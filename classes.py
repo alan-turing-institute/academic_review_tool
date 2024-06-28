@@ -2635,6 +2635,7 @@ def citation_crawler_scraper(entry, be_polite = True):
                 res_series = res_df.loc[0]
                 for i in res_series.index:
                     entry[i] = res_series[i]
+                    print(res_series)
         
         except:
             pass
