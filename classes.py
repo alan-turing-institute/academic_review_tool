@@ -2603,8 +2603,8 @@ def citation_crawler_engine(
         # Displaying status to user
 
         if iteration > depth_marker:
-            
-            print(f'\nCrawl iteration {depth}:\n    - Entries processed: {processed_in_cycle}\n    - Results added: {added_in_cycle}')
+
+            print(f'\nCrawl depth {depth}:\n    - Entries processed: {processed_in_cycle}\n    - Results added: {added_in_cycle}')
 
             depth += 1
             added_in_cycle = 0
