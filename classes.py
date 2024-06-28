@@ -2530,6 +2530,8 @@ def citation_crawler_engine(
     """
     
     # Intiailising variables to store the pages already visited
+    data = data.copy(deep=True)
+    
     crawled_entries = []
     iteration = 1
     
@@ -2560,15 +2562,15 @@ def citation_crawler_engine(
         old_len = len(data)
 
         # Retreiving entry data
-        entry = data.loc[current_index]
+        entry = pd.Series(data.loc[current_index])
         
         if use_api == True:
         # Checking if the entry has a valid DOI. If yes, updating data in the entry using Crossref API. If not, updating data using web scraper.
             entry = update_citation_crawler_data(entry, be_polite = be_polite, timeout = timeout)
 
         # Formatting entry citations data
-        refs = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False) # type: ignore
-        entry.at['citations'] = refs # type: ignore
+        refs = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False)
+        entry.at['citations'] = refs
         refs_len = len(refs)
 
         # Formatting entry authors data
