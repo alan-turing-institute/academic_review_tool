@@ -796,8 +796,18 @@ class Results(pd.DataFrame):
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
 
         unformatted = self.lacks_formatted_citations()
+        length = len(unformatted)
+        if length > 0:
 
-        if len(unformatted) > 0:
+            if length == 1:
+                message = '\nFormatting 1 set of citations...\n'
+            else:
+                message = f'\nFormatting {length} sets of citations...\n'
+
+            print(message)
+
+            self.format_citations()
+
             indices = unformatted.index
             for i in indices:
                 refs = extract_references(self.loc[i, 'citations_data'])
@@ -814,7 +824,6 @@ class Results(pd.DataFrame):
 
         unformatted = self.lacks_formatted_citations()
         if len(unformatted) > 0:
-            print(f'\nFormatting {len(unformatted)} citations...\n')
             self.format_citations()
 
         citations = self['citations'].to_list()
@@ -851,7 +860,6 @@ class Results(pd.DataFrame):
 
             unformatted = self.lacks_formatted_citations()
             if len(unformatted) > 0:
-                print(f'\nFormatting {len(unformatted)} citations...\n')
                 self.format_citations()
 
             indexes = self.index
@@ -873,13 +881,13 @@ class Results(pd.DataFrame):
                         res = i.copy(deep=True)
                         if len(res) > 0:
                             new_df = pd.concat([new_df, res])
-                        print(True)
 
                     process_iteration += 1
 
                     if (len(processed_indexes) + process_iteration) > processing_limit:
                         to_process = to_process[:process_iteration]
                         break
+
                 new_df_asstr = new_df.copy(deep=True).astype(str)
                 unique_indexes = new_df_asstr.drop_duplicates().index
                 new_df = new_df.loc[unique_indexes]
@@ -888,9 +896,9 @@ class Results(pd.DataFrame):
 
             processed_indexes = processed_indexes + to_process
             len_diff = len(self) - original_len
-            iteration += 1
             print(f'Iteration {iteration} complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {len_diff}\n')
-
+            
+            iteration += 1
             
         final_len_diff = len(self) - original_len
         print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n\n')
@@ -1449,8 +1457,13 @@ class Authors:
             return self.data[key]
     
     def __repr__(self) -> str:
-        return self.all['full_name'].to_list().__repr__()
+
+        alphabetical = self.all['full_name'].sort_values().to_list().__repr__()
+        return alphabetical
     
+    def __len__(self) -> int:
+        return len(self.details.keys())
+
     def merge(self, authors):
 
         left = self.all.copy(deep=True)
