@@ -274,7 +274,7 @@ class Results(pd.DataFrame):
                 pass
         return work_id
 
-    def add_dataframe(self, dataframe):
+    def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
@@ -287,15 +287,17 @@ class Results(pd.DataFrame):
                 if c not in self.columns:
                     self[c] = pd.Series(dtype=object)
 
-        index = len(self)
-        for i in dataframe.index:
-            self.loc[index] = dataframe.loc[i]
-            work_id = generate_work_id(dataframe.loc[i])
-            work_id = self.get_unique_id(work_id, i)
-            self.loc[index, 'work_id'] = work_id
-            index += 1
+        if update_work_ids == True:
+            index = len(self)
+            for i in dataframe.index:
+                self.loc[index] = dataframe.loc[i]
+                work_id = generate_work_id(dataframe.loc[i])
+                work_id = self.get_unique_id(work_id, i)
+                self.loc[index, 'work_id'] = work_id
+                index += 1
         
-        self.format_authors()
+        if format_authors == True:
+            self.format_authors()
 
     def add_doi(self, doi: str = 'request_input', timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
@@ -800,16 +802,24 @@ class Results(pd.DataFrame):
         if length > 0:
 
             if length == 1:
-                message = '\nFormatting 1 set of citations...\n'
+                intro_message = '\nFormatting 1 set of citations...'
             else:
-                message = f'\nFormatting {length} sets of citations...\n'
-
-            print(message)
+                intro_message = f'\nFormatting {length} sets of citations...'
+            print(intro_message)
 
             indices = unformatted.index
+            processing_count = 0
             for i in indices:
                 refs = extract_references(self.loc[i, 'citations_data'])
+                refs_count = len(refs) # type: ignore
+                processing_count = processing_count + refs_count
                 self.at[i, 'citations'] = refs
+            
+            if processing_count == 1:
+                outro_message = '1 citation formatted\n'
+            else:
+                outro_message = f'{processing_count} citations formatted\n'
+            print(outro_message)
     
     def format_authors(self):
 
@@ -890,16 +900,16 @@ class Results(pd.DataFrame):
                 unique_indexes = new_df_asstr.drop_duplicates().index
                 new_df = new_df.loc[unique_indexes]
                 new_df = new_df.reset_index().drop('index', axis=1)
-                self.add_dataframe(dataframe=new_df)
+                self.add_dataframe(dataframe=new_df, update_work_ids = False, format_authors = False)
 
             processed_indexes = processed_indexes + to_process
             len_diff = len(self) - original_len
-            print(f'Iteration {iteration} complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {len_diff}\n')
+            print(f'Iteration {iteration} complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {len_diff}')
             
             iteration += 1
             
         final_len_diff = len(self) - original_len
-        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n\n')
+        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n')
 
         # df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
         # self = Results.from_dataframe(df)
@@ -965,7 +975,7 @@ class References(Results):
         
         return results_table
 
-def extract_references(references_list):
+def extract_references(references_list, add_work_ids = True):
 
     refs = References()
 
@@ -979,7 +989,10 @@ def extract_references(references_list):
         df = references_to_df(references_list)
         df.replace({np.nan: None})
         refs = References.from_dataframe(df) # type: ignore
-        refs.generate_work_ids()
+        
+        if add_work_ids == True:
+            refs.generate_work_ids()
+
         return refs
     
     if (type(references_list) == list) and (type(references_list[0]) == str):
@@ -988,7 +1001,9 @@ def extract_references(references_list):
         df.replace({np.nan: None})
 
         refs = References.from_dataframe(df) # type: ignore
-        refs.generate_work_ids()
+        if add_work_ids == True:
+            refs.generate_work_ids()
+        
         return refs
 
     

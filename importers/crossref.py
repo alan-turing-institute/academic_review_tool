@@ -219,33 +219,38 @@ def items_to_df(items: list) -> pd.DataFrame:
     
     return df
 
-def reference_to_df(reference: dict) -> pd.DataFrame:
+def reference_to_df(reference: dict, update_from_doi = False) -> pd.DataFrame:
 
     keys = list(reference.keys())
 
     df_data = {}
 
+    
     if 'DOI' in keys:
 
-        try:
+        if update_from_doi == True:
+            try:
+                doi = reference['DOI']
+                df = lookup_doi(doi)
+                return df
+            
+            except:
+                pass
+        else:
             doi = reference['DOI']
-            df = lookup_doi(doi)
-            return df
-        
-        except:
-            pass
     
     if 'URL' in keys:
 
         if 'doi.org/' in reference['URL']:
             doi = reference['URL']
 
-            try:
-                df = lookup_doi(doi)
-                return df
-            
-            except:
-                pass
+            if update_from_doi == True:
+                try:
+                    df = lookup_doi(doi)
+                    return df
+                
+                except:
+                    pass
 
     if 'unstructured' in keys:
 
@@ -315,13 +320,13 @@ def reference_to_df(reference: dict) -> pd.DataFrame:
     return df
 
 
-def references_to_df(references_list: list) -> pd.DataFrame:
+def references_to_df(references_list: list, update_from_doi = False) -> pd.DataFrame:
 
     df = pd.DataFrame(columns = results_cols, dtype=object)
 
     for i in references_list:
 
-        row = reference_to_df(i)
+        row = reference_to_df(i, update_from_doi)
         df = pd.concat([df, row])
     
     df = df.reset_index().drop('index', axis=1)
