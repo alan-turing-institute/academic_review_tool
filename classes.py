@@ -2356,7 +2356,7 @@ class Review:
 def crawler_scrape_url(url):
 
     global results_cols
-    return pd.DataFrame(columns=results_cols, dtype=object)
+    return pd.Series(index=results_cols, dtype=object)
 
 def citation_crawler_site_test(url: str):
 
@@ -2370,7 +2370,7 @@ def citation_crawler_site_test(url: str):
     
     return False
 
-def citation_crawler_scraper(entry, be_polite = True):
+def citation_crawler_scraper(entry: pd.Series, be_polite = True):
     
     url = entry['link']
 
@@ -2454,7 +2454,7 @@ def citation_crawler_doi_retriver(entry: pd.Series, be_polite = True, timeout = 
         else:
             return entry
 
-def update_citation_crawler_data(entry, be_polite = True, timeout = 60):
+def update_citation_crawler_data(entry: pd.Series, be_polite = True, timeout = 60):
 
     doi = entry['doi']
     link = entry['link']
@@ -2567,6 +2567,8 @@ def citation_crawler_engine(
         if use_api == True:
         # Checking if the entry has a valid DOI. If yes, updating data in the entry using Crossref API. If not, updating data using web scraper.
             entry = update_citation_crawler_data(entry, be_polite = be_polite, timeout = timeout)
+            entry = pd.Series(entry)
+
 
         # Formatting entry citations data
         refs = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False)
