@@ -865,19 +865,23 @@ class Results(pd.DataFrame):
                 new_df = pd.DataFrame(dtype=object)
 
                 process_iteration = 0
+
                 for i in citations:
                     
                     if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+                        
                         res = i.copy(deep=True)
                         if len(res) > 0:
                             new_df = pd.concat([new_df, res])
                         print(True)
+
                     process_iteration += 1
 
                     if (len(processed_indexes) + process_iteration) > processing_limit:
                         to_process = to_process[:process_iteration]
                         break
-
+                
+                new_df = new_df.drop_duplicates().reset_index().drop('index', axis=1)
                 self.add_dataframe(dataframe=new_df)
 
             processed_indexes = processed_indexes + to_process
