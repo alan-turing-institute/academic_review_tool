@@ -889,6 +889,7 @@ class Results(pd.DataFrame):
         if add_to_results == True:
 
             self.add_dataframe(result) # type: ignore
+            self = self.drop(labels=1, axis=0).reset_index().drop('index', axis=1)
             self.format_citations() # type: ignore
             self.format_authors() # type: ignore
         
