@@ -888,13 +888,11 @@ class Results(pd.DataFrame):
         
         if add_to_results == True:
 
-            self = self.add_dataframe(result) # type: ignore
+            self.add_dataframe(result) # type: ignore
             self.format_citations() # type: ignore
             self.format_authors() # type: ignore
-            return self
         
-        else:
-            return result
+        return result
 
     def crawl_stored_citations(self, max_depth=2, processing_limit=100, format_authors = True, update_from_doi = False):
 
@@ -2371,10 +2369,8 @@ class Review:
 
             self.format_citations()
             self.format_authors()
-            return self.results
         
-        else:
-            return result
+        return result
 
 
 
