@@ -865,6 +865,35 @@ class Results(pd.DataFrame):
 
         return self
     
+    def crawl_citations(
+                    self,
+                    use_api: bool = True,
+                    crawl_limit: int = 5, 
+                    depth_limit: int = 2,
+                    be_polite: bool = True,
+                    rate_limit: float = 0.05,
+                    timeout: int = 60,
+                    add_to_results = True
+                    ):
+        
+        result = citation_crawler(
+                    data = self,
+                    use_api = use_api,
+                    crawl_limit = crawl_limit, 
+                    depth_limit = depth_limit,
+                    be_polite = be_polite,
+                    rate_limit = rate_limit,
+                    timeout = timeout
+                    )
+        
+        if add_to_results == True:
+            self = Results.from_dataframe(result) # type: ignore
+            self.format_citations()
+            self.format_authors()
+            return self
+        
+        else:
+            return result
 
     def crawl_stored_citations(self, max_depth=2, processing_limit=100, format_authors = True, update_from_doi = False):
 
@@ -2293,18 +2322,15 @@ class Review:
             self.format_authors()
 
     def crawl_citations(
-            self,
-            crawl_limit: int = 5, 
-            excluded_url_terms: str = 'default',
-            required_keywords: bool = None, 
-            excluded_keywords: bool = None, 
-            case_sensitive: bool = False,
-            ignore_urls: list = None, 
-            ignore_domains: list = 'default',
-            be_polite: bool = True,
-            full: bool = True,
-            add_to_results = True
-            ):
+                    self,
+                    use_api: bool = True,
+                    crawl_limit: int = 5, 
+                    depth_limit: int = 2,
+                    be_polite: bool = True,
+                    rate_limit: float = 0.05,
+                    timeout: int = 60,
+                    add_to_results = True
+                    ):
     
         """
         Crawls a Result's object's entries, their citations, and so on.
@@ -2321,28 +2347,7 @@ class Review:
         
         Parameters
         ---------- 
-        seeds : str or list 
-            one or more URLs from which to crawl.
-        crawl_limit : int 
-            how many URLs the crawler should visit before it stops.
-        excluded_url_terms : list 
-            list of strings; link will be ignored if it contains any string in list.
-        required_keywords : list 
-            list of keywords which sites must contain to be crawled.
-        excluded_keywords : list 
-            list of keywords which sites must *not* contain to be crawled.
-        case_sensitive : bool 
-            whether or not to ignore string characters' case.
-        ignore_urls : list 
-            list of URLs to ignore.
-        ignore_domains : list 
-            list of domains to ignore.
-        be_polite : bool 
-            whether respect websites' permissions for crawlers.
-        full : bool 
-            whether to run a full scrape on each site. This takes longer.
-        output_as : str 
-            the format to output results in. Defaults to a pandas.DataFrame.
+        
         
         
         Returns
@@ -2350,6 +2355,25 @@ class Review:
         result : object 
             an object containing the results of a crawl.
         """
+
+        result = self.results.crawl_citations(
+                                            use_api = use_api,
+                                            crawl_limit = crawl_limit, 
+                                            depth_limit = depth_limit,
+                                            be_polite = be_polite,
+                                            rate_limit = rate_limit,
+                                            timeout = timeout,
+                                            add_to_results = add_to_results
+                                            ) # type: ignore
+        
+        if add_to_results == True:
+
+            self.format_citations()
+            self.format_authors()
+            return self.results
+        
+        else:
+            return result
 
 
 
@@ -2626,7 +2650,6 @@ def citation_crawler_engine(
             data.loc[i] = entry
 
     return data
-
 
 def citation_crawler(
                     data: pd.DataFrame,
