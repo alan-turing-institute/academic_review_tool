@@ -2631,7 +2631,6 @@ def citation_crawler_scraper(entry, be_polite = True):
 
         try:
             res_df = scrape_article(url)
-            print(res_df)
             if len(res_df) > 0: 
                 res_series = res_df.loc[0]
                 for i in res_series.index:
