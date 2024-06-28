@@ -843,7 +843,7 @@ class Results(pd.DataFrame):
 
         while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
             
-            print('Formatting citations...')i
+            print('Formatting citations...')
             self.format_citations()
 
             indexes = self.index
@@ -867,7 +867,7 @@ class Results(pd.DataFrame):
 
         len_diff = len(self) - original_len
         print(f'Crawl complete:\n    - {len(processed_indexes)} entries processed\n    - {len_diff} works added to results.')
-        
+
         # df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
         # self = Results.from_dataframe(df)
         # self.update_work_ids()
