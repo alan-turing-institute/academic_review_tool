@@ -812,7 +812,10 @@ class Results(pd.DataFrame):
 
     def add_citations_to_results(self):
 
-        self.format_citations()
+        unformatted = self.lacks_formatted_citations()
+        if len(unformatted) > 0:
+            print(f'\nFormatting {len(unformatted)} citations...\n')
+            self.format_citations()
 
         citations = self['citations'].to_list()
         existing_ids = set(self['work_id'].to_list())
@@ -843,8 +846,13 @@ class Results(pd.DataFrame):
 
         while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
             
-            print('Formatting citations...')
-            self.format_citations()
+            if (iteration > max_depth) or (len(processed_indexes) > processing_limit):
+                break
+
+            unformatted = self.lacks_formatted_citations()
+            if len(unformatted) > 0:
+                print(f'\nFormatting {len(unformatted)} citations...\n')
+                self.format_citations()
 
             indexes = self.index
             to_process = pd.Series(list(set(indexes).difference(set(processed_indexes))), dtype=object).sort_values().to_list()
@@ -854,22 +862,25 @@ class Results(pd.DataFrame):
                 rows = self.loc[to_process]
                 citations = rows['citations'].to_list()
                 
+                new_df = pd.DataFrame(dtype=object)
                 for i in citations:
 
                     if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
                         res = i.copy(deep=True)
-                        self.add_dataframe(dataframe=res)
+                        if len(res) > 0:
+                            new_df = pd.concat([new_df, res])
                         print(True)
-            
+
+                self.add_dataframe(dataframe=new_df)
+
             processed_indexes = processed_indexes + to_process
+            len_diff = len(self) - original_len
             iteration += 1
-            print(f'Entries processed: {len(processed_indexes)}')
+            print(f'Iteration {iteration} complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {len_diff}\n')
 
-            if (iteration > max_depth) or (len(processed_indexes) > processing_limit):
-                break
-
-        len_diff = len(self) - original_len
-        print(f'Crawl complete:\n    - {len(processed_indexes)} entries processed\n    - {len_diff} works added to results.')
+            
+        final_len_diff = len(self) - original_len
+        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n\n')
 
         # df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
         # self = Results.from_dataframe(df)
