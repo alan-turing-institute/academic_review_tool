@@ -891,7 +891,7 @@ class Results(pd.DataFrame):
         if add_to_results == True:
 
             df = result.drop(labels=0, axis=0).reset_index().drop('index', axis=1)
-            self = self.add_dataframe(df)
+            self.add_dataframe(df)
             self.format_citations() # type: ignore
             self.format_authors() # type: ignore
         
