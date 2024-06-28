@@ -865,6 +865,9 @@ class Results(pd.DataFrame):
             iteration += 1
             print(f'Entries processed: {len(processed_indexes)}')
 
+            if (iteration > max_depth) or (len(processed_indexes) > processing_limit):
+                break
+
         len_diff = len(self) - original_len
         print(f'Crawl complete:\n    - {len(processed_indexes)} entries processed\n    - {len_diff} works added to results.')
 
