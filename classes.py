@@ -887,6 +887,7 @@ class Results(pd.DataFrame):
                     )
         
         if add_to_results == True:
+            
             self = Results.from_dataframe(result) # type: ignore
             self.format_citations()
             self.format_authors()
