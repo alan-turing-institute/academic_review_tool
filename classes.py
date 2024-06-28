@@ -2600,47 +2600,47 @@ def excluded_keywords_test(text, excluded_keywords, case_sensitive):
 def citation_crawler_scraper(entry):
 
 
-        # Checking if URL is bad. If True, tries to correct it.
-        if check_bad_url('current_index') == True:
-            current_index = correct_seed_errors(current_index)
+        # # Checking if URL is bad. If True, tries to correct it.
+        # if check_bad_url('current_index') == True:
+        #     current_index = correct_seed_errors(current_index)
         
-        # If be_polite is True, checks if crawler has permission to crawl/scrape URL
-        if be_polite == True:
-            try:
-                # If the crawler does not have permission, skips URL
-                if check_crawl_permission(current_index) == False:
-                    continue
-            except:
-                pass
+        # # If be_polite is True, checks if crawler has permission to crawl/scrape URL
+        # if be_polite == True:
+        #     try:
+        #         # If the crawler does not have permission, skips URL
+        #         if check_crawl_permission(current_index) == False:
+        #             continue
+        #     except:
+        #         pass
         
-        # Initialising result variable
-        crawl_res = None
+        # # Initialising result variable
+        # crawl_res = None
         
-        # Trying to scrape URL
-        try:
+        # # Trying to scrape URL
+        # try:
             
-            # Scraping URL and retrieving links
-            crawl_res = crawler_scraper(current_index, full)
-            scraped_links = crawl_res[2]
+        #     # Scraping URL and retrieving links
+        #     crawl_res = crawler_scraper(current_index, full)
+        #     scraped_links = crawl_res[2]
             
-            # Appending results to result dictionary
-            output_dict[current_index] = crawl_res[1]
+        #     # Appending results to result dictionary
+        #     output_dict[current_index] = crawl_res[1]
             
-            # Retrieving domain
-            domain = get_domain(current_index)
+        #     # Retrieving domain
+        #     domain = get_domain(current_index)
         
-        # If scrape fails, sets current_index to None
-        except:
-            # Appending results to result dictionary
-            output_dict[current_index] = crawl_res
-            continue
+        # # If scrape fails, sets current_index to None
+        # except:
+        #     # Appending results to result dictionary
+        #     output_dict[current_index] = crawl_res
+        #     continue
         
-        # Extracting raw text from site scrape result
-        if type(crawl_res) == tuple:
-            text = crawl_res[1]['raw_text']
+        # # Extracting raw text from site scrape result
+        # if type(crawl_res) == tuple:
+        #     text = crawl_res[1]['raw_text']
         
-        elif crawl_res == None:
-            text = ''
+        # elif crawl_res == None:
+        #     text = ''
     
 def citation_crawler_doi_retriver(entry: pd.Series, timeout = 60):
 
