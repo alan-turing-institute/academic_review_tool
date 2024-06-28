@@ -2598,8 +2598,7 @@ def excluded_keywords_test(text, excluded_keywords, case_sensitive):
     return result
 
 def citation_crawler_scraper(entry):
-
-
+    return
         # # Checking if URL is bad. If True, tries to correct it.
         # if check_bad_url('current_index') == True:
         #     current_index = correct_seed_errors(current_index)
