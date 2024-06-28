@@ -863,13 +863,20 @@ class Results(pd.DataFrame):
                 citations = rows['citations'].to_list()
                 
                 new_df = pd.DataFrame(dtype=object)
-                for i in citations:
 
+                process_iteration = 0
+                for i in citations:
+                    
                     if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
                         res = i.copy(deep=True)
                         if len(res) > 0:
                             new_df = pd.concat([new_df, res])
                         print(True)
+                    process_iteration += 1
+
+                    if (len(processed_indexes) + process_iteration) > processing_limit:
+                        to_process = to_process[:process_iteration]
+                        break
 
                 self.add_dataframe(dataframe=new_df)
 
