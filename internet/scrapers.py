@@ -715,43 +715,92 @@ def scrape_frontiers(url):
         raise ValueError('URL must be for a Frontiers webpage')
     
     res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res,'lxml')
+    try:
+        soup = BeautifulSoup(res,'lxml')
+    except:
+        pass
 
-    meta = soup.find_all('meta')
+    try:
+        meta = soup.find_all('meta')
+    except:
+        meta = ''
 
-    doi = soup.find(attrs = {'name':"citation_doi"}).attrs['content']
-    keywords = soup.find(attrs = {'name':"citation_keywords"}).attrs['content'].split('; ')
-    item_type = 'article'
-    link = soup.find(attrs = {'property':"og:url"}).attrs['content']
-    date = soup.find(attrs={'name':"citation_publication_date"}).attrs['content']
-    source = soup.find(attrs = {'name':"citation_journal_title"}).attrs['content']
-    publisher = soup.find(attrs = {'name':"citation_publisher"}).attrs['content']
-    repository = 'Frontiers'
-    title = soup.find(attrs = {'name':"citation_title"}).attrs['content']
-    description = soup.find(attrs = {'name':"description"}).attrs['content']
-    abstract = soup.find(attrs={'name':"citation_abstract"}).attrs['content']
+    try:
+        doi = soup.find(attrs = {'name':"citation_doi"}).attrs['content']
+    except:
+        doi = None
     
-    alist = soup.find_all(attrs={'name':"citation_author"})
+    try:
+        keywords = soup.find(attrs = {'name':"citation_keywords"}).attrs['content'].split('; ')
+    except:
+        keywords = None
+    
+    item_type = 'article'
+    
+    try:
+        link = soup.find(attrs = {'property':"og:url"}).attrs['content']
+    except:
+        link = None
+    
+    try:
+        date = soup.find(attrs={'name':"citation_publication_date"}).attrs['content']
+    except:
+        date = None
+
+    try:
+        source = soup.find(attrs = {'name':"citation_journal_title"}).attrs['content']
+    except:
+        source = None
+
+    try:
+        publisher = soup.find(attrs = {'name':"citation_publisher"}).attrs['content']
+    except:
+        publisher = None
+
+    repository = 'Frontiers'
+
+    try:
+        title = soup.find(attrs = {'name':"citation_title"}).attrs['content']
+    except:
+        title = None
+
+    try:
+        description = soup.find(attrs = {'name':"description"}).attrs['content']
+    except:
+        description = None
+
+    try:
+        abstract = soup.find(attrs={'name':"citation_abstract"}).attrs['content']
+    except:
+        abstract = None
+
     authors = []
-    for name in alist:
-        authors.append(name.attrs['content'])
-    authors
+    try:
+        alist = soup.find_all(attrs={'name':"citation_author"})
+        for name in alist:
+            authors.append(name.attrs['content'])
+    except:
+        pass
+        
     
     paras = []
     refs = []
 
-    soup.find_all('p')
+    try:
+        soup.find_all('p')
 
-    for i in soup.find_all('p'):
+        for i in soup.find_all('p'):
 
-        if ('<p class="References' in str(i)):
-            refs.append(i.text.strip())
+            if ('<p class="References' in str(i)):
+                refs.append(i.text.strip())
 
-        if (
-            ('<span' not in str(i)) 
-            and ('<p class="References' not in str(i))
-            ):
-            paras.append(i.text.replace('\n', '').replace('\r', '').replace('  ', '').replace('   ', '').strip())
+            if (
+                ('<span' not in str(i)) 
+                and ('<p class="References' not in str(i))
+                ):
+                paras.append(i.text.replace('\n', '').replace('\r', '').replace('  ', '').replace('   ', '').strip())
+    except:
+        pass
 
     full_text = ' \n\n '.join(paras)
     
@@ -779,16 +828,39 @@ def scrape_arxiv(url):
     if ('arxiv.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Arxiv webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res,'lxml', features="xml")
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res,'lxml', features="xml")
+    except:
+        soup = BeautifulSoup()
 
-    meta = soup.find_all('meta')
+    try:
+        meta = soup.find_all('meta')
+    except:
+        meta = []
 
-    doi = soup.find(attrs = {'class':"tablecell arxivdoi"}).a.attrs['href']
-    keywords = soup.find(attrs = {'class':"tablecell subjects"}).text.replace('\n', '').split('; ')
+    try:
+        doi = soup.find(attrs = {'class':"tablecell arxivdoi"}).a.attrs['href']
+    except:
+        doi = None
+
+    try:
+        keywords = soup.find(attrs = {'class':"tablecell subjects"}).text.replace('\n', '').split('; ')
+    except:
+        keywords = None
+        
     item_type = 'article'
-    link = soup.find(attrs = {'property':"og:url"}).attrs['content']
-    date = soup.find(attrs = {'class': "dateline"}).text.replace('\n', '').replace('  ', '').replace('[', '').replace(']', '').replace('Submitted on ', '')
+    
+    try:
+        link = soup.find(attrs = {'property':"og:url"}).attrs['content']
+    except:
+        link = None
+        
+    try:
+        date = soup.find(attrs = {'class': "dateline"}).text.replace('\n', '').replace('  ', '').replace('[', '').replace(']', '').replace('Submitted on ', '')
+    except:
+        date = None
+        
     source = 'arxiv'
     publisher = 'arxiv'
     repository = 'arxiv'
@@ -819,34 +891,38 @@ def scrape_arxiv(url):
     try:
         title = title[0]
     except:
-        None
+        pass
     
     try:
         abstract = abstract[0]
     except:
-        None
+        pass
 
-    string_list = soup.find(attrs={'class':'authors'}).find_all('a')
     authors = []
-    for item in string_list:
-        string = str(item).replace('<', ' <').replace('>', '> ').replace('</a> ', '').replace(' <a href="https://arxiv.org/search/cs?searchtype=author&amp;query=', '').strip()
-        string = string.split('> ')[1]
-        authors.append(string)
+    try:
+        string_list = soup.find(attrs={'class':'authors'}).find_all('a')
+    
+        for item in string_list:
+            string = str(item).replace('<', ' <').replace('>', '> ').replace('</a> ', '').replace(' <a href="https://arxiv.org/search/cs?searchtype=author&amp;query=', '').strip()
+            string = string.split('> ')[1]
+            authors.append(string)
+    except:
+        pass
 
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
 
-    result.loc[0, 'title'] = title
-    result.loc[0, 'authors'] = authors
-    result.loc[0, 'date'] = date
-    result.loc[0, 'source'] = source
-    result.loc[0, 'publisher'] = publisher
-    result.loc[0, 'type'] = item_type
-    result.loc[0, 'keywords'] = keywords
-    result.loc[0, 'abstract'] = abstract
-    result.loc[0, 'repository'] = repository
-    result.loc[0, 'doi'] = doi
-    result.loc[0, 'link'] = link
+    result.at[0, 'title'] = title
+    result.at[0, 'authors'] = authors
+    result.at[0, 'date'] = date
+    result.at[0, 'source'] = source
+    result.at[0, 'publisher'] = publisher
+    result.at[0, 'type'] = item_type
+    result.at[0, 'keywords'] = keywords
+    result.at[0, 'abstract'] = abstract
+    result.at[0, 'repository'] = repository
+    result.at[0, 'doi'] = doi
+    result.at[0, 'link'] = link
     
     return result
 
@@ -855,10 +931,16 @@ def scrape_springer(url):
     if ('springer' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Springer webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res,'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res,'lxml')
+    except:
+        soup = BeautifulSoup()
 
-    meta = soup.find_all('meta')
+    try:
+        meta = soup.find_all('meta')
+    except:
+        meta = []
 
     doi = []
     keywords = []
@@ -921,45 +1003,48 @@ def scrape_springer(url):
     try:
         doi = doi[0]
     except:
-        None
+        pass
 
     try:
         keywords = keywords[0]
     except:
-        None
+        pass
 
     try:
         item_type = item_type[0]
     except:
-        None
+        pass
 
     try:
         link = link[0]
     except:
-        None
+        pass
 
     try:
         date = date[0]
     except:
-        None
+        pass
 
     try:
         source = source[0]
     except:
-        None
+        pass
 
     try:
         publisher = publisher[0]
     except:
-        None
+        pass
 
 
     try:
         title = titles[0]
     except:
-        None
-
-    notes = soup.find_all('section')[1].find_all('p')
+        pass
+    
+    try:
+        notes = soup.find_all('section')[1].find_all('p')
+    except:
+        notes = []
 
     refs = []
     citations_data = []
@@ -976,25 +1061,29 @@ def scrape_springer(url):
         except:
             None
 
-    sections = soup.find_all('section')
-    abstract = str(sections[0].find_all('p')).replace('<p>', '').replace('</p>', '').replace('[', '').replace(']', '')
-    
+    try:
+        sections = soup.find_all('section')
+        abstract = str(sections[0].find_all('p')).replace('<p>', '').replace('</p>', '').replace('[', '').replace(']', '')
+    except:
+        sections = []
+        abstract = None
+
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
     
-    result.loc[0, 'title'] = title
-    result.loc[0, 'authors'] = authors
-    result.loc[0, 'date'] = date
-    result.loc[0, 'source'] = source
-    result.loc[0, 'publisher'] = publisher
-    result.loc[0, 'type'] = item_type
-    result.loc[0, 'keywords'] = keywords
-    result.loc[0, 'abstract'] = abstract
-    result.loc[0, 'citations'] = refs
-    result.loc[0, 'citations_data'] = citations_data
-    result.loc[0, 'repository'] = 'Springer'
-    result.loc[0, 'doi'] = doi
-    result.loc[0, 'link'] = link
+    result.at[0, 'title'] = title
+    result.at[0, 'authors'] = authors
+    result.at[0, 'date'] = date
+    result.at[0, 'source'] = source
+    result.at[0, 'publisher'] = publisher
+    result.at[0, 'type'] = item_type
+    result.at[0, 'keywords'] = keywords
+    result.at[0, 'abstract'] = abstract
+    result.at[0, 'citations'] = refs
+    result.at[0, 'citations_data'] = citations_data
+    result.at[0, 'repository'] = 'Springer'
+    result.at[0, 'doi'] = doi
+    result.at[0, 'link'] = link
     
     return result
 
@@ -1009,52 +1098,75 @@ def scrape_nature(url = 'request_input'):
     if ('nature.com' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Nature webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
 
-    all_scripts = soup.find_all('script')
-    for i in all_scripts:
-        if 'type="application/ld+json">{"mainEntity"' in str(i):
-            script_json = str(i).replace('<script type="application/ld+json">', '').replace('</script>', '')
+    try:
+        all_scripts = soup.find_all('script')
+        for i in all_scripts:
+            if 'type="application/ld+json">{"mainEntity"' in str(i):
+                script_json = str(i).replace('<script type="application/ld+json">', '').replace('</script>', '')
+    except:
+        script_json = '{}'
 
-    main = json.loads(script_json)['mainEntity']
+    try:
+        main = json.loads(script_json)['mainEntity']
 
-    title = main['headline']
-    abstract = main['description']
-    date = main['datePublished']
-    doi = main['sameAs']
-    keywords = main['keywords']
-    source = main['isPartOf']['name']
-    publisher = main['publisher']['name']
-    item_type = 'article'
+        title = main['headline']
+        abstract = main['description']
+        date = main['datePublished']
+        doi = main['sameAs']
+        keywords = main['keywords']
+        source = main['isPartOf']['name']
+        publisher = main['publisher']['name']
+        item_type = 'article'
 
-    authors = []
-    for i in main['author']:
-        authors.append(i['name'])
+        authors = []
+        for i in main['author']:
+            authors.append(i['name'])
+    except:
+        title = None
+        abstract = None
+        date = None
+        doi = None
+        keywords = None
+        source = None
+        publisher = None
+        item_type = 'article'
+        authors = None
 
-    for i in soup.find_all('link'):
-        string = str(i)
-        if 'canonical' in string:
-            link = string.replace('<link href="', '').replace('rel="canonical"/>', '').replace('" ', '')
+    try:
+        for i in soup.find_all('link'):
+            string = str(i)
+            if 'canonical' in string:
+                link = string.replace('<link href="', '').replace('rel="canonical"/>', '').replace('" ', '')
+    except:
+        link = None
 
-    meta = soup.find_all('meta')
+    try:
+        meta = soup.find_all('meta')
 
-    citations = []
-    citations_links = []
-    for i in meta:
-        if 'name="citation_reference"/>' in str(i):
-            citation = i['content'].split('; ')
-            cit_dict = {}
-            for i in range(0, len(citation)):
-                if '=' in citation[i]:
-                    pair = citation[i].split('=')
-                    cit_dict[pair[0]] = pair[1]
-                    if pair[0] == 'citation_doi':
-                        citations_links.append(pair[1])
-                else:
-                    cit_dict['item_title'] = citation[i].replace('\n', '').replace('  ', '').replace('   ', '').strip()
-            
-            citations.append(cit_dict)
+        citations = []
+        citations_links = []
+        for i in meta:
+            if 'name="citation_reference"/>' in str(i):
+                citation = i['content'].split('; ')
+                cit_dict = {}
+                for i in range(0, len(citation)):
+                    if '=' in citation[i]:
+                        pair = citation[i].split('=')
+                        cit_dict[pair[0]] = pair[1]
+                        if pair[0] == 'citation_doi':
+                            citations_links.append(pair[1])
+                    else:
+                        cit_dict['item_title'] = citation[i].replace('\n', '').replace('  ', '').replace('   ', '').strip()
+                
+                citations.append(cit_dict)
+    except:
+        citations = None
     
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
@@ -1083,10 +1195,16 @@ def scrape_ieee(url):
     if ('ieee.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for an IEEE webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
 
-    meta = soup.find_all('meta')
+    try:
+        meta = soup.find_all('meta')
+    except:
+        meta = []
 
     item_type = 'article'
     link = []
@@ -1138,32 +1256,32 @@ def scrape_ieee(url):
     try:
         link = link[0]
     except:
-        None
+        pass
 
     try:
         date = date[0]
     except:
-        None
+        pass
 
     try:
         source = source[0]
     except:
-        None
+        pass
 
     try:
         descriptions = descriptions[0]
     except:
-        None     
+        pass     
         
     try:
         abstract = abstract[0]
     except:
-        None
+        pass
 
     try:
         title = titles[0]
     except:
-        None
+        pass
 
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
@@ -1189,35 +1307,77 @@ def scrape_pubmed(url):
     if ('pubmed.ncbi.' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a PubMed webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
 
-    meta = soup.find_all('meta')
+    try:
+        meta = soup.find_all('meta')
+    except:
+        meta = []
 
-    doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
+    try:
+        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
+    except:
+        doi = None
     item_type = 'article'
-    link = soup.find(attrs={'rel':'canonical'}).attrs['href']
-    date = soup.find(attrs={'name':'citation_date'}).attrs['content']
-    source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content']
-    publisher = soup.find(attrs={'name':'citation_publisher'}).attrs['content']
+    
+    try:
+        link = soup.find(attrs={'rel':'canonical'}).attrs['href']
+    except:
+        link = None
+    try:
+        date = soup.find(attrs={'name':'citation_date'}).attrs['content']
+    except:
+        date = None
+    try:
+        source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content']
+    except:
+        source = None
+    try:
+        publisher = soup.find(attrs={'name':'citation_publisher'}).attrs['content']
+    except:
+        publisher = None
     repository = 'PubMed'
-    title = soup.find(attrs={'name':'citation_title'}).attrs['content']
-    description = soup.find(attrs={'name':'description'}).attrs['content']
-    abstract = soup.find(attrs={'class':"abstract-content selected"}).text.replace('\n', '').replace('  ', '').replace('   ', '')
-    authors = soup.find(attrs={'name':'citation_authors'}).attrs['content'].split(';')
+    try:
+        title = soup.find(attrs={'name':'citation_title'}).attrs['content']
+    except:
+        title = None
+    try:
+        description = soup.find(attrs={'name':'description'}).attrs['content']
+    except:
+        description = None
+    try:
+        abstract = soup.find(attrs={'class':"abstract-content selected"}).text.replace('\n', '').replace('  ', '').replace('   ', '')
+    except:
+        abstract = None
+    try:
+        authors = soup.find(attrs={'name':'citation_authors'}).attrs['content'].split(';')
+    except:
+        authors = None
     
     citations = []
     citations_data = []
-    refs = soup.find_all(attrs={'class':'references-and-notes-list'})
+
+    try:
+        refs = soup.find_all(attrs={'class':'references-and-notes-list'})
+    except:
+        refs = []
+
     for citation in refs:
         citations.append(citation.text.replace('\n', '').replace('   ', '').replace('  ', '').replace(' .', '.').strip())
         citations_data.append(citation.li.a.attrs['href'])
     
-    for i in soup.find_all('p'):
-        if 'keywords' in str(i).lower():
-            keywords = i.text.replace('\n', '').replace('  ', '').replace('   ', '').replace('Keywords:', '').replace('.', '').split('; ')
-        else:
-            keywords = []
+    keywords = []
+    try:
+        for i in soup.find_all('p'):
+            if 'keywords' in str(i).lower():
+                keywords = i.text.replace('\n', '').replace('  ', '').replace('   ', '').replace('Keywords:', '').replace('.', '').split('; ')
+    except:
+        pass
+                
     
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
@@ -1247,38 +1407,87 @@ def scrape_pmc(url):
     if ('gov/pmc' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a PubMedCentral webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
 
-    doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
-    item_type = soup.find(attrs={'property':'og:type'}).attrs['content']
-    link = soup.find(attrs={'rel':'canonical'}).attrs['href']
-    date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
-    source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content']
-    publisher = soup.find(attrs={'name':'DC.Publisher'}).attrs['content']
+    
+    try:
+        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
+    except:
+        doi = None
+    try:
+        item_type = soup.find(attrs={'property':'og:type'}).attrs['content']
+    except:
+        item_type = None
+    try:
+        link = soup.find(attrs={'rel':'canonical'}).attrs['href']
+    except:
+        link = None
+    try:
+        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
+    except:
+        date = None
+    try:
+        source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content']
+    except:
+        source = None
+    try:
+        publisher = soup.find(attrs={'name':'DC.Publisher'}).attrs['content']
+    except:
+        publisher = None
     repository = 'PubMedCentral'
-    title = soup.find(attrs={'name':'citation_title'}).attrs['content']
-    description = soup.find(attrs={'property':'og:description'}).attrs['content']
-    keywords = soup.find(attrs={'class':"kwd-text"}).text
-    abstract = soup.find(attrs={'class':"p p-first-last"}).text
-   
+    try:
+        title = soup.find(attrs={'name':'citation_title'}).attrs['content']
+    except:
+        title = None
+    try:
+        description = soup.find(attrs={'property':'og:description'}).attrs['content']
+    except:
+        description = None
+    try:
+        keywords = soup.find(attrs={'class':"kwd-text"}).text
+    except:
+        keywords = None
+    try:
+        abstract = soup.find(attrs={'class':"p p-first-last"}).text
+    except:
+        abstract = None
+    
     authors = []
-    for author in soup.find_all(attrs={'name':'citation_author'}):
-        authors.append(author.attrs['content'])
+    try:
+        for author in soup.find_all(attrs={'name':'citation_author'}):
+            authors.append(author.attrs['content'])
+    except:
+        pass
     
     citations = []
     citations_data = []
-    refs = soup.find(attrs={'class':"ref-list-sec"})
+
+    refs = []
+    try:
+        refs = soup.find(attrs={'class':"ref-list-sec"})
+    except:
+        pass
+
     for i in refs:
         citations.append(i.text.replace('\n', '').replace('..', '.').replace('  ', '').replace('   ', '').replace('[PubMed]', '').replace('[Google Scholar]', '').replace('[PMC free article]', ''))
 
-    for i in refs.find_all(attrs={'target':"_blank"}):
-        citations_data.append(i.attrs['href'])
+    try:
+        for i in refs.find_all(attrs={'target':"_blank"}):
+            citations_data.append(i.attrs['href'])
+    except:
+        pass
     
     full_text = []
-    for i in soup.find_all('p'):
-        if 'class="p p-' in str(i):
-            full_text.append(i.text.replace('\n', '').replace('  ', '').replace('   ', ''))
+    try:
+        for i in soup.find_all('p'):
+            if 'class="p p-' in str(i):
+                full_text.append(i.text.replace('\n', '').replace('  ', '').replace('   ', ''))
+    except:
+        pass
 
     full_text = '\n\n'.join(full_text)
     
@@ -1314,8 +1523,11 @@ def scrape_ssrn(url = 'request_input'):
     if ('ssrn.com' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for an SSRN webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
 
     try:
         doi = soup.find(attrs={'name':'citation_doi'}).text
@@ -1329,18 +1541,39 @@ def scrape_ssrn(url = 'request_input'):
     except:
         link = None
     
-    date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
-    source = soup.find(attrs={'class': 'btn-link'}).text
+    try:
+        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
+    except:
+        date = None
+    try:
+        source = soup.find(attrs={'class': 'btn-link'}).text
+    except:
+        source = None
     publisher = 'SSRN'
     repository = 'SSRN'
-    title = soup.find(attrs={'name': 'citation_title'}).attrs['content']
-    description = soup.find(attrs={'name': 'description'}).attrs['content']
-    keywords = soup.find(attrs={'name': 'citation_keywords'}).attrs['content']
-    abstract = soup.find(attrs={'class':'abstract-text'}).p.text
-   
+    try:
+        title = soup.find(attrs={'name': 'citation_title'}).attrs['content']
+    except:
+        title = None
+    try:
+        description = soup.find(attrs={'name': 'description'}).attrs['content']
+    except:
+        description = None
+    try:
+        keywords = soup.find(attrs={'name': 'citation_keywords'}).attrs['content']
+    except:
+        keywords = None
+    try:
+        abstract = soup.find(attrs={'class':'abstract-text'}).p.text
+    except:
+        abstract = None
+    
     authors = []
-    for author in soup.find_all(attrs={'name':'citation_author'}):
-        authors.append(author.attrs['content'])
+    try:
+        for author in soup.find_all(attrs={'name':'citation_author'}):
+            authors.append(author.attrs['content'])
+    except:
+        pass
     
     
     global results_cols
@@ -1369,17 +1602,33 @@ def scrape_heinonline(url):
     if ('heinonline.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a HeinOnline webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
     
     item_type = 'article'
     repository = 'HeinOnline'
-    title = soup.find(attrs={'class':'cite_title'}).text.strip()
-    description = soup.find(attrs={'name': 'description'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip()
-    keywords = soup.find(attrs={'name': 'keywords'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip()
-   
-    author_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').strip()
 
+    try:
+        title = soup.find(attrs={'class':'cite_title'}).text.strip()
+    except:
+        title = None
+    try:
+        description = soup.find(attrs={'name': 'description'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip()
+    except:
+        description = None
+    try:
+        keywords = soup.find(attrs={'name': 'keywords'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip()
+    except:
+        keywords = None
+    try:
+        author_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').strip()
+    except:
+        author_res = ''
+    
+    auths_to_clean = ''
     for i in author_res.split('_'):
             if '.au' in i:
                 auths_to_clean = i
@@ -1391,7 +1640,10 @@ def scrape_heinonline(url):
         if 'au ' in auth:
             authors.append(auth.replace('au','').replace('  ','').strip())
     
-    date_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').split('.')
+    try:
+        date_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').split('.')
+    except:
+        date_res = []
 
     for i in date_res:
         if 'date' in i:
@@ -1422,47 +1674,77 @@ def scrape_mdpi(url):
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
         soup = BeautifulSoup(res, 'lxml')
-    
-        doi = soup.find(attrs={'name':'citation_doi'}).text
-        item_type = 'article'
-        link = url
-        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
-        source = soup.find(attrs={'name': 'dc.source'}).attrs['content']
-        publisher = soup.find(attrs={'name': 'dc.publisher'}).attrs['content']
-        repository = 'PNAS'
-        title = soup.find(attrs={'name': 'title'}).attrs['content']
-        description = soup.find(attrs={'name': 'description'}).attrs['content']
-        abstract = soup.find(attrs={'name': 'description'}).attrs['content']
+    except:
+        soup = BeautifulSoup()
 
-        authors = []
+    try:
+        doi = soup.find(attrs={'name':'citation_doi'}).text
+    except:
+        doi = None
+    
+    item_type = 'article'
+    link = url
+
+    try:
+        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
+    except:
+        date = None
+    try:
+        source = soup.find(attrs={'name': 'dc.source'}).attrs['content']
+    except:
+        source = None
+    try:
+        publisher = soup.find(attrs={'name': 'dc.publisher'}).attrs['content']
+    except:
+        publisher = None
+    
+    repository = 'PNAS'
+
+    try:
+        title = soup.find(attrs={'name': 'title'}).attrs['content']
+    except:
+        title = None
+    try:
+        description = soup.find(attrs={'name': 'description'}).attrs['content']
+    except:
+        description = None
+    try:
+        abstract = soup.find(attrs={'name': 'description'}).attrs['content']
+    except:
+        abstract = None
+    
+    authors = []
+    try:
         for author in soup.find_all(attrs={'name':'dc.creator'}):
             authors.append(author.attrs['content'])
+    except:
+        pass
 
-        keywords = []
+    keywords = []
+    try:
         for term in soup.find_all(attrs={'name':'dc.subject'}):
             keywords.append(term.attrs['content'])
-
-
-        global results_cols
-        result = pd.DataFrame(columns = results_cols, dtype=object)
-
-        result.loc[0, 'title'] = title
-        result.loc[0, 'authors'] = authors
-        result.loc[0, 'date'] = date
-        result.loc[0, 'source'] = source
-        result.loc[0, 'publisher'] = publisher
-        result.loc[0, 'type'] = item_type
-        result.loc[0, 'keywords'] = keywords
-        result.loc[0, 'abstract'] = abstract
-        result.loc[0, 'description'] = description
-        result.loc[0, 'repository'] = repository
-        result.loc[0, 'doi'] = doi
-        result.loc[0, 'link'] = link
-
-        return result
-
     except:
-        None
+        pass
+
+
+    global results_cols
+    result = pd.DataFrame(columns = results_cols, dtype=object)
+
+    result.loc[0, 'title'] = title
+    result.loc[0, 'authors'] = authors
+    result.loc[0, 'date'] = date
+    result.loc[0, 'source'] = source
+    result.loc[0, 'publisher'] = publisher
+    result.loc[0, 'type'] = item_type
+    result.loc[0, 'keywords'] = keywords
+    result.loc[0, 'abstract'] = abstract
+    result.loc[0, 'description'] = description
+    result.loc[0, 'repository'] = repository
+    result.loc[0, 'doi'] = doi
+    result.loc[0, 'link'] = link
+
+    return result
 
 def scrape_acm(url = 'request_input'):
 
@@ -1475,18 +1757,41 @@ def scrape_acm(url = 'request_input'):
     if ('acm.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for an ACM webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
-    soup = BeautifulSoup(res, 'lxml')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+        soup = BeautifulSoup(res, 'lxml')
+    except:
+        soup = BeautifulSoup()
     
     item_type = 'article'
-    link = soup.find(attrs={'property':'og:url'}).attrs['content']
-    doi = link.replace('https://dl.acm.org/', '')
-    date = soup.find(attrs={'class':"rlist article-chapter-history-list"}).text.replace('Published: ', '')
-    source = soup.find(attrs={'class':"epub-section__title"}).text
+    try:
+        link = soup.find(attrs={'property':'og:url'}).attrs['content']
+    except:
+        link = None
+    try:
+        doi = link.replace('https://dl.acm.org/', '')
+    except:
+        doi = None
+    try:
+        date = soup.find(attrs={'class':"rlist article-chapter-history-list"}).text.replace('Published: ', '')
+    except:
+        date = None
+    try:
+        source = soup.find(attrs={'class':"epub-section__title"}).text
+    except:
+        source = None
+     
     publisher = 'ACM'
     repository = 'ACM'
-    title = soup.find(attrs={'property':'og:title'}).attrs['content']
-    abstract = soup.find(attrs={'class':"abstractSection abstractInFull"}).p.text.strip()
+
+    try:
+        title = soup.find(attrs={'property':'og:title'}).attrs['content']
+    except:
+        title = None
+    try:
+        abstract = soup.find(attrs={'class':"abstractSection abstractInFull"}).p.text.strip()
+    except:
+        abstract = None
     
     keywords = []
     try:
@@ -1495,7 +1800,7 @@ def scrape_acm(url = 'request_input'):
         for i in chart_terms:
             keywords.append(i.text)
     except:
-        None
+        pass
 
     authors = []
     try:
@@ -1503,7 +1808,7 @@ def scrape_acm(url = 'request_input'):
         for i in names_txt:
             authors.append(i.attrs['title'])
     except:
-        None
+        pass
     
     citations = []
     try:
@@ -1513,7 +1818,7 @@ def scrape_acm(url = 'request_input'):
             citations.append(i.text.replace('Google Scholar', '').replace('Cross Ref', '').replace('Digital Library', ''))
             citations_data.append(i.find(attrs={'class':'references__suffix'}).a.attrs['href'])
     except:
-        None
+        pass
     
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
@@ -1542,7 +1847,10 @@ def parse_muse_from_source(source = 'request_input', link = None):
     if type(source) != str:
         raise TypeError('Source must be a string')
 
-    soup = BeautifulSoup(source,'lxml')
+    try:
+        soup = BeautifulSoup(source,'lxml')
+    except:
+        soup = BeautifulSoup()
     
     try:
         authors_html = soup.find_all(attrs={'name':'citation_author'})
@@ -1677,7 +1985,10 @@ def scrape_muse(url = 'request_input'):
     if ('muse.jhu.edu' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Project MUSE webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+    except:
+        res = ''
     
     result = parse_muse_from_source(source = res, link = url)
     
@@ -1736,9 +2047,17 @@ def parse_proquest_from_source(source, link = None):
     date = metadata['year']
     source = metadata['pubTitle']
     repository = 'ProQuest'
-    title = soup.find(attrs={'id':'documentTitle'}).text
 
-    auths_txt = soup.find(attrs={'class':"truncatedAuthor"}).text.replace('\xa0', '').replace('\\u', ' ').replace('\n', '')
+    try:
+        title = soup.find(attrs={'id':'documentTitle'}).text
+    except:
+        title = None
+
+    try:
+        auths_txt = soup.find(attrs={'class':"truncatedAuthor"}).text.replace('\xa0', '').replace('\\u', ' ').replace('\n', '')
+    except:
+        auths_txt = ''
+
     authors = auths_txt.split('.')[0].split(';')
     
     try:
@@ -1792,11 +2111,10 @@ def parse_proquest_from_source(source, link = None):
             abstract = None
             main_body = None
     
-    try:
+    if (type(main_body) == str) and (type(abstract) == str):
         main_body = main_body.replace('ABSTRACT', '').replace('Abstract', '').strip().strip('.')
         abstract = abstract.replace('ABSTRACT', '').replace('Abstract', '').strip().strip('.')
-    except:
-        None
+
     
     global results_cols
     result = pd.DataFrame(columns = results_cols, dtype=object)
@@ -1827,7 +2145,11 @@ def scrape_proquest(url = 'request_input'):
     if ('proquest.com' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a ProQuest webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+    except:
+        res = ''
+    
     result = parse_proquest_from_source(source = res, link = url)
     
     return result
@@ -1851,8 +2173,10 @@ def parse_jstor_from_source(source = 'request_input', link = None):
         ):
         raise ValueError('The web browser seems to have been blocked by a bot detection system')
                
-    
-    soup = BeautifulSoup(source,'lxml')
+    try:
+        soup = BeautifulSoup(source,'lxml')
+    except:
+        soup = BeautifulSoup()
     
     repository = 'JSTOR'
     
@@ -1963,7 +2287,11 @@ def scrape_jstor(url = 'request_input'):
     if ('jstor.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a JSTOR webpage')
     
-    res = scrape_url(url = url, parse_pdf = False, output = 'html')
+    try:
+        res = scrape_url(url = url, parse_pdf = False, output = 'html')
+    except:
+        res = ''
+
     result = parse_jstor_from_source(source = res, link = url)
     
     return result
@@ -1976,9 +2304,15 @@ def parse_google_scholar_source(source = 'request_input'):
     if type(source) != str:
         raise TypeError('Query must be a string')
     
-    soup=BeautifulSoup(source,'lxml')
+    try:
+        soup=BeautifulSoup(source,'lxml')
+    except:
+        soup = BeautifulSoup()
     
-    data_lids = soup.select('[data-lid]')
+    try:
+        data_lids = soup.select('[data-lid]')
+    except:
+        data_lids = []
     
     global results_cols
     df = pd.DataFrame(columns = results_cols, dtype=object)
@@ -1989,10 +2323,19 @@ def parse_google_scholar_source(source = 'request_input'):
         
         try:
             df.loc[index, 'title'] = item.select('h3')[0].get_text()
+        except:
+            df.loc[index, 'title'] = None
+        try:
             df.loc[index, 'link'] = item.select('a')[0]['href']
+        except:
+            df.loc[index, 'link'] = None
+        try:
             df.loc[index, 'extract'] = item.select('.gs_rs')[0].get_text()
+        except:
+            df.loc[index, 'extract'] = None
             
-            author_list = []
+        author_list = []
+        try:
             selected = item.select('a')
             
             for entry in selected:
@@ -2025,21 +2368,23 @@ def parse_google_scholar_source(source = 'request_input'):
                     and (entry_text != 'Library Search')
                     ):
                         author_list.append(entry_text)
+        except:
+            pass
+        
+        df.loc[index, 'authors'] = author_list
             
-            df.loc[index, 'authors'] = author_list
-            
-            if ((df.loc[index, 'title'] == np.nan) or (df.loc[index, 'title'] == None)) and ('books.google' in df.loc[index, 'link']):
+        if ((df.loc[index, 'title'] == np.nan) or (df.loc[index, 'title'] == None)) and ('books.google' in df.loc[index, 'link']):
 
+            try:
                 link = df.loc[index, 'link']
                 gbooks_response = scrape_url(url = link)
                 title=BeautifulSoup(gbooks_response.content,'html').select('title')[0].get_text()
                 df.loc[index, 'title'] = title
-            
+            except:
+                df.loc[index, 'title'] = None
                 
             
-        except Exception as e:
-            print('')
-    
+
     df = df.replace(np.nan, None)
     df['title'] = df['title'].str.replace('[PDF]', '').str.replace('[BOOK]', '').str.replace('[B]', '').str.replace('[HTML]', '')
     df['authors'] = df['authors'].apply(join_list_by_colon).str.replace('cached', '').str.replace('full View', '')
