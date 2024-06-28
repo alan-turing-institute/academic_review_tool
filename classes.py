@@ -296,7 +296,7 @@ class Results(pd.DataFrame):
                     work_id = generate_work_id(dataframe.loc[i])
                     work_id = self.get_unique_id(work_id, i)
                     self.loc[index, 'work_id'] = work_id
-                    
+
                 index += 1
         
         if format_authors == True:
@@ -858,7 +858,7 @@ class Results(pd.DataFrame):
         return self
     
 
-    def crawl_stored_citations(self, max_depth=2, processing_limit=100, update_from_doi = False):
+    def crawl_stored_citations(self, max_depth=2, processing_limit=100, format_authors = True, update_from_doi = False):
 
         iteration = 1
         processed_indexes = []
@@ -912,12 +912,16 @@ class Results(pd.DataFrame):
             iteration += 1
             
         final_len_diff = len(self) - original_len
-        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n')
+        
 
-        # df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
-        # self = Results.from_dataframe(df)
-        # self.update_work_ids()
-        # self.format_authors()
+        self.update_work_ids()
+        df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
+        self = Results.from_dataframe(df)
+        
+        if format_authors == True:
+            self.format_authors()
+        
+        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n')
         
         return 
 
