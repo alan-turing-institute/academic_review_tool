@@ -6,7 +6,7 @@ from .importers.jstor import import_jstor_metadata, import_jstor_full
 from .importers.crossref import items_to_df, references_to_df, search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from .importers.orcid import lookup_orcid
 from .datasets import stopwords
-from .internet.scrapers import scrape_url, scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search, can_scrape
+from .internet.scrapers import get_final_url, scrape_url, scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search, can_scrape
 from .internet.crawlers import is_external_link, check_crawl_permission, check_bad_url, append_domain, correct_link_errors
 from .internet.crawlers import correct_seed_errors as correct_seed_url_errors
 from .internet.webanalysis import correct_url, get_domain
@@ -2600,15 +2600,15 @@ def excluded_keywords_test(text, excluded_keywords, case_sensitive):
 
 def citation_crawler_site_test(url: str):
 
-    result = False
+    final_url = get_final_url(url)
 
     global can_scrape
 
     for i in can_scrape:
-        if i in url:
-            result = True
+        if i in final_url:
+            return True
     
-    return result
+    return False
 
 def citation_crawler_scraper(entry, be_polite = True):
     
