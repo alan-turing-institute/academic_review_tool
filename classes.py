@@ -2535,6 +2535,8 @@ def citation_crawler_engine(
     crawled_entries = []
     iteration = 1
     
+    added_in_cycle = 0
+    processed_in_cycle = 0
     depth_marker = len(data)
     depth = 1
 
@@ -2573,7 +2575,6 @@ def citation_crawler_engine(
         # Formatting entry citations data
         refs = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False)
         entry.at['citations'] = refs
-        refs_len = len(refs)
 
         # Formatting entry authors data
         entry.at['authors'] = format_authors(entry['authors']) # type: ignore
@@ -2588,6 +2589,9 @@ def citation_crawler_engine(
         new_len = len(data)
         new_indexes = list(range(old_len, new_len))
 
+        added_in_cycle = added_in_cycle + len(refs_df)
+
+
         for i in new_indexes:
             priority_score = 0.0001
             to_crawl.put((priority_score, i))
@@ -2597,14 +2601,20 @@ def citation_crawler_engine(
         time.sleep(rate_limit) 
         
         # Displaying status to user
-        print(f'\nCrawl iteration {iteration}: {refs_len} results added')
 
         if iteration > depth_marker:
+            
+            print(f'\nCrawl iteration {depth}:\n    - Entries processed: {processed_in_cycle}\n    - Results added: {added_in_cycle}')
+
             depth += 1
+            added_in_cycle = 0
+            processed_in_cycle = 0
             depth_marker = len(data)
+            
 
         # Incrementing iteration count
         iteration += 1
+        processed_in_cycle += 1
 
     return data
 
