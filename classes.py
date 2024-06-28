@@ -806,8 +806,6 @@ class Results(pd.DataFrame):
 
             print(message)
 
-            self.format_citations()
-
             indices = unformatted.index
             for i in indices:
                 refs = extract_references(self.loc[i, 'citations_data'])
