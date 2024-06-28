@@ -207,7 +207,6 @@ def check_bad_url(url: str = 'request_input') -> bool:
         
         return True
     
-
 def append_domain(url: str, domain: str) -> str:
     
     """
@@ -248,9 +247,6 @@ def append_domain(url: str, domain: str) -> str:
         else:
             raise ValueError('URL may not be a valid domain')
         
-        
-        
-
 def crawl_site(url: str = 'request_input', max_seen_urls: int = 10, max_known_urls: int = 100000) -> list:
     
     """
@@ -292,7 +288,7 @@ def crawl_site(url: str = 'request_input', max_seen_urls: int = 10, max_known_ur
     
     return total_urls
 
-def correct_link_errors(url: str, source_domain: str = None) -> str:
+def correct_link_errors(url: str, source_domain = None) -> str:
     
     """Checks for errors in a link and corrects them. Returns a corrected link as a string.
     
@@ -336,8 +332,6 @@ def correct_link_errors(url: str, source_domain: str = None) -> str:
             url = correct_url(url)
     
     return url
-
-
 
 def correct_seed_errors(url: str) -> str:
     

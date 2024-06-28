@@ -7,15 +7,22 @@ from .importers.crossref import items_to_df, references_to_df, search_works, loo
 from .importers.orcid import lookup_orcid
 from .datasets import stopwords
 from .internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
+from .internet.crawlers import is_external_link, check_crawl_permission, check_bad_url, append_domain, correct_link_errors, correct_seed_errors
+from .internet.webanalysis import correct_url, get_domain
 
 import copy
 from datetime import datetime
 import pickle
 from pathlib import Path
+import requests
+import queue
+import time
+import random
 
 import pandas as pd
 import numpy as np
 from nltk.tokenize import word_tokenize # type: ignore
+from courlan import clean_url, scrub_url
 
 class Properties:
     
@@ -2286,6 +2293,728 @@ class Review:
 
         if format_authors == True:
             self.format_authors()
+
+    def crawl_citations(
+            self,
+            crawl_limit: int = 5, 
+            excluded_url_terms: str = 'default',
+            required_keywords: bool = None, 
+            excluded_keywords: bool = None, 
+            case_sensitive: bool = False,
+            ignore_urls: list = None, 
+            ignore_domains: list = 'default',
+            be_polite: bool = True,
+            full: bool = True,
+            add_to_results = True
+            ):
+    
+        """
+        Crawls a Result's object's entries, their citations, and so on.
+        
+        The crawler iterates through queue of works; extracts their citations; runs checks to validate each reference;
+        based on these, selects a source to retrieve data from: 
+            (a) if has a valid DOI: Crossref API.
+            (b) if no valid DOI: bespoke web scraping for specific academic websites.
+            (c) else if a link is present: general web scraping.
+        
+        Retrieves data and adds the entries to the dataframe. 
+
+        Iterates through each set of added entries.
+        
+        Parameters
+        ---------- 
+        seeds : str or list 
+            one or more URLs from which to crawl.
+        crawl_limit : int 
+            how many URLs the crawler should visit before it stops.
+        excluded_url_terms : list 
+            list of strings; link will be ignored if it contains any string in list.
+        required_keywords : list 
+            list of keywords which sites must contain to be crawled.
+        excluded_keywords : list 
+            list of keywords which sites must *not* contain to be crawled.
+        case_sensitive : bool 
+            whether or not to ignore string characters' case.
+        ignore_urls : list 
+            list of URLs to ignore.
+        ignore_domains : list 
+            list of domains to ignore.
+        be_polite : bool 
+            whether respect websites' permissions for crawlers.
+        full : bool 
+            whether to run a full scrape on each site. This takes longer.
+        output_as : str 
+            the format to output results in. Defaults to a pandas.DataFrame.
+        
+        
+        Returns
+        -------
+        result : object 
+            an object containing the results of a crawl.
+        """
+
+
+
+
+def select_crawled_links(
+                        iteration: int,
+                         source_domain: str, 
+                         link_elements, 
+                         urls: queue, 
+                         crawled_entries: list, 
+                         ignore_urls: list, 
+                         ignore_domains: list,
+                         excluded_url_terms: list
+                        ) -> tuple:
+    
+    """
+    Selects links to crawl from set of crawler scraper results. To be used by web crawler. Returns a tuple containing links and URLs.
+    
+    Parameters
+    ---------- 
+    iteration : int 
+        how many iterations the crawler engine has run.
+    source_domain : str 
+        domain of URL currently being crawled.
+    link_elements : list
+        iterable containing URL's links as HTML elements.
+    urls : queue 
+        ordered queue of URLs to be crawled.
+    crawled_entries : list 
+        list of URLs already visited.
+    ignore_urls : list 
+        list of URLs to ignore.
+    ignore_domains : 
+        list list of domains to ignore.
+    excluded_url_terms : list 
+        list of strings; link will be ignored if it contains any string in list.
+
+    Returns
+    -------
+    result : tuple 
+        a tuple containing the updated URLs queue and any new links found.
+    """
+    
+    # Initialising links list
+    links = []
+    
+    # Iterating through link lements to extract links
+    for link_element in link_elements:
+        
+        # Cleaning link elements
+        url = link_element
+        url = url.strip('/').strip('.').strip().lower()
+        
+        try:
+            url = correct_link_errors(url = url, source_domain = source_domain)
+        except:
+            pass
+
+        try:
+            domain = get_domain(url)
+        except:
+            domain = ''
+        
+        # Appending link to list of links found
+        links.append(url)
+        
+        # Checking if the URL does not include an excluded term
+        exclude_test = False
+        for term in excluded_url_terms:
+            term = term.lower()
+            url_check = url.lower()
+                
+            if (term in url_check) == True:
+                exclude_test = True
+        
+        # If the URL does not an excluded term, selects link to be added to queue
+        if exclude_test != True:
+            
+            # Proceeds if the URL is not included in the ignore list
+            if (
+                (url != None) 
+                and (url not in ignore_urls) 
+                and (
+                    (domain != '') 
+                    and (domain not in ignore_domains)
+                    )
+
+            ):
+                # Creating variations on URL to check if already visited
+                no_http = url.replace('https://', '').replace('http://', '')
+                www_added = 'www.'+ no_http
+                www_https_added = 'https://' + www_added
+                www_removed = no_http.replace('www', '')
+                www_removed_https_added = 'https://' + www_removed
+                
+                # Proceeds if URL or a variation on it has not been visited already
+                if (
+                    (url not in crawled_entries) 
+                    and (no_http not in crawled_entries)
+                    and (www_added not in crawled_entries)
+                    and (www_https_added not in crawled_entries)
+                    and (www_removed not in crawled_entries)
+                    and (www_removed_https_added not in crawled_entries)
+                    and (url not in [item[1] for item in urls.queue])
+                ):
+                    
+                    # Setting default priority score as the current crawler's iteration number. 
+                    # This queues them in order of crawl depth.
+                    priority_score = iteration
+                    
+                    # Incrementing priority score to queue links in order of discovery.
+                    # Increment is very small to ensure 
+                    # that the depth-first ranking of discovered links is not overriden.
+                    priority_score += 0.001
+                    
+                    # Prioritising shorter urls. Uses the normalised string length of the url, 
+                    # where length of 0 -> 0 and an infinite length -> 0.1
+                    
+                    url_len = len(url)
+                    normalised_len = map_inf_to_1(url_len) / 10
+                    priority_score += normalised_len
+                    
+                    # Adding link to URLs queue with assigned priority score
+                    urls.put((priority_score, url))
+
+    return (urls, links)
+
+def excluded_term_test(current_index: str, excluded_url_terms: list, case_sensitive: bool) -> bool:
+    
+    """
+    Checks if URL contains terms to be excluded. To be used by web crawler.
+    
+    Parameters
+    ---------- 
+    current_index : str 
+        link to check.
+    excluded_url_terms : list 
+        list of strings to check for.
+    case_sensitive : bool 
+        whether to be case sensitive when checking for terms.
+    
+    Returns
+    -------
+    result : bool 
+        True if the URL contains a term in excluded_url_terms list.
+    """
+    
+    # Initialising output variable; defaulting to False
+    excluded_term_test = False
+    
+    # Iterating through excluded terms to check in URL
+    for term in excluded_url_terms:
+            
+            # If instructed to not be case sensitive, turning all strings to lowercase
+            if case_sensitive == False:
+                term = term.lower()
+                url_check = str(current_index.lower())
+            
+            # Returning True if term is found
+            if (term in url_check) == True:
+                return True
+        
+
+def required_keywords_test(text, required_keywords, case_sensitive):
+    
+    """
+    Checks if text contains a set of required keywords. Returns True if it does. To be used by web crawler.
+    
+    Parameters
+    ---------- 
+    text : str 
+        text to check.
+    required_keywords : list 
+        list of strings to check for.
+    case_sensitive : bool 
+        whether to be case sensitive when checking for terms.
+    
+    Returns
+    -------
+    result : bool 
+        True if the text contains a term in required_keywords list.
+    """
+    
+    # Initialising output variable; defaulting to True
+    result = True
+    
+    # Iterating through required terms to check in text
+    for required_word in required_keywords:
+            
+            # Checking for None types; changing to empty string to avoid errors
+            if text == None:
+                    text = ''
+            
+            # If instructed to not be case sensitive, turning all strings to lowercase
+            if case_sensitive == False:
+                required_word = required_word.lower()
+                text = text.lower()
+            
+            # Returning False if term is *not* found
+            if required_word not in text:
+                result = False
+    
+    return result
+
+def excluded_keywords_test(text, excluded_keywords, case_sensitive):
+    
+    """
+    Checks if text contains a set of excluded keywords. Returns True if it does not. To be used by web crawler.
+    
+    Parameters
+    ---------- 
+    text : str 
+        text to check.
+    excluded_keywords : list 
+        list of strings to check for.
+    case_sensitive : bool 
+        whether to be case sensitive when checking for terms.
+    
+    Returns
+    -------
+    result : bool 
+        True if the text contains a term in excluded_keywords list.
+    """
+    
+    # Initialising output variable; defaulting to True
+    result = True
+    
+    # Iterating through excluded terms to check in text
+    for excluded_word in excluded_keywords:
+            
+            # Checking for None types; changing to empty string to avoid errors
+            if text == None:
+                    text = ''
+            
+            # If instructed to not be case sensitive, turning all strings to lowercase
+            if case_sensitive == False:
+                excluded_word = excluded_word.lower()
+                text = text.lower()
+            
+            # Returning False if term is found
+            if excluded_word in text:
+                result = False
+    
+    return result
+
+def citation_crawler_scraper(entry):
+
+
+        # Checking if URL is bad. If True, tries to correct it.
+        if check_bad_url('current_index') == True:
+            current_index = correct_seed_errors(current_index)
+        
+        # If be_polite is True, checks if crawler has permission to crawl/scrape URL
+        if be_polite == True:
+            try:
+                # If the crawler does not have permission, skips URL
+                if check_crawl_permission(current_index) == False:
+                    continue
+            except:
+                pass
+        
+        # Initialising result variable
+        crawl_res = None
+        
+        # Trying to scrape URL
+        try:
+            
+            # Scraping URL and retrieving links
+            crawl_res = crawler_scraper(current_index, full)
+            scraped_links = crawl_res[2]
+            
+            # Appending results to result dictionary
+            output_dict[current_index] = crawl_res[1]
+            
+            # Retrieving domain
+            domain = get_domain(current_index)
+        
+        # If scrape fails, sets current_index to None
+        except:
+            # Appending results to result dictionary
+            output_dict[current_index] = crawl_res
+            continue
+        
+        # Extracting raw text from site scrape result
+        if type(crawl_res) == tuple:
+            text = crawl_res[1]['raw_text']
+        
+        elif crawl_res == None:
+            text = ''
+    
+def citation_crawler_doi_retriver(entry: pd.Series, timeout = 60):
+
+    doi = entry['doi']
+
+    res_df = lookup_doi(doi, timeout=timeout)
+
+    if len(res_df) > 0:
+        res_series = res_df.loc[0]
+        for i in res_series.index:
+            entry[i] = res_series[i]
+
+    return entry
+
+
+def citation_crawler_data_retriever(entry):
+
+    doi = entry['doi']
+    link = entry['link']
+
+    if (doi != None) and (doi != 'None') and (doi != ''):
+        return citation_crawler_doi_retriver(entry)
+
+    else:
+        if (link != None) and (type(link) == str) and ('doi.org' in link):
+            doi = link.replace('https://', '').replace('http://', '').replace('dx.', '').replace('doi.org/', '')
+            return citation_crawler_doi_retriver(entry)
+        
+        else:
+            if link != None:
+                
+                if type(link) == dict:
+                    link = list(link.values())
+
+                if type(link) == list:
+                    link = link[0]
+                
+                if type(link) == str:
+                    return citation_crawler_scraper(entry)
+            
+            else:
+                return entry
+
+def crawler_engine(
+                    to_crawl,
+                    data,
+                    required_keywords, 
+                    excluded_keywords,
+                    excluded_url_terms,
+                    case_sensitive,
+                    crawl_limit, 
+                    ignore_urls, 
+                    ignore_domains,
+                    be_polite
+                ) -> dict:
+    
+    """
+    Core functionality for web crawler. Takes inputted URLs, scrapes them, and returns a dictionary of results.
+    
+    Iterates through queue of URLS; runs checks to see if should proceed with scraping; 
+    if so, scrapes them and adds links found to queue.
+    
+    Parameters
+    ---------- 
+    urls : queue 
+        ordered queue of URLs to be crawled.
+    required_keywords : list 
+        list of keywords which sites must contain to be crawled.
+    excluded_keywords : list 
+        list of keywords which sites must *not* contain to be crawled.
+    excluded_url_terms : list 
+        list of strings; link will be ignored if it contains any string in list.
+    case_sensitive : bool 
+        whether or not to ignore string characters' case.
+    crawl_limit : int 
+        how many URLs the crawler should visit before it stops.
+    ignore_urls : list 
+        list of URLs to ignore.
+    ignore_domains : list 
+        list of domains to ignore.
+    be_polite : bool 
+        whether to respect websites' permissions for crawlers.
+    full : bool 
+        whether to run a full scrape on each site. This takes longer.
+    
+    
+    Returns
+    -------
+    output_dict : dict 
+        a dictionary containing results from each crawled site.
+    """
+    
+    # Intiailising variables to store the pages already visited
+    crawled_entries = []
+    output_dict = {}
+    iteration = 1
+    
+    # until all pages have been visited
+    
+    while not to_crawl.empty():
+        
+        # Checking if crawler has crawled the maximum number of entries. If so, halts.
+        if len(crawled_entries) > crawl_limit:
+            print('\nLimit reached')
+            break
+        
+        # Getting the entry index to process from the queue
+        _, current_index = to_crawl.get()
+        
+        # Checking if entry index has been process. If True, skips.
+        if current_index in crawled_entries:
+            continue
+        
+        # Retreiving entry data
+        entry = data.loc[current_index]
+
+        # Checking if URL includes an excluded term. If True, skips URL
+        if excluded_term_test(current_index, excluded_url_terms, case_sensitive) == True:
+            continue
+        
+        # Checking if the entry has a valid DOI. If yes, updating data in the entry using Crossref API. If not, updating data in the entry using web scraper
+        entry = citation_crawler_data_retriever(entry)
+
+
+        
+        # Initialising result variable
+        crawl_res = None
+        
+        
+        if (
+            # Skips if the scraped data does not contain required keywords
+            (required_keywords_test(text, required_keywords, case_sensitive) == False) 
+            # Skips if the scraped data contains excluded keywords
+            or (excluded_keywords_test(text, excluded_keywords, case_sensitive) == False)
+        ):
+            continue
+        
+        # Adding current current index to list of indexes already processed
+        crawled_entries.append(current_index)
+        
+        # Incrementing iteration count
+        iteration += 1
+        
+        # Selecting links to crawl from URL scrape result
+        links_res = select_crawled_links(
+                            iteration = iteration,
+                            source_domain = domain,
+                            link_elements = scraped_links, 
+                            urls = urls, 
+                            crawled_entries = crawled_entries,
+                            ignore_urls = ignore_urls, 
+                            ignore_domains = ignore_domains,
+                            excluded_url_terms = excluded_url_terms
+                            )
+            
+        urls = links_res[0]
+        current_links = list(set(links_res[1]))
+        
+        # Appending results to result dictionary
+        output_dict[current_index]['domain'] = domain
+        output_dict[current_index]['links'] = current_links
+        
+        # Pausing crawler for a random interval to reduce server loads and avoid being blocked
+        time.sleep(random.uniform(0.25, 1)) 
+        
+        # Displaying status to user
+        print(f'\nSite visited: {current_index}')
+        print(f'Visited count: {len(crawled_entries)}')
+
+    return output_dict
+
+def seed_str_to_list(seed_urls: str) -> list:
+    
+    """
+    Takes a string of seed URLs in list format and returns a list object. To be used by web crawler.
+    
+    Parameters
+    ---------- 
+    seed_urls : str 
+        string containing seed URLs.
+    
+    Returns
+    -------
+    seed_urls : list 
+        List of seed urls.
+    """
+    
+    obj_type = type(seed_urls)
+    
+    # Checking type. If list, no action taken
+    if (obj_type == list) or (obj_type == set) or (obj_type == tuple):
+        seed_urls = list(seed_urls)
+    
+    # If string, cleaning data and splitting into list
+    elif obj_type == str:
+        
+        seed_urls = seed_urls.replace('[', '').replace(']', '').replace('"', '').replace("'", '')
+        
+        if (type(seed_urls) == str) and (', ' in seed_urls):
+            seed_urls = seed_urls.split(', ')
+
+        if (type(seed_urls) == str) and (',' in seed_urls):
+            seed_urls = seed_urls.split(',')
+
+        if (type(seed_urls) == str) and (';' in seed_urls):
+            seed_urls = seed_urls.split(';')
+
+        if type(seed_urls) == str:
+            seed_urls = [seed_urls]
+    
+    # Raising an error if conversion has failed
+    if type(seed_urls) != list:
+        raise TypeError(f'seed_urls must be a string, list, set, or tuple, not {obj_type}')
+    
+    return seed_urls
+
+def clean_seed_urls(seed_urls: list) -> list:
+    
+    """
+    Cleans list of seed URLs. To be used by web crawler.
+    
+    Parameters
+    ---------- 
+    seed_urls : list 
+        list containing seed URLs.
+    
+    Returns
+    -------
+    seed_urls : list 
+        List of cleaned seed urls.
+    """
+    
+    # If input is string, set, or tuple, converting to list
+    seed_urls = seed_str_to_list(seed_urls)
+    
+    # Initialising output variable
+    cleaned_seeds = []
+    
+    # Iterating through seeds and cleaning
+    for seed in seed_urls:
+        seed = seed.strip()
+        seed = correct_seed_errors(seed)
+        seed = correct_url(seed)
+        cleaned_seeds.append(seed)
+    
+    return cleaned_seeds
+
+
+
+def citation_crawler(
+            data,
+            crawl_limit: int = 5, 
+            excluded_url_terms = 'default',
+            required_keywords: bool = None,  # type: ignore
+            excluded_keywords: bool = None,  # type: ignore
+            case_sensitive: bool = False,
+            ignore_urls: list = None,  # type: ignore
+            ignore_domains: list = 'default', # type: ignore
+            be_polite: bool = True,
+            add_to_results = True
+            ) -> pd.DataFrame:
+    
+        """
+        Crawls results, their citations, and so on.
+        
+        The crawler iterates through queue of works; extracts their citations; runs checks to validate each reference;
+        based on these, selects a source to retrieve data from: (a) Crossref API (if has a valid DOI); (b) bespoke web scraping for 
+        if so, scrapes them and adds links found to queue.
+        
+        Parameters
+        ---------- 
+        seeds : str or list 
+            one or more URLs from which to crawl.
+        crawl_limit : int 
+            how many URLs the crawler should visit before it stops.
+        excluded_url_terms : list 
+            list of strings; link will be ignored if it contains any string in list.
+        required_keywords : list 
+            list of keywords which sites must contain to be crawled.
+        excluded_keywords : list 
+            list of keywords which sites must *not* contain to be crawled.
+        case_sensitive : bool 
+            whether or not to ignore string characters' case.
+        ignore_urls : list 
+            list of URLs to ignore.
+        ignore_domains : list 
+            list of domains to ignore.
+        be_polite : bool 
+            whether respect websites' permissions for crawlers.
+        full : bool 
+            whether to run a full scrape on each site. This takes longer.
+        output_as : str 
+            the format to output results in. Defaults to a pandas.DataFrame.
+        
+        
+        Returns
+        -------
+        result : pd.DataFrame 
+            an object containing the results of a crawl.
+        """
+
+        # See https://www.zenrows.com/blog/web-crawler-python#transitioning-to-a-real-world-web-crawler
+
+        seeds = data.index.to_list()
+        
+        
+        # If ignore_domains set to default, loads a preset list of domains to ignore
+        if ignore_domains == 'default':
+            ignore_domains = [
+                            'ad.doubleclick.net'
+                            ]
+        # If no ignore_urls given, sets an empty list
+        if ignore_urls == None:
+            ignore_urls = []
+        
+        # If excluded_url_terms set to default, loads a preset terms of domains to exclude
+        if excluded_url_terms == 'default':
+            excluded_url_terms = [
+                                'advertise',
+                                'doubleclick',
+                                'advertising',
+                                'cloudflare',
+                                'holidays',
+                                'app.',
+                                'ctdonate',
+                                'sitemap',
+                                'jobs.',
+                                'policies.google',
+                                'adsense'
+                                ]
+            
+        # If no required_keywords given, sets an empty list
+        if required_keywords == None:
+            required_keywords = []
+        
+        # If no excluded_keywords given, sets an empty list
+        if excluded_keywords == None:
+            excluded_keywords = []
+        
+        # Storing seed indexes to crawl in a specific order
+        to_crawl = queue.PriorityQueue()
+        
+        # Queing seeds with highest priority
+        for seed in seeds:
+            to_crawl.put((0.0001, seed))
+        
+        # Running crawler engine
+        output = crawler_engine(
+                        to_crawl = to_crawl,
+                        crawl_limit = crawl_limit, 
+                        excluded_url_terms = excluded_url_terms,
+                        required_keywords = required_keywords, 
+                        excluded_keywords = excluded_keywords, 
+                        case_sensitive = case_sensitive,
+                        ignore_urls = ignore_urls, 
+                        ignore_domains = ignore_domains,
+                        be_polite = be_polite
+                        )
+        
+        # Printing end status for user
+        print('\n\n----------------------\nCrawl complete\n----------------------')
+        
+        if (len(output.keys()) > 0) and (list(output.values()) != [None]):
+            
+                df = pd.DataFrame().from_dict(output).T
+                df['date'] = pd.to_datetime(df['date'])
+            
+        else:
+                
+            df = pd.DataFrame(columns = results_cols, dtype=object)
+            df = df.replace(np.nan, None).where(df.notnull(), None)
+        
+        return df
+
 
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 
