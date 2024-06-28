@@ -2567,15 +2567,16 @@ def citation_crawler_engine(
             entry = update_citation_crawler_data(entry, be_polite = be_polite, timeout = timeout)
 
         # Formatting entry citations data
-        entry['citations'] = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False) # type: ignore
-        refs = entry['citations'] # type: ignore
+        refs = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False) # type: ignore
+        entry.at['citations'] = refs # type: ignore
         refs_len = len(refs)
 
         # Formatting entry authors data
-        entry['authors'] = format_authors(entry['authors']) # type: ignore
+        entry.at['authors'] = format_authors(entry['authors']) # type: ignore
 
         data.loc[current_index] = entry
-        data = pd.concat([data, refs]).reset_index().drop('index', axis=1) # type: ignore
+        refs_df = refs.copy(deep=True)
+        data = pd.concat([data, refs_df]).reset_index().drop('index', axis=1) # type: ignore
 
         # Adding current current index to list of indexes already processed
         crawled_entries.append(current_index)
