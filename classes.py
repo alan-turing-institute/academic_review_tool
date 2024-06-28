@@ -2597,14 +2597,14 @@ def citation_crawler_engine(
             to_crawl.put((priority_score, i))
         
         
-        # Pausing crawler for a random interval to reduce server loads and avoid being blocked
+        # Pausing crawler for a brief interval to reduce server loads and avoid being blocked
         time.sleep(rate_limit) 
         
         # Displaying status to user
 
         if iteration > depth_marker:
 
-            print(f'\nCrawl depth {depth}:\n    - Entries processed: {processed_in_cycle}\n    - Results added: {added_in_cycle}')
+            # print(f'\nCrawl depth {depth}:\n    - Entries processed: {processed_in_cycle}\n    - Results added: {added_in_cycle}')
 
             depth += 1
             added_in_cycle = 0
@@ -2615,6 +2615,15 @@ def citation_crawler_engine(
         # Incrementing iteration count
         iteration += 1
         processed_in_cycle += 1
+
+    # Updating newly added entries
+    if use_api == True:
+        index = set(data.index)
+        not_crawled = list(index.difference(set(crawled_entries)))
+        for i in not_crawled:
+            entry = data.loc[i]
+            entry = update_citation_crawler_data(entry, be_polite = be_polite, timeout = timeout)
+            data.loc[i] = entry
 
     return data
 
@@ -2690,6 +2699,8 @@ def citation_crawler(
                     rate_limit,
                     timeout
                 )
+        
+        
         
         # Printing end status for user
         print('\n\n----------------------\nCrawl complete\n----------------------')
