@@ -876,6 +876,8 @@ class Results(pd.DataFrame):
                     add_to_results = True
                     ):
         
+        self.format_citations()
+
         result = citation_crawler(
                     data = self,
                     use_api = use_api,
