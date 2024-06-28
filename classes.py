@@ -2610,7 +2610,7 @@ def citation_crawler_site_test(url: str):
     
     return result
 
-def citation_crawler_scraper(entry, be_polite):
+def citation_crawler_scraper(entry, be_polite = True):
     
     url = entry['link']
 
