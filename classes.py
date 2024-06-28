@@ -887,10 +887,10 @@ class Results(pd.DataFrame):
                     )
         
         if add_to_results == True:
-            
-            self = Results.from_dataframe(result) # type: ignore
-            self.format_citations()
-            self.format_authors()
+
+            self = self.add_dataframe(result) # type: ignore
+            self.format_citations() # type: ignore
+            self.format_authors() # type: ignore
             return self
         
         else:
