@@ -2616,7 +2616,7 @@ def citation_crawler_scraper(entry, be_polite = True):
 
     # Checking if URL is bad. If True, tries to correct it.
     if check_bad_url(url) == True:
-        current_index = correct_seed_url_errors(url)
+        url = correct_seed_url_errors(url)
         
     # If be_polite is True, checks if crawler has permission to crawl/scrape URL
     if be_polite == True:
@@ -2636,8 +2636,6 @@ def citation_crawler_scraper(entry, be_polite = True):
                 res_series = res_df.loc[0]
                 for i in res_series.index:
                     entry[i] = res_series[i]
-                    print(True)
-                    print(res_series)
         
         except:
             pass
