@@ -28,6 +28,24 @@ from selenium.webdriver.common.by import By
 
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Windows; Windows x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'}
 
+can_scrape = [
+              'frontiersin.org',
+              'arxiv.org',
+              'springer',
+              'nature.com',
+              'ieee.org',
+              'pubmed.ncbi.',
+              'gov/pmc',
+              'ssrn.com',
+              'heinonline.org',
+              'mdpi.com',
+              'acm.org',
+              'muse.jhu.edu',
+              'proquest.com',
+              'jstor.org',
+              'scholar.google.com'
+              ]
+
 def get_final_url(url):
 
     global headers
@@ -2129,7 +2147,7 @@ def scrape_doi(doi):
     else:
         raise ValueError('Bad DOI code or URL. Please check.')
 
-def scrape_article(url = 'request_input'):
+def scrape_article(url = 'request_input') -> pd.DataFrame:
 
     if url == 'request_input':
             url = input('URL: ')

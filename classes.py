@@ -6,8 +6,9 @@ from .importers.jstor import import_jstor_metadata, import_jstor_full
 from .importers.crossref import items_to_df, references_to_df, search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from .importers.orcid import lookup_orcid
 from .datasets import stopwords
-from .internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
-from .internet.crawlers import is_external_link, check_crawl_permission, check_bad_url, append_domain, correct_link_errors, correct_seed_errors
+from .internet.scrapers import scrape_url, scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search, can_scrape
+from .internet.crawlers import is_external_link, check_crawl_permission, check_bad_url, append_domain, correct_link_errors
+from .internet.crawlers import correct_seed_errors as correct_seed_url_errors
 from .internet.webanalysis import correct_url, get_domain
 
 import copy
@@ -2597,63 +2598,72 @@ def excluded_keywords_test(text, excluded_keywords, case_sensitive):
     
     return result
 
-def citation_crawler_scraper(entry):
-    return
-        # # Checking if URL is bad. If True, tries to correct it.
-        # if check_bad_url('current_index') == True:
-        #     current_index = correct_seed_errors(current_index)
-        
-        # # If be_polite is True, checks if crawler has permission to crawl/scrape URL
-        # if be_polite == True:
-        #     try:
-        #         # If the crawler does not have permission, skips URL
-        #         if check_crawl_permission(current_index) == False:
-        #             continue
-        #     except:
-        #         pass
-        
-        # # Initialising result variable
-        # crawl_res = None
-        
-        # # Trying to scrape URL
-        # try:
-            
-        #     # Scraping URL and retrieving links
-        #     crawl_res = crawler_scraper(current_index, full)
-        #     scraped_links = crawl_res[2]
-            
-        #     # Appending results to result dictionary
-        #     output_dict[current_index] = crawl_res[1]
-            
-        #     # Retrieving domain
-        #     domain = get_domain(current_index)
-        
-        # # If scrape fails, sets current_index to None
-        # except:
-        #     # Appending results to result dictionary
-        #     output_dict[current_index] = crawl_res
-        #     continue
-        
-        # # Extracting raw text from site scrape result
-        # if type(crawl_res) == tuple:
-        #     text = crawl_res[1]['raw_text']
-        
-        # elif crawl_res == None:
-        #     text = ''
+def citation_crawler_site_test(url: str):
+
+    result = False
+
+    global can_scrape
+
+    for i in can_scrape:
+        if i in url:
+            result = True
     
+    return result
+
+def citation_crawler_scraper(entry, be_polite):
+    
+    url = entry['link']
+
+    # Checking if URL is bad. If True, tries to correct it.
+    if check_bad_url(url) == True:
+        current_index = correct_seed_url_errors(url)
+        
+    # If be_polite is True, checks if crawler has permission to crawl/scrape URL
+    if be_polite == True:
+        try:
+            # If the crawler does not have permission, skips URL
+            if check_crawl_permission(url) == False:
+                return entry
+        except:
+            pass
+    
+    if citation_crawler_site_test(url) == True:
+
+        try:
+            res_df = scrape_article(url)
+            if len(res_df) > 0: 
+                res_series = res_df.loc[0]
+                for i in res_series.index:
+                    entry[i] = res_series[i]
+        
+        except:
+            pass
+
+    else:
+        try:
+            res = scrape_url(url)
+        except:
+            pass
+    
+    return entry
+        
+    
+
 def citation_crawler_doi_retriver(entry: pd.Series, timeout = 60):
 
     doi = entry['doi']
 
-    res_df = lookup_doi(doi, timeout=timeout)
+    try:
+        res_df = lookup_doi(doi, timeout=timeout)
 
-    if len(res_df) > 0:
-        res_series = res_df.loc[0]
-        for i in res_series.index:
-            entry[i] = res_series[i]
+        if len(res_df) > 0:
+            res_series = res_df.loc[0]
+            for i in res_series.index:
+                entry[i] = res_series[i]
+    except:
+        pass
 
     return entry
-
 
 def citation_crawler_data_retriever(entry):
 
@@ -2661,7 +2671,10 @@ def citation_crawler_data_retriever(entry):
     link = entry['link']
 
     if (doi != None) and (doi != 'None') and (doi != ''):
-        return citation_crawler_doi_retriver(entry)
+        try:
+            return citation_crawler_doi_retriver(entry)
+        except:
+            return citation_crawler_scraper(entry)
 
     else:
         if (link != None) and (type(link) == str) and ('doi.org' in link):
