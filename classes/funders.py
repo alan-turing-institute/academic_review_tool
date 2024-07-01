@@ -504,6 +504,10 @@ class Funders:
 
     def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = False): # type: ignore
 
+        if type(funder) == str:
+            uri = funder
+            funder = None # type: ignore
+
         if funder == None:
             funder = Funder(uri=uri, crossref_id=crossref_id)
 
@@ -681,20 +685,20 @@ class Funders:
                     if (uid==None) or (uid == ''):
                         uid = ''
 
-                funder_id = self.all.loc[index, 'funder_id']
+                funder_id = self.all.loc[index, 'funder_id'] # type: ignore
 
                 uid = str(uid)
             
             else:
                 if crossref_id != None:
                     index = self.all[self.all['crossref_id'] == crossref_id].index.to_list()[0]
-                    funder_id = self.all.loc[index, 'funder_id']
+                    funder_id = self.all.loc[index, 'funder_id'] # type: ignore
                     uid = str(crossref_id)
                     
                 else:
                     if uri != None:
                         index = self.all[self.all['uri'] == uri].index.to_list()[0]
-                        funder_id = self.all.loc[index, 'funder_id']
+                        funder_id = self.all.loc[index, 'funder_id'] # type: ignore
                         uid = str(uri)
                         
 
