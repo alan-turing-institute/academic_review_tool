@@ -4,11 +4,11 @@ from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 
-from ..classes.properties import Properties
-from ..classes.results import Results, generate_work_id
-from ..classes.references import References, is_formatted_reference, extract_references
-from ..classes.activitylog import ActivityLog
-from ..classes.authors import Author, Authors, format_authors as orig_format_authors
+from .properties import Properties
+from .results import Results, generate_work_id
+from .references import References, is_formatted_reference, extract_references
+from .activitylog import ActivityLog
+from .authors import Author, Authors, format_authors as orig_format_authors
 from .citation_crawler import citation_crawler
 
 import copy
