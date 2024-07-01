@@ -1,56 +1,54 @@
 from ..importers.crossref import search_funders, search_funder_works, lookup_funder, lookup_funders
+from ..datasets.stopwords.stopwords import all_stopwords
+
 from .results import Results
 
 import pandas as pd
 import numpy as np
 
+
+
+from nltk.tokenize import word_tokenize # type: ignore
+
 def generate_funder_id(funder_data: pd.Series):
 
         funder_id = 'F:'
 
-        given_name = funder_data['given_name']
-        family_name = funder_data['family_name']
-        full_name = funder_data['full_name']
+        name = funder_data['name']
 
-        if (family_name == None) and (full_name != None):
-            
-            if full_name == 'no_name_given':
-                funder_id = funder_id + '-' + '000'
-            
-            else:
-            
-                full_split = full_name.lower().split(' ')
-                first = full_split[0]
-                first_shortened = first[0]
-                last = full_split[-1]
+        if (name == None) or (name == ''):
+            name = 'no_name_given'
+        
+        if name != 'no_name_given':
+            name = name.strip().lower()
+            name_tokens = list(word_tokenize(name))
+            name_tokens = [i for i in name_tokens if i not in all_stopwords]
+            name_first_3 = name_tokens[:3]
+            name_last = name_tokens[-1]
 
-                funder_id = funder_id + '-' + first_shortened + '-' + last
+            if name_last in name_first_3:
+                name_last = ''
+            
+            name_shortened = '-'.join(name_first_3) + '-' + name_last
 
         else:
+            name_shortened = name
 
-            if given_name != None:
-                given_shortened = given_name.lower()[0]
-                funder_id = funder_id + '-' + given_shortened
-            
-            
-            if family_name != None:
-                family_clean = family_name.lower().replace(' ', '-')
-                funder_id = funder_id + '-' + family_clean
+        funder_id = funder_id + '-' + name_shortened
+        
 
-        uid = funder_data['orcid']
+        uid = funder_data['crossref']
         if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = funder_data['google_scholar']
+            uid = funder_data['uri']
             if (uid == None) or (uid == 'None') or (uid == ''):
-                uid = funder_data['scopus']
+                uid = funder_data['website']
                 if (uid == None) or (uid == 'None') or (uid == ''):
-                    uid = funder_data['crossref']
-                    if (uid == None) or (uid == 'None') or (uid == ''):
                         uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:20]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:20]
 
         funder_id = funder_id + '-' + uid_shortened
-        funder_id = funder_id.replace('F:-', 'F:').strip('-')
+        funder_id = funder_id.replace('F:-', 'F:').replace('--', '-').replace('F:-', 'F:').strip('-')
 
         return funder_id
 
@@ -79,6 +77,7 @@ class Funder():
                  tokens = [], # type: ignore
                  website: str = None,  # type: ignore
                  other_links = [], # type: ignore
+                 use_api: bool = False
                  ):
         
         """
@@ -142,6 +141,9 @@ class Funder():
         self.details.at[0, 'other_links'] = other_links
 
         self.publications = Results()
+
+        if use_api == True:
+            self.update_from_crossref()
 
     def generate_id(self):
 
