@@ -398,7 +398,7 @@ class Funders:
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['full_name'].sort_values().to_list())
+        alphabetical = str(self.all['name'].sort_values())
         return alphabetical
     
     def __len__(self) -> int:
@@ -445,7 +445,11 @@ class Funders:
 
         return self
 
-    def add_funder(self, funder: Funder, data = None, use_api = False):
+
+    def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = False): # type: ignore
+
+        if funder == None:
+            funder = Funder(uri=uri, crossref_id=crossref_id)
 
         if use_api == True:
             funder.update_from_crossref()
@@ -486,6 +490,17 @@ class Funders:
             auth_index = all[all['funder_id'] == i].index.to_list()[0]
             self.all.loc[auth_index] = series
 
+    def update_ids(self):
+
+        self.sync_all()
+
+        for i in self.all.index:
+            old_id = self.all.loc[i, 'funder_id']
+            new_id = generate_funder_id(self.all.loc[i])
+            self.all.loc[i, 'funder_id'] = new_id
+            self.details[new_id] = self.details[old_id]
+            del self.details[old_id]
+            
     def update_from_crossref(self):
 
         funder_ids = self.details.keys()
