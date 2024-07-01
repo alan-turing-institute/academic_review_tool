@@ -175,7 +175,7 @@ class Funder():
             return self.publications[key]
 
     def __repr__(self) -> str:
-        return str(self.details.loc[0, 'full_name'])
+        return str(self.details.loc[0, 'name'])
 
     def has_uri(self) -> bool:
 
