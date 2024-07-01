@@ -286,9 +286,9 @@ class Funder():
 
     def update_from_crossref(self, timeout = 60):
 
-        uid = self.details['crossref_id']
+        uid = self.details.loc[0,'crossref_id']
         if uid == None:
-            uid = self.details['uri']
+            uid = self.details.loc[0,'uri']
             if uid == None:
                 uid = ''
 
