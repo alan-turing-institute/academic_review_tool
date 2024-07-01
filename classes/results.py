@@ -414,26 +414,26 @@ class Results(pd.DataFrame):
         else:
             raise ValueError('File does not exist')
     
-    def from_file(file_path = 'request_input', sheet_name = None):
+    def from_file(file_path = 'request_input', sheet_name = None): # type: ignore
 
         if file_path == 'request_input':
             file_path = input('File path: ')
         
         results_table = Results()
 
-        path_obj = Path(file_path)
+        path_obj = Path(file_path)  # type: ignore
         suffix = path_obj.suffix
 
         if path_obj.exists() == True:
 
             if suffix.strip('.') == 'xlsx':
-                return results_table.import_excel(file_path, sheet_name)
+                return results_table.import_excel(file_path, sheet_name)  # type: ignore
             
             if suffix.strip('.') == 'csv':
-                return results_table.import_csv(file_path)
+                return results_table.import_csv(file_path)  # type: ignore
             
             if suffix.strip('.') == 'json':
-                return results_table.import_json(file_path)
+                return results_table.import_json(file_path) # type: ignore
         
         else:
             raise ValueError('File does not exist')
@@ -498,7 +498,7 @@ class Results(pd.DataFrame):
                 for item in not_kwds:
                     
                         rows = df[df[field].str.contains(item) == False]
-                        not_kwds = pd.concat([not_kwds, rows])
+                        not_kwds = pd.concat([not_kwds, rows]) # type: ignore
         
         
         combined_df = pd.concat([contains_df, not_kwds_df])
@@ -509,7 +509,7 @@ class Results(pd.DataFrame):
                 raise TypeError('"all_kwds" must be a string or list')
 
             if type(all_kwds) == str:
-                any_kwds = any_kwds.strip().split(',')
+                any_kwds = any_kwds.strip().split(',') # type: ignore
                 any_kwds = [i.strip() for i in any_kwds]
 
             if case_sensitive == False:
@@ -541,7 +541,7 @@ class Results(pd.DataFrame):
                 raise TypeError('"all_kwds" must be a string or list')
 
             if type(all_kwds) == str:
-                any_kwds = any_kwds.strip().split(',')
+                any_kwds = any_kwds.strip().split(',') # type: ignore
                 any_kwds = [i.strip() for i in any_kwds]
 
             if case_sensitive == False:
@@ -556,7 +556,7 @@ class Results(pd.DataFrame):
             output_df = pd.DataFrame(columns = self.columns.to_list(), dtype=object)
             
             for col in self.columns:
-                rows = self.search_field(field = col, any_kwds = any_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = 'pandas.dataframe')
+                rows = self.search_field(field = col, any_kwds = any_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = 'pandas.dataframe') # type: ignore
                 output_df = pd.concat([output_df, rows])
             
             output_df = output_df[~output_df.index.duplicated(keep = 'first') == True]
@@ -572,8 +572,8 @@ class Results(pd.DataFrame):
             
             if (type(fields) == str) or ((type(fields) == list) and (len(fields) == 1)):
 
-                output_df = self.search_field(field = fields, any_kwds = any_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive)
-                output_df = output_df[~output_df.index.duplicated(keep = 'first') == True]
+                output_df = self.search_field(field = fields, any_kwds = any_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive) # type: ignore
+                output_df = output_df[~output_df.index.duplicated(keep = 'first') == True] # type: ignore
                 
                 if all_kwds != None:
                     
@@ -597,18 +597,18 @@ class Results(pd.DataFrame):
 
         for i in self['keywords']:
             if type(i) == str:
-                i = strip_list_str(i)
+                i = strip_list_str(i)  # type: ignore
             
             if type(i) == list:
                 output = output + i
 
         output = pd.Series(output).str.strip().str.lower()
-        output = output.drop(output[output.values == 'none'].index).reset_index().drop('index', axis=1)[0]
+        output = output.drop(output[output.values == 'none'].index).reset_index().drop('index', axis=1)[0] # type: ignore
         
         return output
     
     def get_keywords_list(self):        
-        return self.get_keywords(self).to_list()
+        return self.get_keywords().to_list()
     
     def get_keywords_set(self):
         return set(self.get_keywords_list())
@@ -617,7 +617,7 @@ class Results(pd.DataFrame):
         return self.get_keywords().value_counts()
 
     def keyword_stats(self):
-        return self.keyword_frequencies(self).describe()
+        return self.keyword_frequencies().describe()
     
     def get_titles_words(self, ignore_stopwords = True):
 
@@ -653,7 +653,7 @@ class Results(pd.DataFrame):
         if type(keywords) == str:
             keywords = [keywords]
 
-        results = self.search(any_kwds = keywords).index
+        results = self.search(any_kwds = keywords).index # type: ignore
         return self.drop(index = results, axis=0).reset_index().drop('index', axis=1)
 
     def filter_by_keyword_frequency(self, cutoff = 3):
@@ -681,74 +681,8 @@ class Results(pd.DataFrame):
     def has(self, column):
         return self[~self[column].isna()]
 
-    def has_formatted_citations(self):
-        return self[self['citations'].apply(is_formatted_reference)]
-
-    def lacks_formatted_citations(self):
-        return self[~self['citations'].apply(is_formatted_reference)]
-
-    def format_citations(self, add_work_ids = False, update_from_doi = False):
-
-        self['citations'] = self['citations'].replace({np.nan: None})
-        self['citations_data'] = self['citations_data'].replace({np.nan: None})
-
-        unformatted = self.lacks_formatted_citations()
-        length = len(unformatted)
-        if length > 0:
-
-            if length == 1:
-                intro_message = '\nFormatting 1 set of citations...'
-            else:
-                intro_message = f'\nFormatting {length} sets of citations...'
-            print(intro_message)
-
-            indices = unformatted.index
-            processing_count = 0
-            for i in indices:
-                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
-                refs_count = len(refs) # type: ignore
-                processing_count = processing_count + refs_count
-                self.at[i, 'citations'] = refs
-            
-            if processing_count == 1:
-                outro_message = '1 citation formatted\n'
-            else:
-                outro_message = f'{processing_count} citations formatted\n'
-            print(outro_message)
-    
-    def format_authors(self):
-
-        self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
-        return self['authors']
-
     
 
-    def add_citations_to_results(self, add_work_ids = False, update_from_doi = False):
-
-        unformatted = self.lacks_formatted_citations()
-        if len(unformatted) > 0:
-            self.format_citations(add_work_ids = add_work_ids, update_from_doi = update_from_doi)
-
-        citations = self['citations'].to_list()
-        existing_ids = set(self['work_id'].to_list())
-        
-        for i in citations:
-
-            if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
-                df = i.copy(deep=True)
-
-                new_ids = set(df['work_id'].to_list())
-                diff_len = len(new_ids.difference(existing_ids))
-
-                if diff_len > 0:
-                    self.add_dataframe(dataframe=df)
-        
-        self.update_work_ids()
-        self.format_authors()
-
-
-        return self
-    
     def crawl_citations(
                     self,
                     use_api: bool = True,

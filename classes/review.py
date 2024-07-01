@@ -5,6 +5,7 @@ from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_schola
 
 from ..classes.properties import Properties
 from ..classes.results import Results
+from ..classes.references import References, is_formatted_reference
 from ..classes.activitylog import ActivityLog
 from ..classes.authors import Author, Authors
 from .citation_crawler import citation_crawler
@@ -710,7 +711,7 @@ class Review:
         self.format_citations()
 
         result = citation_crawler(
-                    data = self,
+                    data = self,  # type: ignore
                     use_api = use_api,
                     crawl_limit = crawl_limit, 
                     depth_limit = depth_limit,
@@ -729,6 +730,86 @@ class Review:
         
         return result
 
+
+def has_formatted_citations(self):
+        return self[self['citations'].apply(is_formatted_reference)]
+
+Review.results.has_formatted_citations = has_formatted_citations # type: ignore
+
+
+def lacks_formatted_citations(self):
+        return self[~self['citations'].apply(is_formatted_reference)]
+
+Review.results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
+
+
+def format_citations(self, add_work_ids = False, update_from_doi = False):
+
+        self['citations'] = self['citations'].replace({np.nan: None})
+        self['citations_data'] = self['citations_data'].replace({np.nan: None})
+
+        unformatted = self.lacks_formatted_citations()
+        length = len(unformatted)
+        if length > 0:
+
+            if length == 1:
+                intro_message = '\nFormatting 1 set of citations...'
+            else:
+                intro_message = f'\nFormatting {length} sets of citations...'
+            print(intro_message)
+
+            indices = unformatted.index
+            processing_count = 0
+            for i in indices:
+                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
+                refs_count = len(refs) # type: ignore
+                processing_count = processing_count + refs_count
+                self.at[i, 'citations'] = refs
+            
+            if processing_count == 1:
+                outro_message = '1 citation formatted\n'
+            else:
+                outro_message = f'{processing_count} citations formatted\n'
+            print(outro_message)
+
+Review.results.format_citations = format_citations # type: ignore
+
+
+def format_authors(self):
+
+        self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
+        return self['authors']
+
+Review.results.format_authors = format_authors # type: ignore
+    
+
+def add_citations_to_results(self, add_work_ids = False, update_from_doi = False):
+
+        unformatted = self.lacks_formatted_citations()
+        if len(unformatted) > 0:
+            self.format_citations(add_work_ids = add_work_ids, update_from_doi = update_from_doi)
+
+        citations = self['citations'].to_list()
+        existing_ids = set(self['work_id'].to_list())
+        
+        for i in citations:
+
+            if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+                df = i.copy(deep=True)
+
+                new_ids = set(df['work_id'].to_list())
+                diff_len = len(new_ids.difference(existing_ids))
+
+                if diff_len > 0:
+                    self.add_dataframe(dataframe=df)
+        
+        self.update_work_ids()
+        self.format_authors()
+
+
+        return self
+
+Review.results.add_citations_to_results = add_citations_to_results # type: ignore
 
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 
