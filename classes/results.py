@@ -4,7 +4,6 @@ from ..importers.pdf import read_pdf_to_table
 from ..importers.jstor import import_jstor_metadata, import_jstor_full
 from ..importers.crossref import lookup_doi, lookup_dois
 from ..datasets import stopwords
-from .citation_crawler import citation_crawler
 from pathlib import Path
 
 import pandas as pd
