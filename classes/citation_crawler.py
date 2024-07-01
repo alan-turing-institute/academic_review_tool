@@ -3,7 +3,7 @@ from ..importers.crossref import lookup_doi
 from ..internet.scrapers import get_final_url, scrape_url, scrape_article, can_scrape
 from ..internet.crawlers import check_crawl_permission
 from ..internet.crawlers import correct_seed_errors as correct_seed_url_errors
-
+from .references import extract_references
 import queue
 import time
 
@@ -238,7 +238,7 @@ def citation_crawler_engine(
         entry.at['authors'] = format_authors(entry['authors']) # type: ignore
 
         data.loc[current_index] = entry
-        refs_df = refs.copy(deep=True)
+        refs_df = refs.copy(deep=True) # type: ignore
         data = pd.concat([data, refs_df]).reset_index().drop('index', axis=1) # type: ignore
 
         # Adding current current index to list of indexes already processed
