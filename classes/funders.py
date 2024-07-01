@@ -144,6 +144,8 @@ class Funder():
 
         if use_api == True:
             self.update_from_crossref()
+        
+        self.update_id()
 
     def generate_id(self):
 
@@ -306,255 +308,257 @@ class Funder():
         res = lookup_funder(funder_id = uid, timeout = timeout) # type: ignore
         self.import_crossref_result(res.loc[0]) # type: ignore
 
-# class Funders:
+class Funders:
 
-#     """
-#     This is a funders object. It contains a collection of funders objects and compiles data about them.
+    """
+    This is a Funders object. It contains a collection of Funders objects and compiles data about them.
     
-#     Parameters
-#     ----------
+    Parameters
+    ----------
     
     
-#     Attributes
-#     ----------
-#     """
+    Attributes
+    ----------
+    """
 
-#     def __init__(self, funders_data = None):
+    def __init__(self, funders_data = None):
         
-#         """
-#         Initialises funders instance.
+        """
+        Initialises Funders instance.
         
-#         Parameters
-#         ----------
-#         """
+        Parameters
+        ----------
+        """
 
-#         self.all = pd.DataFrame(columns = [
-#                                 'funder_id',
-#                                 'full_name',
-#                                 'given_name',
-#                                 'family_name',
-#                                 'email',
-#                                 'affiliations',
-#                                 'publications',
-#                                 'orcid',
-#                                 'google_scholar',
-#                                 'crossref',
-#                                 'other_links'
-#                                 ],
-#                                 dtype = object)
+        self.all = pd.DataFrame(columns = 
+                                ['funder_id',
+                                'name',
+                                'alt_names',
+                                'location',
+                                'email',
+                                'uri',
+                                'crossref_id',
+                                'work_count',
+                                'tokens',
+                                'website',
+                                'other_links'
+                                ],
+                                dtype = object)
         
 
-#         self.details = dict()
+        self.details = dict()
 
-#         self.data = []
-#         self.data.append(funders_data)
+        self.data = []
+        self.data.append(funders_data)
 
-#         if (type(funders_data) == list) and (type(funders_data[0]) == funder):
+        if (type(funders_data) == list) and (type(funders_data[0]) == Funder):
 
-#             for i in funders_data:
-#                 auth = i.details.copy(deep=True)
-#                 self.all = pd.concat([self.all, auth])
+            for i in funders_data:
+                fu = i.details.copy(deep=True)
+                self.all = pd.concat([self.all, fu])
 
-#             self.all = self.all.reset_index().drop('index',axis=1)
+            self.all = self.all.reset_index().drop('index',axis=1)
 
-#         else:
+        else:
 
-#             if type(funders_data) == dict:
+            if type(funders_data) == dict:
                 
-#                 values = list(funders_data.values())
+                values = list(funders_data.values())
 
-#                 if type(values[0]) == funder:
+                if type(values[0]) == Funder:
 
-#                     for a in funders_data.keys():
+                    for f in funders_data.keys():
                         
-#                         index = len(self.all)
-#                         auth = a.details.copy(deep=True)
-#                         self.all = pd.concat([self.all, auth])
-#                         self.all.loc[index, 'funder_id'] = a
+                        index = len(self.all)
+                        fu = f.details.copy(deep=True)
+                        self.all = pd.concat([self.all, fu])
+                        self.all.loc[index, 'funder_id'] = f
 
-#                     self.all = self.all.reset_index().drop('index',axis=1)
+                    self.all = self.all.reset_index().drop('index',axis=1)
                 
 
 
-#     def __getitem__(self, key):
+    def __getitem__(self, key):
         
-#         """
-#         Retrieves funders attribute using a key.
-#         """
+        """
+        Retrieves funders attribute using a key.
+        """
         
-#         if key in self.__dict__.keys():
-#             return self.__dict__[key]
+        if key in self.__dict__.keys():
+            return self.__dict__[key]
         
-#         if key in self.details.keys():
-#             return self.details[key]
+        if key in self.details.keys():
+            return self.details[key]
 
-#         if key in self.all.columns:
-#             return self.all[key]
+        if key in self.all.columns:
+            return self.all[key]
         
-#         if (type(key) == int) and (key <= len(self.data)):
-#             return self.data[key]
+        if (type(key) == int) and (key <= len(self.data)):
+            return self.data[key]
     
-#     def __repr__(self) -> str:
+    def __repr__(self) -> str:
 
-#         alphabetical = self.all['full_name'].sort_values().to_list().__repr__()
-#         return alphabetical
+        alphabetical = str(self.all['full_name'].sort_values().to_list())
+        return alphabetical
     
-#     def __len__(self) -> int:
-#         return len(self.details.keys())
+    def __len__(self) -> int:
+        return len(self.details.keys())
 
-#     def merge(self, funders):
+    def merge(self, funders):
 
-#         left = self.all.copy(deep=True)
-#         right = funders.all.copy(deep=True)
+        left = self.all.copy(deep=True)
+        right = funders.all.copy(deep=True)
         
-#         merged = pd.concat([left, right])
+        merged = pd.concat([left, right])
 
-#         self.all = merged.drop_duplicates(subset=['funder_id', 'family_name', 'orcid'], ignore_index=True)
+        self.all = merged.drop_duplicates(subset=['funder_id', 'family_name', 'crossref'], ignore_index=True)
 
-#         for i in funders.details.keys():
-#             if i not in self.details.keys():
-#                 self.details[i] = funders.details[i]
+        for i in funders.details.keys():
+            if i not in self.details.keys():
+                self.details[i] = funders.details[i]
 
-#         left_data = self.data
-#         right_data = funders.data
+        left_data = self.data
+        right_data = funders.data
 
-#         if left_data == None:
-#                 left_data = []
+        if left_data == None:
+                left_data = []
             
-#         if right_data == None:
-#                 right_data = []
+        if right_data == None:
+                right_data = []
 
-#         if (type(left_data) == funder) or (type(left_data) == str):
-#                 left_data = [left_data]
+        if (type(left_data) == Funder) or (type(left_data) == str):
+                left_data = [left_data]
             
-#         if (type(right_data) == funder) or (type(right_data) == str):
-#                 right_data = [right_data]
+        if (type(right_data) == Funder) or (type(right_data) == str):
+                right_data = [right_data]
             
-#         if type(left_data) == dict:
-#                 left_data = list(left_data.values())
+        if type(left_data) == dict:
+                left_data = list(left_data.values())
             
-#         if type(right_data) == dict:
-#                 right_data = list(right_data.values())
+        if type(right_data) == dict:
+                right_data = list(right_data.values())
 
-#         merged_data = left_data + right_data # type: ignore
-#         merged_data = pd.Series(merged_data).value_counts().index.to_list()
+        merged_data = left_data + right_data # type: ignore
+        merged_data = pd.Series(merged_data).value_counts().index.to_list()
 
-#         self.data = merged_data
+        self.data = merged_data
 
-#         return self
+        return self
 
-#     def add_funder(self, funder: funder, data = None, update_from_orcid = False):
+    def add_funder(self, funder: Funder, data = None, use_api = False):
 
-#         if update_from_orcid == True:
-#             orcid = funder.details.loc[0,'orcid']
-#             if (orcid != None) and (orcid != '') and (orcid != 'None'):
-#                 funder.update_from_orcid()
+        if use_api == True:
+            funder.update_from_crossref()
 
-#         funder.update_id()
+        funder.update_id()
 
-#         funder_id = str(funder.details.loc[0, 'funder_id'])
+        funder_id = str(funder.details.loc[0, 'funder_id'])
 
-#         if funder_id in self.all['funder_id'].to_list():
-#             id_count = len(self.all[self.all['funder_id'].str.contains(funder_id)]) # type: ignore
-#             funder_id = funder_id + f'#{id_count + 1}'
-#             funder.details.loc[0, 'funder_id'] = funder_id
+        if funder_id in self.all['funder_id'].to_list():
+            id_count = len(self.all[self.all['funder_id'].str.contains(funder_id)]) # type: ignore
+            funder_id = funder_id + f'#{id_count + 1}'
+            funder.details.loc[0, 'funder_id'] = funder_id
 
-#         self.all = pd.concat([self.all, funder.details])
-#         self.all = self.all.reset_index().drop('index', axis=1)
+        self.all = pd.concat([self.all, funder.details])
+        self.all = self.all.reset_index().drop('index', axis=1)
 
-#         self.details[funder_id] = funder
+        self.details[funder_id] = funder
 
-#         if data == None:
-#             data = funder.details.to_dict(orient='index')
+        if data == None:
+            data = funder.details.to_dict(orient='index')
         
-#         self.data.append(data)
+        self.data.append(data)
 
 
-#     def add_funders_list(self, funders_list: list):
+    def add_funders_list(self, funders_list: list):
         
-#         for i in funders_list:
-#             if type(i) == funder:
-#                 self.add_funder(funder = i)
+        for i in funders_list:
+            if type(i) == Funder:
+                self.add_funder(funder = i)
 
-#     def sync_all(self):
+    def sync_all(self):
 
-#         for i in self.details.keys():
-#             funder = self.details[i]
-#             funder.update_id()
-#             series = funder.details.loc[0]
-#             all = self.all.copy(deep=True).astype(str)
-#             auth_index = all[all['funder_id'] == i].index.to_list()[0]
-#             self.all.loc[auth_index] = series
+        for i in self.details.keys():
+            funder = self.details[i]
+            funder.update_id()
+            series = funder.details.loc[0]
+            all = self.all.copy(deep=True).astype(str)
+            auth_index = all[all['funder_id'] == i].index.to_list()[0]
+            self.all.loc[auth_index] = series
 
-#     def update_from_orcid(self):
+    def update_from_crossref(self):
 
-#         funder_ids = self.details.keys()
+        funder_ids = self.details.keys()
 
-#         for a in funder_ids:
+        for a in funder_ids:
 
-#             self.details[a].update_from_orcid()
-#             details = self.details[a].details.loc[0]
+            self.details[a].update_from_crossref()
+            details = self.details[a].details.loc[0]
             
-#             df_index = self.all[self.all['funder_id'] == a].index.to_list()[0]
-#             self.all.loc[df_index] = details
+            df_index = self.all[self.all['funder_id'] == a].index.to_list()[0]
+            self.all.loc[df_index] = details
 
-#             new_id = details['funder_id']
-#             if new_id != a:
-#                 self.details[new_id] = self.details[a]
-#                 del self.details[a]
+            new_id = details['funder_id']
+            if new_id != a:
+                self.details[new_id] = self.details[a]
+                del self.details[a]
 
-#     def import_orcid_ids(self, orcid_ids: list):
+    def import_crossref_ids(self, crossref_ids: list):
 
-#         for i in orcid_ids:
+        for i in crossref_ids:
 
-#             auth = funder.from_orcid(i) # type: ignore
-#             self.add_funder(funder = auth, data = i)
+            auth = Funder.from_crossref(i) # type: ignore
+            self.add_funder(funder = auth, data = i)
 
-#     def from_orcid_ids(orcid_ids: list): # type: ignore
+    def from_crossref_ids(crossref_ids: list): # type: ignore
 
-#         funders = funders()
-#         funders.import_orcid_ids(orcid_ids)
+        funders = Funders()
+        funders.import_crossref_ids(crossref_ids)
 
-#         return funders
+        return funders
 
-#     def with_orcid(self):
-#         return self.all[~self.all['orcid'].isna()]
-
-#     def import_crossref(self, crossref_result: list):
-
-#         for i in crossref_result:
-
-#             auth = funder.from_crossref(i) # type: ignore
-#             self.add_funder(funder = auth, data = i)
+    def with_crossref(self):
+        return self.all[~self.all['crossref_id'].isna()]
     
-#     def from_crossref(crossref_result: list): # type: ignore
+    def with_uri(self):
+        return self.all[~self.all['uri'].isna()]
 
-#         funders = funders()
-#         funders.import_crossref(crossref_result)
+    def import_crossref_result(self, crossref_result: pd.DataFrame):
 
-#         return funders
+        for i in crossref_result.index:
+            
+            data = crossref_result.loc[i]
+            fu = Funder.from_crossref_result(crossref_result=data) # type: ignore
+            self.add_funder(funder = fu, data = data)
+    
+    def from_crossref_result(crossref_result: pd.DataFrame): # type: ignore
+
+        funders = Funders()
+        funders.import_crossref_result(crossref_result)
+
+        return funders
 
 # def format_funders(funder_data):
         
-        result = funders()
+        # result = Funders()
 
-        if (funder_data == None) or (funder_data == ''):
-            result = funders()
+        # if (funder_data == None) or (funder_data == ''):
+        #     result = Funders()
 
-        if type(funder_data) == funders:
-            result = funder_data
+        # if type(funder_data) == Funders:
+        #     result = funder_data
 
-        if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == funder):
-            result = funders()
-            result.add_funders_list(funder_data)
+        # if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
+        #     result = Funders()
+        #     result.add_funders_list(funder_data)
 
-        if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
-            result = funders.from_crossref(funder_data) # type: ignore
+        # if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
+        #     result = funders.from_crossref(funder_data) # type: ignore
 
-        if (type(funder_data) == dict) and (len(funder_data.values()) > 0) and (type(list(funder_data.values())[0]) == str):
-            funder = funder.from_crossref(funder_data) # type: ignore
-            result = funders()
-            result.add_funder(funder)
+        # if (type(funder_data) == dict) and (len(funder_data.values()) > 0) and (type(list(funder_data.values())[0]) == str):
+        #     funder = funder.from_crossref(funder_data) # type: ignore
+        #     result = Funders()
+        #     result.add_funder(funder)
     
     
-        return result
+        # return result
