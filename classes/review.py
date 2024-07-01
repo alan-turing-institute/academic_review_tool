@@ -8,7 +8,7 @@ from ..classes.properties import Properties
 from ..classes.results import Results, generate_work_id
 from ..classes.references import References, is_formatted_reference, extract_references
 from ..classes.activitylog import ActivityLog
-from ..classes.authors import Author, Authors
+from ..classes.authors import Author, Authors, format_authors as orig_format_authors
 from .citation_crawler import citation_crawler
 
 import copy
@@ -139,7 +139,7 @@ Results.format_citations = format_citations # type: ignore
 
 def format_authors(self):
 
-        self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
+        self['authors'] = self['authors_data'].apply(orig_format_authors) # type: ignore
         return self['authors']
 
 Results.format_authors = format_authors # type: ignore
