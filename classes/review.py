@@ -1,10 +1,11 @@
 from ..utils.basics import Iterator
 from ..exporters.general_exporters import obj_to_folder
+from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 
 from ..classes.properties import Properties
-from ..classes.results import Results
+from ..classes.results import Results, generate_work_id
 from ..classes.references import References, is_formatted_reference
 from ..classes.activitylog import ActivityLog
 from ..classes.authors import Author, Authors
@@ -292,19 +293,24 @@ class Review:
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
         self.update_properties()
-        return self.results.import_excel(file_path, sheet_name) # type: ignore
+        self.results.import_excel(file_path, sheet_name) # type: ignore
+        self.format_authors()
+
+        return self
     
     def from_excel(file_path = 'request_input', sheet_name = None): # type: ignore
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name)
-        review.format_authors() # type: ignore
-
+        review.format_authors()
+        
         return review
 
     def import_csv(self, file_path = 'request_input'):
         self.update_properties()
-        return self.results.import_csv(file_path) # type: ignore
+        self.results.import_csv(file_path) # type: ignore
+        self.format_authors()
+        return self
     
     def from_csv(file_path = 'request_input'):
 
@@ -316,13 +322,14 @@ class Review:
 
     def import_json(self, file_path = 'request_input'):
         self.update_properties()
-        return self.results.import_json(file_path) # type: ignore
+        self.results.import_json(file_path) # type: ignore
+        self.format_authors()
+        return self
     
     def from_json(file_path = 'request_input'):
 
         review = Review()
-        review.results = Results.from_json(file_path)
-        review.format_authors() # type: ignore
+        review.import_json(file_path = file_path)
 
         return review
     
@@ -658,10 +665,71 @@ class Review:
 
     def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format_authors = True, update_from_doi = False):
 
-        self.results.crawl_stored_citations(max_depth=max_depth, processing_limit=processing_limit, format_authors = format_authors, update_from_doi = update_from_doi) # type: ignore
+        iteration = 1
+        processed_indexes = []
+        original_len = len(self.results)
+
+        while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
+            
+            if (iteration > max_depth) or (len(processed_indexes) > processing_limit):
+                break
+
+            unformatted = self.results.lacks_formatted_citations()
+            if len(unformatted) > 0:
+                self.results.format_citations(add_work_ids = False, update_from_doi = update_from_doi)
+
+            indexes = self.results.index
+            to_process = pd.Series(list(set(indexes).difference(set(processed_indexes))), dtype=object).sort_values().to_list()
+
+            if len(to_process) > 0:
+
+                rows = self.results.loc[to_process]
+                citations = rows['citations'].to_list()
+                
+                new_df = pd.DataFrame(dtype=object)
+
+                process_iteration = 0
+
+                for i in citations:
+                    
+                    if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+
+                        res = i.copy(deep=True)
+                        if len(res) > 0:
+                            new_df = pd.concat([new_df, res])
+
+                    process_iteration += 1
+
+                    if (len(processed_indexes) + process_iteration) > processing_limit:
+                        to_process = to_process[:process_iteration]
+                        break
+
+                new_df_asstr = new_df.copy(deep=True).astype(str)
+                unique_indexes = new_df_asstr.drop_duplicates().index
+                new_df = new_df.loc[unique_indexes]
+                new_df = new_df.reset_index().drop('index', axis=1)
+                self.results.add_dataframe(dataframe=new_df, update_work_ids = False, format_authors = False)
+
+            processed_indexes = processed_indexes + to_process
+            len_diff = len(self.results) - original_len
+            print(f'Iteration {iteration} complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {len_diff}')
+            
+            iteration += 1
+            
+        final_len_diff = len(self.results) - original_len
+        
+
+        self.results.update_work_ids()
+        df = self.results.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
+        self.results = Results.from_dataframe(df)
+        
 
         if format_authors == True:
             self.format_authors()
+        
+        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n')
+
+        return self.results
 
     def crawl_citations(
                     self,
@@ -730,6 +798,80 @@ class Review:
         
         return result
 
+def add_pdf(self, path = 'request_input'):
+        
+        if path == 'request_input':
+            path = input('Path to PDF (URL or filepath): ')
+
+        table = read_pdf_to_table(path)
+        table = table.replace(np.nan, None).astype(object)
+
+        series = table.loc[0]
+        work_id = generate_work_id(series) # type: ignore
+        series['work_id'] = work_id
+
+        index = len(self)
+        self.loc[index] = series
+
+        self.format_authors()
+
+        return self
+
+Review.results.add_pdf = add_pdf # type: ignore
+
+
+def add_row(self, data):
+
+        if type(data) != pd.Series:
+            raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
+
+        data.index = data.index.astype(str).str.lower().str.replace(' ', '_')
+        if len(data) != len(self.columns):
+            for c in data.index:
+                if c not in self.columns:
+                    self[c] = pd.Series(dtype=object)
+
+        index = len(self)
+
+        work_id = generate_work_id(data)
+        work_id = self.get_unique_id(work_id, index)
+        data['work_id'] = work_id
+
+        
+        self.loc[index] = data
+        self.format_authors()
+
+Review.results.add_row = add_row # type: ignore
+
+def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True):
+        
+        if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
+            raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
+
+        dataframe = dataframe.reset_index().drop('index', axis=1)
+        dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
+
+        if (self.columns.to_list()) != (dataframe.columns.to_list()):
+            for c in dataframe.columns:
+                if c not in self.columns:
+                    self[c] = pd.Series(dtype=object)
+
+        
+        index = len(self)
+        for i in dataframe.index:
+                self.loc[index] = dataframe.loc[i]
+
+                if update_work_ids == True:
+                    work_id = generate_work_id(dataframe.loc[i])
+                    work_id = self.get_unique_id(work_id, i)
+                    self.loc[index, 'work_id'] = work_id
+
+                index += 1
+        
+        if format_authors == True:
+            self.format_authors()
+
+Review.results.add_dataframe = add_dataframe # type: ignore
 
 def has_formatted_citations(self):
         return self[self['citations'].apply(is_formatted_reference)]
@@ -810,6 +952,12 @@ def add_citations_to_results(self, add_work_ids = False, update_from_doi = False
         return self
 
 Review.results.add_citations_to_results = add_citations_to_results # type: ignore
+
+
+
+
+
+
 
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 

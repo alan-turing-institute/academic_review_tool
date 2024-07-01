@@ -123,8 +123,6 @@ class Results(pd.DataFrame):
         index = len(self)
         self.loc[index] = series
 
-        self.format_authors()
-
         return self
     
     def add_row(self, data):
@@ -146,7 +144,6 @@ class Results(pd.DataFrame):
 
         
         self.loc[index] = data
-        self.format_authors()
         
     def get_unique_id(self, work_id, index):
 
@@ -190,9 +187,6 @@ class Results(pd.DataFrame):
                     self.loc[index, 'work_id'] = work_id
 
                 index += 1
-        
-        if format_authors == True:
-            self.format_authors()
 
     def add_doi(self, doi: str = 'request_input', timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
@@ -289,8 +283,6 @@ class Results(pd.DataFrame):
 
         for c in dataframe.columns:
             results_table[c] = dataframe[c]
-        
-        results_table.format_authors()
 
         return results_table
 
@@ -316,8 +308,6 @@ class Results(pd.DataFrame):
                     
                 except:
                     pass
-        
-        self.format_authors()
 
         return self
 
@@ -348,8 +338,6 @@ class Results(pd.DataFrame):
                         
                     except:
                         pass
-            
-            self.format_authors()
 
             return self
     
@@ -381,7 +369,6 @@ class Results(pd.DataFrame):
                         pass
 
         self = self.replace(np.nan, None)
-        self.format_authors() # type: ignore
 
         return self
     
@@ -665,7 +652,7 @@ class Results(pd.DataFrame):
         
         output = pd.DataFrame(dtype=object)
         for i in frequent_kws:
-            df = self.search(any_kwds = i).copy(deep=True)
+            df = self.search(any_kwds = i).copy(deep=True) # type: ignore
             output = pd.concat([output, df])
 
         output = output.drop_duplicates('title')
@@ -680,104 +667,4 @@ class Results(pd.DataFrame):
 
     def has(self, column):
         return self[~self[column].isna()]
-
     
-
-    def crawl_citations(
-                    self,
-                    use_api: bool = True,
-                    crawl_limit: int = 5, 
-                    depth_limit: int = 2,
-                    be_polite: bool = True,
-                    rate_limit: float = 0.05,
-                    timeout: int = 60,
-                    add_to_results = True
-                    ):
-        
-        self.format_citations()
-
-        result = citation_crawler(
-                    data = self,
-                    use_api = use_api,
-                    crawl_limit = crawl_limit, 
-                    depth_limit = depth_limit,
-                    be_polite = be_polite,
-                    rate_limit = rate_limit,
-                    timeout = timeout
-                    )
-        
-        if add_to_results == True:
-
-            df = result.drop(labels=0, axis=0).reset_index().drop('index', axis=1)
-            self.add_dataframe(df)
-            self.format_citations() # type: ignore
-            self.format_authors() # type: ignore
-        
-        return result
-
-    def crawl_stored_citations(self, max_depth=2, processing_limit=100, format_authors = True, update_from_doi = False):
-
-        iteration = 1
-        processed_indexes = []
-        original_len = len(self)
-
-        while (iteration <= max_depth) and (len(processed_indexes) <= processing_limit):
-            
-            if (iteration > max_depth) or (len(processed_indexes) > processing_limit):
-                break
-
-            unformatted = self.lacks_formatted_citations()
-            if len(unformatted) > 0:
-                self.format_citations(add_work_ids = False, update_from_doi = update_from_doi)
-
-            indexes = self.index
-            to_process = pd.Series(list(set(indexes).difference(set(processed_indexes))), dtype=object).sort_values().to_list()
-
-            if len(to_process) > 0:
-
-                rows = self.loc[to_process]
-                citations = rows['citations'].to_list()
-                
-                new_df = pd.DataFrame(dtype=object)
-
-                process_iteration = 0
-
-                for i in citations:
-                    
-                    if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
-
-                        res = i.copy(deep=True)
-                        if len(res) > 0:
-                            new_df = pd.concat([new_df, res])
-
-                    process_iteration += 1
-
-                    if (len(processed_indexes) + process_iteration) > processing_limit:
-                        to_process = to_process[:process_iteration]
-                        break
-
-                new_df_asstr = new_df.copy(deep=True).astype(str)
-                unique_indexes = new_df_asstr.drop_duplicates().index
-                new_df = new_df.loc[unique_indexes]
-                new_df = new_df.reset_index().drop('index', axis=1)
-                self.add_dataframe(dataframe=new_df, update_work_ids = False, format_authors = False)
-
-            processed_indexes = processed_indexes + to_process
-            len_diff = len(self) - original_len
-            print(f'Iteration {iteration} complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {len_diff}')
-            
-            iteration += 1
-            
-        final_len_diff = len(self) - original_len
-        
-
-        self.update_work_ids()
-        df = self.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
-        self = Results.from_dataframe(df)
-        
-        if format_authors == True:
-            self.format_authors()
-        
-        print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n')
-        
-        return 
