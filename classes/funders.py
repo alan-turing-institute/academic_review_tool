@@ -502,11 +502,17 @@ class Funders:
         return self
 
 
-    def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = False): # type: ignore
+    def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = True): # type: ignore
 
         if type(funder) == str:
-            uri = funder
-            funder = None # type: ignore
+            if use_api == True:
+                details = lookup_funder(funder_id=funder)
+                crossref_id = details.loc[0, 'id'] # type: ignore
+                uri = details.loc[0, 'uri'] # type: ignore
+            else:
+                crossref_id = funder
+                
+            funder = None
 
         if funder == None:
             funder = Funder(uri=uri, crossref_id=crossref_id)
