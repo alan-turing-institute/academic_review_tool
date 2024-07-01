@@ -307,6 +307,61 @@ class Funder():
 
         res = lookup_funder(funder_id = uid, timeout = timeout) # type: ignore
         self.import_crossref_result(res.loc[0]) # type: ignore
+    
+    def search_works(self, bibliographic: str = None, # type: ignore
+                     title: str = None, # type: ignore
+                     author: str = None, # type: ignore
+                     author_affiliation: str = None, # type: ignore
+                     editor: str = None, # type: ignore
+                     entry_type: str = None, # type: ignore
+                     published_date: str = None, # type: ignore
+                     DOI: str = None, # type: ignore
+                     publisher_name: str = None,# type: ignore
+                    source: str = None, # type: ignore
+                    link: str = None, # type: ignore
+                    filter: dict = None, # type: ignore
+                    select: list = None, # type: ignore
+                    sample: int = None, # type: ignore
+                    limit: int = 10, 
+                    rate_limit: float = 0.05, 
+                    timeout: int = 60, 
+                    add_to_publications = False) -> pd.DataFrame:
+        
+        uid = self.details.loc[0, 'crossref_id']
+        if (uid == None) or (uid == ''):
+            uid = self.details.loc[0, 'uri']
+            if (uid == None) or (uid == ''):
+                uid = ''
+        
+        uid = str(uid)
+
+
+        result = search_funder_works(funder_id=uid,  
+                                     bibliographic=bibliographic, 
+                                     title=title, author=author, 
+                                     author_affiliation=author_affiliation, 
+                                     editor=editor,
+                                     entry_type=entry_type,
+                                     published_date=published_date,
+                                     DOI=DOI,
+                                     publisher_name=publisher_name,
+                                     source=source,
+                                     link=link,
+                                     filter=filter,
+                                     select=select,
+                                     sample=sample,
+                                     limit=limit,
+                                     rate_limit=rate_limit,
+                                     timeout=timeout
+                                     )
+        
+        if add_to_publications == True:
+            self.publications.add_dataframe(result)
+        
+        return result
+
+
+
 
 class Funders:
 
@@ -376,7 +431,7 @@ class Funders:
 
                     self.all = self.all.reset_index().drop('index',axis=1)
                 
-
+        self.update_ids()
 
     def __getitem__(self, key):
         
@@ -442,6 +497,7 @@ class Funders:
         merged_data = pd.Series(merged_data).value_counts().index.to_list()
 
         self.data = merged_data
+        self.update_ids()
 
         return self
 
@@ -473,6 +529,8 @@ class Funders:
         
         self.data.append(data)
 
+        self.update_ids()
+
 
     def add_funders_list(self, funders_list: list):
         
@@ -497,6 +555,11 @@ class Funders:
         for i in self.all.index:
             old_id = self.all.loc[i, 'funder_id']
             new_id = generate_funder_id(self.all.loc[i])
+
+            if new_id in self.all['funder_id'].to_list():
+                id_count = len(self.all[self.all['funder_id'].str.contains(new_id)]) # type: ignore
+                new_id = new_id + f'#{id_count + 1}'
+
             self.all.loc[i, 'funder_id'] = new_id
             self.details[new_id] = self.details[old_id]
             self.details[new_id].details.loc[0, 'funder_id'] = new_id
@@ -519,12 +582,18 @@ class Funders:
                 self.details[new_id] = self.details[a]
                 del self.details[a]
 
+        self.update_ids()
+
+
     def import_crossref_ids(self, crossref_ids: list):
 
         for i in crossref_ids:
 
             auth = Funder.from_crossref(i) # type: ignore
             self.add_funder(funder = auth, data = i)
+
+        self.update_ids()
+
 
     def from_crossref_ids(crossref_ids: list): # type: ignore
 
@@ -546,13 +615,112 @@ class Funders:
             data = crossref_result.loc[i]
             fu = Funder.from_crossref_result(crossref_result=data) # type: ignore
             self.add_funder(funder = fu, data = data)
-    
+
+        self.update_ids()
+
+
     def from_crossref_result(crossref_result: pd.DataFrame): # type: ignore
 
         funders = Funders()
         funders.import_crossref_result(crossref_result)
 
         return funders
+
+    def search_works(self, 
+                     funder_id: str = None, # type: ignore
+                    index: int = None, # type: ignore
+                    crossref_id: int = None, # type: ignore
+                    uri: str = None,# type: ignore
+                     bibliographic: str = None, # type: ignore
+                     title: str = None, # type: ignore
+                     author: str = None, # type: ignore
+                     author_affiliation: str = None, # type: ignore
+                     editor: str = None, # type: ignore
+                     entry_type: str = None, # type: ignore
+                     published_date: str = None, # type: ignore
+                     DOI: str = None, # type: ignore
+                     publisher_name: str = None,# type: ignore
+                    source: str = None, # type: ignore
+                    link: str = None, # type: ignore
+                    filter: dict = None, # type: ignore
+                    select: list = None, # type: ignore
+                    sample: int = None, # type: ignore
+                    limit: int = 10, 
+                    rate_limit: float = 0.05, 
+                    timeout: int = 60, 
+                    add_to_publications = False) -> pd.DataFrame:
+        
+        if (funder_id != None) and (funder_id in self.details.keys()):
+            funder = self.details[funder_id]
+            result = funder.search_works(
+                                     bibliographic=bibliographic, 
+                                     title=title, author=author, 
+                                     author_affiliation=author_affiliation, 
+                                     editor=editor,
+                                     entry_type=entry_type,
+                                     published_date=published_date,
+                                     DOI=DOI,
+                                     publisher_name=publisher_name,
+                                     source=source,
+                                     link=link,
+                                     filter=filter,
+                                     select=select,
+                                     sample=sample,
+                                     limit=limit,
+                                     rate_limit=rate_limit,
+                                     timeout=timeout,
+                                     add_to_publications=add_to_publications
+                                     )
+        
+        else:
+            if index != None:
+    
+                uid = self.all.loc[index, 'crossref_id']
+                if (uid==None) or (uid == ''):
+                    uid = self.all.loc[index, 'uri']
+                    if (uid==None) or (uid == ''):
+                        uid = ''
+
+                funder_id = self.all.loc[index, 'funder_id']
+
+                uid = str(uid)
+            
+            else:
+                if crossref_id != None:
+                    index = self.all[self.all['crossref_id'] == crossref_id].index.to_list()[0]
+                    funder_id = self.all.loc[index, 'funder_id']
+                    uid = str(crossref_id)
+                    
+                else:
+                    if uri != None:
+                        index = self.all[self.all['uri'] == uri].index.to_list()[0]
+                        funder_id = self.all.loc[index, 'funder_id']
+                        uid = str(uri)
+                        
+
+            result = search_funder_works(funder_id=uid,  
+                                     bibliographic=bibliographic, 
+                                     title=title, author=author, 
+                                     author_affiliation=author_affiliation, 
+                                     editor=editor,
+                                     entry_type=entry_type,
+                                     published_date=published_date,
+                                     DOI=DOI,
+                                     publisher_name=publisher_name,
+                                     source=source,
+                                     link=link,
+                                     filter=filter,
+                                     select=select,
+                                     sample=sample,
+                                     limit=limit,
+                                     rate_limit=rate_limit,
+                                     timeout=timeout
+                                     )
+        
+            if add_to_publications == True:
+                self.details[funder_id].publications.add_dataframe(result)
+        
+        return result
 
 # def format_funders(funder_data):
         
