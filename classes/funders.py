@@ -52,10 +52,10 @@ def generate_funder_id(funder_data: pd.Series):
 
         return funder_id
 
-class Funder():
+class Funder:
 
     """
-    This is a funder object. It is designed to store data about an individual funder and their publications.
+    This is a Funder object. It is designed to store data about an individual funder and their publications.
     
     Parameters
     ----------
@@ -201,7 +201,7 @@ class Funder():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
             self.details.loc[0, 'name'] = 'https://doi.org/' + uri
     
-    def from_dict(data: dict, use_api=False) -> Funder: # type: ignore
+    def from_dict(data: dict, use_api=False): # type: ignore
 
         funder = Funder()
         funder.add_dict(data=data)
@@ -214,7 +214,7 @@ class Funder():
     def add_series(self, series: pd.Series):
         self.details.loc[0] = series
 
-    def from_series(data: pd.Series) -> Funder: # type: ignore
+    def from_series(data: pd.Series): # type: ignore
         funder = Funder()
         funder.add_series(data)
 
@@ -224,7 +224,7 @@ class Funder():
         series = dataframe.loc[0]
         self.add_series(series) # type: ignore
 
-    def from_dataframe(data: pd.DataFrame) -> Funder: # type: ignore
+    def from_dataframe(data: pd.DataFrame): # type: ignore
         funder = Funder()
         funder.add_dataframe(data)
 
@@ -538,7 +538,7 @@ class Funders:
                 details = lookup_funder(funder_id=funder)
                 crossref_id = details.loc[0, 'id'] # type: ignore
                 uri = details.loc[0, 'uri'] # type: ignore
-                
+
             else:
                 crossref_id = funder
 
