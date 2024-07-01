@@ -37,9 +37,9 @@ def generate_funder_id(funder_data: pd.Series):
         funder_id = funder_id + '-' + name_shortened
         
 
-        uid = funder_data['crossref']
+        uid = funder_data['uri']
         if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = funder_data['uri']
+            uid = funder_data['crossref_id']
             if (uid == None) or (uid == 'None') or (uid == ''):
                 uid = funder_data['website']
                 if (uid == None) or (uid == 'None') or (uid == ''):
