@@ -18,6 +18,161 @@ import pandas as pd
 import numpy as np
 
 
+def add_pdf(self, path = 'request_input'):
+        
+        if path == 'request_input':
+            path = input('Path to PDF (URL or filepath): ')
+
+        table = read_pdf_to_table(path)
+        table = table.replace(np.nan, None).astype(object)
+
+        series = table.loc[0]
+        work_id = generate_work_id(series) # type: ignore
+        series['work_id'] = work_id
+
+        index = len(self)
+        self.loc[index] = series
+
+        self.format_authors()
+
+        return self
+
+Results.add_pdf = add_pdf # type: ignore
+
+
+def add_row(self, data):
+
+        if type(data) != pd.Series:
+            raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
+
+        data.index = data.index.astype(str).str.lower().str.replace(' ', '_')
+        if len(data) != len(self.columns):
+            for c in data.index:
+                if c not in self.columns:
+                    self[c] = pd.Series(dtype=object)
+
+        index = len(self)
+
+        work_id = generate_work_id(data)
+        work_id = self.get_unique_id(work_id, index)
+        data['work_id'] = work_id
+
+        
+        self.loc[index] = data
+        self.format_authors()
+
+Results.add_row = add_row # type: ignore
+
+def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True):
+        
+        if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
+            raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
+
+        dataframe = dataframe.reset_index().drop('index', axis=1)
+        dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
+
+        if (self.columns.to_list()) != (dataframe.columns.to_list()):
+            for c in dataframe.columns:
+                if c not in self.columns:
+                    self[c] = pd.Series(dtype=object)
+
+        
+        index = len(self)
+        for i in dataframe.index:
+                self.loc[index] = dataframe.loc[i]
+
+                if update_work_ids == True:
+                    work_id = generate_work_id(dataframe.loc[i])
+                    work_id = self.get_unique_id(work_id, i)
+                    self.loc[index, 'work_id'] = work_id
+
+                index += 1
+        
+        if format_authors == True:
+            self.format_authors()
+
+Results.add_dataframe = add_dataframe # type: ignore
+
+def has_formatted_citations(self):
+        return self[self['citations'].apply(is_formatted_reference)]
+
+Results.has_formatted_citations = has_formatted_citations # type: ignore
+
+
+def lacks_formatted_citations(self):
+        return self[~self['citations'].apply(is_formatted_reference)]
+
+Results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
+
+
+def format_citations(self, add_work_ids = False, update_from_doi = False):
+
+        self['citations'] = self['citations'].replace({np.nan: None})
+        self['citations_data'] = self['citations_data'].replace({np.nan: None})
+
+        unformatted = self.lacks_formatted_citations()
+        length = len(unformatted)
+        if length > 0:
+
+            if length == 1:
+                intro_message = '\nFormatting 1 set of citations...'
+            else:
+                intro_message = f'\nFormatting {length} sets of citations...'
+            print(intro_message)
+
+            indices = unformatted.index
+            processing_count = 0
+            for i in indices:
+                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
+                refs_count = len(refs) # type: ignore
+                processing_count = processing_count + refs_count
+                self.at[i, 'citations'] = refs
+            
+            if processing_count == 1:
+                outro_message = '1 citation formatted\n'
+            else:
+                outro_message = f'{processing_count} citations formatted\n'
+            print(outro_message)
+
+Results.format_citations = format_citations # type: ignore
+
+
+def format_authors(self):
+
+        self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
+        return self['authors']
+
+Results.format_authors = format_authors # type: ignore
+    
+
+def add_citations_to_results(self, add_work_ids = False, update_from_doi = False):
+
+        unformatted = self.lacks_formatted_citations()
+        if len(unformatted) > 0:
+            self.format_citations(add_work_ids = add_work_ids, update_from_doi = update_from_doi)
+
+        citations = self['citations'].to_list()
+        existing_ids = set(self['work_id'].to_list())
+        
+        for i in citations:
+
+            if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
+                df = i.copy(deep=True)
+
+                new_ids = set(df['work_id'].to_list())
+                diff_len = len(new_ids.difference(existing_ids))
+
+                if diff_len > 0:
+                    self.add_dataframe(dataframe=df)
+        
+        self.update_work_ids()
+        self.format_authors()
+
+
+        return self
+
+Results.add_citations_to_results = add_citations_to_results # type: ignore
+
 class Review:
     
     """
@@ -800,161 +955,6 @@ class Review:
 
         
         return result
-
-def add_pdf(self, path = 'request_input'):
-        
-        if path == 'request_input':
-            path = input('Path to PDF (URL or filepath): ')
-
-        table = read_pdf_to_table(path)
-        table = table.replace(np.nan, None).astype(object)
-
-        series = table.loc[0]
-        work_id = generate_work_id(series) # type: ignore
-        series['work_id'] = work_id
-
-        index = len(self)
-        self.loc[index] = series
-
-        self.format_authors()
-
-        return self
-
-Review.results.add_pdf = add_pdf # type: ignore
-
-
-def add_row(self, data):
-
-        if type(data) != pd.Series:
-            raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
-
-        data.index = data.index.astype(str).str.lower().str.replace(' ', '_')
-        if len(data) != len(self.columns):
-            for c in data.index:
-                if c not in self.columns:
-                    self[c] = pd.Series(dtype=object)
-
-        index = len(self)
-
-        work_id = generate_work_id(data)
-        work_id = self.get_unique_id(work_id, index)
-        data['work_id'] = work_id
-
-        
-        self.loc[index] = data
-        self.format_authors()
-
-Review.results.add_row = add_row # type: ignore
-
-def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True):
-        
-        if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
-            raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
-
-        dataframe = dataframe.reset_index().drop('index', axis=1)
-        dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
-
-        if (self.columns.to_list()) != (dataframe.columns.to_list()):
-            for c in dataframe.columns:
-                if c not in self.columns:
-                    self[c] = pd.Series(dtype=object)
-
-        
-        index = len(self)
-        for i in dataframe.index:
-                self.loc[index] = dataframe.loc[i]
-
-                if update_work_ids == True:
-                    work_id = generate_work_id(dataframe.loc[i])
-                    work_id = self.get_unique_id(work_id, i)
-                    self.loc[index, 'work_id'] = work_id
-
-                index += 1
-        
-        if format_authors == True:
-            self.format_authors()
-
-Review.results.add_dataframe = add_dataframe # type: ignore
-
-def has_formatted_citations(self):
-        return self[self['citations'].apply(is_formatted_reference)]
-
-Review.results.has_formatted_citations = has_formatted_citations # type: ignore
-
-
-def lacks_formatted_citations(self):
-        return self[~self['citations'].apply(is_formatted_reference)]
-
-Review.results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
-
-
-def format_citations(self, add_work_ids = False, update_from_doi = False):
-
-        self['citations'] = self['citations'].replace({np.nan: None})
-        self['citations_data'] = self['citations_data'].replace({np.nan: None})
-
-        unformatted = self.lacks_formatted_citations()
-        length = len(unformatted)
-        if length > 0:
-
-            if length == 1:
-                intro_message = '\nFormatting 1 set of citations...'
-            else:
-                intro_message = f'\nFormatting {length} sets of citations...'
-            print(intro_message)
-
-            indices = unformatted.index
-            processing_count = 0
-            for i in indices:
-                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
-                refs_count = len(refs) # type: ignore
-                processing_count = processing_count + refs_count
-                self.at[i, 'citations'] = refs
-            
-            if processing_count == 1:
-                outro_message = '1 citation formatted\n'
-            else:
-                outro_message = f'{processing_count} citations formatted\n'
-            print(outro_message)
-
-Review.results.format_citations = format_citations # type: ignore
-
-
-def format_authors(self):
-
-        self['authors'] = self['authors_data'].apply(format_authors) # type: ignore
-        return self['authors']
-
-Review.results.format_authors = format_authors # type: ignore
-    
-
-def add_citations_to_results(self, add_work_ids = False, update_from_doi = False):
-
-        unformatted = self.lacks_formatted_citations()
-        if len(unformatted) > 0:
-            self.format_citations(add_work_ids = add_work_ids, update_from_doi = update_from_doi)
-
-        citations = self['citations'].to_list()
-        existing_ids = set(self['work_id'].to_list())
-        
-        for i in citations:
-
-            if (type(i) == References) or (type(i) == Results) or (type(i) == pd.DataFrame):
-                df = i.copy(deep=True)
-
-                new_ids = set(df['work_id'].to_list())
-                diff_len = len(new_ids.difference(existing_ids))
-
-                if diff_len > 0:
-                    self.add_dataframe(dataframe=df)
-        
-        self.update_work_ids()
-        self.format_authors()
-
-
-        return self
-
-Review.results.add_citations_to_results = add_citations_to_results # type: ignore
 
 
 
