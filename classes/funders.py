@@ -175,6 +175,7 @@ class Funder():
             return self.publications[key]
 
     def __repr__(self) -> str:
+        
         return str(self.details.loc[0, 'name'])
 
     def has_uri(self) -> bool:
@@ -203,8 +204,54 @@ class Funder():
 
     def import_crossref_result(self, crossref_result: pd.Series):
         
-        self.details = pd.concat([self.details, crossref_result])
-        self.details = self.details.drop_duplicates(['crossref_id']).drop_duplicates(['uri']).reset_index()
+        if 'name' in crossref_result.index:
+            name = crossref_result['name']
+        else:
+            name = self.details.loc[0, 'name']
+
+        if 'alt-names' in crossref_result.index:
+            alt_names = crossref_result['alt-names']
+        else:
+            alt_names = self.details.loc[0, 'alt_names']
+
+        if 'location' in crossref_result.index:
+            location = crossref_result['location']
+        else:
+            location = self.details.loc[0, 'location']
+
+        if 'email' in crossref_result.index:
+            email = crossref_result['email']
+        else:
+            email = self.details.loc[0, 'email']
+
+        if 'uri' in crossref_result.index:
+            uri  =crossref_result['uri']
+        else:
+            uri = self.details.loc[0, 'uri']
+
+        if 'id' in crossref_result.index:
+            crossref_id = crossref_result['id']
+        else:
+            crossref_id = self.details.loc[0, 'crossref_id']
+
+        if 'work-count' in crossref_result.index:
+            work_count = crossref_result['work-count']
+        else:
+            work_count = self.details.loc[0, 'work_count']
+
+        if 'tokens' in crossref_result.index:
+            tokens = crossref_result['tokens']
+        else:
+            tokens = self.details.loc[0, 'tokens']
+        
+        self.details.loc[0, 'name'] = name
+        self.details.loc[0, 'alt_names'] = alt_names
+        self.details.loc[0, 'location'] = location
+        self.details.loc[0, 'email'] = email
+        self.details.loc[0, 'uri'] = uri
+        self.details.loc[0, 'crossref_id'] = crossref_id
+        self.details.loc[0, 'work_count'] = work_count
+        self.details.loc[0, 'tokens'] = tokens
     
     def from_crossref_result(self, crossref_result: pd.Series):
 
