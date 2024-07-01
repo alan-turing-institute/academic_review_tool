@@ -499,8 +499,9 @@ class Funders:
             new_id = generate_funder_id(self.all.loc[i])
             self.all.loc[i, 'funder_id'] = new_id
             self.details[new_id] = self.details[old_id]
+            self.details[new_id].details.loc[0, 'funder_id'] = new_id
             del self.details[old_id]
-            
+
     def update_from_crossref(self):
 
         funder_ids = self.details.keys()
