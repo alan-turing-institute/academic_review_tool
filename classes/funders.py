@@ -607,6 +607,7 @@ class Funders:
         self.sync_all()
 
         for i in self.all.index:
+            data = self.all.loc[i]
             old_id = self.all.loc[i, 'funder_id']
             new_id = generate_funder_id(self.all.loc[i])
 
@@ -615,9 +616,16 @@ class Funders:
                 new_id = new_id + f'#{id_count + 1}'
 
             self.all.loc[i, 'funder_id'] = new_id
-            self.details[new_id] = self.details[old_id]
-            self.details[new_id].details.loc[0, 'funder_id'] = new_id
-            del self.details[old_id]
+            if old_id in self.details.keys():
+                self.details[new_id] = self.details[old_id]
+                self.details[new_id].details.loc[0, 'funder_id'] = new_id
+                del self.details[old_id]
+                
+            else:
+                funder = Funder.from_series(data)
+                funder.details.loc[0, 'funder_id'] = new_id
+                self.details[new_id] = funder
+
 
     def update_from_crossref(self):
 
