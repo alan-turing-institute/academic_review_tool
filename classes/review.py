@@ -6,7 +6,7 @@ from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_schola
 
 from ..classes.properties import Properties
 from ..classes.results import Results, generate_work_id
-from ..classes.references import References, is_formatted_reference
+from ..classes.references import References, is_formatted_reference, extract_references
 from ..classes.activitylog import ActivityLog
 from ..classes.authors import Author, Authors
 from .citation_crawler import citation_crawler
@@ -72,8 +72,8 @@ class Review:
             * last_changed
         """
         
-        self.properties.review_id = id(self)
-        self.properties.size = str(self.__sizeof__()) + ' bytes'
+        self.properties.review_id = id(self) # type: ignore
+        self.properties.size = str(self.__sizeof__()) + ' bytes' # type: ignore
         self.properties.update_last_changed()
     
     def __repr__(self):
@@ -215,7 +215,7 @@ class Review:
     
     def add_pdf(self, path = 'request_input'):
         
-        self.results.add_pdf(path)
+        self.results.add_pdf(path) # type: ignore
         self.update_properties()
 
     def varstr(self):
@@ -284,7 +284,7 @@ class Review:
                 self.authors.merge(auths)
     
     def add_citations_to_results(self):
-        self.results.add_citations_to_results()
+        self.results.add_citations_to_results() # type: ignore
         self.format_authors()
 
 
@@ -301,7 +301,7 @@ class Review:
     def from_excel(file_path = 'request_input', sheet_name = None): # type: ignore
 
         review = Review()
-        review.results = Results.from_excel(file_path, sheet_name)
+        review.results = Results.from_excel(file_path, sheet_name) # type: ignore
         review.format_authors()
         
         return review
@@ -312,10 +312,10 @@ class Review:
         self.format_authors()
         return self
     
-    def from_csv(file_path = 'request_input'):
+    def from_csv(file_path = 'request_input'): # type: ignore
 
         review = Review()
-        review.results = Results.from_csv(file_path)
+        review.results = Results.from_csv(file_path) # type: ignore
         review.format_authors()
 
         return review
@@ -326,36 +326,36 @@ class Review:
         self.format_authors()
         return self
     
-    def from_json(file_path = 'request_input'):
+    def from_json(file_path = 'request_input'): # type: ignore
 
         review = Review()
-        review.import_json(file_path = file_path)
+        review.import_json(file_path = file_path) # type: ignore
 
         return review
     
     def import_file(self, file_path = 'request_input', sheet_name = None):
         self.update_properties()
-        return self.results.import_file(file_path, sheet_name)
+        return self.results.import_file(file_path, sheet_name) # type: ignore
     
-    def from_file(file_path = 'request_input', sheet_name = None):
+    def from_file(file_path = 'request_input', sheet_name = None): # type: ignore
         
         review = Review()
-        review.results = Results.from_file(file_path, sheet_name)
+        review.results = Results.from_file(file_path, sheet_name) # type: ignore
         review.format_authors() # type: ignore
 
         return review
 
     def import_jstor_metadata(self, file_path = 'request_input', clean_results = True):
-        self.results.import_jstor_metadata(file_path = file_path, clean_results = clean_results)
+        self.results.import_jstor_metadata(file_path = file_path, clean_results = clean_results) # type: ignore
     
     def import_jstor_full(self, file_path = 'request_input', clean_results = True):
-        self.results.import_jstor_full(file_path = file_path, clean_results = clean_results)
+        self.results.import_jstor_full(file_path = file_path, clean_results = clean_results) # type: ignore
 
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
-        return self.results.search_field(field = field, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output)
+        return self.results.search_field(field = field, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
 
     def search(self, any_kwds = 'request_input', all_kwds = None, not_kwds = None, fields = 'all', case_sensitive = False, output = 'Results'):
-        return self.results.search(fields = fields, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output)
+        return self.results.search(fields = fields, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
 
     def export_txt(self, file_name = 'request_input', file_address = 'request_input'):
         
@@ -419,7 +419,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_article(url)
-        self.results.add_dataframe(df)
+        self.results.add_dataframe(df) # type: ignore
 
     def scrape_doi(self, doi = 'request_input'):
         
@@ -427,7 +427,7 @@ class Review:
             doi = input('DOI or URL: ')
 
         df = scrape_doi(doi)
-        self.results.add_dataframe(df)
+        self.results.add_dataframe(df) # type: ignore
 
     def scrape_google_scholar(self, url = 'request_input'):
 
@@ -435,7 +435,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_google_scholar(url)
-        self.results.add_dataframe(df)
+        self.results.add_dataframe(df) # type: ignore
     
     def scrape_google_scholar_search(self, url = 'request_input'):
 
@@ -443,26 +443,26 @@ class Review:
             url = input('URL: ')
 
         df = scrape_google_scholar_search(url)
-        self.results.add_dataframe(df)
+        self.results.add_dataframe(df) # type: ignore
     
     def search_crossref(self,
-                bibliographic: str = None,
-                title: str = None,
-                author: str = None,
-                author_affiliation: str = None,
-                editor: str = None,
-                entry_type: str = None,
-                published_date: str = None,
-                DOI: str = None,
-                ISSN: str = None,
-                publisher_name: str = None,
-                funder_name = None,
-                source: str = None,
-                link: str = None,
-                filter: dict = None,
-                select: list = None,
-                sample: int = None,
-                limit: int = None,
+                bibliographic: str = None,  # type: ignore
+                title: str = None, # type: ignore
+                author: str = None, # type: ignore
+                author_affiliation: str = None, # type: ignore
+                editor: str = None, # type: ignore
+                entry_type: str = None, # type: ignore
+                published_date: str = None, # type: ignore
+                DOI: str = None, # type: ignore
+                ISSN: str = None, # type: ignore
+                publisher_name: str = None, # type: ignore
+                funder_name = None, # type: ignore
+                source: str = None, # type: ignore
+                link: str = None, # type: ignore
+                filter: dict = None, # type: ignore
+                select: list = None, # type: ignore
+                sample: int = None, # type: ignore
+                limit: int = None, # type: ignore
                 rate_limit: float = 0.1,
                 timeout = 60,
                 add_to_results = False
@@ -489,7 +489,7 @@ class Review:
                 timeout = timeout)
         
         if add_to_results == True:
-            self.results.add_dataframe(dataframe=df)
+            self.results.add_dataframe(dataframe=df) # type: ignore
             self.format_authors()
         
         return df
@@ -498,13 +498,13 @@ class Review:
         return lookup_doi(doi=doi, timeout=timeout)
     
     def add_doi(self, doi = 'request_input', timeout = 60):
-        return self.results.add_doi(doi=doi, timeout=timeout)
+        return self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
 
     def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
     def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
-        return self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
+        return self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
     
     def update_from_dois(self, timeout: int = 60):
         self.results.update_from_dois(timeout=timeout) # type: ignore
@@ -522,15 +522,15 @@ class Review:
     def lookup_journals(self, issns_list: list = [], rate_limit: float = 0.1, timeout: int = 60):
         return lookup_journals(issns_list = issns_list, rate_limit = rate_limit, timeout = timeout)
     
-    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60):
+    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60): # type: ignore
         return search_journals(*args, limit = limit, rate_limit=rate_limit, timeout = timeout)
     
     def get_journal_entries(self,
                         issn = 'request_input',
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
-                        limit: int = None,
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
+                        limit: int = None, # type: ignore
                         rate_limit: float = 0.1,
                         timeout = 60):
         
@@ -539,22 +539,22 @@ class Review:
     def search_journal_entries(
                         self,
                         issn = 'request_input',
-                        bibliographic: str = None,
-                        title: str = None,
-                        author: str = None,
-                        author_affiliation: str = None,
-                        editor: str = None,
-                        entry_type: str = None,
-                        published_date: str = None,
-                        DOI: str = None,
-                        publisher_name: str = None,
-                        funder_name: str = None,
-                        source: str = None,
-                        link: str = None,
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
-                        limit: int = None,
+                        bibliographic: str = None, # type: ignore
+                        title: str = None, # type: ignore
+                        author: str = None, # type: ignore
+                        author_affiliation: str = None, # type: ignore
+                        editor: str = None, # type: ignore
+                        entry_type: str = None, # type: ignore
+                        published_date: str = None, # type: ignore
+                        DOI: str = None, # type: ignore
+                        publisher_name: str = None, # type: ignore
+                        funder_name: str = None, # type: ignore
+                        source: str = None, # type: ignore
+                        link: str = None, # type: ignore
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
+                        limit: int = None, # type: ignore
                         rate_limit: float = 0.1,
                         timeout: int = 60,
                         add_to_results: bool = False) -> pd.DataFrame:
@@ -581,7 +581,7 @@ class Review:
                                           )
             
             if add_to_results == True:
-                self.results.add_dataframe(dataframe=df)
+                self.results.add_dataframe(dataframe=df) # type: ignore
                 self.format_authors()
         
             return df
@@ -592,15 +592,15 @@ class Review:
     def lookup_funders(self, funder_ids: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_funders(funder_ids=funder_ids, rate_limit=rate_limit, timeout = timeout)
     
-    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60):
+    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60): # type: ignore
         return search_funders(*args, limit=limit, rate_limit=rate_limit, timeout=timeout)
     
     def get_funder_works(self,
                         funder_id = 'request_input',
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
-                        limit: int = None,
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
+                        limit: int = None, # type: ignore
                         rate_limit: float = 0.1,
                         timeout: int = 60,
                         add_to_results: bool = False):
@@ -608,29 +608,29 @@ class Review:
         df = get_funder_works(funder_id=funder_id, filter=filter, select=select, sample=sample, limit=limit, rate_limit=rate_limit, timeout=timeout)
 
         if add_to_results == True:
-                self.results.add_dataframe(dataframe=df)
+                self.results.add_dataframe(dataframe=df) # type: ignore
                 self.format_authors()
         
         return df
     
     def search_funder_works(self,
                         funder_id = 'request_input',
-                        bibliographic: str = None,
-                        title: str = None,
-                        author: str = None,
-                        author_affiliation: str = None,
-                        editor: str = None,
-                        entry_type: str = None,
-                        published_date: str = None,
-                        DOI: str = None,
-                        publisher_name: str = None,
+                        bibliographic: str = None, # type: ignore
+                        title: str = None, # type: ignore
+                        author: str = None, # type: ignore
+                        author_affiliation: str = None, # type: ignore
+                        editor: str = None, # type: ignore
+                        entry_type: str = None, # type: ignore
+                        published_date: str = None, # type: ignore
+                        DOI: str = None, # type: ignore
+                        publisher_name: str = None, # type: ignore
                         funder_name = None,
-                        source: str = None,
-                        link: str = None,
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
-                        limit: int = None,
+                        source: str = None, # type: ignore
+                        link: str = None, # type: ignore
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
+                        limit: int = None, # type: ignore
                         rate_limit: float = 0.1,
                         timeout: int = 60,
                         add_to_results: bool = False):
@@ -674,9 +674,9 @@ class Review:
             if (iteration > max_depth) or (len(processed_indexes) > processing_limit):
                 break
 
-            unformatted = self.results.lacks_formatted_citations()
+            unformatted = self.results.lacks_formatted_citations() # type: ignore
             if len(unformatted) > 0:
-                self.results.format_citations(add_work_ids = False, update_from_doi = update_from_doi)
+                self.results.format_citations(add_work_ids = False, update_from_doi = update_from_doi) # type: ignore
 
             indexes = self.results.index
             to_process = pd.Series(list(set(indexes).difference(set(processed_indexes))), dtype=object).sort_values().to_list()
@@ -708,7 +708,7 @@ class Review:
                 unique_indexes = new_df_asstr.drop_duplicates().index
                 new_df = new_df.loc[unique_indexes]
                 new_df = new_df.reset_index().drop('index', axis=1)
-                self.results.add_dataframe(dataframe=new_df, update_work_ids = False, format_authors = False)
+                self.results.add_dataframe(dataframe=new_df, update_work_ids = False, format_authors = False) # type: ignore
 
             processed_indexes = processed_indexes + to_process
             len_diff = len(self.results) - original_len
@@ -719,9 +719,9 @@ class Review:
         final_len_diff = len(self.results) - original_len
         
 
-        self.results.update_work_ids()
+        self.results.update_work_ids() # type: ignore
         df = self.results.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
-        self.results = Results.from_dataframe(df)
+        self.results = Results.from_dataframe(df) # type: ignore
         
 
         if format_authors == True:
