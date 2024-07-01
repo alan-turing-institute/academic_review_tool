@@ -1,5 +1,5 @@
 from ..importers.orcid import lookup_orcid
-from ..classes.results import Results
+from .results import Results
 
 import pandas as pd
 import numpy as np

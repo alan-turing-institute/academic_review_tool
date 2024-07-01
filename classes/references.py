@@ -1,6 +1,6 @@
 from ..utils.basics import results_cols
 from ..importers.crossref import references_to_df
-from ..classes.results import Results
+from .results import Results
 
 import pandas as pd
 import numpy as np
