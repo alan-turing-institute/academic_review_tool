@@ -199,7 +199,7 @@ class Funder:
 
         if 'DOI' in data.keys():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
-            self.details.loc[0, 'name'] = 'https://doi.org/' + uri
+            self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
     
     def from_dict(data: dict, use_api=False): # type: ignore
 
