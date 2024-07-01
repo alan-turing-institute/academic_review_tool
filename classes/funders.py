@@ -191,20 +191,44 @@ class Funder():
         else:
             return False
 
+    def add_dict(self, data: dict):
+
+        if 'name' in data.keys():
+            name = data['name']
+            self.details.loc[0, 'name'] = name
+
+        if 'DOI' in data.keys():
+            uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+            self.details.loc[0, 'name'] = 'https://doi.org/' + uri
+    
+    def from_dict(data: dict, use_api=False) -> Funder: # type: ignore
+
+        funder = Funder()
+        funder.add_dict(data=data)
+
+        if use_api == True:
+            funder.update_from_crossref()
+
+        return funder
+        
     def add_series(self, series: pd.Series):
         self.details.loc[0] = series
 
-    def from_series(series: pd.Series): # type: ignore
+    def from_series(data: pd.Series) -> Funder: # type: ignore
         funder = Funder()
-        funder.add_series(series)
-    
+        funder.add_series(data)
+
+        return funder
+
     def add_dataframe(self, dataframe: pd.DataFrame):
         series = dataframe.loc[0]
         self.add_series(series) # type: ignore
 
-    def from_dataframe(dataframe: pd.DataFrame): # type: ignore
+    def from_dataframe(data: pd.DataFrame) -> Funder: # type: ignore
         funder = Funder()
-        funder.add_dataframe(dataframe)
+        funder.add_dataframe(data)
+
+        return funder
 
     def import_crossref_result(self, crossref_result: pd.Series):
         
@@ -261,6 +285,8 @@ class Funder():
 
         funder = Funder()
         funder.import_crossref_result(crossref_result=crossref_result)
+
+        return funder
 
     def import_crossref(self, crossref_id: str, timeout = 60):
 
@@ -504,15 +530,33 @@ class Funders:
 
     def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = True): # type: ignore
 
+        
+
         if type(funder) == str:
+
             if use_api == True:
                 details = lookup_funder(funder_id=funder)
                 crossref_id = details.loc[0, 'id'] # type: ignore
                 uri = details.loc[0, 'uri'] # type: ignore
+                
             else:
                 crossref_id = funder
+
+            funder = None # type: ignore
+
+        if type(data) != None:
+
+            if type(data) == dict:
+                funder = Funder.from_dict(data=data, use_api = use_api) # type: ignore
+            
+            else:
+                if type(data) == pd.Series:
+                    funder = Funder.from_series(data=data) # type: ignore
                 
-            funder = None
+                else:
+                    if type(data) == pd.DataFrame:
+                        funder = Funder.from_dataframe(data=data) # type: ignore
+
 
         if funder == None:
             funder = Funder(uri=uri, crossref_id=crossref_id)
