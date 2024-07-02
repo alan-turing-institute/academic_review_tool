@@ -808,7 +808,7 @@ def format_funders(funder_data, use_api = False):
             result.add_funder(funder=funder, use_api=use_api)
 
         if type(funder_data) == pd.DataFrame:
-            result = result.import_crossref_result(funder_data, use_api=use_api) # type: ignore
+            result.import_crossref_result(funder_data, use_api=use_api) # type: ignore
 
         if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
             result = Funders()
