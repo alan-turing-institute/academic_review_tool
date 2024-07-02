@@ -95,7 +95,7 @@ class Affiliation:
         orig_name_data = name
 
         if type(name) == str:
-            name = name.strip()
+            name = name.strip().replace('&amp;', '&').replace('\n', '').replace('\n', ' ')
         
             if (location is None) and (address is None):
 
