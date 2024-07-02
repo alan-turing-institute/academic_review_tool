@@ -708,11 +708,11 @@ class Affiliations:
                 self.add_affiliation(affiliation = i, use_api=use_api)
             else:
                 if type(i) == dict:
-                    affil = Affiliation.from_dict(i)
+                    affil = Affiliation.from_dict(i)  # type: ignore
                     self.add_affiliation(affiliation = affil, use_api=use_api)
                 else:
                     if type(i) == pd.Series:
-                        affil = Affiliation.from_series(i)
+                        affil = Affiliation.from_series(i)  # type: ignore
                         self.add_affiliation(affiliation = affil, use_api=use_api)
         
         self.update_ids()
@@ -821,7 +821,7 @@ class Affiliations:
     def with_uri(self):
         return self.all[~self.all['uri'].isna()]
 
-    def from_list(affiliations_list: list, use_api: bool = False):
+    def from_list(affiliations_list: list, use_api: bool = False): # type: ignore
         affiliations = Affiliations()
         affiliations.add_list(affiliations_list, use_api=use_api)
 
