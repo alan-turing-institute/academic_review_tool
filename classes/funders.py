@@ -22,7 +22,7 @@ def generate_funder_id(funder_data: pd.Series):
         if name != 'no_name_given':
             name = name.strip().lower()
             name_tokens = list(word_tokenize(name))
-            name_tokens = [i for i in name_tokens if i not in all_stopwords]
+            name_tokens = [i for i in name_tokens if ((i not in all_stopwords) and (i != "'s"))]
             name_first_3 = name_tokens[:3]
             name_last = name_tokens[-1]
 
@@ -48,7 +48,7 @@ def generate_funder_id(funder_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:20]
 
         funder_id = funder_id + '-' + uid_shortened
-        funder_id = funder_id.replace('F:-', 'F:').replace('--', '-').replace('F:-', 'F:').strip('-')
+        funder_id = funder_id.replace('F:-', 'F:').replace("'s", '').replace("'", "").replace('"', '').replace('--', '-').replace('F:-', 'F:').strip('-')
 
         return funder_id
 
