@@ -541,6 +541,13 @@ class Review:
         if update_formatting == True:
             self.format()
 
+    def add_dataframe(self, dataframe: pd.DataFrame, update_formatting: bool = True):
+
+        self.results.add_dataframe(dataframe=dataframe) # type: ignore
+
+        if update_formatting == True:
+            self.format()
+
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True):
         self.update_properties()
         self.results.import_excel(file_path, sheet_name) # type: ignore
