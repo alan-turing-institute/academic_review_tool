@@ -814,7 +814,7 @@ def search_funders(*args, limit: int = 1000, rate_limit: float = 0.05, timeout =
 
                 sleep(rate_limit)
         except Exception as e:
-            
+
             raise e
     
     output = output.reset_index().drop('index', axis=1)
@@ -969,7 +969,10 @@ def search_funder_works(funder_id = 'request_input',
         select_code = f'result.select({select_input})'
         result = exec(select_code)
 
-    print(f'{result.count()} results found')
+    try:
+        print(f'{result.count()} results found')
+    except:
+        pass
 
     items = []
     if result != None:
