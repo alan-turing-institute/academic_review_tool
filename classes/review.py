@@ -216,8 +216,11 @@ class Review:
         self.properties = Properties(review_name = review_name, file_location = file_location, file_type = file_type)
         self.results = Results()
         self.authors = Authors()
+        self.funders = Funders()
+        self.affiliations = Affiliations()
         self.activity_log = ActivityLog()
         self.description = ''
+        self.format()
         self.update_properties()
     
     def update_properties(self):
@@ -425,7 +428,7 @@ class Review:
         return review
 
     def format_funders(self):
-        self.results.format_funders() # type: ignore
+        self.results.format_fcunders() # type: ignore
 
     def format_affiliations(self):
         self.authors.format_affiliations()
