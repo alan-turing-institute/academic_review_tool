@@ -380,10 +380,13 @@ class Review:
             if id(locals()[name]) == id(self):
                 return name
     
-    def add_pdf(self, path = 'request_input'):
+    def add_pdf(self, path = 'request_input', update_formatting: bool = True):
         
         self.results.add_pdf(path) # type: ignore
-        self.format()
+        
+        if update_formatting == True:
+            self.format()
+
         self.update_properties()
 
     def varstr(self):
@@ -463,18 +466,25 @@ class Review:
         self.format_authors()
         self.format_affiliations()
 
-    def add_citations_to_results(self):
+    def add_citations_to_results(self, update_formatting: bool = True):
         self.results.add_citations_to_results() # type: ignore
-        self.format()
+
+        if update_formatting == True:
+            self.format()
 
 
-    def update_from_orcid(self):
+    def update_from_orcid(self, update_formatting: bool = True):
         self.authors.update_from_orcid()
 
-    def import_excel(self, file_path = 'request_input', sheet_name = None):
+        if update_formatting == True:
+            self.format()
+
+    def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True):
         self.update_properties()
         self.results.import_excel(file_path, sheet_name) # type: ignore
-        self.format()
+
+        if update_formatting == True:
+            self.format()
 
         return self
     
@@ -486,10 +496,13 @@ class Review:
         
         return review
 
-    def import_csv(self, file_path = 'request_input'):
+    def import_csv(self, file_path = 'request_input', update_formatting: bool = True):
         self.update_properties()
         self.results.import_csv(file_path) # type: ignore
-        self.format()
+
+        if update_formatting == True:
+            self.format()
+
         return self
     
     def from_csv(file_path = 'request_input'): # type: ignore
@@ -500,10 +513,13 @@ class Review:
 
         return review
 
-    def import_json(self, file_path = 'request_input'):
+    def import_json(self, file_path = 'request_input', update_formatting: bool = True):
         self.update_properties()
         self.results.import_json(file_path) # type: ignore
-        self.format()
+
+        if update_formatting == True:
+            self.format()
+
         return self
     
     def from_json(file_path = 'request_input'): # type: ignore
@@ -513,9 +529,13 @@ class Review:
 
         return review
     
-    def import_file(self, file_path = 'request_input', sheet_name = None):
+    def import_file(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True):
+
         self.update_properties()
-        return self.results.import_file(file_path, sheet_name) # type: ignore
+        self.results.import_file(file_path, sheet_name) # type: ignore
+
+        if update_formatting == True:
+            self.format()
     
     def from_file(file_path = 'request_input', sheet_name = None): # type: ignore
         
@@ -677,30 +697,34 @@ class Review:
     def lookup_doi(self, doi = 'request_input', timeout = 60):
         return lookup_doi(doi=doi, timeout=timeout)
     
-    def add_doi(self, doi = 'request_input', timeout = 60):
+    def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True):
+            
         self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
-        self.format_citations()
-        self.format_authors()
+
+        if update_formatting == True:
+            self.format()
+        
 
     def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
-    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True):
         self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
-        self.format_citations()
-        self.format_authors()
+
+        if update_formatting == True:
+            self.format()
     
-    def update_from_dois(self, timeout: int = 60):
+    def update_from_dois(self, timeout: int = 60, update_formatting: bool = True):
         self.results.update_from_dois(timeout=timeout) # type: ignore
-        self.format_authors()
-        self.format_citations()
+
+        if update_formatting == True:
+            self.format()
 
     def sync_apis(self, timeout: int = 60):
 
         self.update_from_dois(timeout=timeout)
         self.update_from_orcid()
-        self.format_citations()
-        self.format_authors()
+        self.format()
 
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
@@ -979,8 +1003,7 @@ class Review:
 
             df = result.drop(labels=0, axis=0).reset_index().drop('index', axis=1)
             self.results.add_dataframe(df) # type: ignore
-            self.format_citations() # type: ignore
-            self.format_authors() # type: ignore
+            self.format()
 
         
         return result
