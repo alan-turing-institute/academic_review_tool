@@ -574,6 +574,17 @@ class Authors:
         authors.import_crossref(crossref_result)
 
         return authors
+    
+    def affiliations(self):
+        
+        output = {}
+        for auth_id in self.details.keys():
+            auth = self.details[auth_id]
+            affiliation = auth.loc[0, 'affiliations']
+            output[auth_id] = affiliation
+        
+        return output
+
 
 def format_authors(author_data):
         
@@ -598,5 +609,5 @@ def format_authors(author_data):
             result.add_author(author)
     
         result.format_affiliations()
-        
+
         return result
