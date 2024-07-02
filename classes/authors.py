@@ -241,6 +241,7 @@ class Author():
     def from_series(series: pd.Series): # type: ignore
         author = Author()
         author.add_series(series)
+        return author
     
     def add_dataframe(self, dataframe: pd.DataFrame):
         series = dataframe.loc[0]
@@ -249,6 +250,7 @@ class Author():
     def from_dataframe(dataframe: pd.DataFrame): # type: ignore
         author = Author()
         author.add_dataframe(dataframe)
+        return author
 
     def import_crossref(self, crossref_result: dict):
 
@@ -529,7 +531,7 @@ class Authors:
             auth_data = self.all.loc[i]
             auth_id = auth_data['author_id']
 
-            if auth_id is not None:
+            if auth_id != None:
                 auth = Author.from_series(auth_data)
                 self.details[auth_id] = auth
 
