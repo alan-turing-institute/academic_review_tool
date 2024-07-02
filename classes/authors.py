@@ -532,13 +532,13 @@ class Authors:
             auth_id = auth_data['author_id']
 
             if auth_id != None:
-                auth = Author.from_series(auth_data)
+                auth = Author.from_series(auth_data) # type: ignore
                 self.details[auth_id] = auth
 
             else:
                 auth_id = generate_author_id(auth_data)
                 auth_data['author_id'] = auth_id
-                auth = Author.from_series(auth_data)
+                auth = Author.from_series(auth_data) # type: ignore
                 self.details[auth_id] = auth
 
     def format_affiliations(self):
