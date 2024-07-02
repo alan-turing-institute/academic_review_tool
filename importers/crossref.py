@@ -339,23 +339,23 @@ def references_to_df(references_list: list, update_from_doi = False) -> pd.DataF
     return df
 
 def search_works(
-                bibliographic: str = None,
-                title: str = None,
-                author: str = None,
-                author_affiliation: str = None,
-                editor: str = None,
-                entry_type: str = None,
-                published_date: str = None,
-                DOI: str = None,
-                ISSN: str = None,
-                publisher_name: str = None,
-                funder_name = None,
-                source: str = None,
-                link: str = None,
-                filter: dict = None,
-                select: list = None,
-                sample: int = None,
-                limit: int = 1000,
+                bibliographic: str = None, # type: ignore
+                title: str = None, # type: ignore
+                author: str = None, # type: ignore
+                author_affiliation: str = None, # type: ignore
+                editor: str = None, # type: ignore
+                entry_type: str = None, # type: ignore
+                published_date: str = None, # type: ignore
+                DOI: str = None, # type: ignore
+                ISSN: str = None, # type: ignore
+                publisher_name: str = None, # type: ignore
+                funder_name = None, # type: ignore
+                source: str = None, # type: ignore
+                link: str = None, # type: ignore
+                filter: dict = None, # type: ignore
+                select: list = None, # type: ignore
+                sample: int = None, # type: ignore
+                limit: int = 20,
                 rate_limit: float = 0.05,
                 timeout = 60
                 ) -> pd.DataFrame:
@@ -385,7 +385,7 @@ def search_works(
         bibliographic = bibliographic + ', ' + str(link)
 
     if bibliographic == '':
-        bibliographic = None
+        bibliographic = None # type: ignore
 
     global my_etiquette
     works = Works(etiquette=my_etiquette, timeout=timeout)
@@ -450,7 +450,7 @@ def search_works(
     if result != None:
 
         iteration = 1
-        for item in result:
+        for item in result: # type: ignore
 
             if limit != None:
                 if iteration > limit:
@@ -551,10 +551,10 @@ def search_journals(*args, limit: int = 1000, rate_limit: float = 0.05, timeout 
     return results
     
 def get_journal_entries(issn = 'request_input',
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
-                        limit: int = 1000,
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
+                        limit: int = 20,
                         rate_limit: float = 0.05,
                         timeout = 60):
 
@@ -590,13 +590,13 @@ def get_journal_entries(issn = 'request_input',
         select_code = f'result.select({select_input})'
         result = exec(select_code)
 
-    print(f'{result.count()} results found')
+    print(f'{result.count()} results found') # type: ignore
 
     items = []
     if result != None:
 
         iteration = 1
-        for item in result:
+        for item in result: # type: ignore
 
             if limit != None:
                 if iteration > limit:
@@ -613,21 +613,21 @@ def get_journal_entries(issn = 'request_input',
     return df
 
 def search_journal_entries(issn = 'request_input',
-                        bibliographic: str = None,
-                        title: str = None,
-                        author: str = None,
-                        author_affiliation: str = None,
-                        editor: str = None,
-                        entry_type: str = None,
-                        published_date: str = None,
-                        DOI: str = None,
-                        publisher_name: str = None,
-                        funder_name = None,
-                        source: str = None,
-                        link: str = None,
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
+                        bibliographic: str = None, # type: ignore
+                        title: str = None, # type: ignore
+                        author: str = None, # type: ignore
+                        author_affiliation: str = None, # type: ignore
+                        editor: str = None, # type: ignore
+                        entry_type: str = None, # type: ignore
+                        published_date: str = None, # type: ignore
+                        DOI: str = None, # type: ignore
+                        publisher_name: str = None, # type: ignore
+                        funder_name = None, # type: ignore
+                        source: str = None, # type: ignore
+                        link: str = None, # type: ignore
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
                         limit: int = 1000,
                         rate_limit: float = 0.05,
                         timeout = 60):
@@ -658,7 +658,7 @@ def search_journal_entries(issn = 'request_input',
         bibliographic = bibliographic + ', ' + str(link)
 
     if bibliographic == '':
-        bibliographic = None
+        bibliographic = None  # type: ignore
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout)
@@ -697,14 +697,16 @@ def search_journal_entries(issn = 'request_input',
 
         select_code = f'result.select({select_input})'
         result = exec(select_code)
-
-    print(f'{result.count()} results found')
+    try:
+        print(f'{result.count()} results found') # type: ignore
+    except:
+        pass
 
     items = []
     if result != None:
 
         iteration = 1
-        for item in result:
+        for item in result:  # type: ignore
 
             if limit != None:
                 if iteration > limit:
@@ -822,9 +824,9 @@ def search_funders(*args, limit: int = 1000, rate_limit: float = 0.05, timeout =
     return output
     
 def get_funder_works(funder_id = 'request_input',
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
                         limit: int = 1000,
                         rate_limit: float = 0.05,
                         timeout = 60):
@@ -861,13 +863,16 @@ def get_funder_works(funder_id = 'request_input',
         select_code = f'result.select({select_input})'
         result = exec(select_code)
 
-    print(f'{result.count()} results found')
+    try:
+        print(f'{result.count()} results found') # type: ignore
+    except:
+        pass
 
     items = []
     if result != None:
 
         iteration = 1
-        for item in result:
+        for item in result: # type: ignore
 
             if limit != None:
                 if iteration > limit:
@@ -884,21 +889,21 @@ def get_funder_works(funder_id = 'request_input',
     return df
 
 def search_funder_works(funder_id = 'request_input',
-                        bibliographic: str = None,
-                        title: str = None,
-                        author: str = None,
-                        author_affiliation: str = None,
-                        editor: str = None,
-                        entry_type: str = None,
-                        published_date: str = None,
-                        DOI: str = None,
-                        publisher_name: str = None,
-                        funder_name = None,
-                        source: str = None,
-                        link: str = None,
-                        filter: dict = None,
-                        select: list = None,
-                        sample: int = None,
+                        bibliographic: str = None, # type: ignore
+                        title: str = None, # type: ignore
+                        author: str = None, # type: ignore
+                        author_affiliation: str = None, # type: ignore
+                        editor: str = None, # type: ignore
+                        entry_type: str = None, # type: ignore
+                        published_date: str = None, # type: ignore
+                        DOI: str = None, # type: ignore
+                        publisher_name: str = None, # type: ignore
+                        funder_name = None, # type: ignore
+                        source: str = None, # type: ignore
+                        link: str = None, # type: ignore
+                        filter: dict = None, # type: ignore
+                        select: list = None, # type: ignore
+                        sample: int = None, # type: ignore
                         limit: int = 1000,
                         rate_limit: float = 0.05,
                         timeout = 60):
@@ -929,7 +934,7 @@ def search_funder_works(funder_id = 'request_input',
         bibliographic = bibliographic + ', ' + str(link)
 
     if bibliographic == '':
-        bibliographic = None
+        bibliographic = None # type: ignore
 
     global my_etiquette
     funders = Funders(etiquette=my_etiquette, timeout=timeout)
@@ -970,7 +975,7 @@ def search_funder_works(funder_id = 'request_input',
         result = exec(select_code)
 
     try:
-        print(f'{result.count()} results found')
+        print(f'{result.count()} results found') # type: ignore
     except:
         pass
 
@@ -978,7 +983,7 @@ def search_funder_works(funder_id = 'request_input',
     if result != None:
 
         iteration = 1
-        for item in result:
+        for item in result: # type: ignore
 
             if limit != None:
                 if iteration > limit:
