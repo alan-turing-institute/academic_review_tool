@@ -1,4 +1,5 @@
 from ..datasets.stopwords.stopwords import all_stopwords
+from ..importers.crossref import lookup_funder
 
 from .results import Results
 
@@ -164,7 +165,6 @@ class Affiliation:
 
             try:
                 loc = geolocator.geocode(orig_name_data)
-                print(loc)
             except:
                 loc = None
             
@@ -177,8 +177,6 @@ class Affiliation:
                 if self.details.loc[0, 'location'] == None:
                     self.details.loc[0, 'location'] = loc.display_name
 
-            
-        
         self.update_id()
 
     def generate_id(self):
@@ -323,130 +321,176 @@ class Affiliation:
 
         return affiliation
         
-    # def add_series(self, series: pd.Series):
-    #     self.details.loc[0] = series
+    def add_series(self, series: pd.Series):
+        self.details.loc[0] = series
 
-    # def from_series(data: pd.Series): # type: ignore
-    #     affiliation = Affiliation()
-    #     affiliation.add_series(data)
+    def from_series(data: pd.Series): # type: ignore
+        affiliation = Affiliation()
+        affiliation.add_series(data)
 
-    #     return affiliation
+        return affiliation
 
-    # def add_dataframe(self, dataframe: pd.DataFrame):
-    #     series = dataframe.loc[0]
-    #     self.add_series(series) # type: ignore
+    def add_dataframe(self, dataframe: pd.DataFrame):
+        series = dataframe.loc[0]
+        self.add_series(series) # type: ignore
 
-    # def from_dataframe(data: pd.DataFrame): # type: ignore
-    #     affiliation = Affiliation()
-    #     affiliation.add_dataframe(data)
+    def from_dataframe(data: pd.DataFrame): # type: ignore
+        affiliation = Affiliation()
+        affiliation.add_dataframe(data)
 
-    #     return affiliation
+        return affiliation
 
-    # def import_crossref_result(self, crossref_result: pd.Series):
+    def import_crossref_result(self, crossref_result: pd.Series):
         
-    #     if 'name' in crossref_result.index:
-    #         name = crossref_result['name']
-    #     else:
-    #         name = self.details.loc[0, 'name']
+        if 'name' in crossref_result.index:
+            name = crossref_result['name']
+        else:
+            name = self.details.loc[0, 'name']
 
-    #     if 'alt-names' in crossref_result.index:
-    #         alt_names = crossref_result['alt-names']
-    #     else:
-    #         alt_names = self.details.loc[0, 'alt_names']
+        if 'location' in crossref_result.index:
+            location = crossref_result['location']
+        else:
+            location = self.details.loc[0, 'location']
 
-    #     if 'location' in crossref_result.index:
-    #         location = crossref_result['location']
-    #     else:
-    #         location = self.details.loc[0, 'location']
+        if 'email' in crossref_result.index:
+            email = crossref_result['email']
+        else:
+            email = self.details.loc[0, 'email']
 
-    #     if 'email' in crossref_result.index:
-    #         email = crossref_result['email']
-    #     else:
-    #         email = self.details.loc[0, 'email']
+        if 'uri' in crossref_result.index:
+            uri  =crossref_result['uri']
+        else:
+            uri = self.details.loc[0, 'uri']
 
-    #     if 'uri' in crossref_result.index:
-    #         uri  =crossref_result['uri']
-    #     else:
-    #         uri = self.details.loc[0, 'uri']
-
-    #     if 'id' in crossref_result.index:
-    #         crossref_id = crossref_result['id']
-    #     else:
-    #         crossref_id = self.details.loc[0, 'crossref_id']
-
-    #     if 'work-count' in crossref_result.index:
-    #         work_count = crossref_result['work-count']
-    #     else:
-    #         work_count = self.details.loc[0, 'work_count']
-
-    #     if 'tokens' in crossref_result.index:
-    #         tokens = crossref_result['tokens']
-    #     else:
-    #         tokens = self.details.loc[0, 'tokens']
+        if 'id' in crossref_result.index:
+            crossref_id = crossref_result['id']
+        else:
+            crossref_id = self.details.loc[0, 'crossref_id']
         
-    #     self.details.loc[0, 'name'] = name
-    #     self.details.loc[0, 'alt_names'] = alt_names
-    #     self.details.loc[0, 'location'] = location
-    #     self.details.loc[0, 'email'] = email
-    #     self.details.loc[0, 'uri'] = uri
-    #     self.details.loc[0, 'crossref_id'] = crossref_id
-    #     self.details.loc[0, 'work_count'] = work_count
-    #     self.details.loc[0, 'tokens'] = tokens
+        self.details.loc[0, 'name'] = name
+        self.details.loc[0, 'location'] = location
+        self.details.loc[0, 'email'] = email
+        self.details.loc[0, 'uri'] = uri
+        self.details.loc[0, 'crossref_id'] = crossref_id
+
+    def from_crossref_result(crossref_result: pd.Series, use_api: bool = False): # type: ignore
+        
+        if 'name' in crossref_result.index:
+            name = crossref_result['name']
+        else:
+            name = None
+
+        if 'location' in crossref_result.index:
+            location = crossref_result['location']
+        else:
+            location = None
+
+        if 'email' in crossref_result.index:
+            email = crossref_result['email']
+        else:
+            email = None
+
+        if 'uri' in crossref_result.index:
+            uri  =crossref_result['uri']
+        else:
+            uri = None
+
+        if 'id' in crossref_result.index:
+            crossref_id = crossref_result['id']
+        else:
+            crossref_id = None
+
+        affiliation = Affiliation(name=name, location=location, email=email, uri=uri, crossref_id=crossref_id, use_api=use_api) # type: ignore
+
+        return affiliation
+
+    def import_crossref(self, crossref_id: str, timeout = 60):
+
+        res = lookup_funder(crossref_id, timeout)
+        self.import_crossref_result(res.loc[0]) # type: ignore
+
+    def from_crossref(crossref_id: str, use_api=True, timeout = 60): # type: ignore
+        res = lookup_funder(crossref_id, timeout)
+        affiliation = Affiliation.from_crossref_result(crossref_result=res, use_api=use_api) # type: ignore
+
+        return affiliation
     
-    # def from_crossref_result(crossref_result: pd.Series): # type: ignore
+    def import_uri(self, uri: int, timeout = 60):
+        uri_str = str(uri)
+        res = lookup_funder(uri_str, timeout)
+        self.import_crossref_result(res.loc[0]) # type: ignore
 
-    #     affiliation = Affiliation()
-    #     affiliation.import_crossref_result(crossref_result=crossref_result)
+    def from_uri(uri: int, use_api=True, timeout = 60): # type: ignore
+        uri_str = str(uri)
+        res = lookup_funder(uri_str, timeout)
+        affiliation = Affiliation.from_crossref_result(crossref_result=res, use_api=use_api) # type: ignore
 
-    #     return affiliation
-
-    # def import_crossref(self, crossref_id: str, timeout = 60):
-
-    #     res = lookup_affiliation(crossref_id, timeout)
-    #     self.import_crossref_result(res.loc[0]) # type: ignore
-
-    # def from_crossref(crossref_id: str): # type: ignore
-        
-    #     affiliation = Affiliation()
-    #     affiliation.import_crossref(crossref_id) # type: ignore
-
-    #     return affiliation
+        return affiliation
     
-    # def import_uri(self, uri: str, timeout = 60):
-
-    #     res = lookup_affiliation(uri, timeout)
-    #     self.import_crossref_result(res.loc[0]) # type: ignore
-
-    # def from_uri(uri: str): # type: ignore
+    def update_address(self):
         
-    #     affiliation = Affiliation()
-    #     affiliation.import_uri(uri) # type: ignore
+        if self.details.loc[0, 'name'] != None:
+            name = str(self.details.loc[0, 'name']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace(',',' ').replace('  ',' ').strip()
+        else:
+            name = ''
+        
+        if self.details.loc[0, 'location'] != None:
+            location = str(self.details.loc[0, 'location']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace('  ',' ').strip()
+        else:
+            location = ''
 
-    #     return affiliation
+        if self.details.loc[0, 'address'] != None:
+            address = str(self.details.loc[0, 'address']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace('  ',' ').strip()
+        else:
+            address = ''
 
-    # def update_from_crossref(self, timeout = 60):
+        if name not in address:
+            address = name + ', ' + address
+        
+        if (address == '') or (address == ', '):
+            address = location
 
-    #     uid = self.details.loc[0,'crossref_id']
-    #     if uid == None:
-    #         uid = self.details.loc[0,'uri']
-    #         if uid == None:
-    #             uid = ''
+        geolocator = Nominatim(user_agent="location_app")
 
-    #     res = lookup_affiliation(affiliation_id = uid, timeout = timeout) # type: ignore
-    #     if len(res) > 0:
-    #         self.import_crossref_result(res.loc[0]) # type: ignore
+        try:
+                loc = geolocator.geocode(address)
+        except:
+                loc = None
+            
+        if loc != None:
+                
+                self.details.loc[0, 'address'] = loc.address
 
-    # def update_from_uri(self, timeout = 60):
+                if self.details.loc[0, 'name'] == None:
+                    self.details.loc[0, 'name'] = loc.name
+                
+                if self.details.loc[0, 'location'] == None:
+                    self.details.loc[0, 'location'] = loc.display_name
 
-    #     uid = self.details['uri']
-    #     if uid == None:
-    #         uid = self.details['crossref']
-    #         if uid == None:
-    #             uid = ''
 
-    #     res = lookup_affiliation(affiliation_id = uid, timeout = timeout) # type: ignore
-    #     if len(res) > 0:
-    #         self.import_crossref_result(res.loc[0]) # type: ignore
+    def update_from_crossref(self, timeout = 60):
+
+        uid = self.details.loc[0,'crossref_id']
+        if uid == None:
+            uid = self.details.loc[0,'uri']
+            if uid == None:
+                uid = ''
+
+        res = lookup_funder(funder_id = uid, timeout = timeout) # type: ignore
+        if len(res) > 0:
+            self.import_crossref_result(res.loc[0]) # type: ignore
+
+    def update_from_uri(self, timeout = 60):
+
+        uid = self.details.loc[0, 'uri']
+        if uid == None:
+            uid = self.details.loc[0, 'crossref']
+            if uid == None:
+                uid = ''
+
+        res = lookup_funder(funder_id = uid, timeout = timeout) # type: ignore
+        if len(res) > 0:
+            self.import_crossref_result(res.loc[0]) # type: ignore
    
 
 

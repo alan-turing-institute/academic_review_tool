@@ -1,4 +1,4 @@
-from ..importers.crossref import search_funders, search_funder_works, lookup_funder, lookup_funders
+from ..importers.crossref import search_funder_works, lookup_funder
 from ..datasets.stopwords.stopwords import all_stopwords
 
 from .results import Results
@@ -326,9 +326,9 @@ class Funder:
 
     def update_from_uri(self, timeout = 60):
 
-        uid = self.details['uri']
+        uid = self.details.loc[0,'uri']
         if uid == None:
-            uid = self.details['crossref']
+            uid = self.details.loc[0,'crossref']
             if uid == None:
                 uid = ''
 
