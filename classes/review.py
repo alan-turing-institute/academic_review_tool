@@ -355,6 +355,9 @@ class Review:
         else:
             return self.results.loc[row_position, column_position]
     
+    def affiliations_dict(self):
+        return self.authors.affiliations()
+
     def get_name_str(self):
         
         """
