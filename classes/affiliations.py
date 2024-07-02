@@ -845,35 +845,36 @@ class Affiliations:
 
         return affiliations
 
-# def format_affiliations(affiliation_data, use_api = False):
+def format_affiliations(affiliation_data, use_api = False):
         
-#         result = Affiliations()
+        result = Affiliations()
+        affil_type = type(affiliation_data)
+        
+        if (affil_type != pd.DataFrame) and (affil_type != pd.Series) and (affil_type != Affiliations) and (affil_type != Affiliation) and (affil_type != list):
+            result = Affiliations()
 
-#         if ((type(affiliation_data) != pd.DataFrame) and (type(affiliation_data) != pd.Series)) and ((affiliation_data == None) or (affiliation_data == '')):
-#             result = Affiliations()
+        if affil_type == Affiliations:
+            result = affiliation_data
 
-#         if type(affiliation_data) == Affiliations:
-#             result = affiliation_data
+        if affil_type == Affiliation:
+            result.add_affiliation(affiliation=affiliation_data, use_api=use_api)
 
-#         if type(affiliation_data) == Affiliation:
-#             result.add_affiliation(affiliation=affiliation_data, use_api=use_api)
+        if affil_type == pd.Series:
+            affiliation = Affiliation()
+            affiliation.add_series(affiliation_data)
+            result.add_affiliation(affiliation=affiliation, use_api=use_api)
 
-#         if type(affiliation_data) == pd.Series:
-#             affiliation = Affiliation()
-#             affiliation.add_series(affiliation_data)
-#             result.add_affiliation(affiliation=affiliation, use_api=use_api)
+        if affil_type == pd.DataFrame:
+            result.import_crossref_result(affiliation_data, use_api=use_api) # type: ignore
 
-#         if type(affiliation_data) == pd.DataFrame:
-#             result.import_crossref_result(affiliation_data, use_api=use_api) # type: ignore
+        if (affil_type == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == Affiliation):
+            result = Affiliations()
+            result.add_list(affiliation_data)
 
-#         if (type(affiliation_data) == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == Affiliation):
-#             result = Affiliations()
-#             result.add_list(affiliation_data)
+        if (affil_type == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == dict):
 
-#         if (type(affiliation_data) == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == dict):
-
-#             for i in affiliation_data:
-#                 affiliation = Affiliation.from_dict(i) # type: ignore
-#                 result.add_affiliation(affiliation = affiliation, use_api=use_api) # type: ignorex
+            for i in affiliation_data:
+                affiliation = Affiliation.from_dict(i) # type: ignore
+                result.add_affiliation(affiliation = affiliation, use_api=use_api) # type: ignorex
     
-#         return result
+        return result
