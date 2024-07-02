@@ -580,7 +580,7 @@ class Funders:
 
         self.details[funder_id] = funder
 
-        if data == None:
+        if data is None:
             data = funder.details.to_dict(orient='index')
         
         self.data.append(data)
