@@ -546,7 +546,7 @@ class Funders:
 
             funder = None # type: ignore
 
-        if type(data) != None:
+        if data is not None:
 
             if type(data) == dict:
                 funder = Funder.from_dict(data=data, use_api = use_api) # type: ignore
@@ -560,7 +560,7 @@ class Funders:
                         funder = Funder.from_dataframe(data=data) # type: ignore
 
 
-        if funder == None:
+        if funder is None:
             funder = Funder(uri=uri, crossref_id=crossref_id)
 
         if use_api == True:
