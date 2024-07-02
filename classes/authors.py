@@ -607,7 +607,6 @@ class Authors:
         
         return output
 
-
 def format_authors(author_data):
         
         result = Authors()

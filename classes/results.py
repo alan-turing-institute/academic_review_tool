@@ -669,5 +669,15 @@ class Results(pd.DataFrame):
 
     def has(self, column):
         return self[~self[column].isna()]
+    
+    def format_funders(self, use_api: bool = False):
+
+        try:
+            funders = self['funder'].apply(format_funders) # type: ignore
+        except:
+            funders = self['funder']
+
+        self['funder'] = funders
+
 
 Funder.publications = Results() # type: ignore

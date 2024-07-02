@@ -793,31 +793,51 @@ def format_funders(funder_data, use_api = False):
         
         result = Funders()
 
-        if ((type(funder_data) != pd.DataFrame) and (type(funder_data) != pd.Series)) and ((funder_data == None) or (funder_data == '')):
+        funder_type = type(funder_data)
+
+        if (
+            (funder_type != pd.DataFrame) 
+            and (funder_type != pd.Series) 
+            and (funder_type != Funder) 
+            and (funder_type != Funders) 
+            and (funder_type != list) 
+            and (funder_type != dict)
+            ):
             result = Funders()
+            return result
 
-        if type(funder_data) == Funders:
+        if funder_type == Funders:
             result = funder_data
+            return result
 
-        if type(funder_data) == Funder:
+        if funder_type == Funder:
             result.add_funder(funder=funder_data, use_api=use_api)
+            return result
 
-        if type(funder_data) == pd.Series:
+        if funder_type == pd.Series:
             funder = Funder()
             funder.add_series(funder_data)
             result.add_funder(funder=funder, use_api=use_api)
+            return result
 
-        if type(funder_data) == pd.DataFrame:
+        if funder_type == pd.DataFrame:
             result.import_crossref_result(funder_data, use_api=use_api) # type: ignore
+            return result
+        
+        if (funder_type == dict):
+            funder = Funder.from_dict(funder_data) # type: ignore
+            result.add_funder(funder = funder, use_api=use_api) # type: ignorex
+            return result
 
-        if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
+        if (funder_type == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
             result = Funders()
             result.add_funders_list(funder_data)
+            return result
 
-        if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
+        if (funder_type == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
 
             for i in funder_data:
                 funder = Funder.from_dict(i) # type: ignore
-                result.add_funder(funder = funder, use_api=use_api) # type: ignorex
+                result.add_funder(funder = funder, use_api=use_api) # type: ignore
     
-        return result
+            return result
