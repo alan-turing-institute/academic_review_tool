@@ -33,7 +33,7 @@ def generate_affiliation_id(affiliation_data: pd.Series):
         else:
             name_shortened = name
 
-        affiliation_id = affiliation_id + '-' + name_shortened
+        affiliation_id = affiliation_id + '-' + name_shortened.lower()
 
         location = affiliation_data['location']
         if type(location) == str:
@@ -44,7 +44,7 @@ def generate_affiliation_id(affiliation_data: pd.Series):
         else:
             location_shortened = ''
         
-        affiliation_id = affiliation_id + '-' + location_shortened
+        affiliation_id = affiliation_id + '-' + location_shortened.lower()
 
         uid = affiliation_data['uri']
         if (uid == None) or (uid == 'None') or (uid == ''):
@@ -57,7 +57,7 @@ def generate_affiliation_id(affiliation_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:20]
 
         affiliation_id = affiliation_id + '-' + uid_shortened
-        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace('--', '-').replace('AFFIL:-', 'AFFIL:').strip('-')
+        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace('--', '-').replace('AFFIL:-', 'AFFIL:').replace(' ','-').replace('(','').replace(')','').strip('-')
 
         return affiliation_id
 
@@ -106,7 +106,11 @@ class Affiliation:
 
                 address = name
                 location = name_split[-1]
-                name = name_split[0]
+
+                if (len(name_split) > 1) and (('department' in name_split[0].lower()) or ('institute of' in name_split[0].lower())):
+                    name = name_split[0] + ', ' + name_split[1]
+                else:
+                    name = name_split[0]
         
         if type(name) == list:
 
