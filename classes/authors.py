@@ -597,5 +597,6 @@ def format_authors(author_data):
             result = Authors()
             result.add_author(author)
     
-    
+        result.format_affiliations()
+        
         return result
