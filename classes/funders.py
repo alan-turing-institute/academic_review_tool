@@ -481,7 +481,7 @@ class Funders:
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['name'].sort_values())
+        alphabetical = str(self.all['name'].sort_values().to_list())
         return alphabetical
     
     def __len__(self) -> int:
@@ -494,7 +494,7 @@ class Funders:
         
         merged = pd.concat([left, right])
 
-        self.all = merged.drop_duplicates(subset=['funder_id', 'family_name', 'crossref'], ignore_index=True)
+        self.all = merged.drop_duplicates(subset=['funder_id', 'name', 'crossref'], ignore_index=True)
 
         for i in funders.details.keys():
             if i not in self.details.keys():

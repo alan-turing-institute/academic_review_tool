@@ -496,9 +496,6 @@ class Affiliation:
         if len(res) > 0:
             self.import_crossref_result(res.loc[0]) # type: ignore
    
-
-
-
 class Affiliations:
 
     """
@@ -581,7 +578,7 @@ class Affiliations:
 
                         self.all = self.all.reset_index().drop('index',axis=1)
                 
-        # self.update_ids()
+        self.update_ids()
 
     def __getitem__(self, key):
         
@@ -603,155 +600,162 @@ class Affiliations:
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['name'].sort_values())
+        alphabetical = str(self.all['name'].sort_values().to_list())
         return alphabetical
     
     def __len__(self) -> int:
         return len(self.details.keys())
 
-    # def merge(self, affiliations):
+    def merge(self, affiliations):
 
-    #     left = self.all.copy(deep=True)
-    #     right = affiliations.all.copy(deep=True)
+        left = self.all.copy(deep=True)
+        right = affiliations.all.copy(deep=True)
         
-    #     merged = pd.concat([left, right])
+        merged = pd.concat([left, right])
 
-    #     self.all = merged.drop_duplicates(subset=['affiliation_id', 'family_name', 'crossref'], ignore_index=True)
+        self.all = merged.drop_duplicates(subset=['affiliation_id', 'name', 'location'], ignore_index=True)
 
-    #     for i in affiliations.details.keys():
-    #         if i not in self.details.keys():
-    #             self.details[i] = affiliations.details[i]
+        for i in affiliations.details.keys():
+            if i not in self.details.keys():
+                self.details[i] = affiliations.details[i]
 
-    #     left_data = self.data
-    #     right_data = affiliations.data
+        left_data = self.data
+        right_data = affiliations.data
 
-    #     if left_data == None:
-    #             left_data = []
+        if left_data == None:
+                left_data = []
             
-    #     if right_data == None:
-    #             right_data = []
+        if right_data == None:
+                right_data = []
 
-    #     if (type(left_data) == Affiliation) or (type(left_data) == str):
-    #             left_data = [left_data]
+        if (type(left_data) == Affiliation) or (type(left_data) == str):
+                left_data = [left_data]
             
-    #     if (type(right_data) == Affiliation) or (type(right_data) == str):
-    #             right_data = [right_data]
+        if (type(right_data) == Affiliation) or (type(right_data) == str):
+                right_data = [right_data]
             
-    #     if type(left_data) == dict:
-    #             left_data = list(left_data.values())
+        if type(left_data) == dict:
+                left_data = list(left_data.values())
             
-    #     if type(right_data) == dict:
-    #             right_data = list(right_data.values())
+        if type(right_data) == dict:
+                right_data = list(right_data.values())
 
-    #     merged_data = left_data + right_data # type: ignore
-    #     merged_data = pd.Series(merged_data).value_counts().index.to_list()
+        merged_data = left_data + right_data # type: ignore
+        merged_data = pd.Series(merged_data).value_counts().index.to_list()
 
-    #     self.data = merged_data
-    #     self.update_ids()
+        self.data = merged_data
+        self.update_ids()
 
-    #     return self
+        return self
 
 
-    # def add_affiliation(self, affiliation: Affiliation =  None, uri: str = None, crossref_id: int = None, data = None, use_api = True): # type: ignore
+    def add_affiliation(self, affiliation: Affiliation =  None, name: str = None, uri: str = None, crossref_id: int = None, data = None, use_api = True): # type: ignore
 
-        
+        if type(affiliation) == str:
 
-    #     if type(affiliation) == str:
+            affiliation = Affiliation(name = affiliation, use_api = use_api)
 
-    #         if use_api == True:
-    #             details = lookup_affiliation(affiliation_id=affiliation)
-    #             crossref_id = details.loc[0, 'id'] # type: ignore
-    #             uri = details.loc[0, 'uri'] # type: ignore
+            affiliation = None # type: ignore
 
-    #         else:
-    #             crossref_id = affiliation
+        if data is not None:
 
-    #         affiliation = None # type: ignore
-
-    #     if data is not None:
-
-    #         if type(data) == dict:
-    #             affiliation = Affiliation.from_dict(data=data, use_api = use_api) # type: ignore
+            if type(data) == dict:
+                affiliation = Affiliation.from_dict(data=data, use_api = use_api) # type: ignore
             
-    #         else:
-    #             if type(data) == pd.Series:
-    #                 affiliation = Affiliation.from_series(data=data) # type: ignore
+            else:
+                if type(data) == pd.Series:
+                    affiliation = Affiliation.from_series(data=data) # type: ignore
                 
-    #             else:
-    #                 if type(data) == pd.DataFrame:
-    #                     affiliation = Affiliation.from_dataframe(data=data) # type: ignore
+                else:
+                    if type(data) == pd.DataFrame:
+                        affiliation = Affiliation.from_dataframe(data=data) # type: ignore
 
 
-    #     if affiliation is None:
-    #         affiliation = Affiliation(uri=uri, crossref_id=crossref_id)
+        if affiliation is None:
+            affiliation = Affiliation(name=name, uri=uri, crossref_id=crossref_id, use_api = use_api)
 
-    #     if use_api == True:
-    #         affiliation.update_from_crossref()
+        if use_api == True:
+            affiliation.update_from_crossref()
+            affiliation.update_address()
 
-    #     affiliation.update_id()
+        affiliation.update_id()
 
-    #     affiliation_id = str(affiliation.details.loc[0, 'affiliation_id'])
+        affiliation_id = str(affiliation.details.loc[0, 'affiliation_id'])
 
-    #     if affiliation_id in self.all['affiliation_id'].to_list():
-    #         id_count = len(self.all[self.all['affiliation_id'].str.contains(affiliation_id)]) # type: ignore
-    #         affiliation_id = affiliation_id + f'#{id_count + 1}'
-    #         affiliation.details.loc[0, 'affiliation_id'] = affiliation_id
+        if affiliation_id in self.all['affiliation_id'].to_list():
+            all_copy = self.all.copy(deep=True).astype(str)
+            id_count = len(all_copy[all_copy['affiliation_id'].str.contains(affiliation_id)]) # type: ignore
+            affiliation_id = affiliation_id + f'#{id_count + 1}'
+            affiliation.details.loc[0, 'affiliation_id'] = affiliation_id
 
-    #     self.all = pd.concat([self.all, affiliation.details])
-    #     self.all = self.all.reset_index().drop('index', axis=1)
+        self.all = pd.concat([self.all, affiliation.details])
+        self.all = self.all.reset_index().drop('index', axis=1)
 
-    #     self.details[affiliation_id] = affiliation
+        self.details[affiliation_id] = affiliation
 
-    #     if data is None:
-    #         data = affiliation.details.to_dict(orient='index')
+        if data is None:
+            data = affiliation.details.to_dict(orient='index')
         
-    #     self.data.append(data)
+        self.data.append(data)
 
-    #     self.update_ids()
+        self.update_ids()
 
 
-    # def add_affiliations_list(self, affiliations_list: list):
+    def add_list(self, affiliations_list: list, use_api: bool = False):
         
-    #     for i in affiliations_list:
-    #         if type(i) == Affiliation:
-    #             self.add_affiliation(affiliation = i)
+        for i in affiliations_list:
+            if type(i) == Affiliation:
+                self.add_affiliation(affiliation = i, use_api=use_api)
+            else:
+                if type(i) == dict:
+                    affil = Affiliation.from_dict(i)
+                    self.add_affiliation(affiliation = affil, use_api=use_api)
+                else:
+                    if type(i) == pd.Series:
+                        affil = Affiliation.from_series(i)
+                        self.add_affiliation(affiliation = affil, use_api=use_api)
 
-    # def sync_all(self):
+    def sync_all(self):
 
-    #     for i in self.details.keys():
-    #         affiliation = self.details[i]
-    #         affiliation.update_id()
-    #         series = affiliation.details.loc[0]
-    #         all = self.all.copy(deep=True).astype(str)
-    #         indexes = all[all['affiliation_id'] == i].index.to_list()
-    #         if len(indexes) > 0:
-    #             auth_index = indexes[0]
-    #             self.all.loc[auth_index] = series
+        for i in self.details.keys():
 
-    # def update_ids(self):
+            affiliation = self.details[i]
+            affiliation.update_id()
 
-    #     self.sync_all()
+            series = affiliation.details.loc[0]
 
-    #     for i in self.all.index:
-    #         data = self.all.loc[i]
-    #         old_id = self.all.loc[i, 'affiliation_id']
-    #         new_id = generate_affiliation_id(self.all.loc[i])
+            all = self.all.copy(deep=True).astype(str)
 
-    #         if new_id in self.all['affiliation_id'].to_list():
-    #             df_copy = self.all.copy(deep=True).astype(str)
-    #             id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)]) # type: ignore
-    #             new_id = new_id + f'#{id_count + 1}'
+            indexes = all[all['affiliation_id'] == i].index.to_list()
 
-    #         self.all.loc[i, 'affiliation_id'] = new_id
-    #         if old_id in self.details.keys():
-    #             self.details[new_id] = self.details[old_id]
-    #             self.details[new_id].details.loc[0, 'affiliation_id'] = new_id
-    #             del self.details[old_id]
+            if len(indexes) > 0:
+                auth_index = indexes[0]
+                self.all.loc[auth_index] = series
 
-    #         else:
-    #             affiliation = Affiliation.from_series(data) # type: ignore
-    #             affiliation.details.loc[0, 'affiliation_id'] = new_id
-    #             self.details[new_id] = affiliation
+    def update_ids(self):
+
+        self.sync_all()
+
+        for i in self.all.index:
+            data = self.all.loc[i]
+            old_id = self.all.loc[i, 'affiliation_id']
+            new_id = generate_affiliation_id(self.all.loc[i])
+
+            if new_id in self.all['affiliation_id'].to_list():
+                df_copy = self.all.copy(deep=True).astype(str)
+                id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)]) # type: ignore
+                new_id = new_id + f'#{id_count + 1}'
+
+            self.all.loc[i, 'affiliation_id'] = new_id
+            if old_id in self.details.keys():
+                self.details[new_id] = self.details[old_id]
+                self.details[new_id].details.loc[0, 'affiliation_id'] = new_id
+                del self.details[old_id]
+
+            else:
+                affiliation = Affiliation.from_series(data) # type: ignore
+                affiliation.details.loc[0, 'affiliation_id'] = new_id
+                self.details[new_id] = affiliation
 
 
     # def update_from_crossref(self):
@@ -934,7 +938,7 @@ class Affiliations:
 
 #         if (type(affiliation_data) == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == Affiliation):
 #             result = Affiliations()
-#             result.add_affiliations_list(affiliation_data)
+#             result.add_list(affiliation_data)
 
 #         if (type(affiliation_data) == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == dict):
 
