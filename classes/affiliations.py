@@ -155,7 +155,7 @@ class Affiliation:
                 orig_name_data = [i.strip() for i in orig_name_data]
 
             if type(orig_name_data) == list:
-                location_data = orig_name_data[-4:]
+                location_data = orig_name_data[-3:]
                 location_data = ', '.join(location_data)
             else:
                 location_data = ''
@@ -205,7 +205,7 @@ class Affiliation:
         
         if key in self.__dict__.keys():
             return self.__dict__[key]
-        
+
         if key in self.details.columns:
             return self.details.loc[0, key]
 
@@ -222,25 +222,106 @@ class Affiliation:
         else:
             return False
 
-    # def add_dict(self, data: dict):
+    def add_dict(self, data: dict):
 
-    #     if 'name' in data.keys():
-    #         name = data['name']
-    #         self.details.loc[0, 'name'] = name
+        if 'name' in data.keys():
+            name = data['name']
+            self.details.loc[0, 'name'] = name
+        
+        if 'location' in data.keys():
+            location = data['location']
+            self.details.loc[0, 'location'] = location
 
-    #     if 'DOI' in data.keys():
-    #         uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
-    #         self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
-    
-    # def from_dict(data: dict, use_api=False): # type: ignore
+        if 'address' in data.keys():
+            address = data['address']
+            self.details.loc[0, 'address'] = address
+        
+        if 'crossref_id' in data.keys():
+            crossref_id = data['crossref_id']
+            self.details.loc[0, 'crossref_id'] = crossref_id
 
-    #     affiliation = Affiliation()
-    #     affiliation.add_dict(data=data)
+        if 'DOI' in data.keys():
+            uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+            self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
+        else:
+            if 'uri' in data.keys():
+                uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+                self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
 
-    #     if use_api == True:
-    #         affiliation.update_from_crossref()
+        if 'url' in data.keys():
+            website = data['url']
+            self.details.loc[0, 'website'] = website
+        else:
+            if 'link' in data.keys():
+                website = data['link']
+                self.details.loc[0, 'website'] = website
+            else:
+                if 'website' in data.keys():
+                    website = data['website']
+                    self.details.loc[0, 'website'] = website
 
-    #     return affiliation
+    def from_dict(data: dict, use_api=False): # type: ignore
+
+        if 'name' in data.keys():
+            name = data['name']
+        else:
+            name = None
+        
+        if 'location' in data.keys():
+            location = data['location']
+        else:
+            location = None
+
+        if 'address' in data.keys():
+            address = data['address']
+        else:
+            address = None
+        
+        if 'email' in data.keys():
+            email = data['email']
+        else:
+            email = None
+
+        if 'crossref_id' in data.keys():
+            crossref_id = data['crossref_id']
+        else:
+            crossref_id = None
+
+        if 'DOI' in data.keys():
+            uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+            uri = 'https://doi.org/' + uri
+        else:
+            if 'doi' in data.keys():
+                uri = data['doi'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+                uri = 'https://doi.org/' + uri
+            else:
+                if 'URI' in data.keys():
+                    uri = data['URI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+                    uri = 'https://doi.org/' + uri
+                else:
+                    if 'uri' in data.keys():
+                        uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+                        uri = 'https://doi.org/' + uri
+                    else:
+                        uri = None
+
+        if 'URL' in data.keys():
+            website = data['URL']
+        else:
+            if 'url' in data.keys():
+                website = data['url']
+            else:
+                if 'link' in data.keys():
+                    website = data['link']
+                else:
+                    if 'website' in data.keys():
+                        website = data['website']
+                    else:
+                        website = None
+
+        affiliation = Affiliation(name=name, location=location, address=address, email=email, uri=uri, crossref_id=crossref_id, website=website, use_api=use_api) # type: ignore
+
+        return affiliation
         
     # def add_series(self, series: pd.Series):
     #     self.details.loc[0] = series
