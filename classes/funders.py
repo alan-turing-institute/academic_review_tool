@@ -321,7 +321,8 @@ class Funder:
                 uid = ''
 
         res = lookup_funder(funder_id = uid, timeout = timeout) # type: ignore
-        self.import_crossref_result(res.loc[0]) # type: ignore
+        if len(res) > 0:
+            self.import_crossref_result(res.loc[0]) # type: ignore
 
     def update_from_uri(self, timeout = 60):
 
@@ -332,7 +333,8 @@ class Funder:
                 uid = ''
 
         res = lookup_funder(funder_id = uid, timeout = timeout) # type: ignore
-        self.import_crossref_result(res.loc[0]) # type: ignore
+        if len(res) > 0:
+            self.import_crossref_result(res.loc[0]) # type: ignore
     
     def search_works(self, bibliographic: str = None, # type: ignore
                      title: str = None, # type: ignore
