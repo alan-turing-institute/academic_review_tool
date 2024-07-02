@@ -620,9 +620,9 @@ class Funders:
                 self.details[new_id] = self.details[old_id]
                 self.details[new_id].details.loc[0, 'funder_id'] = new_id
                 del self.details[old_id]
-                
+
             else:
-                funder = Funder.from_series(data)
+                funder = Funder.from_series(data) # type: ignore
                 funder.details.loc[0, 'funder_id'] = new_id
                 self.details[new_id] = funder
 
@@ -784,27 +784,27 @@ class Funders:
         
         return result
 
-# def format_funders(funder_data):
+def format_funders(funder_data):
         
-        # result = Funders()
+        result = Funders()
 
-        # if (funder_data == None) or (funder_data == ''):
-        #     result = Funders()
+        if (funder_data == None) or (funder_data == ''):
+            result = Funders()
 
-        # if type(funder_data) == Funders:
-        #     result = funder_data
+        if type(funder_data) == Funders:
+            result = funder_data
 
-        # if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
-        #     result = Funders()
-        #     result.add_funders_list(funder_data)
+        if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
+            result = Funders()
+            result.add_funders_list(funder_data)
 
-        # if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
-        #     result = funders.from_crossref(funder_data) # type: ignore
+        if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
+            result = funders.from_crossref(funder_data) # type: ignore
 
-        # if (type(funder_data) == dict) and (len(funder_data.values()) > 0) and (type(list(funder_data.values())[0]) == str):
-        #     funder = funder.from_crossref(funder_data) # type: ignore
-        #     result = Funders()
-        #     result.add_funder(funder)
+        if (type(funder_data) == dict) and (len(funder_data.values()) > 0) and (type(list(funder_data.values())[0]) == str):
+            funder = funder.from_crossref(funder_data) # type: ignore
+            result = Funders()
+            result.add_funder(funder)
     
     
-        # return result
+        return result
