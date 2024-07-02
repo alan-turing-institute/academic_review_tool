@@ -728,9 +728,9 @@ def lookup_funder(funder_id = 'request_input', timeout = 60):
     global my_etiquette
     funders = Funders(etiquette=my_etiquette, timeout=timeout)
     result = funders.funder(funder_id)
-    output = pd.DataFrame(columns = list(result.keys()), dtype=object)
 
     if (result != None) and (type(result) == dict):
+        output = pd.DataFrame(columns = list(result.keys()), dtype=object)
 
         for key in result.keys():
 
@@ -741,7 +741,8 @@ def lookup_funder(funder_id = 'request_input', timeout = 60):
                         data = data[0]
 
                 output.at[0, key] = data
-
+    else:
+        output = pd.DataFrame(dtype=object)
 
     return output
 
