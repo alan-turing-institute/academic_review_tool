@@ -1,8 +1,6 @@
 from ..datasets.stopwords.stopwords import all_stopwords
 from ..importers.crossref import lookup_funder
 
-from .results import Results
-
 import pandas as pd
 import numpy as np
 

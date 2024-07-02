@@ -1,5 +1,6 @@
 from ..importers.orcid import lookup_orcid
 from .results import Results
+from .affiliations import Affiliation, Affiliations, format_affiliations
 
 import pandas as pd
 import numpy as np

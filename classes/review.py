@@ -5,11 +5,14 @@ from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_j
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 
 from .properties import Properties
-from .results import Results, generate_work_id
+from .affiliations import Affiliation, Affiliations, format_affiliations
+from .funders import Funders, format_funders
+from .results import Results, Funder, generate_work_id
 from .references import References, is_formatted_reference, extract_references
 from .activitylog import ActivityLog
 from .authors import Author, Authors, format_authors as orig_format_authors
 from .citation_crawler import citation_crawler
+
 
 import copy
 import pickle

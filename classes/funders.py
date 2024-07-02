@@ -1,7 +1,7 @@
 from ..importers.crossref import search_funder_works, lookup_funder
 from ..datasets.stopwords.stopwords import all_stopwords
 
-from .results import Results
+# from .results import Results
 
 import pandas as pd
 import numpy as np
@@ -140,7 +140,7 @@ class Funder:
         self.details.loc[0, 'website'] = website
         self.details.at[0, 'other_links'] = other_links
 
-        self.publications = Results()
+        # self.publications = Results()
 
         if use_api == True:
             self.update_from_crossref()
@@ -175,8 +175,8 @@ class Funder:
         if key in self.details.columns:
             return self.details.loc[0, key]
         
-        if key in self.publications.columns:
-            return self.publications[key]
+        # if key in self.publications.columns:
+        #     return self.publications[key]
 
     def __repr__(self) -> str:
         
@@ -383,8 +383,8 @@ class Funder:
                                      timeout=timeout
                                      )
         
-        if add_to_publications == True:
-            self.publications.add_dataframe(result)
+        # if add_to_publications == True:
+        #     self.publications.add_dataframe(result)
         
         return result
 

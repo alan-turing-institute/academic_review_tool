@@ -4,6 +4,9 @@ from ..importers.pdf import read_pdf_to_table
 from ..importers.jstor import import_jstor_metadata, import_jstor_full
 from ..importers.crossref import lookup_doi, lookup_dois
 from ..datasets import stopwords
+
+from .funders import Funder, Funders, format_funders
+
 from pathlib import Path
 
 import pandas as pd
@@ -61,7 +64,6 @@ def generate_work_id(work_data: pd.Series):
 
         return work_id
     
-
 class Results(pd.DataFrame):
 
     """
@@ -667,4 +669,5 @@ class Results(pd.DataFrame):
 
     def has(self, column):
         return self[~self[column].isna()]
-    
+
+Funder.publications = Results() # type: ignore
