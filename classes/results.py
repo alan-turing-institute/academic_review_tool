@@ -27,6 +27,7 @@ def generate_work_id(work_data: pd.Series):
             authors_list = [i.strip() for i in authors_list]
             if len(authors_list) > 0:
                 first_author = authors_list[0]
+                first_author = first_author.split(' ')[-1]
             else:
                 first_author = ''
             
@@ -59,8 +60,8 @@ def generate_work_id(work_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:30]
 
         work_id = work_id + '-' + uid_shortened
-        work_id = work_id.replace('W:-', 'W:').strip('-').strip('.')
-        work_id = work_id[:35]
+        work_id = work_id.replace('W:-', 'W:').replace("'s", '').replace("'", "").replace('"', '').replace('--', '-').replace('W:-', 'W:').strip('-').strip('.')
+        work_id = work_id[:40]
 
         return work_id
     
