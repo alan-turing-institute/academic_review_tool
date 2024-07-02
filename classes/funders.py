@@ -601,8 +601,10 @@ class Funders:
             funder.update_id()
             series = funder.details.loc[0]
             all = self.all.copy(deep=True).astype(str)
-            auth_index = all[all['funder_id'] == i].index.to_list()[0]
-            self.all.loc[auth_index] = series
+            indexes = all[all['funder_id'] == i].index.to_list()
+            if len(indexes) > 0:
+                auth_index = indexes[0]
+                self.all.loc[auth_index] = series
 
     def update_ids(self):
 
