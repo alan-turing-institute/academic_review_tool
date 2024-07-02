@@ -37,10 +37,12 @@ def generate_affiliation_id(affiliation_data: pd.Series):
 
         affiliation_id = affiliation_id + '-' + name_shortened
 
-        location = affiliation_data['location'].split(',')
-        location_shortened = location[0].strip()
-        if location[0] != location[-1]:
-            location_shortened = location_shortened + '-' + location[-1].strip()
+        location = affiliation_data['location']
+        if type(location) == str:
+            location = location.split(',')
+            location_shortened = location[0].strip()
+            if location[0] != location[-1]:
+                location_shortened = location_shortened + '-' + location[-1].strip()
 
         
 
@@ -76,7 +78,7 @@ class Affiliation:
                  affiliation_id: str = None, # type: ignore
                  name: str = None, # type: ignore
                  location: str = None, # type: ignore
-                 address: str = None,
+                 address: str = None, # type: ignore
                  email: str = None, # type: ignore
                  uri: str = None, # type: ignore
                  crossref_id: int = None, # type: ignore
