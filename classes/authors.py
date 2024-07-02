@@ -229,6 +229,12 @@ class Author():
         else:
             return False
 
+    def format_affiliations(self):
+
+        affils_data = self.details.loc[0, 'affiliations']
+        affiliations = format_affiliations(affils_data)
+        self.details.at[0, 'affiliations'] = affiliations
+
     def add_series(self, series: pd.Series):
         self.details.loc[0] = series
 
@@ -515,6 +521,11 @@ class Authors:
             all = self.all.copy(deep=True).astype(str)
             auth_index = all[all['author_id'] == i].index.to_list()[0]
             self.all.loc[auth_index] = series
+
+    def format_affiliations(self):
+
+        affils = self.all['affiliations'].apply(func=format_affiliations) # type: ignore
+        self.all['affiliations'] = affils
 
     def update_from_orcid(self):
 
