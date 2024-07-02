@@ -48,7 +48,7 @@ def generate_funder_id(funder_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:20]
 
         funder_id = funder_id + '-' + uid_shortened
-        funder_id = funder_id.replace('F:-', 'F:').replace("'s", '').replace("'", "").replace('"', '').replace('--', '-').replace('F:-', 'F:').strip('-')
+        funder_id = funder_id.replace('F:-', 'F:').replace("'s", '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('F:-', 'F:').strip('-')
 
         return funder_id
 

@@ -55,7 +55,7 @@ def generate_affiliation_id(affiliation_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:20]
 
         affiliation_id = affiliation_id + '-' + uid_shortened
-        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace('--', '-').replace('AFFIL:-', 'AFFIL:').replace(' ','-').replace('(','').replace(')','').strip('-')
+        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace("'s", '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('AFFIL:-', 'AFFIL:').strip('-')
 
         return affiliation_id
 

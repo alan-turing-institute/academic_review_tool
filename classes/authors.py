@@ -51,7 +51,7 @@ def generate_author_id(author_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:20]
 
         author_id = author_id + '-' + uid_shortened
-        author_id = author_id.replace('A:-', 'A:').strip('-')
+        author_id = author_id.replace('A:-', 'A:').replace("'s", '').replace('.', '').replace('(','').replace(')','').replace("'", "").replace('"', '').replace('`','').replace('’','').replace('--', '-').replace('A:-', 'A:').strip('-')
 
         return author_id
 

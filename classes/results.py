@@ -60,8 +60,8 @@ def generate_work_id(work_data: pd.Series):
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:30]
 
         work_id = work_id + '-' + uid_shortened
-        work_id = work_id.replace('W:-', 'W:').replace("'s", '').replace("'", "").replace('"', '').replace('--', '-').replace('W:-', 'W:').strip('-').strip('.')
-        work_id = work_id[:40]
+        work_id = work_id.replace('W:-', 'W:').replace("'s", '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('.', '').replace('’','').replace('--', '-').replace('W:-', 'W:').strip('-')
+        work_id = work_id
 
         return work_id
     
