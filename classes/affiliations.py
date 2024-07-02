@@ -164,6 +164,7 @@ class Affiliation:
 
             try:
                 loc = geolocator.geocode(orig_name_data)
+                print(loc)
             except:
                 loc = None
             
