@@ -815,7 +815,7 @@ def format_funders(funder_data):
         if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
 
             for i in funder_data:
-                funder = Funder.from_dict(funder_data[i]) # type: ignore
-                result.add_funder(funder = funder) # type: ignore
+                funder = Funder.from_dict(i) # type: ignore
+                result.add_funder(funder = funder) # type: ignorex
     
         return result
