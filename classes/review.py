@@ -466,6 +466,38 @@ class Review:
     def format_affiliations(self):
         self.authors.format_affiliations()
 
+        affils_data = self.authors.all['affiliations'].to_list()
+
+        for i in affils_data:
+
+            if type(i) == Affiliations:
+                self.affiliations.merge(i)
+                continue
+            
+            if type(i) == Affiliation:
+                self.affiliations.add_affiliation(affiliation=i)
+                continue
+            
+            if (type(i) == str) and (len(i) > 0):
+                i = i.split(',')
+
+            if (type(i) == list) and (len(i) > 0):
+
+                if type(i[0]) == Affiliation:
+                    affils = Affiliations()
+                    for a in i:
+                        affils.add_affiliation(affiliation=a) # type: ignore
+                    self.affiliations.merge(affiliations=affils)
+                    continue
+
+                if type(i[0]) == str:
+                    affils = Affiliations()
+                    for a in i:
+                        affiliation = Affiliation(name=a.strip())
+                        affils.add_affiliation(affiliation)
+                    self.affiliations.merge(affiliations=affils)
+                    continue
+
     def format_citations(self):
         self.results.format_citations() # type: ignore
 
