@@ -849,7 +849,7 @@ def format_affiliations(affiliation_data, use_api = False):
         
         result = Affiliations()
         affil_type = type(affiliation_data)
-        
+
         if (affil_type != pd.DataFrame) and (affil_type != pd.Series) and (affil_type != Affiliations) and (affil_type != Affiliation) and (affil_type != list):
             result = Affiliations()
 
