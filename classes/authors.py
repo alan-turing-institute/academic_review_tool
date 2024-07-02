@@ -525,12 +525,18 @@ class Authors:
     def sync_details(self):
 
         for i in self.all.index:
+            
             auth_data = self.all.loc[i]
             auth_id = auth_data['author_id']
+
             if auth_id is not None:
-                self.details[auth_id] = auth_data
+                auth = Author.from_series(auth_data)
+                self.details[auth_id] = auth
+
             else:
                 auth_id = generate_author_id(auth_data)
+                auth_data['author_id'] = auth_id
+                auth = Author.from_series(auth_data)
                 self.details[auth_id] = auth_data
 
     def format_affiliations(self):
