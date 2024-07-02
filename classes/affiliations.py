@@ -600,7 +600,7 @@ class Affiliations:
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['name'].sort_values().to_list())
+        alphabetical = str(self.all['name'].sort_values().to_list()).replace('[','').replace(']','')
         return alphabetical
     
     def __len__(self) -> int:
@@ -714,6 +714,8 @@ class Affiliations:
                     if type(i) == pd.Series:
                         affil = Affiliation.from_series(i)
                         self.add_affiliation(affiliation = affil, use_api=use_api)
+        
+        self.update_ids()
 
     def sync_all(self):
 
@@ -757,163 +759,91 @@ class Affiliations:
                 affiliation.details.loc[0, 'affiliation_id'] = new_id
                 self.details[new_id] = affiliation
 
+    def update_addresses(self):
 
-    # def update_from_crossref(self):
+        affiliation_ids = self.details.keys()
 
-    #     affiliation_ids = self.details.keys()
+        for a in affiliation_ids:
 
-    #     for a in affiliation_ids:
-
-    #         self.details[a].update_from_crossref()
-    #         details = self.details[a].details.loc[0]
+            self.details[a].update_address()
+            details = self.details[a].details.loc[0]
             
-    #         df_index = self.all[self.all['affiliation_id'] == a].index.to_list()[0]
-    #         self.all.loc[df_index] = details
+            df_index = self.all[self.all['affiliation_id'] == a].index.to_list()[0]
+            self.all.loc[df_index] = details
 
-    #         new_id = details['affiliation_id']
-    #         if new_id != a:
-    #             self.details[new_id] = self.details[a]
-    #             del self.details[a]
+            new_id = details['affiliation_id']
+            if new_id != a:
+                self.details[new_id] = self.details[a]
+                del self.details[a]
 
-    #     self.update_ids()
+        self.update_ids()
+
+    def update_from_crossref(self):
+
+        affiliation_ids = self.details.keys()
+
+        for a in affiliation_ids:
+
+            self.details[a].update_from_crossref()
+            details = self.details[a].details.loc[0]
+            
+            df_index = self.all[self.all['affiliation_id'] == a].index.to_list()[0]
+            self.all.loc[df_index] = details
+
+            new_id = details['affiliation_id']
+            if new_id != a:
+                self.details[new_id] = self.details[a]
+                del self.details[a]
+
+        self.update_ids()
 
 
-    # def import_crossref_ids(self, crossref_ids: list):
+    def import_crossref_ids(self, crossref_ids: list):
 
-    #     for i in crossref_ids:
+        for i in crossref_ids:
 
-    #         auth = Affiliation.from_crossref(i) # type: ignore
-    #         self.add_affiliation(affiliation = auth, data = i)
+            auth = Affiliation.from_crossref(i) # type: ignore
+            self.add_affiliation(affiliation = auth)
 
-    #     self.update_ids()
+        self.update_ids()
 
 
-    # def from_crossref_ids(crossref_ids: list): # type: ignore
+    def from_crossref_ids(crossref_ids: list): # type: ignore
 
-    #     affiliations = Affiliations()
-    #     affiliations.import_crossref_ids(crossref_ids)
+        affiliations = Affiliations()
+        affiliations.import_crossref_ids(crossref_ids)
 
-    #     return affiliations
+        return affiliations
 
-    # def with_crossref(self):
-    #     return self.all[~self.all['crossref_id'].isna()]
+    def with_crossref(self):
+        return self.all[~self.all['crossref_id'].isna()]
     
-    # def with_uri(self):
-    #     return self.all[~self.all['uri'].isna()]
+    def with_uri(self):
+        return self.all[~self.all['uri'].isna()]
 
-    # def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False):
+    def from_list(affiliations_list: list, use_api: bool = False):
+        affiliations = Affiliations()
+        affiliations.add_list(affiliations_list, use_api=use_api)
 
-    #     for i in crossref_result.index:
-            
-    #         data = crossref_result.loc[i]
-    #         fu = Affiliation.from_crossref_result(crossref_result=data) # type: ignore
-    #         self.add_affiliation(affiliation = fu, data = data, use_api=use_api)
-
-    #     self.update_ids()
-
-
-    # def from_crossref_result(crossref_result: pd.DataFrame): # type: ignore
-
-    #     affiliations = Affiliations()
-    #     affiliations.import_crossref_result(crossref_result)
-
-    #     return affiliations
-
-    # def search_works(self, 
-    #                  affiliation_id: str = None, # type: ignore
-    #                 index: int = None, # type: ignore
-    #                 crossref_id: int = None, # type: ignore
-    #                 uri: str = None,# type: ignore
-    #                  bibliographic: str = None, # type: ignore
-    #                  title: str = None, # type: ignore
-    #                  author: str = None, # type: ignore
-    #                  author_affiliation: str = None, # type: ignore
-    #                  editor: str = None, # type: ignore
-    #                  entry_type: str = None, # type: ignore
-    #                  published_date: str = None, # type: ignore
-    #                  DOI: str = None, # type: ignore
-    #                  publisher_name: str = None,# type: ignore
-    #                 source: str = None, # type: ignore
-    #                 link: str = None, # type: ignore
-    #                 filter: dict = None, # type: ignore
-    #                 select: list = None, # type: ignore
-    #                 sample: int = None, # type: ignore
-    #                 limit: int = 10, 
-    #                 rate_limit: float = 0.05, 
-    #                 timeout: int = 60, 
-    #                 add_to_publications = False) -> pd.DataFrame:
-        
-    #     if (affiliation_id != None) and (affiliation_id in self.details.keys()):
-    #         affiliation = self.details[affiliation_id]
-    #         result = affiliation.search_works(
-    #                                  bibliographic=bibliographic, 
-    #                                  title=title, author=author, 
-    #                                  author_affiliation=author_affiliation, 
-    #                                  editor=editor,
-    #                                  entry_type=entry_type,
-    #                                  published_date=published_date,
-    #                                  DOI=DOI,
-    #                                  publisher_name=publisher_name,
-    #                                  source=source,
-    #                                  link=link,
-    #                                  filter=filter,
-    #                                  select=select,
-    #                                  sample=sample,
-    #                                  limit=limit,
-    #                                  rate_limit=rate_limit,
-    #                                  timeout=timeout,
-    #                                  add_to_publications=add_to_publications
-    #                                  )
-        
-    #     else:
-    #         if index != None:
+        return affiliations
     
-    #             uid = self.all.loc[index, 'crossref_id']
-    #             if (uid==None) or (uid == ''):
-    #                 uid = self.all.loc[index, 'uri']
-    #                 if (uid==None) or (uid == ''):
-    #                     uid = ''
+    def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False):
 
-    #             affiliation_id = self.all.loc[index, 'affiliation_id'] # type: ignore
-
-    #             uid = str(uid)
+        for i in crossref_result.index:
             
-    #         else:
-    #             if crossref_id != None:
-    #                 index = self.all[self.all['crossref_id'] == crossref_id].index.to_list()[0]
-    #                 affiliation_id = self.all.loc[index, 'affiliation_id'] # type: ignore
-    #                 uid = str(crossref_id)
-                    
-    #             else:
-    #                 if uri != None:
-    #                     index = self.all[self.all['uri'] == uri].index.to_list()[0]
-    #                     affiliation_id = self.all.loc[index, 'affiliation_id'] # type: ignore
-    #                     uid = str(uri)
-                        
+            data = crossref_result.loc[i]
+            affil = Affiliation.from_crossref_result(crossref_result=data, use_api=use_api) # type: ignore
+            self.add_affiliation(affiliation = affil, use_api=use_api)
 
-    #         result = search_affiliation_works(affiliation_id=uid,  
-    #                                  bibliographic=bibliographic, 
-    #                                  title=title, author=author, 
-    #                                  author_affiliation=author_affiliation, 
-    #                                  editor=editor,
-    #                                  entry_type=entry_type,
-    #                                  published_date=published_date,
-    #                                  DOI=DOI,
-    #                                  publisher_name=publisher_name,
-    #                                  source=source,
-    #                                  link=link,
-    #                                  filter=filter,
-    #                                  select=select,
-    #                                  sample=sample,
-    #                                  limit=limit,
-    #                                  rate_limit=rate_limit,
-    #                                  timeout=timeout
-    #                                  )
-        
-    #         if add_to_publications == True:
-    #             self.details[affiliation_id].publications.add_dataframe(result)
-        
-    #     return result
+        self.update_ids()
+
+
+    def from_crossref_result(crossref_result: pd.DataFrame, use_api: bool = False): # type: ignore
+
+        affiliations = Affiliations()
+        affiliations.import_crossref_result(crossref_result, use_api=use_api)
+
+        return affiliations
 
 # def format_affiliations(affiliation_data, use_api = False):
         

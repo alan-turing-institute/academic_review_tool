@@ -481,7 +481,7 @@ class Funders:
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['name'].sort_values().to_list())
+        alphabetical = str(self.all['name'].sort_values().to_list()).replace('[','').replace(']','')
         return alphabetical
     
     def __len__(self) -> int:
