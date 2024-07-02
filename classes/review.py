@@ -426,12 +426,42 @@ class Review:
         
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
-        review.format()
+        review.format() # type: ignore
 
         return review
 
     def format_funders(self):
+
         self.results.format_funders() # type: ignore
+
+        funders_data = self.results['funder'].to_list()
+
+        for i in funders_data:
+
+            if type(i) == Funders:
+                self.funders.merge(i)
+                continue
+            
+            if type(i) == Funder:
+                self.funders.add_funder(funder=i)
+                continue
+            
+            if (type(i) == str) and (len(i) > 0):
+                i = i.split(',')
+
+            if (type(i) == list) and (len(i) > 0):
+
+                if type(i[0]) == Funder:
+                    self.funders.add_funders_list(funders_list=i)
+                    continue
+
+                if type(i[0]) == str:
+                    funders = Funders()
+                    for f in i:
+                        funder = Funder(name=f.strip())
+                        funders.add_funder(funder)
+                    self.funders.merge(funders)
+                    continue
 
     def format_affiliations(self):
         self.authors.format_affiliations()
