@@ -424,6 +424,12 @@ class Review:
 
         return review
 
+    def format_funders(self):
+        self.results.format_funders() # type: ignore
+
+    def format_affiliations(self):
+        self.authors.format_affiliations()
+
     def format_citations(self):
         self.results.format_citations() # type: ignore
 
@@ -449,8 +455,10 @@ class Review:
                 self.authors.merge(auths)
     
     def format(self):
+        self.format_funders()
         self.format_citations()
         self.format_authors()
+        self.format_affiliations()
 
     def add_citations_to_results(self):
         self.results.add_citations_to_results() # type: ignore
