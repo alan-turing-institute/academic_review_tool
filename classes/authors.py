@@ -576,11 +576,11 @@ class Authors:
         return authors
     
     def affiliations(self):
-        
+
         output = {}
         for auth_id in self.details.keys():
             auth = self.details[auth_id]
-            affiliation = auth.loc[0, 'affiliations']
+            affiliation = auth.details.loc[0, 'affiliations']
             output[auth_id] = affiliation
         
         return output
