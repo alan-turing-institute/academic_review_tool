@@ -614,7 +614,8 @@ class Funders:
             new_id = generate_funder_id(self.all.loc[i])
 
             if new_id in self.all['funder_id'].to_list():
-                id_count = len(self.all[self.all['funder_id'].str.contains(new_id)]) # type: ignore
+                df_copy = self.all.copy(deep=True).astype(str)
+                id_count = len(df_copy[df_copy['funder_id'].str.contains(new_id)]) # type: ignore
                 new_id = new_id + f'#{id_count + 1}'
 
             self.all.loc[i, 'funder_id'] = new_id
