@@ -786,7 +786,7 @@ class Funders:
         
         return result
 
-def format_funders(funder_data):
+def format_funders(funder_data, use_api = False):
         
         result = Funders()
 
@@ -797,13 +797,13 @@ def format_funders(funder_data):
             result = funder_data
 
         if type(funder_data) == Funder:
-            result.add_funder(funder=funder_data)
+            result.add_funder(funder=funder_data, use_api=use_api)
 
 
         if type(funder_data) == pd.Series:
             funder = Funder()
             funder.add_series(funder_data)
-            result.add_funder(funder=funder)
+            result.add_funder(funder=funder, use_api=use_api)
 
         if type(funder_data) == pd.DataFrame:
             result = result.import_crossref_result(funder_data) # type: ignore
@@ -816,6 +816,6 @@ def format_funders(funder_data):
 
             for i in funder_data:
                 funder = Funder.from_dict(i) # type: ignore
-                result.add_funder(funder = funder) # type: ignorex
+                result.add_funder(funder = funder, use_api=use_api) # type: ignorex
     
         return result
