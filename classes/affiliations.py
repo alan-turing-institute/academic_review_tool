@@ -544,28 +544,42 @@ class Affiliations:
 
         if (type(affiliations_data) == list) and (type(affiliations_data[0]) == Affiliation):
 
-            for i in affiliations_data:
-                fu = i.details.copy(deep=True)
-                self.all = pd.concat([self.all, fu])
+            for a in affiliations_data:
+                affil_details = a.details.copy(deep=True)
+                affil_id = affil_details.loc[0, 'affiliation_id']
+                self.all = pd.concat([self.all, affil_details])
+                self.details[affil_id] = a
 
             self.all = self.all.reset_index().drop('index',axis=1)
 
         else:
 
-            if type(affiliations_data) == dict:
-                
-                values = list(affiliations_data.values())
+            if (type(affiliations_data) == list) and (type(affiliations_data[0]) == dict):
 
-                if type(values[0]) == Affiliation:
+                for i in affiliations_data:
+                    a = Affiliation.from_dict(i) # type: ignore
+                    affil_id = a.details.loc[0, 'affiliation_id']
+                    affil_details = a.details.copy(deep=True)
+                    self.all = pd.concat([self.all, affil_details])
+                    self.details[affil_id] = a
 
-                    for a in affiliations_data.keys():
-                        
-                        index = len(self.all)
-                        affil = a.details.copy(deep=True)
-                        self.all = pd.concat([self.all, affil])
-                        self.all.loc[index, 'affiliation_id'] = a
+                self.all = self.all.reset_index().drop('index',axis=1)
 
-                    self.all = self.all.reset_index().drop('index',axis=1)
+            else:
+
+                if type(affiliations_data) == dict:
+                    
+                    values = list(affiliations_data.values())
+
+                    if type(values[0]) == Affiliation:
+
+                        for a in affiliations_data.keys():
+                            affil_id = a.details.loc[0, 'affiliation_id']
+                            affil_details = a.details.copy(deep=True)
+                            self.all = pd.concat([self.all, affil_details])
+                            self.details[affil_id] = a
+
+                        self.all = self.all.reset_index().drop('index',axis=1)
                 
         # self.update_ids()
 
