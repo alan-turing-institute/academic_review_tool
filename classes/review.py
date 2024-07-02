@@ -431,7 +431,7 @@ class Review:
         return review
 
     def format_funders(self):
-        self.results.format_fcunders() # type: ignore
+        self.results.format_funders() # type: ignore
 
     def format_affiliations(self):
         self.authors.format_affiliations()
