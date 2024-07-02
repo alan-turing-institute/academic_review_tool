@@ -6,9 +6,6 @@ import pandas as pd
 import numpy as np
 
 from geopy.geocoders import Nominatim # type: ignore
-
-
-
 from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_affiliation_id(affiliation_data: pd.Series):
@@ -43,8 +40,10 @@ def generate_affiliation_id(affiliation_data: pd.Series):
             location_shortened = location[0].strip()
             if location[0] != location[-1]:
                 location_shortened = location_shortened + '-' + location[-1].strip()
-
+        else:
+            location_shortened = ''
         
+        affiliation_id = affiliation_id + '-' + location_shortened
 
         uid = affiliation_data['uri']
         if (uid == None) or (uid == 'None') or (uid == ''):
@@ -148,8 +147,18 @@ class Affiliation:
 
         if use_api == True:
             
+            if (type(orig_name_data) != str) and (type(orig_name_data) != list):
+                orig_name_data = str(orig_name_data).strip().replace('{','').replace('}','').replace('[','').replace(']','')
+
+            if type(orig_name_data) == str:
+                orig_name_data = orig_name_data.split(',')
+                orig_name_data = [i.strip() for i in orig_name_data]
+
             if type(orig_name_data) == list:
-                orig_name_data = ', '.join(orig_name_data)
+                location_data = orig_name_data[-4:]
+                location_data = ', '.join(location_data)
+            else:
+                location_data = ''
 
             geolocator = Nominatim(user_agent="location_app")
 
