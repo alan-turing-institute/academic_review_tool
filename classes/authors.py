@@ -525,7 +525,7 @@ class Authors:
     def sync_details(self):
 
         for i in self.all.index:
-            
+
             auth_data = self.all.loc[i]
             auth_id = auth_data['author_id']
 
@@ -537,7 +537,7 @@ class Authors:
                 auth_id = generate_author_id(auth_data)
                 auth_data['author_id'] = auth_id
                 auth = Author.from_series(auth_data)
-                self.details[auth_id] = auth_data
+                self.details[auth_id] = auth
 
     def format_affiliations(self):
 
