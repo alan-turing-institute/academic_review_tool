@@ -789,29 +789,33 @@ def search_funders(*args, limit: int = 1000, rate_limit: float = 0.05, timeout =
     if funders != None:
 
         iteration = 1
-        for item in funders:
+        try:
+            for item in funders:
 
-            if limit != None:
-                if iteration > limit:
-                    break
+                if limit != None:
+                    if iteration > limit:
+                        break
+                
+                results = pd.DataFrame(columns = list(item.keys()), dtype=object)
+                index = len(results)
+
+                for key in set(item.keys()):
+                    data = item[key]
+                    if type(data) == dict:
+                        data = list(data.keys()) + list(data.values())
+                        if len(data) == 1:
+                            data = data[0]
+
+                    results.at[index, key] = data
+
+                output = pd.concat([output, results])
+
+                iteration += 1
+
+                sleep(rate_limit)
+        except Exception as e:
             
-            results = pd.DataFrame(columns = list(item.keys()), dtype=object)
-            index = len(results)
-
-            for key in set(item.keys()):
-                data = item[key]
-                if type(data) == dict:
-                    data = list(data.keys()) + list(data.values())
-                    if len(data) == 1:
-                        data = data[0]
-
-                results.at[index, key] = data
-
-            output = pd.concat([output, results])
-
-            iteration += 1
-
-            sleep(rate_limit)
+            raise e
     
     output = output.reset_index().drop('index', axis=1)
 
