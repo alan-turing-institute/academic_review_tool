@@ -281,7 +281,7 @@ class Funder:
         self.details.loc[0, 'work_count'] = work_count
         self.details.loc[0, 'tokens'] = tokens
     
-    def from_crossref_result(self, crossref_result: pd.Series):
+    def from_crossref_result(crossref_result: pd.Series): # type: ignore
 
         funder = Funder()
         funder.import_crossref_result(crossref_result=crossref_result)
