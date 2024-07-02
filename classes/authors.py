@@ -589,7 +589,7 @@ class Authors:
     
     def affiliations(self):
 
-        self.
+        self.sync_details()
         
         output = {}
         for auth_id in self.details.keys():
