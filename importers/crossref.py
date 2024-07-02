@@ -730,15 +730,18 @@ def lookup_funder(funder_id = 'request_input', timeout = 60):
     result = funders.funder(funder_id)
     output = pd.DataFrame(columns = list(result.keys()), dtype=object)
 
-    for key in result.keys():
+    if (result != None) and (type(result) == dict):
 
-            data = result[key]
-            if type(data) == dict:
-                data = list(data.keys()) + list(data.values())
-                if len(data) == 1:
-                    data = data[0]
+        for key in result.keys():
 
-            output.at[0, key] = data
+                data = result[key]
+                if type(data) == dict:
+                    data = list(data.keys()) + list(data.values())
+                    if len(data) == 1:
+                        data = data[0]
+
+                output.at[0, key] = data
+
 
     return output
 
@@ -756,14 +759,15 @@ def lookup_funders(funder_ids: list = [], rate_limit: float = 0.05, timeout = 60
         index = len(results)
 
         item = {}
-        for key in result.keys():
-            data = result[key]
-            if type(data) == dict:
-                data = list(data.keys()) + list(data.values())
-                if len(data) == 1:
-                    data = data[0]
+        if (result != None) and (type(result) == dict):
+            for key in result.keys():
+                data = result[key]
+                if type(data) == dict:
+                    data = list(data.keys()) + list(data.values())
+                    if len(data) == 1:
+                        data = data[0]
 
-            results.at[index, key] = data
+                results.at[index, key] = data
         
         output = pd.concat([output, results])
         
