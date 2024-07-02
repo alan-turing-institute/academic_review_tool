@@ -377,6 +377,7 @@ class Review:
     def add_pdf(self, path = 'request_input'):
         
         self.results.add_pdf(path) # type: ignore
+        self.format()
         self.update_properties()
 
     def varstr(self):
@@ -416,7 +417,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
-        review.format_authors()
+        review.format()
 
         return review
 
@@ -444,9 +445,13 @@ class Review:
                     auths.add_author(auth)
                 self.authors.merge(auths)
     
+    def format(self):
+        self.format_citations()
+        self.format_authors()
+
     def add_citations_to_results(self):
         self.results.add_citations_to_results() # type: ignore
-        self.format_authors()
+        self.format()
 
 
     def update_from_orcid(self):
@@ -455,7 +460,7 @@ class Review:
     def import_excel(self, file_path = 'request_input', sheet_name = None):
         self.update_properties()
         self.results.import_excel(file_path, sheet_name) # type: ignore
-        self.format_authors()
+        self.format()
 
         return self
     
@@ -463,28 +468,28 @@ class Review:
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
-        review.format_authors()
+        review.format()
         
         return review
 
     def import_csv(self, file_path = 'request_input'):
         self.update_properties()
         self.results.import_csv(file_path) # type: ignore
-        self.format_authors()
+        self.format()
         return self
     
     def from_csv(file_path = 'request_input'): # type: ignore
 
         review = Review()
         review.results = Results.from_csv(file_path) # type: ignore
-        review.format_authors()
+        review.format()
 
         return review
 
     def import_json(self, file_path = 'request_input'):
         self.update_properties()
         self.results.import_json(file_path) # type: ignore
-        self.format_authors()
+        self.format()
         return self
     
     def from_json(file_path = 'request_input'): # type: ignore
@@ -502,7 +507,7 @@ class Review:
         
         review = Review()
         review.results = Results.from_file(file_path, sheet_name) # type: ignore
-        review.format_authors() # type: ignore
+        review.format() # type: ignore
 
         return review
 
@@ -659,13 +664,17 @@ class Review:
         return lookup_doi(doi=doi, timeout=timeout)
     
     def add_doi(self, doi = 'request_input', timeout = 60):
-        return self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
+        self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
+        self.format_citations()
+        self.format_authors()
 
     def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
     def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
-        return self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
+        self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
+        self.format_citations()
+        self.format_authors()
     
     def update_from_dois(self, timeout: int = 60):
         self.results.update_from_dois(timeout=timeout) # type: ignore
@@ -676,6 +685,8 @@ class Review:
 
         self.update_from_dois(timeout=timeout)
         self.update_from_orcid()
+        self.format_citations()
+        self.format_authors()
 
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
@@ -743,6 +754,7 @@ class Review:
             
             if add_to_results == True:
                 self.results.add_dataframe(dataframe=df) # type: ignore
+                self.format_citations()
                 self.format_authors()
         
             return df
