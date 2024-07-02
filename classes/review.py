@@ -422,7 +422,7 @@ class Review:
     def to_dataframe(self):
         return self.results.to_dataframe() # type: ignore
 
-    def from_dataframe(dataframe): # type: ignore
+    def from_dataframe(dataframe: pd.DataFrame): # type: ignore
         
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
