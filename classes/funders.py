@@ -796,17 +796,26 @@ def format_funders(funder_data):
         if type(funder_data) == Funders:
             result = funder_data
 
+        if type(funder_data) == Funder:
+            result.add_funder(funder=funder_data)
+
+
+        if type(funder_data) == pd.Series:
+            funder = Funder()
+            funder.add_series(funder_data)
+            result.add_funder(funder=funder)
+
+        if type(funder_data) == pd.DataFrame:
+            result = result.import_crossref_result(funder_data) # type: ignore
+
         if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
             result = Funders()
             result.add_funders_list(funder_data)
 
         if (type(funder_data) == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
-            result = funders.from_crossref(funder_data) # type: ignore
 
-        if (type(funder_data) == dict) and (len(funder_data.values()) > 0) and (type(list(funder_data.values())[0]) == str):
-            funder = funder.from_crossref(funder_data) # type: ignore
-            result = Funders()
-            result.add_funder(funder)
-    
+            for i in funder_data:
+                funder = Funder.from_dict(funder_data[i]) # type: ignore
+                result.add_funder(funder = funder) # type: ignore
     
         return result
