@@ -790,7 +790,7 @@ def format_funders(funder_data, use_api = False):
         
         result = Funders()
 
-        if (funder_data == None) or (funder_data == ''):
+        if ((type(funder_data) != pd.DataFrame) and (type(funder_data) != pd.Series)) and ((funder_data == None) or (funder_data == '')):
             result = Funders()
 
         if type(funder_data) == Funders:
@@ -798,7 +798,6 @@ def format_funders(funder_data, use_api = False):
 
         if type(funder_data) == Funder:
             result.add_funder(funder=funder_data, use_api=use_api)
-
 
         if type(funder_data) == pd.Series:
             funder = Funder()
