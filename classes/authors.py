@@ -522,10 +522,22 @@ class Authors:
             auth_index = all[all['author_id'] == i].index.to_list()[0]
             self.all.loc[auth_index] = series
 
+    def sync_details(self):
+
+        for i in self.all.index:
+            auth_data = self.all.loc[i]
+            auth_id = auth_data['author_id']
+            if auth_id is not None:
+                self.details[auth_id] = auth_data
+            else:
+                auth_id = generate_author_id(auth_data)
+                self.details[auth_id] = auth_data
+
     def format_affiliations(self):
 
         affils = self.all['affiliations'].apply(func=format_affiliations) # type: ignore
         self.all['affiliations'] = affils
+        self.sync_details()
 
     def update_from_orcid(self):
 
@@ -577,6 +589,8 @@ class Authors:
     
     def affiliations(self):
 
+        self.
+        
         output = {}
         for auth_id in self.details.keys():
             auth = self.details[auth_id]
