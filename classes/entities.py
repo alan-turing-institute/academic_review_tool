@@ -244,9 +244,10 @@ class Entities:
         all_res = self.all.loc[masked_indexes].copy(deep=True)
 
         if 'affiliations' in self.all.columns:
+
             affils = self.all['affiliations']
             
-            for i in affils.index:
+            for i in self.all.index:
                   
                   a = affils[i]
                   
@@ -256,11 +257,13 @@ class Entities:
                     val = len(a_res)
                     if val > 0:
                         series = self.all.loc[i]
-                        all_res = pd.concat([all_res, series])
+                        all_res.loc[i] = series
             
         final_indexes = all_res.astype(str).drop_duplicates().index
         
-        return self.all.loc[final_indexes]
+        result = self.all.loc[final_indexes]
+
+        return result
 
 
 
