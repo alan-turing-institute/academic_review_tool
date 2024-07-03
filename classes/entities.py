@@ -225,7 +225,30 @@ class Entities:
             return self.all[~self.all['uri'].isna()]
         else:
             return pd.DataFrame(index=self.all.columns, dtype=object)
+    
+    def search_ids(self, query: str = 'request_input'):
+
+        if query == 'request_input':
+            query = input('Search query').strip()
         
+        query = query.strip().lower()
+
+        cols = [c for c in self.all.columns if ('_id' in c)]
+
+        masked_indexes = []
+        for col in cols:
+                col_str = self.all[col].copy(deep=True).astype(str).str.lower()
+                indexes = col_str[col_str.str.contains(query)].index.to_list()
+                masked_indexes = masked_indexes + indexes
+        
+        masked_indexes = list(set(masked_indexes))
+        all_res = self.all.loc[masked_indexes].copy(deep=True)
+        final_indexes = all_res.astype(str).drop_duplicates().index
+        result = self.all.loc[final_indexes]
+
+        return result
+        
+
     def search(self, query: str = 'request_input'):
         
         if query == 'request_input':
@@ -241,8 +264,6 @@ class Entities:
             if '&' in query:
                 query_list = query.split('&')
                 query_list = [i.strip() for i in query_list]
-
-        
 
         if len(query_list) > 0:
             
