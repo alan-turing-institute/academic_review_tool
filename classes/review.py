@@ -638,7 +638,7 @@ class Review:
         authors_search = authors_search.copy(deep=True).rename(columns={'author_id':'id'})
 
         funders_search = self.funders.search(query = combined_query)
-        funders_search = funders_search.copy(deep=True).
+        funders_search = funders_search.copy(deep=True)
 
         affils_search = self.affiliations.search(query=combined_query)
         affils_search = affils_search.copy(deep=True).rename(columns={'affiliation_id':'id'})
@@ -646,7 +646,6 @@ class Review:
         output = pd.concat([results_search, authors_search, funders_search, affils_search]).reset_index().drop('index', axis=1)
 
         return output
-
 
 
     def export_txt(self, file_name = 'request_input', file_address = 'request_input'):
