@@ -258,9 +258,9 @@ class Entities:
                         series = self.all.loc[i]
                         all_res = pd.concat([all_res, series])
             
-        all_res = all_res.drop_duplicates()
+        final_indexes = all_res.astype(str).drop_duplicates().index
         
-        return all_res
+        return self.all.loc[final_indexes]
 
 
 
