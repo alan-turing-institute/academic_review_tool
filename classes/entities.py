@@ -233,10 +233,14 @@ class Entities:
         
         query = query.strip().lower()
         
-        self_str = self.all.copy(deep=True).loc[0].astype(str).str.lower()
-        masked = self_str[self_str.str.contains(query)].index
-        
-        all_res = self.all.loc[masked].copy(deep=True)
+        self_str = self.all.copy(deep=True).astype(str).str.lower()
+        masked_indexes = []
+        for col in self.all.columns:
+            indexes = self_str[self_str[col].str.contains(query)].index.to_list()
+            masked_indexes = masked_indexes + indexes
+            
+        masked_indexes = list(set(masked_indexes))
+        all_res = self.all.loc[masked_indexes].copy(deep=True)
 
         if 'affiliations' in self.all.columns:
             affils = self.all['affiliations']
@@ -246,7 +250,7 @@ class Entities:
                   a = affils[i]
                   
                   if 'search' in a.__dir__():
-                    
+
                     a_res = a.search(query)
                     val = len(a_res)
                     if val > 0:
