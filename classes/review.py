@@ -625,7 +625,10 @@ class Review:
 
     def search(self, any_kwds = 'request_input', all_kwds = None, not_kwds = None, fields = 'all', case_sensitive = False):
 
-        combined_query = str(any_kwds) + str(all_kwds)
+        combined_query = str(any_kwds)
+        if all_kwds is not None:
+            combined_query = combined_query + str(all_kwds)
+
         combined_query = combined_query.replace(']','').replace('[','').replace('{','').replace('}','')
 
         results_search = self.results.search(fields = fields, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive) # type: ignore
@@ -635,12 +638,12 @@ class Review:
         authors_search = authors_search.copy(deep=True).rename(columns={'author_id':'id'})
 
         funders_search = self.funders.search(query = combined_query)
-        funders_search = funders_search.copy(deep=True).rename(columns={'funder_id':'id'})
+        funders_search = funders_search.copy(deep=True).
 
         affils_search = self.affiliations.search(query=combined_query)
         affils_search = affils_search.copy(deep=True).rename(columns={'affiliation_id':'id'})
 
-        output = pd.concat([results_search, authors_search, funders_search, affils_search])
+        output = pd.concat([results_search, authors_search, funders_search, affils_search]).reset_index().drop('index', axis=1)
 
         return output
 
