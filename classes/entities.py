@@ -233,35 +233,66 @@ class Entities:
         
         query = query.strip().lower()
         
+        query_list = []
+
+        if ('AND' in query):
+            query_list = query.split('AND')
+            query_list = [i.strip() for i in query_list]
+        else:
+            if ('&' in query):
+                query_list = query.split('&')
+                query_list = [i.strip() for i in query_list]
+
         
-        masked_indexes = []
-        for col in self.all.columns:
-            col_str = self.all[col].copy(deep=True).astype(str).str.lower()
-            indexes = col_str[col_str.str.contains(query)].index.to_list()
-            masked_indexes = masked_indexes + indexes
-            
-        masked_indexes = list(set(masked_indexes))
-        all_res = self.all.loc[masked_indexes].copy(deep=True)
 
-        if 'affiliations' in self.all.columns:
-
-            affils = self.all['affiliations']
+        if len(query_list) > 0:
             
-            for i in self.all.index:
-                  
-                  a = affils[i]
-                  
-                  if 'search' in a.__dir__():
+            results_list = []
+            result = pd.DataFrame(columns=self.all.columns, dtype=object)
 
-                    a_res = a.search(query)
-                    val = len(a_res)
-                    if val > 0:
-                        series = self.all.loc[i]
-                        all_res.loc[i] = series
+            for i in query_list:
+                res_indexes = set(self.search(query=i).index)
+                results_list.append(res_indexes)
             
-        final_indexes = all_res.astype(str).drop_duplicates().index
+            union = set.union(*results_list)
+            indexes = list(union)
+
+            result = self.all.loc[indexes]
+
+            return result
+            
+
         
-        result = self.all.loc[final_indexes]
+        else:
+
+            masked_indexes = []
+            for col in self.all.columns:
+                col_str = self.all[col].copy(deep=True).astype(str).str.lower()
+                indexes = col_str[col_str.str.contains(query)].index.to_list()
+                masked_indexes = masked_indexes + indexes
+                
+            masked_indexes = list(set(masked_indexes))
+            all_res = self.all.loc[masked_indexes].copy(deep=True)
+
+            if 'affiliations' in self.all.columns:
+
+                affils = self.all['affiliations']
+                
+                for i in self.all.index:
+                    
+                    a = affils[i]
+                    
+                    if 'search' in a.__dir__():
+
+                        a_res = a.search(query)
+                        val = len(a_res)
+                        if val > 0:
+                            series = self.all.loc[i]
+                            all_res.loc[i] = series
+                
+            final_indexes = all_res.astype(str).drop_duplicates().index
+            
+            result = self.all.loc[final_indexes]
 
         return result
 
