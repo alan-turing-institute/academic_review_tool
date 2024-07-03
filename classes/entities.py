@@ -217,14 +217,46 @@ class Entities:
         if 'crossref_id' in self.all.columns:
             return self.all[~self.all['crossref_id'].isna()]
         else:
-            return pd.Series(index=self.all.columns, dtype=object)
+            return pd.DataFrame(index=self.all.columns, dtype=object)
     
     def with_uri(self):
 
         if 'uri' in self.all.columns:
             return self.all[~self.all['uri'].isna()]
         else:
-            return pd.Series(index=self.all.columns, dtype=object)
-
-
+            return pd.DataFrame(index=self.all.columns, dtype=object)
         
+    def search(self, query: str = 'request_input'):
+        
+        if query == 'request_input':
+            query = input('Search query').strip()
+        
+        query = query.strip().lower()
+        
+        self_str = self.all.copy(deep=True).loc[0].astype(str).str.lower()
+        masked = self_str[self_str.str.contains(query)].index
+        
+        all_res = self.all.loc[masked].copy(deep=True)
+
+        if 'affiliations' in self.all.columns:
+            affils = self.all['affiliations']
+            
+            for i in affils.index:
+                  
+                  a = affils[i]
+                  
+                  if 'search' in a.__dir__():
+                    
+                    a_res = a.search(query)
+                    val = len(a_res)
+                    if val > 0:
+                        series = self.all.loc[i]
+                        all_res = pd.concat([all_res, series])
+            
+        all_res = all_res.drop_duplicates()
+        
+        return all_res
+
+
+
+                  
