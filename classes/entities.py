@@ -231,7 +231,7 @@ class Entities:
         if query == 'request_input':
             query = input('Search query').strip()
         
-        query = query.strip().lower()
+        query = query.strip()
         query_list = []
 
         if 'AND' in query:
@@ -262,7 +262,7 @@ class Entities:
 
         
         else:
-
+            query = query.lower()
             masked_indexes = []
             for col in self.all.columns:
                 col_str = self.all[col].copy(deep=True).astype(str).str.lower()
