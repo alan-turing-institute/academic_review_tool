@@ -632,25 +632,25 @@ class Review:
         combined_query = combined_query.replace(']','').replace('[','').replace('{','').replace('}','')
 
         results_search = self.results.search(fields = fields, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive) # type: ignore
-        results_search = results_search.copy(deep=True).rename(columns={'work_id':'id', 'title': 'name'}) # type: ignore
+        results_search = results_search.copy(deep=True).rename(columns={'work_id':'id', 'title': 'name/title'}) # type: ignore
         results_search['type'] = 'work'
         
         authors_search = self.authors.search(query = combined_query)
-        authors_search = authors_search.copy(deep=True).rename(columns={'author_id':'id', 'full_name': 'name'})
+        authors_search = authors_search.copy(deep=True).rename(columns={'author_id':'id', 'full_name': 'name/title'})
         authors_search['type'] = 'author'
 
         funders_search = self.funders.search(query = combined_query)
-        funders_search = funders_search.copy(deep=True)
+        funders_search = funders_search.copy(deep=True).rename(columns={'funder_id':'id', 'name': 'name/title'})
         funders_search['type'] = 'funder'
 
         affils_search = self.affiliations.search(query=combined_query)
-        affils_search = affils_search.copy(deep=True).rename(columns={'affiliation_id':'id'})
+        affils_search = affils_search.copy(deep=True).rename(columns={'affiliation_id':'id', 'name': 'name/title'})
         affils_search['type'] = 'affiliation'
 
         output = pd.concat([results_search, authors_search, funders_search, affils_search]).reset_index().drop('index', axis=1)
         
         old_cols = output.columns.to_list()
-        new_cols = ['id', 'type', 'name']
+        new_cols = ['id', 'type', 'name/title']
         remaining_cols = [c for c in old_cols if c not in new_cols]
         cols = new_cols + remaining_cols
         output = output[cols]
