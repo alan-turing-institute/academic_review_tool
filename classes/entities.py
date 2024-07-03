@@ -233,10 +233,11 @@ class Entities:
         
         query = query.strip().lower()
         
-        self_str = self.all.copy(deep=True).astype(str).str.lower()
+        
         masked_indexes = []
         for col in self.all.columns:
-            indexes = self_str[self_str[col].str.contains(query)].index.to_list()
+            col_str = self.all[col].copy(deep=True).astype(str).str.lower()
+            indexes = col_str[col_str.str.contains(query)].index.to_list()
             masked_indexes = masked_indexes + indexes
             
         masked_indexes = list(set(masked_indexes))
