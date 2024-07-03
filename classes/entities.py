@@ -233,7 +233,7 @@ class Entities:
         
         query = query.strip().lower()
 
-        cols = [c for c in self.all.columns if ('_id' in c)]
+        cols = [c for c in self.all.columns if (('_id' in c) or (c == 'uri'))]
 
         masked_indexes = []
         for col in cols:

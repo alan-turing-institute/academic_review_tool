@@ -55,10 +55,10 @@ def generate_affiliation_id(affiliation_data: pd.Series):
                 if (uid == None) or (uid == 'None') or (uid == ''):
                         uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:20]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:30]
 
         affiliation_id = affiliation_id + '-' + uid_shortened
-        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace("'s", '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('AFFIL:-', 'AFFIL:').strip('-')
+        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace("'s", '').replace('\r', '').replace('\n', '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('AFFIL:-', 'AFFIL:').strip('-')
 
         return affiliation_id
 
