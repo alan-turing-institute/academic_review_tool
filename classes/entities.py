@@ -232,14 +232,13 @@ class Entities:
             query = input('Search query').strip()
         
         query = query.strip().lower()
-        
         query_list = []
 
-        if ('AND' in query):
+        if 'AND' in query:
             query_list = query.split('AND')
             query_list = [i.strip() for i in query_list]
         else:
-            if ('&' in query):
+            if '&' in query:
                 query_list = query.split('&')
                 query_list = [i.strip() for i in query_list]
 
@@ -248,14 +247,13 @@ class Entities:
         if len(query_list) > 0:
             
             results_list = []
-            result = pd.DataFrame(columns=self.all.columns, dtype=object)
 
             for i in query_list:
                 res_indexes = set(self.search(query=i).index)
                 results_list.append(res_indexes)
             
-            union = set.union(*results_list)
-            indexes = list(union)
+            intersect = set.intersection(*results_list)
+            indexes = list(intersect)
 
             result = self.all.loc[indexes]
 
