@@ -623,8 +623,28 @@ class Review:
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
         return self.results.search_field(field = field, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
 
-    def search(self, any_kwds = 'request_input', all_kwds = None, not_kwds = None, fields = 'all', case_sensitive = False, output = 'Results'):
-        return self.results.search(fields = fields, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
+    def search(self, any_kwds = 'request_input', all_kwds = None, not_kwds = None, fields = 'all', case_sensitive = False):
+
+        combined_query = str(any_kwds) + str(all_kwds)
+        combined_query = combined_query.replace(']','').replace('[','').replace('{','').replace('}','')
+
+        results_search = self.results.search(fields = fields, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive) # type: ignore
+        results_search = results_search.copy(deep=True).rename(columns={'work_id':'id'}) # type: ignore
+        
+        authors_search = self.authors.search(query = combined_query)
+        authors_search = authors_search.copy(deep=True).rename(columns={'author_id':'id'})
+
+        funders_search = self.funders.search(query = combined_query)
+        funders_search = funders_search.copy(deep=True).rename(columns={'funder_id':'id'})
+
+        affils_search = self.affiliations.search(query=combined_query)
+        affils_search = affils_search.copy(deep=True).rename(columns={'affiliation_id':'id'})
+
+        output = pd.concat([results_search, authors_search, funders_search, affils_search])
+
+        return output
+
+
 
     def export_txt(self, file_name = 'request_input', file_address = 'request_input'):
         
