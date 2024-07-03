@@ -51,6 +51,8 @@ class Entity:
         if query == 'request_input':
             query = input('Search query').strip()
         
+        query = query.strip().lower()
+        
         self_str = self.details.copy(deep=True).loc[0].astype(str).str.lower()
         masked = self_str[self_str.str.contains(query)].index
         
