@@ -5,6 +5,7 @@ from ..importers.jstor import import_jstor_metadata, import_jstor_full
 from ..importers.crossref import lookup_doi, lookup_dois
 from ..datasets import stopwords
 
+from .entities import Entity, Entities
 from .funders import Funder, Funders, format_funders
 
 from pathlib import Path
@@ -680,5 +681,5 @@ class Results(pd.DataFrame):
 
         self['funder'] = funders
 
-
+Entity.publications = Results() # type: ignore
 Funder.publications = Results() # type: ignore
