@@ -1,4 +1,5 @@
 from ..importers.orcid import lookup_orcid
+from .entities import Entity, Entities
 from .results import Results
 from .affiliations import Affiliation, Affiliations, format_affiliations
 
@@ -55,7 +56,7 @@ def generate_author_id(author_data: pd.Series):
 
         return author_id
 
-class Author():
+class Author(Entity):
 
     """
     This is an Author object. It is designed to store data about an individual author and their publications.
@@ -89,6 +90,8 @@ class Author():
         Parameters
         ----------
         """
+
+        super().__init__()
 
         if type(given_name) == str:
             given_name = given_name.strip()
@@ -344,7 +347,7 @@ class Author():
 
             self.import_orcid(orcid_id = orcid)
 
-class Authors:
+class Authors(Entities):
 
     """
     This is an Authors object. It contains a collection of Authors objects and compiles data about them.
@@ -365,6 +368,8 @@ class Authors:
         Parameters
         ----------
         """
+
+        super().__init__()
 
         self.all = pd.DataFrame(columns = [
                                 'author_id',

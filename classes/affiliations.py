@@ -1,6 +1,9 @@
 from ..datasets.stopwords.stopwords import all_stopwords
 from ..importers.crossref import lookup_funder
 
+from .entities import Entity, Entities
+
+
 import pandas as pd
 import numpy as np
 
@@ -59,7 +62,7 @@ def generate_affiliation_id(affiliation_data: pd.Series):
 
         return affiliation_id
 
-class Affiliation:
+class Affiliation(Entity):
 
     """
     This is a Affiliation object. It is designed to store data about an organisation that an author is affiliated with.
@@ -91,6 +94,8 @@ class Affiliation:
         Parameters
         ----------
         """
+
+        super().__init__()
 
         orig_name_data = name
 
@@ -494,7 +499,7 @@ class Affiliation:
         if len(res) > 0:
             self.import_crossref_result(res.loc[0]) # type: ignore
    
-class Affiliations:
+class Affiliations(Entities):
 
     """
     This is a Affiliations object. It contains a collection of Affiliations objects and compiles data about them.
@@ -515,6 +520,8 @@ class Affiliations:
         Parameters
         ----------
         """
+
+        super().__init__()
 
         self.all = pd.DataFrame(columns = 
                                 [

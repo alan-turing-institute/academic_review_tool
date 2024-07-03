@@ -1,6 +1,8 @@
 from ..importers.crossref import search_funder_works, lookup_funder
 from ..datasets.stopwords.stopwords import all_stopwords
 
+from .entities import Entity, Entities
+
 # from .results import Results
 
 import pandas as pd
@@ -52,7 +54,7 @@ def generate_funder_id(funder_data: pd.Series):
 
         return funder_id
 
-class Funder:
+class Funder(Entity):
 
     """
     This is a Funder object. It is designed to store data about an individual funder and their publications.
@@ -86,6 +88,8 @@ class Funder:
         Parameters
         ----------
         """
+
+        super().__init__()
 
         if type(name) == str:
             name = name.strip()
@@ -388,10 +392,7 @@ class Funder:
         
         return result
 
-
-
-
-class Funders:
+class Funders(Entities):
 
     """
     This is a Funders object. It contains a collection of Funders objects and compiles data about them.
@@ -412,6 +413,8 @@ class Funders:
         Parameters
         ----------
         """
+
+        super().__init__()
 
         self.all = pd.DataFrame(columns = 
                                 ['funder_id',
