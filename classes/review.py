@@ -522,11 +522,6 @@ class Review:
                     auths.add_author(auth)
                 self.authors.merge(auths)
     
-    def format(self):
-        self.format_funders()
-        self.format_citations()
-        self.format_authors()
-        self.format_affiliations()
 
     def update_author_publications(self, ignore_case: bool = True):
 
@@ -620,6 +615,15 @@ class Review:
             results = Results.from_dataframe(f_pubs_deduplicated) # type: ignore
 
             self.funders.details[f_id].publications = results
+
+    def format(self):
+        self.format_funders()
+        self.format_citations()
+        self.format_authors()
+        self.format_affiliations()
+        self.update_author_publications()
+        self.update_funder_publications()
+
 
     def add_citations_to_results(self, update_formatting: bool = True):
         self.results.add_citations_to_results() # type: ignore
