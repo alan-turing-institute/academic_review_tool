@@ -445,6 +445,7 @@ class Authors(Entities):
     def __len__(self) -> int:
         return len(self.details.keys())
 
+
     def merge(self, authors):
 
         left = self.all.copy(deep=True)

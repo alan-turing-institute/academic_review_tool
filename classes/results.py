@@ -753,12 +753,20 @@ class Results(pd.DataFrame):
     def mask_affiliations(self, query: str = 'request_input', ignore_case: bool = True):
 
         if query == 'request_input':
-            query = input('Search query').strip()
+            query = input('Search query: ').strip()
 
         query = str(query).strip()
 
         def affil_masker(authors):
-            res = authors.mask_entities(column='affiliations', query=query, ignore_case=ignore_case)
+            if 'mask_entities' in authors.__dir__():
+                masked = authors.mask_entities(column='affiliations', query=query, ignore_case=ignore_case)
+                res = len(masked) > 0
+                
+            else:
+                res = False
+
+            return res
+
         
         masked = self[self['authors'].apply(affil_masker)]
 
