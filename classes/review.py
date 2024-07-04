@@ -550,8 +550,9 @@ class Review:
 
                     data_matches = self.results.mask_entities(column = 'authors', query=datapoint, ignore_case=ignore_case) # type: ignore
                     author_pubs = pd.concat([author_pubs, data_matches])
-                
-            author_pubs = author_pubs.drop_duplicates().reset_index().drop('index', axis=1)
+            
+            deduplicated = author_pubs.astype(str).drop_duplicates().index
+            author_pubs = author_pubs.loc[deduplicated].reset_index().drop('index', axis=1)
 
             self.authors.details[author_id].publications = author_pubs
         
