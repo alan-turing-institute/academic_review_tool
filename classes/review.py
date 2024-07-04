@@ -549,11 +549,17 @@ class Review:
                 if (datapoint != None) and (datapoint != '') and (datapoint != 'None'):
 
                     data_matches = self.results.mask_entities(column = 'authors', query=datapoint, ignore_case=ignore_case) # type: ignore
-                    author_pubs = pd.concat([author_pubs, data_matches])
+                    
+                    match_ids = set(data_matches['work_id'])
+                    current_ids = set(author_pubs['work_id'])
+                    diff = match_ids.difference(current_ids)
+                    
+                    if len(diff) > 0:
+                        author_pubs = pd.concat([author_pubs, data_matches])
             
             deduplicated = author_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index
             author_pubs_deduplicated = author_pubs.loc[deduplicated]
-            
+
             deduplicated2 = author_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(ignore_index = True).index
             author_pubs_deduplicated2 = author_pubs.loc[deduplicated2]
 
