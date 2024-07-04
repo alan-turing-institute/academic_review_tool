@@ -545,16 +545,16 @@ class Review:
 
                 datapoint = auths_data.loc[i, c]
 
-
                 if (datapoint != None) and (datapoint != '') and (datapoint != 'None'):
 
                     data_matches = self.results.mask_entities(column = 'authors', query=datapoint, ignore_case=ignore_case) # type: ignore
                     author_pubs = pd.concat([author_pubs, data_matches])
             
-            deduplicated = author_pubs.astype(str).drop_duplicates().index
-            author_pubs = author_pubs.loc[deduplicated].reset_index().drop('index', axis=1)
+            deduplicated = author_pubs.copy(deep=True).astype(str).drop_duplicates().index
+            author_pubs_deduplicated = author_pubs.loc[deduplicated]
+            author_pubs_deduplicated = author_pubs_deduplicated.reset_index().drop('index', axis=1)
 
-            self.authors.details[author_id].publications = author_pubs
+            self.authors.details[author_id].publications = author_pubs_deduplicated
         
 
 
