@@ -767,7 +767,7 @@ class Results(pd.DataFrame):
 
             return res
         
-        masked = self[self[column].apply(entity_masker) == True]
+        masked = self[self[column].apply(entity_masker)]
 
         return masked
 
