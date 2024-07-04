@@ -554,7 +554,7 @@ class Review:
                     current_ids = set(author_pubs['work_id'])
                     diff = match_ids.difference(current_ids)
                     
-                    if len(diff) > 0:
+                    if (len(author_pubs) == 0) or (len(diff) > 0):
                         author_pubs = pd.concat([author_pubs, data_matches])
             
             deduplicated = author_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index
