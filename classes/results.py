@@ -760,8 +760,8 @@ class Results(pd.DataFrame):
         def entity_masker(entities):
             
             if 'contains' in entities.__dir__():
-                metacode = f'entities.contains(query="{query}", ignore_case={ignore_case})'
-                res = exec(metacode)
+                res = entities.contains(query=query, ignore_case=ignore_case)
+                
             else:
                 res = False
 
