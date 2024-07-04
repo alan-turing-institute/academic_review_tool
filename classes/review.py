@@ -557,16 +557,16 @@ class Review:
                     if (len(author_pubs) == 0) or (len(diff) > 0):
                         author_pubs = pd.concat([author_pubs, data_matches])
             
-            deduplicated = author_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index
+            deduplicated = author_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index.to_list()
             author_pubs_deduplicated = author_pubs.loc[deduplicated]
 
-            deduplicated2 = author_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
-            author_pubs_deduplicated2 = author_pubs.loc[deduplicated2]
+            # deduplicated2 = author_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
+            # author_pubs_deduplicated2 = author_pubs.loc[deduplicated2]
 
-            deduplicated3 = author_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
-            author_pubs_deduplicated3 = author_pubs.loc[deduplicated3]
+            # deduplicated3 = author_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
+            # author_pubs_deduplicated3 = author_pubs.loc[deduplicated3]
 
-            results = Results.from_dataframe(author_pubs_deduplicated3) # type: ignore
+            results = Results.from_dataframe(author_pubs_deduplicated) # type: ignore
 
             self.authors.details[author_id].publications = results
         
@@ -599,16 +599,16 @@ class Review:
                     if (len(f_pubs) == 0) or (len(diff) > 0):
                         f_pubs = pd.concat([f_pubs, data_matches])
             
-            deduplicated = f_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index
+            deduplicated = f_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index.to_list()
             f_pubs_deduplicated = f_pubs.loc[deduplicated]
 
-            deduplicated2 = f_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
-            f_pubs_deduplicated2 = f_pubs.loc[deduplicated2]
+            # deduplicated2 = f_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
+            # f_pubs_deduplicated2 = f_pubs.loc[deduplicated2]
 
-            deduplicated3 = f_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
-            f_pubs_deduplicated3 = f_pubs.loc[deduplicated3]
+            # deduplicated3 = f_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
+            # f_pubs_deduplicated3 = f_pubs.loc[deduplicated3]
 
-            results = Results.from_dataframe(f_pubs_deduplicated3) # type: ignore
+            results = Results.from_dataframe(f_pubs_deduplicated) # type: ignore
 
             self.funders.details[f_id].publications = results
 
