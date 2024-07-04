@@ -618,6 +618,8 @@ class Review:
 
     def update_affiliation_publications(self, ignore_case: bool = True):
 
+        self.update_author_publications(ignore_case=ignore_case)
+
         affils_data = self.affiliations.all[['affiliation_id', 'name', 'uri', 'crossref_id', 'website']]
         affils_data = affils_data.dropna(axis=1, how='all')
 
@@ -626,20 +628,53 @@ class Review:
         for i in affils_data.index:
 
             affil_id = affils_data.loc[i, 'affiliation_id']
+            if (affil_id == None) or (affil_id == '') or (affil_id == 'None'):
+                affil_id = ''
+            affil_id = str(affil_id)
+            
+            affil_auths = self.authors.mask_entities(column='affiliations', query=affil_id, ignore_case=ignore_case)
+
+            if (affil_id != None) and (affil_id != '') and (affil_id != 'None'):
+                self.affiliations.details[affil_id].authors = affil_auths
+
             affil_pubs = pd.DataFrame(columns=results_cols, dtype=object)
-            affil_auths = Authors().all
-
             for c in affils_data.columns:
-                ...
+                affil_info = affils_data.loc[i, c]
 
+                if (affil_info != None) and (affil_info != '') and (affil_info != 'None'):
+                    affil_info = str(affil_info)
+                
+                    masked_pubs = self.results.mask_affiliations(query=affil_info, ignore_case=ignore_case).copy(deep=True) # type: ignore
 
-    def format(self, update_entities_data = False):
+                    match_ids = set(masked_pubs['work_id'])
+                    current_ids = set(affil_pubs['work_id'])
+                    diff = match_ids.difference(current_ids)
+                        
+                    if (len(affil_pubs) == 0) or (len(diff) > 0):
+                        affil_pubs = pd.concat([affil_pubs, masked_pubs])
+                    
+                    deduplicated = affil_pubs.copy(deep=True)
+                    deduplicated_indexes = deduplicated.drop_duplicates(subset='work_id').index.to_list()
+
+                    if len(deduplicated_indexes) > 0:
+                        affil_pubs_deduplicated = affil_pubs.loc[deduplicated_indexes]
+                    else:
+                        affil_pubs_deduplicated = affil_pubs
+
+                    results = Results.from_dataframe(affil_pubs_deduplicated) # type: ignore
+
+                    self.affiliations.details[affil_id].publications = results
+                
+                
+
+    def format(self, update_entities = False):
+
         self.format_funders()
         self.format_citations()
         self.format_authors()
         self.format_affiliations()
 
-        if update_entities_data == True:
+        if update_entities == True:
             self.update_author_publications()
             self.update_funder_publications()
 
