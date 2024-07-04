@@ -237,7 +237,8 @@ class Entities:
         
         if ignore_case == True:
             query = query.lower()
-            all_str = all_str.str.lower()
+            for c in all_str.columns:
+                all_str[c] = all_str[c].str.lower()
             
 
         cols = self.all.columns
