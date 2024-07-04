@@ -251,7 +251,7 @@ class Entities:
                     return True
             
             if (c == 'name') or (c == 'full_name'):
-                res = all_str[all_str[c].str.contains(query)]
+                res = all_str[all_str[c] == query]
                 if len(res) > 0:
                     return True
             
@@ -276,12 +276,12 @@ class Entities:
                     return True
             
             if (c == 'crossref_id') or (c == 'crossref'):
-                res = all_str[all_str[c].str.contains(query)]
+                res = all_str[all_str[c] == query]
                 if len(res) > 0:
                     return True
             
             if (c == 'website') or (c == 'link'):
-                res = all_str[all_str[c].str.contains(query)]
+                res = all_str[all_str[c] == query]
                 if len(res) > 0:
                     return True
             
