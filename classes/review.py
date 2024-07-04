@@ -566,9 +566,14 @@ class Review:
             # author_pubs_deduplicated3 = author_pubs.loc[deduplicated3]
 
             results = Results.from_dataframe(author_pubs_deduplicated) # type: ignore
+            
+            pubs_dict = {}
+            for i in results.index:
+                pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
+
 
             self.authors.details[author_id].publications = results
-            self.authors.all[i, 'publications'] = results
+            self.authors.all.at[i, 'publications'] = pubs_dict
             self.authors.details[author_id].affiliations = self.authors.details[author_id].details.loc[0, 'affiliations']
         
     def update_funder_attrs(self, ignore_case: bool = True):
@@ -615,9 +620,12 @@ class Review:
             # f_pubs_deduplicated3 = f_pubs.loc[deduplicated3]
 
             results = Results.from_dataframe(f_pubs_deduplicated) # type: ignore
+            pubs_dict = {}
+            for i in results.index:
+                pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
 
             self.funders.details[f_id].publications = results
-            self.funders.all.loc[i, 'publications'] = results
+            self.funders.all.at[i, 'publications'] = pubs_dict
 
     def update_affiliation_attrs(self, update_authors: bool = True, ignore_case: bool = True):
         
@@ -657,18 +665,21 @@ class Review:
                     if (len(affil_pubs) == 0) or (len(diff) > 0):
                         affil_pubs = pd.concat([affil_pubs, masked_pubs])
                     
-                    deduplicated = affil_pubs.copy(deep=True)
-                    deduplicated_indexes = deduplicated.drop_duplicates(subset='work_id').index.to_list()
+            deduplicated = affil_pubs.copy(deep=True)
+            deduplicated_indexes = deduplicated.drop_duplicates(subset='work_id').index.to_list()
 
-                    if len(deduplicated_indexes) > 0:
+            if len(deduplicated_indexes) > 0:
                         affil_pubs_deduplicated = affil_pubs.loc[deduplicated_indexes]
-                    else:
+            else:
                         affil_pubs_deduplicated = affil_pubs
 
-                    results = Results.from_dataframe(affil_pubs_deduplicated) # type: ignore
+            results = Results.from_dataframe(affil_pubs_deduplicated) # type: ignore
+            pubs_dict = {}
+            for i in results.index:
+                pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
 
-                    self.affiliations.details[affil_id].publications = results
-                    self.affiliations.all.loc[i, 'publications'] = results
+            self.affiliations.details[affil_id].publications = results
+            self.affiliations.all.at[i, 'publications'] = pubs_dict
                 
     def update_entity_attrs(self, ignore_case: bool = True):
         
