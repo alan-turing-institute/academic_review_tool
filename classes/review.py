@@ -523,7 +523,7 @@ class Review:
                 self.authors.merge(auths)
     
 
-    def update_author_publications(self, ignore_case: bool = True):
+    def update_author_attrs(self, ignore_case: bool = True):
 
         self.authors.sync()
 
@@ -568,8 +568,10 @@ class Review:
             results = Results.from_dataframe(author_pubs_deduplicated) # type: ignore
 
             self.authors.details[author_id].publications = results
+            self.authors.all[i, 'publications'] = results
+            self.authors.details[author_id].affiliations = self.authors.details[author_id].details.loc[0, 'affiliations']
         
-    def update_funder_publications(self, ignore_case: bool = True):
+    def update_funder_attrs(self, ignore_case: bool = True):
 
         self.funders.sync_all()
 
@@ -615,10 +617,12 @@ class Review:
             results = Results.from_dataframe(f_pubs_deduplicated) # type: ignore
 
             self.funders.details[f_id].publications = results
+            self.funders.all.loc[i, 'publications'] = results
 
-    def update_affiliation_publications(self, ignore_case: bool = True):
-
-        self.update_author_publications(ignore_case=ignore_case)
+    def update_affiliation_attrs(self, update_authors: bool = True, ignore_case: bool = True):
+        
+        if update_authors == True:
+            self.update_author_attrs(ignore_case=ignore_case)
 
         affils_data = self.affiliations.all[['affiliation_id', 'name', 'uri', 'crossref_id', 'website']]
         affils_data = affils_data.dropna(axis=1, how='all')
@@ -664,8 +668,13 @@ class Review:
                     results = Results.from_dataframe(affil_pubs_deduplicated) # type: ignore
 
                     self.affiliations.details[affil_id].publications = results
+                    self.affiliations.all.loc[i, 'publications'] = results
                 
-                
+    def update_entity_attrs(self, ignore_case: bool = True):
+        
+        self.update_author_attrs(ignore_case=ignore_case)
+        self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
+        self.update_funder_attrs(ignore_case=ignore_case)
 
     def format(self, update_entities = False):
 
@@ -675,8 +684,7 @@ class Review:
         self.format_affiliations()
 
         if update_entities == True:
-            self.update_author_publications()
-            self.update_funder_publications()
+            self.update_entity_attrs()
 
 
     def add_citations_to_results(self, update_formatting: bool = True):
