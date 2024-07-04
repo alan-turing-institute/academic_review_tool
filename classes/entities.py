@@ -286,9 +286,6 @@ class Entities:
                     return True
             
         return False
-
-                
-        
         
 
     def search_ids(self, query: str = 'request_input'):

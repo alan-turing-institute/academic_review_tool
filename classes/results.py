@@ -65,7 +65,8 @@ def generate_work_id(work_data: pd.Series):
         work_id = work_id
 
         return work_id
-    
+
+
 class Results(pd.DataFrame):
 
     """
@@ -672,6 +673,104 @@ class Results(pd.DataFrame):
     def has(self, column):
         return self[~self[column].isna()]
     
+    def contains(self, query: str = 'request_input', ignore_case: bool = True) -> bool:
+
+        if query == 'request_input':
+            query = input('Search query').strip()
+
+        query = str(query).strip()
+
+        all_str = self.copy(deep=True).astype(str)
+        
+        if ignore_case == True:
+            query = query.lower()
+            
+
+        cols = all_str.columns
+
+        for c in cols:
+
+            if ignore_case == True:
+                all_str[c] = all_str[c].str.lower()
+
+            if c == 'work_id':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'title':
+                res = all_str[all_str[c] == query]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'date':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'source':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'publisher':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'funder':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'keywords':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'doi':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'isbn':
+                res = all_str[all_str[c] == query]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'issn':
+                res = all_str[all_str[c] == query]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'link':
+                res = all_str[all_str[c] == query]
+                if len(res) > 0:
+                    return True
+
+        return False
+
+    def mask_entities(self, column, query: str = 'request_input', ignore_case: bool = True):
+
+        if query == 'request_input':
+            query = input('Search query').strip()
+
+        query = str(query).strip()
+
+        def entity_masker(entities):
+            
+            if 'contains' in entities.__dir__():
+                metacode = f'{entities}.contains(query={query}, ignore_case={ignore_case})'
+                res = exec(metacode)
+            else:
+                res = False
+
+            return res
+        
+        masked = self[self[column].apply(entity_masker) == True]
+
+        return masked
+
     def format_funders(self, use_api: bool = False):
 
         try:
@@ -683,3 +782,5 @@ class Results(pd.DataFrame):
 
 Entity.publications = Results() # type: ignore
 Funder.publications = Results() # type: ignore
+
+
