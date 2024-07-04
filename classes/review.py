@@ -573,6 +573,9 @@ class Review:
 
 
             self.authors.details[author_id].publications = results
+            if 'publications' not in self.authors.all.columns:
+                self.authors.all['publications'] = pd.Series(dtype=object)
+
             self.authors.all.at[i, 'publications'] = pubs_dict
             self.authors.details[author_id].affiliations = self.authors.details[author_id].details.loc[0, 'affiliations']
         
@@ -625,6 +628,8 @@ class Review:
                 pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
 
             self.funders.details[f_id].publications = results
+            if 'publications' not in self.funders.all.columns:
+                self.funders.all['publications'] = pd.Series(dtype=object)
             self.funders.all.at[i, 'publications'] = pubs_dict
 
     def update_affiliation_attrs(self, update_authors: bool = True, ignore_case: bool = True):
@@ -676,9 +681,13 @@ class Review:
             results = Results.from_dataframe(affil_pubs_deduplicated) # type: ignore
             pubs_dict = {}
             for i in results.index:
-                pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
+                key = results.loc[i, 'work_id']
+                pubs_dict[key] = results.loc[i, 'title']
 
             self.affiliations.details[affil_id].publications = results
+            
+            if 'publications' not in self.affiliations.all.columns:
+                self.affiliations.all['publications'] = pd.Series(dtype=object)
             self.affiliations.all.at[i, 'publications'] = pubs_dict
                 
     def update_entity_attrs(self, ignore_case: bool = True):
