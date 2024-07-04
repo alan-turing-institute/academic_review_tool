@@ -630,10 +630,7 @@ class Review:
             affil_auths = Authors().all
 
             for c in affils_data.columns:
-                
-
-
-        ...
+                ...
 
 
     def format(self):
