@@ -566,13 +566,12 @@ class Review:
             # author_pubs_deduplicated3 = author_pubs.loc[deduplicated3]
 
             results = Results.from_dataframe(author_pubs_deduplicated) # type: ignore
+            self.authors.details[author_id].publications = results
             
             pubs_dict = {}
             for work in results.index:
                 key = results.loc[work, 'work_id']
                 pubs_dict[key] = results.loc[work, 'title']
-
-            self.authors.details[author_id].publications = results
             
             if 'publications' not in self.authors.all.columns:
                 self.authors.all['publications'] = pd.Series(dtype=object)
@@ -699,6 +698,46 @@ class Review:
         self.update_author_attrs(ignore_case=ignore_case)
         self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
         self.update_funder_attrs(ignore_case=ignore_case)
+
+    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True):
+
+        if format == True:
+            self.format()
+        
+        if update_attrs == True:
+            self.update_author_attrs(ignore_case=ignore_case)
+        
+        auth_ids = self.authors.details.keys()
+        output = {}
+
+        for a in auth_ids:
+
+            auth = self.authors.details[a]
+            if 'publications' in auth.__dict__.keys():
+                auth_pubs = auth.publications
+            else:
+                auth_pubs = Results()
+            
+            if (auth_pubs == None) or (len(auth_pubs) == 0):
+                auth_pubs = self.results.mask_entities(column = 'authors', query=a, ignore_case=ignore_case) # type: ignore
+            
+            all_coauthors = Authors()
+            for i in auth_pubs.index:
+                    coauthors = auth_pubs.loc[i, 'authors']
+                    if type(coauthors) == Authors:
+                        all_coauthors.merge(coauthors)
+            
+            all_coauthors.drop(entity_id=a)
+
+            output[a] = all_coauthors
+
+        return output
+
+
+                    
+
+
+
 
     def format(self, update_entities = False):
 
