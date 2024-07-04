@@ -1,4 +1,4 @@
-from ..utils.basics import Iterator
+from ..utils.basics import Iterator, results_cols
 from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
@@ -527,6 +527,35 @@ class Review:
         self.format_citations()
         self.format_authors()
         self.format_affiliations()
+
+    def update_author_publications(self, ignore_case: bool = True):
+
+        self.authors.sync()
+
+        auths_data = self.authors.all[['author_id', 'orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']]
+        auths_data = auths_data.dropna(axis=1, how='all')
+
+        global results_cols
+
+        for i in auths_data.index:
+            author_id = auths_data.loc[i, 'author_id']
+            author_pubs = pd.DataFrame(columns=results_cols, dtype=object)
+
+            for c in auths_data.columns:
+
+                datapoint = auths_data.loc[i, c]
+
+
+                if (datapoint != None) and (datapoint != '') and (datapoint != 'None'):
+
+                    data_matches = self.results.mask_entities(column = 'authors', query=datapoint, ignore_case=ignore_case) # type: ignore
+                    author_pubs = pd.concat([author_pubs, data_matches])
+                
+            author_pubs = author_pubs.drop_duplicates().reset_index().drop('index', axis=1)
+
+            self.authors.details[author_id].publications = author_pubs
+        
+
 
     def add_citations_to_results(self, update_formatting: bool = True):
         self.results.add_citations_to_results() # type: ignore

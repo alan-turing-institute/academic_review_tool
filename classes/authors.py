@@ -546,6 +546,23 @@ class Authors(Entities):
                 auth = Author.from_series(auth_data) # type: ignore
                 self.details[auth_id] = auth
 
+    def sync(self):
+        
+        all_len = len(self.all)
+        details_len = len(self.details)
+
+        if all_len > details_len:
+            self.sync_details()
+            return
+        else:
+            if details_len > all_len:
+                self.sync_all()
+                return
+            else:
+                self.sync_details()
+                self.sync_all()
+                return
+
     def format_affiliations(self):
 
         affils = self.all['affiliations'].apply(func=format_affiliations) # type: ignore
