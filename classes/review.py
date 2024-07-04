@@ -568,11 +568,12 @@ class Review:
             results = Results.from_dataframe(author_pubs_deduplicated) # type: ignore
             
             pubs_dict = {}
-            for i in results.index:
-                pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
-
+            for work in results.index:
+                key = results.loc[work, 'work_id']
+                pubs_dict[key] = results.loc[work, 'title']
 
             self.authors.details[author_id].publications = results
+            
             if 'publications' not in self.authors.all.columns:
                 self.authors.all['publications'] = pd.Series(dtype=object)
 
@@ -623,9 +624,11 @@ class Review:
             # f_pubs_deduplicated3 = f_pubs.loc[deduplicated3]
 
             results = Results.from_dataframe(f_pubs_deduplicated) # type: ignore
+            
             pubs_dict = {}
-            for i in results.index:
-                pubs_dict[results.loc[i, 'work_id']] = results.loc[i, 'title']
+            for work in results.index:
+                key = results.loc[work, 'work_id']
+                pubs_dict[key] = results.loc[work, 'title']
 
             self.funders.details[f_id].publications = results
             if 'publications' not in self.funders.all.columns:
@@ -679,10 +682,11 @@ class Review:
                         affil_pubs_deduplicated = affil_pubs
 
             results = Results.from_dataframe(affil_pubs_deduplicated) # type: ignore
+
             pubs_dict = {}
-            for i in results.index:
-                key = results.loc[i, 'work_id']
-                pubs_dict[key] = results.loc[i, 'title']
+            for work in results.index:
+                key = results.loc[work, 'work_id']
+                pubs_dict[key] = results.loc[work, 'title']
 
             self.affiliations.details[affil_id].publications = results
             
