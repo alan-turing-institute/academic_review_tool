@@ -171,6 +171,25 @@ class Entities:
     def __len__(self) -> int:
         return len(self.details.keys())
 
+    def drop(self, entity_id):
+
+        if entity_id in self.details.keys():
+            del self.details[entity_id]
+
+        id_col = None
+        if 'author_id' in self.all.columns:
+            id_col = 'author_id'
+        if 'funder_id' in self.all.columns:
+            id_col = 'funder_id'
+        if 'affiliation_id' in self.all.columns:
+            id_col = 'affiliation_id'
+
+        i_to_drop = self.all[self.all[id_col] == entity_id].index.to_list()
+
+        if len(i_to_drop) > 0:
+            self.all.drop(labels=i_to_drop, axis=0)
+
+
     def merge(self, entities):
 
         left = self.all.copy(deep=True)

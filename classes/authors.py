@@ -519,6 +519,27 @@ class Authors(Entities):
             if type(i) == Author:
                 self.add_author(author = i)
 
+    def mask_entities(self, column, query: str = 'request_input', ignore_case: bool = True):
+
+        if query == 'request_input':
+            query = input('Search query').strip()
+
+        query = str(query).strip()
+
+        def entity_masker(entities):
+            
+            if 'contains' in entities.__dir__():
+                res = entities.contains(query=query, ignore_case=ignore_case)
+                
+            else:
+                res = False
+
+            return res
+        
+        masked = self.all[self.all[column].apply(entity_masker)]
+
+        return masked
+
     def sync_all(self):
 
         for i in self.details.keys():

@@ -616,6 +616,26 @@ class Review:
 
             self.funders.details[f_id].publications = results
 
+    def update_affiliation_publications(self, ignore_case: bool = True):
+
+        affils_data = self.affiliations.all[['affiliation_id', 'name', 'uri', 'crossref_id', 'website']]
+        affils_data = affils_data.dropna(axis=1, how='all')
+
+        global results_cols
+
+        for i in affils_data.index:
+
+            affil_id = affils_data.loc[i, 'affiliation_id']
+            affil_pubs = pd.DataFrame(columns=results_cols, dtype=object)
+            affil_auths = Authors().all
+
+            for c in affils_data.columns:
+                
+
+
+        ...
+
+
     def format(self):
         self.format_funders()
         self.format_citations()
