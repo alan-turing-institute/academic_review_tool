@@ -226,14 +226,19 @@ class Entities:
         else:
             return pd.DataFrame(index=self.all.columns, dtype=object)
     
-    def contains(self, query: str = 'request_input') -> bool:
+    def contains(self, query: str = 'request_input', ignore_case: bool = True) -> bool:
 
         if query == 'request_input':
             query = input('Search query').strip()
 
-        query = query.strip().lower()
+        query = query.strip()
 
         all_str = self.all.copy(deep=True).astype(str)
+        
+        if ignore_case == True:
+            query = query.lower()
+            all_str = all_str.str.lower()
+            
 
         cols = self.all.columns
 
