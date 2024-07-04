@@ -560,17 +560,57 @@ class Review:
             deduplicated = author_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index
             author_pubs_deduplicated = author_pubs.loc[deduplicated]
 
-            deduplicated2 = author_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(ignore_index = True).index
+            deduplicated2 = author_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
             author_pubs_deduplicated2 = author_pubs.loc[deduplicated2]
 
-            deduplicated3 = author_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(ignore_index = True).index
+            deduplicated3 = author_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
             author_pubs_deduplicated3 = author_pubs.loc[deduplicated3]
 
             results = Results.from_dataframe(author_pubs_deduplicated3) # type: ignore
 
             self.authors.details[author_id].publications = results
         
+    def update_funder_publications(self, ignore_case: bool = True):
 
+        self.funders.sync_all()
+
+        f_data = self.funders.all[['funder_id', 'uri', 'crossref_id', 'website','name']]
+        f_data = f_data.dropna(axis=1, how='all')
+
+        global results_cols
+
+        for i in f_data.index:
+            
+            f_id = f_data.loc[i, 'funder_id']
+            f_pubs = pd.DataFrame(columns=results_cols, dtype=object)
+
+            for c in f_data.columns:
+
+                datapoint = f_data.loc[i, c]
+
+                if (datapoint != None) and (datapoint != '') and (datapoint != 'None'):
+
+                    data_matches = self.results.mask_entities(column = 'funder', query=datapoint, ignore_case=ignore_case) # type: ignore
+                    
+                    match_ids = set(data_matches['work_id'])
+                    current_ids = set(f_pubs['work_id'])
+                    diff = match_ids.difference(current_ids)
+                    
+                    if (len(f_pubs) == 0) or (len(diff) > 0):
+                        f_pubs = pd.concat([f_pubs, data_matches])
+            
+            deduplicated = f_pubs.copy(deep=True).drop_duplicates(subset='work_id', ignore_index = True).index
+            f_pubs_deduplicated = f_pubs.loc[deduplicated]
+
+            deduplicated2 = f_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
+            f_pubs_deduplicated2 = f_pubs.loc[deduplicated2]
+
+            deduplicated3 = f_pubs_deduplicated2.copy(deep=True).astype(str).drop_duplicates(subset=['title', 'doi'], ignore_index = True).index
+            f_pubs_deduplicated3 = f_pubs.loc[deduplicated3]
+
+            results = Results.from_dataframe(f_pubs_deduplicated3) # type: ignore
+
+            self.funders.details[f_id].publications = results
 
     def add_citations_to_results(self, update_formatting: bool = True):
         self.results.add_citations_to_results() # type: ignore
