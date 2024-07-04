@@ -633,13 +633,15 @@ class Review:
                 ...
 
 
-    def format(self):
+    def format(self, update_entities_data = False):
         self.format_funders()
         self.format_citations()
         self.format_authors()
         self.format_affiliations()
-        self.update_author_publications()
-        self.update_funder_publications()
+
+        if update_entities_data == True:
+            self.update_author_publications()
+            self.update_funder_publications()
 
 
     def add_citations_to_results(self, update_formatting: bool = True):
