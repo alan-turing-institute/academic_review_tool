@@ -226,6 +226,65 @@ class Entities:
         else:
             return pd.DataFrame(index=self.all.columns, dtype=object)
     
+    def contains(self, query: str = 'request_input') -> bool:
+
+        if query == 'request_input':
+            query = input('Search query').strip()
+
+        query = query.strip().lower()
+
+        all_str = self.all.copy(deep=True).astype(str)
+
+        cols = self.all.columns
+
+        for c in cols:
+
+            if '_id' in c:
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if (c == 'name') or (c == 'full_name'):
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'uri':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'orcid':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'google_scholar':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if c == 'scopus':
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if (c == 'crossref_id') or (c == 'crossref'):
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+            if (c == 'website') or (c == 'link'):
+                res = all_str[all_str[c].str.contains(query)]
+                if len(res) > 0:
+                    return True
+            
+        return False
+
+                
+        
+        
+
     def search_ids(self, query: str = 'request_input'):
 
         if query == 'request_input':
