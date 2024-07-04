@@ -718,7 +718,7 @@ class Review:
             else:
                 auth_pubs = Results()
             
-            if (auth_pubs == None) or (len(auth_pubs) == 0):
+            if (auth_pubs is None) or (len(auth_pubs) == 0):
                 auth_pubs = self.results.mask_entities(column = 'authors', query=a, ignore_case=ignore_case) # type: ignore
             
             all_coauthors = Authors()
