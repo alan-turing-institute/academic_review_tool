@@ -538,6 +538,7 @@ class Review:
         global results_cols
 
         for i in auths_data.index:
+            
             author_id = auths_data.loc[i, 'author_id']
             author_pubs = pd.DataFrame(columns=results_cols, dtype=object)
 
@@ -550,14 +551,14 @@ class Review:
                     data_matches = self.results.mask_entities(column = 'authors', query=datapoint, ignore_case=ignore_case) # type: ignore
                     author_pubs = pd.concat([author_pubs, data_matches])
             
-            deduplicated = author_pubs.copy(deep=True).astype(str).drop_duplicates(subset=['work_id']).index.to_list()
-            deduplicated = author_pubs.copy(deep=True).astype(str).drop_duplicates(subset=['work_id']).index.to_list()
+            deduplicated = author_pubs.copy(deep=True).astype(str).drop_duplicates(subset='work_id', ignore_index = True).index.to_list()
             author_pubs_deduplicated = author_pubs.loc[deduplicated]
-            deduplicated2 = author_pubs_deduplicated.copy(deep=True).astype(str).drop_duplicates().index.to_list()
-            author_pubs_deduplicated = author_pubs.loc[deduplicated2]
-            author_pubs_deduplicated = author_pubs_deduplicated.reset_index().drop('index', axis=1)
+            deduplicated2 = author_pubs_deduplicated.drop_duplicates(subset='work_id', ignore_index = True).index.to_list()
+            author_pubs_deduplicated2 = author_pubs.loc[deduplicated2]
+            author_pubs_deduplicated3 = author_pubs_deduplicated2.reset_index().drop('index', axis=1)
+            results = Results.from_dataframe(author_pubs_deduplicated3) # type: ignore
 
-            self.authors.details[author_id].publications = author_pubs_deduplicated
+            self.authors.details[author_id].publications = results
         
 
 
