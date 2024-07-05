@@ -1,7 +1,9 @@
-from igraph import Graph
-from networkx.classes import Graph as NetworkX_Undir, DiGraph as NetworkX_Dir, MultiGraph as NetworkX_Multi
+from igraph import Graph # type: ignore
+from networkx.classes import Graph as NetworkX_Undir, DiGraph as NetworkX_Dir, MultiGraph as NetworkX_Multi # type: ignore
 import numpy as np
 import pandas as pd
+
+import itertools
 
 def generate_urls_network(urls_dict: dict) -> Graph:
         
@@ -177,3 +179,59 @@ def colinks_in(links_network: Graph) -> pd.DataFrame:
     df = df.sort_values('Frequency', ascending=False)
     
     return df
+
+
+def generate_coauthors_network(coauthors_dict: dict) -> Graph:
+        
+        """
+        Returns a directed network representing if/how items embed hyperlinks to one another.
+        
+        Parameters
+        ----------
+        urls_dict : dict
+            a dictionary with the following structure:
+                * keys: URLs
+                * values: links associated with the URLs
+        """
+
+        
+        # Creating list of all unique author_ids in source dictionary
+        all_auths = list(set(coauthors_dict.keys()))
+        
+        
+        # Initialising network
+        g = Graph(n=len(all_auths), directed=False, vertex_attrs={'name': all_auths})
+        
+        
+        # Adding edges by iterating through vertices and retrieving links associated
+        for vertex in g.vs:
+            
+            # Getting vertex id
+            auth_id = vertex['name']
+            
+            # Ignoring None and empty string vertex IDs
+            if (auth_id != None) and (len(auth_id) > 0):
+                
+                # Retrieving vertex index
+                v_index = vertex.index
+                
+                # Retrieving co-author ids
+                v_edges = coauthors_dict[auth_id]['author_id'].to_list()
+                
+                # If the vertex has links associated, finds vertices those links direct to
+                if len(v_edges) > 0:
+                    
+                    for author in v_edges:
+                        end_index = g.vs.find(name = author).index
+                        df_index = coauthors_dict[auth_id][coauthors_dict[auth_id]['author_id'] == author].index.to_list()[0]
+                        weight = coauthors_dict[auth_id].loc[df_index, 'frequency']
+                        
+                        # Adding edges between linked vertices
+                        Graph.add_edges(g, 
+                                        [(v_index, end_index)], 
+                                        attributes={
+                                           'name': f'{auth_id} <-> {author}',
+                                           'weight': weight
+                                           })
+                    
+        return g
