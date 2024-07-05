@@ -3,6 +3,8 @@ from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
+from ..networks.network_functions import generate_coauthors_network, generate_urls_network, colinks_in, colinks_out
+
 
 from .properties import Properties
 from .affiliations import Affiliation, Affiliations, format_affiliations
@@ -11,6 +13,7 @@ from .results import Results, Funder, generate_work_id
 from .references import References, is_formatted_reference, extract_references
 from .activitylog import ActivityLog
 from .authors import Author, Authors, format_authors as orig_format_authors
+from .networks import Network, Networks
 from .citation_crawler import citation_crawler
 
 
@@ -19,6 +22,8 @@ import pickle
 
 import pandas as pd
 import numpy as np
+
+from igraph import Graph # type: ignore
 
 
 
@@ -221,6 +226,7 @@ class Review:
         self.affiliations = Affiliations()
         self.activity_log = ActivityLog()
         self.description = ''
+        self.networks = Networks()
         self.format()
         self.update_properties()
     
@@ -1347,7 +1353,36 @@ class Review:
         
         return result
 
+    def generate_coauthors_network(self, 
+                                format: bool = True, 
+                                update_attrs: bool = True,
+                                ignore_case: bool = True,
+                                add_to_networks: bool = True
+                                ) -> Graph:
 
+        co_auths = self.get_coauthors(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
+
+        g = generate_coauthors_network(coauthors_dict=co_auths)
+
+        for v in g.vs:
+
+            auth_id = v['name']
+            auth_obj = self.authors.details[auth_id]
+            pubs = auth_obj.publications
+            affils = auth_obj.affiliations
+            details = auth_obj.details
+
+            for c in details.columns:
+                v[c] = details.loc[0, c]
+            
+            v['publications'] = pubs
+            v['affiliations'] = affils
+
+
+        if add_to_networks == True:
+            self.networks.__dict__['coauthors'] = g
+        
+        return g
 
 
 
