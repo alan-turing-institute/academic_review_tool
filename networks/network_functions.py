@@ -184,14 +184,19 @@ def colinks_in(links_network: Graph) -> pd.DataFrame:
 def generate_coauthors_network(coauthors_dict: dict) -> Graph:
         
         """
-        Returns a directed network representing if/how items embed hyperlinks to one another.
+        Returns an undirected network representing how authors co-publish with one another.
         
         Parameters
         ----------
-        urls_dict : dict
+        coauthors_dict : dict
             a dictionary with the following structure:
-                * keys: URLs
-                * values: links associated with the URLs
+                * keys: author IDs
+                * values: Pandas DataFrames containing details on co-authors.
+        
+        Returns
+        -------
+        g : Graph
+            an iGraph Graph object representing the co-authorship network.
         """
 
         
