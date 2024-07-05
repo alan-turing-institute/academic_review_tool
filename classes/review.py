@@ -699,7 +699,7 @@ class Review:
         self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
         self.update_funder_attrs(ignore_case=ignore_case)
 
-    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True):
+    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True):
 
         if format == True:
             self.format()
@@ -710,26 +710,33 @@ class Review:
         auth_ids = self.authors.details.keys()
         output = {}
 
+        cols = Authors().all.columns.to_list()
+
         for a in auth_ids:
 
-            auth = self.authors.details[a]
-            if 'publications' in auth.__dict__.keys():
-                auth_pubs = auth.publications
-            else:
-                auth_pubs = Results()
+            auth_pubs = self.results.mask_entities(column = 'authors', query=a, ignore_case=ignore_case) # type: ignore
             
-            if (auth_pubs is None) or (len(auth_pubs) == 0):
-                auth_pubs = self.results.mask_entities(column = 'authors', query=a, ignore_case=ignore_case) # type: ignore
-            
-            all_coauthors = Authors()
+            all_coauthors = pd.DataFrame(columns=cols, dtype=object)
             for i in auth_pubs.index:
-                    coauthors = auth_pubs.loc[i, 'authors']
-                    if type(coauthors) == Authors:
-                        all_coauthors.merge(coauthors)
+                work_coauthors = auth_pubs.loc[i, 'authors']
+                if type(work_coauthors) == Authors:
+                    work_coauthors = work_coauthors.all
+                if (type(work_coauthors) == pd.DataFrame) or (type(work_coauthors) == pd.Series):
+                    all_coauthors = pd.concat([all_coauthors, work_coauthors])
             
-            all_coauthors.drop(entity_id=a)
+            all_coauthors = all_coauthors.reset_index().drop('index', axis=1)
+            all_coauthors_str = all_coauthors.copy(deep=True).astype(str)
+            deduplicated_index = all_coauthors_str.drop_duplicates().index.to_list()
+            all_coauthors = all_coauthors.loc[deduplicated_index]
+
+            a_entries = all_coauthors[(all_coauthors['author_id'].str.contains(a)) | (all_coauthors['orcid'].str.contains(a)) | (all_coauthors['google_scholar'].str.contains(a)) | (all_coauthors['crossref'].str.contains(a))].index.to_list()
+            all_coauthors = all_coauthors.drop(labels = a_entries, axis=0)
+            all_coauthors = all_coauthors.reset_index().drop('index', axis=1)
 
             output[a] = all_coauthors
+
+            if add_to_authors == True:
+                self.authors.details[a].coauthors = all_coauthors
 
         return output
 
