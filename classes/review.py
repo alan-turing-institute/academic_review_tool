@@ -717,7 +717,10 @@ class Review:
             auth_pubs = self.results.mask_entities(column = 'authors', query=a, ignore_case=ignore_case) # type: ignore
             
             all_coauthors = pd.DataFrame(columns=cols, dtype=object)
+            all_coauthors['frequency'] = pd.Series(dtype=object)
+
             for i in auth_pubs.index:
+
                 work_coauthors = auth_pubs.loc[i, 'authors']
                 if type(work_coauthors) == Authors:
                     work_coauthors = work_coauthors.all
@@ -725,13 +728,18 @@ class Review:
                     all_coauthors = pd.concat([all_coauthors, work_coauthors])
             
             all_coauthors = all_coauthors.reset_index().drop('index', axis=1)
+            
+            a_entries = all_coauthors[(all_coauthors['author_id'].str.contains(a)) | (all_coauthors['orcid'].str.contains(a)) | (all_coauthors['google_scholar'].str.contains(a)) | (all_coauthors['crossref'].str.contains(a))].index.to_list()
+            all_coauthors = all_coauthors.drop(labels = a_entries, axis=0)
+
+            coauthor_counts = all_coauthors['author_id'].value_counts().sort_index().reset_index().drop('index', axis=1)
+            
             all_coauthors_str = all_coauthors.copy(deep=True).astype(str)
             deduplicated_index = all_coauthors_str.drop_duplicates().index.to_list()
             all_coauthors = all_coauthors.loc[deduplicated_index]
-
-            a_entries = all_coauthors[(all_coauthors['author_id'].str.contains(a)) | (all_coauthors['orcid'].str.contains(a)) | (all_coauthors['google_scholar'].str.contains(a)) | (all_coauthors['crossref'].str.contains(a))].index.to_list()
-            all_coauthors = all_coauthors.drop(labels = a_entries, axis=0)
-            all_coauthors = all_coauthors.reset_index().drop('index', axis=1)
+            
+            all_coauthors = all_coauthors.sort_values('author_id').reset_index().drop('index', axis=1)
+            all_coauthors['frequency'] = coauthor_counts
 
             output[a] = all_coauthors
 
