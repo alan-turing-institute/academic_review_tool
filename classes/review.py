@@ -1418,6 +1418,17 @@ class Review:
 
         graph = generate_citations_network(citations) # type: ignore
 
+        for v in graph.vs:
+            work_id = v['name']
+            
+            masked_index = self.results[self.results['work_id'].str.contains(work_id, regex=False)].index.to_list()
+            if len(masked_index) > 0:
+                work_index = masked_index[0]
+                work_data = self.results.loc[work_index]
+
+                for c in work_data.index:
+                    v[c] = work_data[c]
+
         if add_to_networks == True:
             self.networks.__dict__['citations'] = graph
         
