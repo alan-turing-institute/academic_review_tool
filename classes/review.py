@@ -3,7 +3,7 @@ from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
-from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_urls_network, colinks_in, colinks_out
+from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network
 
 
 from .properties import Properties
@@ -807,9 +807,6 @@ class Review:
 
                     
 
-
-
-
     def format(self, update_entities = False):
 
         self.format_funders()
@@ -1444,6 +1441,36 @@ class Review:
         if add_to_networks == True:
             network = Network(graph = g)
             self.networks.__dict__['coauthors'] = network
+        
+        return g
+
+    def generate_cofunders_network(self, 
+                                format: bool = True, 
+                                update_attrs: bool = True,
+                                ignore_case: bool = True,
+                                add_to_networks: bool = True
+                                ) -> Graph:
+
+        co_funders = self.get_cofunders(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
+
+        g = generate_funders_network(funders_dict=co_funders)
+
+        for v in g.vs:
+
+            f_id = v['name']
+            funder_obj = self.funders.details[f_id]
+            pubs = funder_obj.publications
+            details = funder_obj.details
+
+            for c in details.columns:
+                v[c] = details.loc[0, c]
+            
+            v['publications'] = pubs
+
+
+        if add_to_networks == True:
+            network = Network(graph = g)
+            self.networks.__dict__['cofunders'] = network
         
         return g
 
