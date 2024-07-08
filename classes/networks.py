@@ -123,9 +123,11 @@ class Network(Graph):
         
         if vs_len > 5:
             vertices = vertices[:3]
-            vertices = str(vertices).strip('[').strip(']') + '...'
+            vertices = str(vertices)
+            vertices = vertices.strip('[').strip(']') + '...'
         else:
-            vertices = str(vertices).strip('[').strip(']')
+            vertices = str(vertices)
+            vertices = vertices.strip('[').strip(']')
         
 
         edges = list(self.es)
@@ -133,9 +135,11 @@ class Network(Graph):
        
         if es_len > 5:
             edges = edges[:3]
-            edges = str(edges).strip('[').strip(']') + '...'
+            edges = str(edges)
+            edges = edges.strip('[').strip(']') + '...'
         else:
-            edges = str(edges).strip('[').strip(']')
+            edges = str(edges)
+            edges = edges.strip('[').strip(']')
        
 
         output = f'{dir} network with {vs_len} vertices and {es_len} edges\n'
