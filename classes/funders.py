@@ -602,28 +602,36 @@ class Funders(Entities):
         for i in self.details.keys():
             funder = self.details[i]
             funder.update_id()
-            series = funder.details.loc[0]
+            series = funder.details.copy(deep=True).loc[0]
             all = self.all.copy(deep=True).astype(str)
             indexes = all[all['funder_id'] == i].index.to_list()
             if len(indexes) > 0:
                 auth_index = indexes[0]
-                self.all.loc[auth_index] = series
+                all_copy = self.all.copy(deep=True)
+                all_copy.loc[auth_index] = series
+                self.all = all_copy
 
     def update_ids(self):
 
         self.sync_all()
 
         for i in self.all.index:
-            data = self.all.loc[i]
-            old_id = self.all.loc[i, 'funder_id']
-            new_id = generate_funder_id(self.all.loc[i])
+            all_copy = self.all.copy(deep=True)
+            data = all_copy.loc[i]
+            old_id = all_copy.loc[i, 'funder_id']
+            new_id = generate_funder_id(data)
 
             if new_id in self.all['funder_id'].to_list():
-                df_copy = self.all.copy(deep=True).astype(str)
+                df_copy = self.all.copy(deep=True)
+                df_copy = df_copy.astype(str)
                 id_count = len(df_copy[df_copy['funder_id'].str.contains(new_id)]) # type: ignore
                 new_id = new_id + f'#{id_count + 1}'
 
-            self.all.loc[i, 'funder_id'] = new_id
+
+            all_copy2 = self.all.copy(deep=True)
+            all_copy2.loc[i, 'funder_id'] = new_id
+            self.all = all_copy2
+
             if old_id in self.details.keys():
                 self.details[new_id] = self.details[old_id]
                 self.details[new_id].details.loc[0, 'funder_id'] = new_id

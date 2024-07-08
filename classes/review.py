@@ -1264,7 +1264,6 @@ class Review:
         
         return df
 
-
     def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format_authors = True, update_from_doi = False):
 
         iteration = 1
