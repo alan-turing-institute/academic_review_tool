@@ -270,37 +270,41 @@ def generate_funders_network(funders_dict: dict) -> Graph:
         
         
         # Adding edges by iterating through vertices and retrieving links associated
-        for vertex in g.vs:
+        for funder_id in all_funders:
             
-            # Getting vertex id
-            f_id = vertex['name']
             
             # Ignoring None and empty string vertex IDs
-            if (f_id != None) and (len(f_id) > 0):
+            if (funder_id != None) and (len(funder_id) > 0):
                 
+                if funder_id not in g.vs['name']:
+                    g.add_vertex(name=funder_id)
+
+                # Getting vertex id
+                vertex = g.vs.find(name = funder_id)
+
                 # Retrieving vertex index
                 v_index = vertex.index
                 
                 # Retrieving co-author ids
-                v_edges = funders_dict[f_id]['funder_id'].to_list()
+                v_edges = funders_dict[funder_id]['funder_id'].to_list()
                 
                 # If the vertex has links associated, finds vertices those links direct to
                 if len(v_edges) > 0:
                     
-                    for funder in v_edges:
+                    for f in v_edges:
 
-                        if funder not in g.vs['name']:
-                            g.add_vertex(name=funder)
+                        if f not in g.vs['name']:
+                            g.add_vertex(name=f)
 
-                        end_index = g.vs.find(name = funder).index
-                        df_index = funders_dict[f_id][funders_dict[f_id]['funder_id'] == funder].index.to_list()[0]
-                        weight = funders_dict[f_id].loc[df_index, 'frequency']
+                        end_index = g.vs.find(name = f).index
+                        df_index = funders_dict[funder_id][funders_dict[funder_id]['funder_id'] == f].index.to_list()[0]
+                        weight = funders_dict[funder_id].loc[df_index, 'frequency']
                         
                         # Adding edges between linked vertices
                         Graph.add_edges(g, 
                                         [(v_index, end_index)], 
                                         attributes={
-                                           'name': f'{f_id} <-> {funder}',
+                                           'name': f'{funder_id} <-> {f}',
                                            'weight': weight
                                            })
                     

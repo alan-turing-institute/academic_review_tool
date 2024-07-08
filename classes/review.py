@@ -756,7 +756,7 @@ class Review:
         return output
 
 
-    def get_cofunders(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True):
+    def get_cofunders(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_funders: bool = True):
 
         if format == True:
             self.format()
@@ -800,7 +800,7 @@ class Review:
 
             output[f] = all_cofunders
 
-            if add_to_authors == True:
+            if add_to_funders == True:
                 self.funders.details[f].cofunders = all_cofunders
 
         return output
