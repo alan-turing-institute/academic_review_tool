@@ -242,6 +242,69 @@ def generate_coauthors_network(coauthors_dict: dict) -> Graph:
         return g
 
 
+def generate_funders_network(funders_dict: dict) -> Graph:
+        
+        """
+        Returns an undirected network representing how funders co-publish with one another.
+        
+        Parameters
+        ----------
+        funders_dict : dict
+            a dictionary with the following structure:
+                * keys: funder IDs
+                * values: Pandas DataFrames containing details on co-funders.
+        
+        Returns
+        -------
+        g : Graph
+            an iGraph Graph object representing the co-funder network.
+        """
+
+        
+        # Creating list of all unique author_ids in source dictionary
+        all_funders = list(set(funders_dict.keys()))
+        
+        
+        # Initialising network
+        g = Graph(n=len(all_funders), directed=False, vertex_attrs={'name': all_funders})
+        
+        
+        # Adding edges by iterating through vertices and retrieving links associated
+        for vertex in g.vs:
+            
+            # Getting vertex id
+            f_id = vertex['name']
+            
+            # Ignoring None and empty string vertex IDs
+            if (f_id != None) and (len(f_id) > 0):
+                
+                # Retrieving vertex index
+                v_index = vertex.index
+                
+                # Retrieving co-author ids
+                v_edges = funders_dict[f_id]['funder_id'].to_list()
+                
+                # If the vertex has links associated, finds vertices those links direct to
+                if len(v_edges) > 0:
+                    
+                    for funder in v_edges:
+                        end_index = g.vs.find(name = funder).index
+                        df_index = funders_dict[f_id][funders_dict[f_id]['funder_id'] == funder].index.to_list()[0]
+                        weight = funders_dict[f_id].loc[df_index, 'frequency']
+                        
+                        # Adding edges between linked vertices
+                        Graph.add_edges(g, 
+                                        [(v_index, end_index)], 
+                                        attributes={
+                                           'name': f'{f_id} <-> {funder}',
+                                           'weight': weight
+                                           })
+                    
+        return g
+
+
+
+
 def generate_citations_network(citations_dict: dict) -> Graph:
         
         """

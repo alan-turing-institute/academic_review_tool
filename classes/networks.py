@@ -143,12 +143,14 @@ class Network(Graph):
        
 
         output = f'{dir} network with {vs_len} vertices and {es_len} edges\n'
-        output = output + f'{(len(output)-1)*"-"}\n' + f'{(len(output)-1)*"-"}\n\n'
+        output = f'{(len(output)-1)*"-"}\n' + output + f'{(len(output)-1)*"-"}\n\n'
         output = output + f'Vertices\n--------\n{vertices}\n\n'
         output = output + f'Edges\n-----\n{edges}'
 
         return output
     
+    def is_weighted(self) -> bool:
+        return 'weight' in self.es.attributes()
 
     def degrees_dataframe(self, direction = 'all'):
         
