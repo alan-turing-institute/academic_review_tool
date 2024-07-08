@@ -111,7 +111,37 @@ class Network(Graph):
             for attr in es_attrs:
                 self.es[attr] = graph.es[attr]
 
+    def __repr__(self):
+
+        if self.is_directed() == True:
+            dir = 'directed'
+        else:
+            dir = 'undirected'
+
+        vs_len = len(self.vs)
+        vs_names = self.vs['name']
+        if len(vs_names) > 5:
+            vs_names = str(vs_names[:3]) + '...'
+        else:
+            vs_names = str(vs_names)
+        vs_names = vs_names.strip('[').strip(']')
+
+        es_len = len(self.es)
+        es_names = self.vs['name']
+        if len(es_names) > 5:
+            es_names = str(es_names[:3]) + '...'
+        else:
+            es_names = str(es_names)
+        es_names = es_names.strip('[').strip(']')
+
+        output = f'{dir} network with {vs_len} vertices and {es_len} edges\n'
+        output = output + f'{len(output)*"-"}\n\n'
+        output = output + f'Vertices: {vs_names}\n'
+        output = output + f'Edges: {es_names}\n'
+
+        return output
     
+
     def degrees_dataframe(self, direction = 'all'):
         
         """
