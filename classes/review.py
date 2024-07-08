@@ -1364,6 +1364,8 @@ class Review:
             citations = data['citations']
             output[work_id_stripped] = citations
 
+        return output
+
     def generate_coauthors_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
