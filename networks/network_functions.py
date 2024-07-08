@@ -288,6 +288,10 @@ def generate_funders_network(funders_dict: dict) -> Graph:
                 if len(v_edges) > 0:
                     
                     for funder in v_edges:
+
+                        if funder not in g.vs['name']:
+                            g.add_vertex(name=funder)
+
                         end_index = g.vs.find(name = funder).index
                         df_index = funders_dict[f_id][funders_dict[f_id]['funder_id'] == funder].index.to_list()[0]
                         weight = funders_dict[f_id].loc[df_index, 'frequency']
