@@ -1457,14 +1457,15 @@ class Review:
         for v in g.vs:
 
             f_id = v['name']
-            funder_obj = self.funders.details[f_id]
-            pubs = funder_obj.publications
-            details = funder_obj.details
+            if 'f_id' in self.funders.details.keys():
+                funder_obj = self.funders.details[f_id]
+                pubs = funder_obj.publications
+                details = funder_obj.details
 
-            for c in details.columns:
-                v[c] = details.loc[0, c]
-            
-            v['publications'] = pubs
+                for c in details.columns:
+                    v[c] = details.loc[0, c]
+                
+                v['publications'] = pubs
 
 
         if add_to_networks == True:
