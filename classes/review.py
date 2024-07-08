@@ -3,7 +3,7 @@ from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
-from ..networks.network_functions import generate_coauthors_network, generate_urls_network, colinks_in, colinks_out
+from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_urls_network, colinks_in, colinks_out
 
 
 from .properties import Properties
@@ -1353,6 +1353,17 @@ class Review:
         
         return result
 
+    def citations_dict(self, strip_ids = False):
+        
+        output = {}
+
+        for i in self.results.index:
+            data = self.results.loc[i]
+            work_id = data['work_id']
+            work_id_stripped = work_id.split('#')[0].strip()
+            citations = data['citations']
+            output[work_id_stripped] = citations
+
     def generate_coauthors_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
@@ -1384,6 +1395,31 @@ class Review:
         
         return g
 
+    def generate_citations_network(self, 
+                                format: bool = True, 
+                                update_attrs: bool = True,
+                                add_citations_to_results=True,
+                                add_to_networks: bool = True
+                                ) -> Graph:
+        
+        if add_citations_to_results == True:
+            self.add_citations_to_results(update_formatting = format)
+        else:
+            if format == True:
+                self.format()
+        
+        if update_attrs == True:
+            self.update_entity_attrs()
+
+
+        citations = self.citations_dict(strip_ids = True)
+
+        graph = generate_citations_network(citations) # type: ignore
+
+        if add_to_networks == True:
+            self.networks.__dict__['citations'] = graph
+        
+        return graph
 
 
 

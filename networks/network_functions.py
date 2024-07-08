@@ -287,7 +287,7 @@ def generate_citations_network(citations_dict: dict) -> Graph:
 
                 df = refs_obj.copy(deep=True).astype(str)
 
-                # Retrieving co-author ids
+                # Retrieving citations work ids
                 df_index = df.index.to_list()
                 
                 # If the vertex has links associated, finds vertices those links direct to
