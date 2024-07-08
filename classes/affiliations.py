@@ -739,8 +739,11 @@ class Affiliations(Entities):
 
             if len(indexes) > 0:
                 auth_index = indexes[0]
+                all_copy = self.all.copy(deep=True)
                 for col in series.index:
-                    self.all.loc[auth_index, col] = series[col]
+                    all_copy.loc[auth_index, col] = series[col]
+                
+                self.all = all_copy
 
     def update_ids(self):
 
