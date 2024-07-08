@@ -756,6 +756,55 @@ class Review:
         return output
 
 
+    def get_cofunders(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True):
+
+        if format == True:
+            self.format()
+        
+        if update_attrs == True:
+            self.update_funder_attrs(ignore_case=ignore_case)
+        
+        f_ids = self.funders.details.keys()
+        output = {}
+
+        cols = Funders().all.columns.to_list()
+
+        for f in f_ids:
+
+            f_pubs = self.results.mask_entities(column = 'funders', query=f, ignore_case=ignore_case) # type: ignore
+            
+            all_cofunders = pd.DataFrame(columns=cols, dtype=object)
+            all_cofunders['frequency'] = pd.Series(dtype=object)
+
+            for i in f_pubs.index:
+
+                work_cofunders = f_pubs.loc[i, 'funders']
+                if type(work_cofunders) == Funders:
+                    work_cofunders = work_cofunders.all
+                if (type(work_cofunders) == pd.DataFrame) or (type(work_cofunders) == pd.Series):
+                    all_cofunders = pd.concat([all_cofunders, work_cofunders])
+            
+            all_cofunders = all_cofunders.reset_index().drop('index', axis=1)
+            
+            f_entries = all_cofunders[(all_cofunders['funder_id'].str.contains(f)) | (all_cofunders['uri'].str.contains(f)) | (all_cofunders['crossref_id'].str.contains(f))].index.to_list()
+            all_cofunders = all_cofunders.drop(labels = f_entries, axis=0)
+
+            cofunder_counts = all_cofunders['funder_id'].value_counts().sort_index().reset_index().drop('index', axis=1)
+            
+            all_cofunders_str = all_cofunders.copy(deep=True).astype(str)
+            deduplicated_index = all_cofunders_str.drop_duplicates().index.to_list()
+            all_cofunders = all_cofunders.loc[deduplicated_index]
+            
+            all_cofunders = all_cofunders.sort_values('funder_id').reset_index().drop('index', axis=1)
+            all_cofunders['frequency'] = cofunder_counts
+
+            output[f] = all_cofunders
+
+            if add_to_authors == True:
+                self.funders.details[f].cofunders = all_cofunders
+
+        return output
+
                     
 
 
