@@ -270,13 +270,13 @@ def generate_citations_network(citations_dict: dict) -> Graph:
         
         
         # Adding edges by iterating through vertices and retrieving links associated
-        for vertex in g.vs:
-            
-            # Getting vertex id
-            work_id = vertex['name']
+        for work_id in all_ids:
             
             # Ignoring None and empty string vertex IDs
             if (work_id != None) and (len(work_id) > 0):
+
+                # Getting vertex object
+                vertex = g.vs.find(name = work_id)
                 
                 # Retrieving vertex index
                 v_index = vertex.index
