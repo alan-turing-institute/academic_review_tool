@@ -729,9 +729,10 @@ class Affiliations(Entities):
             affiliation = self.details[i]
             affiliation.update_id()
 
-            series = affiliation.details.loc[0]
+            series = affiliation.details.loc[0].copy(deep=True)
 
-            all = self.all.copy(deep=True).astype(str)
+            all = self.all.copy(deep=True)
+            all = all.astype(str)
 
             indexes = all[all['affiliation_id'] == i].index.to_list()
 
@@ -744,16 +745,18 @@ class Affiliations(Entities):
         self.sync_all()
 
         for i in self.all.index:
-            data = self.all.loc[i]
+            data = self.all.loc[i].copy(deep=True)
             old_id = self.all.loc[i, 'affiliation_id']
-            new_id = generate_affiliation_id(self.all.loc[i])
+            new_id = generate_affiliation_id(data)
+            new_id = str(new_id)
 
             if new_id in self.all['affiliation_id'].to_list():
-                df_copy = self.all.copy(deep=True).astype(str)
-                id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)]) # type: ignore
+                df_copy = self.all.copy(deep=True)
+                df_copy = df_copy.astype(str)
+                id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)])
                 new_id = new_id + f'#{id_count + 1}'
 
-            self.all.loc[i, 'affiliation_id'] = new_id
+            self.all.at[i, 'affiliation_id'] = new_id
             if old_id in self.details.keys():
                 self.details[new_id] = self.details[old_id]
                 self.details[new_id].details.loc[0, 'affiliation_id'] = new_id
