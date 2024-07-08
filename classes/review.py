@@ -771,7 +771,7 @@ class Review:
 
         for f in f_ids:
 
-            f_pubs = self.results.mask_entities(column = 'funders', query=f, ignore_case=ignore_case) # type: ignore
+            f_pubs = self.results.mask_entities(column = 'funder', query=f, ignore_case=ignore_case) # type: ignore
             
             all_cofunders = pd.DataFrame(columns=cols, dtype=object)
             all_cofunders['frequency'] = pd.Series(dtype=object)
