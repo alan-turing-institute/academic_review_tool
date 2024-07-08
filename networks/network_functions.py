@@ -240,3 +240,75 @@ def generate_coauthors_network(coauthors_dict: dict) -> Graph:
                                            })
                     
         return g
+
+
+def generate_citations_network(citations_dict: dict) -> Graph:
+        
+        """
+        Returns an undirected network representing how publications cite one another.
+        
+        Parameters
+        ----------
+        citations_dict : dict
+            a dictionary with the following structure:
+                * keys: work IDs
+                * values: Pandas DataFrames containing details on cited works.
+        
+        Returns
+        -------
+        g : Graph
+            an iGraph Graph object representing the citation network.
+        """
+
+        
+        # Creating list of all unique author_ids in source dictionary
+        all_ids = list(set(citations_dict.keys()))
+        
+        
+        # Initialising network
+        g = Graph(n=len(all_ids), directed=True, vertex_attrs={'name': all_ids})
+        
+        
+        # Adding edges by iterating through vertices and retrieving links associated
+        for vertex in g.vs:
+            
+            # Getting vertex id
+            work_id = vertex['name']
+            
+            # Ignoring None and empty string vertex IDs
+            if (work_id != None) and (len(work_id) > 0):
+                
+                # Retrieving vertex index
+                v_index = vertex.index
+                
+                # Retrieving co-author ids
+                v_edges = citations_dict[work_id]['work_id'].to_list()
+                
+                # If the vertex has links associated, finds vertices those links direct to
+                if len(v_edges) > 0:
+                    
+                    for citation in v_edges:
+                        
+                        citation_stripped = citation.split('#').loc[0].strip()
+
+                        if citation_stripped not in g.vs['name']:
+                             g.add_vertex(name=citation_stripped)
+
+                        end_index = g.vs.find(name = citation_stripped).index
+                        
+                        df = citations_dict[work_id].copy(deep=True).astype(str)
+                        df_index = citations_dict[work_id][citations_dict[work_id]['work_id'].str.contains(citation_stripped)].index.to_list()[0]
+                        citation_data = citations_dict[work_id].loc[df_index]
+
+                        for i in citation_data.index.to_list():
+                             data = citation_data[i]
+                             g.vs[end_index][i] = data
+                        
+                        # Adding edges between linked vertices
+                        Graph.add_edges(g, 
+                                        [(v_index, end_index)], 
+                                        attributes={
+                                           'name': f'{work_id} -> {citation_stripped}'
+                                           })
+                    
+        return g
