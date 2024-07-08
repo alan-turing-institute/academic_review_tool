@@ -118,7 +118,7 @@ class Network(Graph):
         else:
             dir = 'Undirected'
 
-        vertices = list(self.vs)
+        vertices = list(self.vs.indices)
         vs_len = len(vertices)
         
         if vs_len > 5:
@@ -130,7 +130,7 @@ class Network(Graph):
             vertices = vertices.strip('[').strip(']')
         
 
-        edges = list(self.es)
+        edges = list(self.es.indices)
         es_len = len(edges)
        
         if es_len > 5:
