@@ -281,8 +281,14 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                 # Retrieving vertex index
                 v_index = vertex.index
                 
+                refs_obj = citations_dict[work_id]
+                if 'update_work_ids' in refs_obj.__dir__():
+                    refs_obj.update_work_ids()
+
+                df = refs_obj.copy(deep=True).astype(str)
+
                 # Retrieving co-author ids
-                v_edges = citations_dict[work_id]['work_id'].to_list()
+                v_edges = df['work_id'].to_list()
                 
                 # If the vertex has links associated, finds vertices those links direct to
                 if len(v_edges) > 0:
@@ -296,8 +302,7 @@ def generate_citations_network(citations_dict: dict) -> Graph:
 
                         end_index = g.vs.find(name = citation_stripped).index
                         
-                        df = citations_dict[work_id].copy(deep=True).astype(str)
-                        df_index = citations_dict[work_id][citations_dict[work_id]['work_id'].str.contains(citation_stripped)].index.to_list()[0]
+                        df_index = df[df['work_id'].str.contains(citation_stripped)].index.to_list()[0]
                         citation_data = citations_dict[work_id].loc[df_index]
 
                         for i in citation_data.index.to_list():
