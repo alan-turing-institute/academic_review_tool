@@ -778,7 +778,7 @@ class Review:
 
             for i in f_pubs.index:
 
-                work_cofunders = f_pubs.loc[i, 'funders']
+                work_cofunders = f_pubs.loc[i, 'funder']
                 if type(work_cofunders) == Funders:
                     work_cofunders = work_cofunders.all
                 if (type(work_cofunders) == pd.DataFrame) or (type(work_cofunders) == pd.Series):
