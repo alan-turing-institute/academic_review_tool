@@ -135,9 +135,9 @@ class Network(Graph):
        
 
         output = f'{dir} network with {vs_len} vertices and {es_len} edges\n'
-        output = output + f'{(len(output)-1)*"-"}\n\n'
-        output = output + f'Vertices: {vs}\n'
-        output = output + f'Edges: {es}\n'
+        output = output + f'{(len(output)-1)*"-"}\n' + f'{(len(output)-1)*"-"}\n\n'
+        output = output + f'Vertices\n--------\n{vs}\n\n'
+        output = output + f'Edges\n-----\n{es}'
 
         return output
     
