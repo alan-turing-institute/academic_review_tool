@@ -729,7 +729,7 @@ class Affiliations(Entities):
             affiliation = self.details[i]
             affiliation.update_id()
 
-            series = affiliation.details.loc[0].copy(deep=True)
+            series = affiliation.details.copy(deep=True).loc[0]
 
             all = self.all.copy(deep=True)
             all = all.astype(str)
