@@ -1393,7 +1393,8 @@ class Review:
 
 
         if add_to_networks == True:
-            self.networks.__dict__['coauthors'] = g
+            network = Network(graph = g)
+            self.networks.__dict__['coauthors'] = network
         
         return g
 
@@ -1430,7 +1431,8 @@ class Review:
                     v[c] = work_data[c]
 
         if add_to_networks == True:
-            self.networks.__dict__['citations'] = graph
+            network = Network(graph)
+            self.networks.__dict__['citations'] = network
         
         return graph
 
