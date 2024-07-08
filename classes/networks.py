@@ -119,25 +119,25 @@ class Network(Graph):
             dir = 'Undirected'
 
         vs_len = len(self.vs)
-        vs_names = self.vs['name']
-        if len(vs_names) > 5:
-            vs_names = str(vs_names[:3]).strip('[').strip(']') + '...'
+        vs = list(self.vs)
+        if len(vs) > 5:
+            vs = str(vs[:3]).strip('[').strip(']') + '...'
         else:
-            vs_names = str(vs_names).strip('[').strip(']')
+            vs = str(vs).strip('[').strip(']')
         
 
         es_len = len(self.es)
-        es_names = self.es['name']
-        if len(es_names) > 5:
-            es_names = str(es_names[:3]).strip('[').strip(']') + '...'
+        es = self.es
+        if len(es) > 5:
+            es = str(es[:3]).strip('[').strip(']') + '...'
         else:
-            es_names = str(es_names).strip('[').strip(']')
+            es = str(es).strip('[').strip(']')
        
 
         output = f'{dir} network with {vs_len} vertices and {es_len} edges\n'
         output = output + f'{(len(output)-1)*"-"}\n\n'
-        output = output + f'Vertices: {vs_names}\n'
-        output = output + f'Edges: {es_names}\n'
+        output = output + f'Vertices: {vs}\n'
+        output = output + f'Edges: {es}\n'
 
         return output
     
