@@ -374,7 +374,7 @@ def scrape_url_csv(url = 'request_input'):
     
     return result
 
-def scrape_url_to_dict(url = 'request_input') -> str:
+def scrape_url_to_dict(url = 'request_input') -> dict:
     
     """Scrapes data from provided URL and returns as a dictionary. 
 
@@ -392,12 +392,15 @@ def scrape_url_to_dict(url = 'request_input') -> str:
     result_json = scrape_url_json(url = url)
     
     # Avoiding errors if no result retrieved
-    if result_json == None:
+    if (result_json == None) or ((type(result_json) is str) and len(result_json) == 0):
         result = {}
     
     else:
         # Converting JSON to dictionary
-        result = json.loads(result_json)
+        try:
+            result = json.loads(result_json)
+        except:
+            result = {}
     
     return result
     
@@ -481,18 +484,33 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
     # If the output format selected is dictionary, scrapes all data available
     if output == 'dict':
         
+
+        result = {}
+
+
         # Running main scraper
-        result = scrape_url_to_dict(url = url)
+        try:
+            result = scrape_url_to_dict(url = url)
+        except:
+            pass
         
         # Appending html to output dict
-        result['html'] = scrape_url_html(url = url)
+        try:
+            result['html'] = scrape_url_html(url = url)
+        except:
+            result['html'] = ''
         
         # Extracting links
         current_url = url
-        soup = BeautifulSoup(result['html'], "html.parser")
-        href_select = soup.select("a")
-        links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs]
-        result['links'] = links
+
+        if ('html' in result.keys()) and (result['html'] is not None):
+            soup = BeautifulSoup(result['html'], "html.parser")
+            try:
+                href_select = soup.select("a")
+                links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs]
+            except:
+                links = []
+            result['links'] = links
         
         # If parse_pdf is selected, check if URL is PDF and parse
         
