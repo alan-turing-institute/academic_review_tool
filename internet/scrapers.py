@@ -1,8 +1,10 @@
 """Functions for scraping web data"""
 
 from .webanalysis import correct_url, get_domain, open_url
+from .search import search_web
 from ..utils.cleaners import join_list_by_colon, split_str_by_colon
 from ..utils.basics import results_cols
+from ..importers.pdf import read_pdf_url
 
 from typing import List
 import json
@@ -11,16 +13,16 @@ import requests
 import numpy as np
 import pandas as pd
 
-import cloudscraper
+import cloudscraper # type: ignore
 
-from trafilatura import fetch_url, extract, extract_metadata
+from trafilatura import fetch_url, extract, extract_metadata # type: ignore
 
 import urllib
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
-from courlan import normalize_url, clean_url, scrub_url
+from courlan import normalize_url, clean_url, scrub_url # type: ignore
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -135,8 +137,8 @@ def check_bad_url(url: str = 'request_input') -> bool:
     except:
         
         return True
-
-def correct_link_errors(url: str, source_domain: str = None) -> str:
+ 
+def correct_link_errors(url: str, source_domain: str = None) -> str: # type: ignore
     
     """Checks for errors in a link and corrects them. Returns a corrected link as a string.
     
@@ -247,7 +249,9 @@ def scrape_url_metadata(url = 'request_input') -> dict:
             result = result.as_dict()
             
         else:
-            result = None
+            result = {}
+    else:
+        result = {}
         
     return result
 
@@ -311,7 +315,7 @@ def scrape_url_xml(url = 'request_input') -> str:
         result = extract(downloaded, output_format="xml", include_tables=True, include_comments=True, include_images=True, include_links=True)
     else:
         result = ''
-        
+
     return result
 
 def scrape_url_json(url = 'request_input') -> str:
@@ -434,7 +438,7 @@ def scrape_url_links(url = 'request_input') -> List[str]:
     href_select = soup.select("a")  
     
     # Extracting links as list and applying corrections 
-    links = [correct_link_errors(source_domain = url, url = i['href']) for i in href_select if 'href' in i.attrs]
+    links = [correct_link_errors(source_domain = url, url = i['href']) for i in href_select if 'href' in i.attrs] # type: ignore
     
     return links
  
@@ -509,10 +513,35 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
             soup = BeautifulSoup(result['html'], "html.parser")
             try:
                 href_select = soup.select("a")
-                links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs]
+                links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs] # type: ignore
             except:
                 links = []
             result['links'] = links
+
+            try:
+                html_find = soup.find('html')
+                html_attrs = html_find.attrs # type: ignore
+                if 'lang' in html_attrs:
+                    lang = html_attrs['lang']
+                else:
+                    lang = None
+            except:
+                lang = None
+            if ('language' not in result.keys()) or (result['language'] is None) or (result['language'] == ''):
+                result['language'] = lang
+
+            try:
+                head_find = soup.find('head')
+                title_find = head_find.find('title') # type: ignore
+                if title_find is not None:
+                    if 'title' in title_find.__dict__.keys():
+                        title = str(title_find.contents).replace('[','').replace(']','') # type: ignore
+                    else:
+                        title = None
+            except:
+                title = None
+            if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == ''):
+                result['title'] = title
         
         # If parse_pdf is selected, check if URL is PDF and parse
         
@@ -545,7 +574,7 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
         
     return result
 
-def scrape_urls_list(urls: list, parse_pdf = True, output: str = 'dataframe'):
+def scrape_urls_list(urls: list, parse_pdf = True, output = 'dataframe'):
     
     """Scrapes list of URLs. Returns any HTML code, text, links, and metatdata found. 
     
@@ -572,7 +601,7 @@ def scrape_urls_list(urls: list, parse_pdf = True, output: str = 'dataframe'):
     
     # If selected output is dataframe, converting to dataframe
     if output == 'dataframe':
-        output = pd.DataFrame.from_dict(output_dict).T
+        output = pd.DataFrame.from_dict(output_dict).T # type: ignore
     
     else:
         output = output_dict
