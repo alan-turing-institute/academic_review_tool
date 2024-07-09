@@ -447,3 +447,67 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
                                            })
         
     return g
+
+def generate_funder_works_network(funder_works_dict: dict) -> Graph:
+
+    """
+        Returns an undirected bipartite network representing the relationships between funders and publications.
+        
+        Parameters
+        ----------
+        author_works_dict : dict
+            a dictionary with the following structure:
+                * keys: work IDs
+                * values: Pandas DataFrames containing details on funders.
+        
+        Returns
+        -------
+        g : Graph
+            an iGraph Graph object.
+    """
+
+    work_ids = funder_works_dict.keys()
+    work_ids = [i for i in work_ids if (i != None) and (len(i) > 0)]
+    works_len = len(work_ids)
+    init_types = [False]*works_len
+
+    g = Graph.Bipartite(types=init_types, edges=[], directed=False)
+    g.vs['name'] = work_ids
+    g.vs['category'] = ['publication']*works_len
+
+    for work_id in work_ids:
+
+        # Getting vertex object
+        vertex = g.vs.find(name = work_id)
+
+        v_index = vertex.index
+
+        data = funder_works_dict[work_id]
+
+        if type(data) == dict:
+             data = pd.DataFrame.from_dict(data, orient='index').T
+        
+        if 'funder_id' not in data.columns:
+            continue
+            
+        f_ids = data['funder_id'].to_list()
+        f_ids = [i.split('#')[0].strip() for i in f_ids if type(i) == str]
+
+        for f in f_ids:
+
+            if f not in g.vs['name']:
+                g.add_vertex(name=f, type=True)
+                
+            funder_vertex = g.vs.find(name = f)
+            funder_index = funder_vertex.index
+            funder_vertex['category'] = 'funder'
+
+            # Adding edges between linked vertices
+            Graph.add_edges(g, 
+                                        [(v_index, funder_index)], 
+                                        attributes={
+                                           'name': f'{work_id} <-> {f}'
+                                           })
+        
+    return g
+
