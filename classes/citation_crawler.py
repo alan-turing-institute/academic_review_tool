@@ -15,9 +15,7 @@ import numpy as np
 
 def crawler_scrape_url(url) -> pd.DataFrame:
 
-    final_url = get_final_url(url)
-
-    scrape_res = scrape_url(url=final_url)
+    scrape_res = scrape_url(url=url)
 
     global results_cols
     result = pd.DataFrame(index = [0], columns=results_cols, dtype=object)
@@ -112,12 +110,10 @@ def crawler_scrape_url(url) -> pd.DataFrame:
 
 def citation_crawler_site_test(url: str):
 
-    final_url = get_final_url(url)
-
     global can_scrape
 
     for i in can_scrape:
-        if i in final_url:
+        if i in url:
             return True
     
     return False
