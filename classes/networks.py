@@ -150,7 +150,7 @@ class Network(Graph):
         output = f'{dir} {bi}network with {vs_len} vertices and {es_len} edges\n'
         output = f'{(len(output)-1)*"-"}\n' + output + f'{(len(output)-1)*"-"}\n\n'
         output = output + f'Vertices\n--------\n{vertices}\n\n'
-        output = output + f'Edges\n-----\n{edges}'
+        output = output + f'Edges\n-----\n{edges}\n'
 
         return output
     
