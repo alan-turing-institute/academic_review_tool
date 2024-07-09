@@ -1676,6 +1676,43 @@ class Review:
         
         return network
 
+    def all_networks(self,
+                                format: bool = True, 
+                                update_attrs: bool = True,
+                                ignore_case: bool = True,
+                                add_citations_to_results: bool = True,
+                                add_to_networks: bool = True
+                                ) -> Networks:
+        
+        if format == True:
+            self.format()
+        
+        if update_attrs == True:
+            self.update_entity_attrs()
+        
+        coauthors_network = self.coauthors_network(format=False, update_attrs=False, ignore_case=ignore_case, add_to_networks=add_to_networks)
+        cofunders_network = self.cofunders_network(format=False, update_attrs=False, ignore_case=ignore_case, add_to_networks=add_to_networks)
+        citations_network = self.citations_network(format=False, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
+        author_works_network = self.author_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
+        funder_works_network = self.funder_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
+        author_affils_network = self.author_affils_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
+        all_entities_network = self.entities_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
+
+        if add_to_networks == True:
+            networks = self.networks
+        
+        else:
+            networks = Networks()
+            networks.__dict__['coauthors_network'] = coauthors_network
+            networks.__dict__['cofunders_network'] = cofunders_network
+            networks.__dict__['citations_network'] = citations_network
+            networks.__dict__['author_works_network'] = author_works_network
+            networks.__dict__['funder_works_network'] = funder_works_network
+            networks.__dict__['author_affils_network'] = author_affils_network
+            networks.__dict__['all_entities_network'] = all_entities_network
+
+        return networks
+
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 
     # def save_as(self, file_name = 'request_input', file_address = 'request_input', file_type = 'request_input'):
