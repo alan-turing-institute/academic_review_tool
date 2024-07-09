@@ -448,6 +448,73 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
         
     return g
 
+
+def generate_author_affils_network(author_affils_dict: dict) -> Graph:
+
+    """
+        Returns an undirected bipartite network representing the relationships between authors and their affiliated organisations.
+        
+        Parameters
+        ----------
+        author_affils_dict : dict
+            a dictionary with the following structure:
+                * keys: work IDs
+                * values: Pandas DataFrames containing details on authors.
+        
+        Returns
+        -------
+        g : Graph
+            an iGraph Graph object.
+    """
+
+    author_ids = author_affils_dict.keys()
+    author_ids_stripped = [i.split('#')[0].strip() for i in author_ids if ((type(i) == str) and (len(i) > 0))]
+    auths_len = len(author_ids_stripped)
+    init_types = [False]*auths_len
+
+    g = Graph.Bipartite(types=init_types, edges=[], directed=False)
+    g.vs['name'] = author_ids_stripped
+    g.vs['category'] = ['author']*auths_len
+
+    for auth_id in author_ids:
+        
+        auth_id_stripped = auth_id.split('#')[0].strip()
+
+        # Getting vertex object
+        vertex = g.vs.find(name = auth_id_stripped)
+
+        v_index = vertex.index
+
+        data = author_affils_dict[auth_id]
+
+        if type(data) == dict:
+             data = pd.DataFrame.from_dict(data, orient='index').T
+        
+        if 'affiliation_id' not in data.columns:
+            continue
+            
+        affil_ids = data['affiliation_id'].to_list()
+        affil_ids = [i.split('#')[0].strip() for i in affil_ids if (type(i) == str and len(i) > 0)]
+
+        for a in affil_ids:
+
+            if a not in g.vs['name']:
+                g.add_vertex(name=a, type=True)
+                
+            affil_vertex = g.vs.find(name = a)
+            affil_index = affil_vertex.index
+            affil_vertex['category'] = 'affiliation'
+
+            # Adding edges between linked vertices
+            Graph.add_edges(g, 
+                                        [(v_index, affil_index)], 
+                                        attributes={
+                                           'name': f'{auth_id_stripped} <-> {a}'
+                                           })
+        
+    return g
+
+
 def generate_funder_works_network(funder_works_dict: dict) -> Graph:
 
     """
