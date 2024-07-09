@@ -693,7 +693,7 @@ def scrape_google_search(query: str = 'request_input'):
     html = input('Search page code: ')
     
     # Parsing result
-    output = parse_google_result(html)
+    output = parse_google_result(html)  # type: ignore
     
     return output
 
@@ -736,10 +736,10 @@ def crawler_scraper(current_url: str, full: bool) -> tuple:
                 try:
                     scraper = cloudscraper.create_scraper()
                     res = scraper.get(current_url)
-                    scraped_data['html'] = res.content
+                    scraped_data['html'] = res.content # type: ignore
                     
                 except:
-                    scraped_data['html'] = ''
+                    scraped_data['html'] = '' # type: ignore
     
     # If full is not selected, runs cloudscraper's basic scraper
     else:
@@ -748,19 +748,19 @@ def crawler_scraper(current_url: str, full: bool) -> tuple:
             
             scraper = cloudscraper.create_scraper()
             res = scraper.get(current_url)
-            scraped_data['html'] = res.content
+            scraped_data['html'] = res.content # type: ignore
             
         except:
-            scraped_data['html'] = ''
+            scraped_data['html'] = '' # type: ignore
         
     # Making HTML soup
-    soup = BeautifulSoup(scraped_data['html'], "html.parser")
+    soup = BeautifulSoup(scraped_data['html'], "html.parser") # type: ignore
     
     # Selecting dividers
     href_select = soup.select("a")  
     
     # Extracting links
-    links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs]          
+    links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs]       # type: ignore    
     
     # Returning results as tuple
     return (soup, scraped_data, links)
@@ -772,7 +772,7 @@ def scrape_frontiers(url):
     
     res = scrape_url(url = url, parse_pdf = False, output = 'html')
     try:
-        soup = BeautifulSoup(res,'lxml')
+        soup = BeautifulSoup(res,'lxml') # type: ignore
     except:
         pass
 
@@ -782,51 +782,51 @@ def scrape_frontiers(url):
         meta = ''
 
     try:
-        doi = soup.find(attrs = {'name':"citation_doi"}).attrs['content']
+        doi = soup.find(attrs = {'name':"citation_doi"}).attrs['content'] # type: ignore
     except:
         doi = None
     
     try:
-        keywords = soup.find(attrs = {'name':"citation_keywords"}).attrs['content'].split('; ')
+        keywords = soup.find(attrs = {'name':"citation_keywords"}).attrs['content'].split('; ') # type: ignore
     except:
         keywords = None
     
     item_type = 'article'
     
     try:
-        link = soup.find(attrs = {'property':"og:url"}).attrs['content']
+        link = soup.find(attrs = {'property':"og:url"}).attrs['content'] # type: ignore
     except:
         link = None
     
     try:
-        date = soup.find(attrs={'name':"citation_publication_date"}).attrs['content']
+        date = soup.find(attrs={'name':"citation_publication_date"}).attrs['content'] # type: ignore
     except:
         date = None
 
     try:
-        source = soup.find(attrs = {'name':"citation_journal_title"}).attrs['content']
+        source = soup.find(attrs = {'name':"citation_journal_title"}).attrs['content'] # type: ignore
     except:
         source = None
 
     try:
-        publisher = soup.find(attrs = {'name':"citation_publisher"}).attrs['content']
+        publisher = soup.find(attrs = {'name':"citation_publisher"}).attrs['content'] # type: ignore
     except:
         publisher = None
 
     repository = 'Frontiers'
 
     try:
-        title = soup.find(attrs = {'name':"citation_title"}).attrs['content']
+        title = soup.find(attrs = {'name':"citation_title"}).attrs['content'] # type: ignore
     except:
         title = None
 
     try:
-        description = soup.find(attrs = {'name':"description"}).attrs['content']
+        description = soup.find(attrs = {'name':"description"}).attrs['content'] # type: ignore
     except:
         description = None
 
     try:
-        abstract = soup.find(attrs={'name':"citation_abstract"}).attrs['content']
+        abstract = soup.find(attrs={'name':"citation_abstract"}).attrs['content'] # type: ignore
     except:
         abstract = None
 
@@ -886,7 +886,7 @@ def scrape_arxiv(url):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res,'lxml', features="xml")
+        soup = BeautifulSoup(res,'lxml', features="xml") # type: ignore
     except:
         soup = BeautifulSoup()
 
@@ -896,24 +896,24 @@ def scrape_arxiv(url):
         meta = []
 
     try:
-        doi = soup.find(attrs = {'class':"tablecell arxivdoi"}).a.attrs['href']
+        doi = soup.find(attrs = {'class':"tablecell arxivdoi"}).a.attrs['href'] # type: ignore
     except:
         doi = None
 
     try:
-        keywords = soup.find(attrs = {'class':"tablecell subjects"}).text.replace('\n', '').split('; ')
+        keywords = soup.find(attrs = {'class':"tablecell subjects"}).text.replace('\n', '').split('; ') # type: ignore
     except:
         keywords = None
         
     item_type = 'article'
     
     try:
-        link = soup.find(attrs = {'property':"og:url"}).attrs['content']
+        link = soup.find(attrs = {'property':"og:url"}).attrs['content'] # type: ignore
     except:
         link = None
         
     try:
-        date = soup.find(attrs = {'class': "dateline"}).text.replace('\n', '').replace('  ', '').replace('[', '').replace(']', '').replace('Submitted on ', '')
+        date = soup.find(attrs = {'class': "dateline"}).text.replace('\n', '').replace('  ', '').replace('[', '').replace(']', '').replace('Submitted on ', '') # type: ignore
     except:
         date = None
         
@@ -956,7 +956,7 @@ def scrape_arxiv(url):
 
     authors = []
     try:
-        string_list = soup.find(attrs={'class':'authors'}).find_all('a')
+        string_list = soup.find(attrs={'class':'authors'}).find_all('a') # type: ignore
     
         for item in string_list:
             string = str(item).replace('<', ' <').replace('>', '> ').replace('</a> ', '').replace(' <a href="https://arxiv.org/search/cs?searchtype=author&amp;query=', '').strip()
@@ -989,7 +989,7 @@ def scrape_springer(url):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res,'lxml')
+        soup = BeautifulSoup(res,'lxml')  # type: ignore
     except:
         soup = BeautifulSoup()
 
@@ -1156,7 +1156,7 @@ def scrape_nature(url = 'request_input'):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
 
@@ -1253,7 +1253,7 @@ def scrape_ieee(url):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
 
@@ -1365,7 +1365,7 @@ def scrape_pubmed(url):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
 
@@ -1375,42 +1375,42 @@ def scrape_pubmed(url):
         meta = []
 
     try:
-        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
+        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content'] # type: ignore
     except:
         doi = None
     item_type = 'article'
     
     try:
-        link = soup.find(attrs={'rel':'canonical'}).attrs['href']
+        link = soup.find(attrs={'rel':'canonical'}).attrs['href'] # type: ignore
     except:
         link = None
     try:
-        date = soup.find(attrs={'name':'citation_date'}).attrs['content']
+        date = soup.find(attrs={'name':'citation_date'}).attrs['content'] # type: ignore
     except:
         date = None
     try:
-        source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content']
+        source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content'] # type: ignore
     except:
         source = None
     try:
-        publisher = soup.find(attrs={'name':'citation_publisher'}).attrs['content']
+        publisher = soup.find(attrs={'name':'citation_publisher'}).attrs['content'] # type: ignore
     except:
         publisher = None
     repository = 'PubMed'
     try:
-        title = soup.find(attrs={'name':'citation_title'}).attrs['content']
+        title = soup.find(attrs={'name':'citation_title'}).attrs['content'] # type: ignore
     except:
         title = None
     try:
-        description = soup.find(attrs={'name':'description'}).attrs['content']
+        description = soup.find(attrs={'name':'description'}).attrs['content'] # type: ignore
     except:
         description = None
     try:
-        abstract = soup.find(attrs={'class':"abstract-content selected"}).text.replace('\n', '').replace('  ', '').replace('   ', '')
+        abstract = soup.find(attrs={'class':"abstract-content selected"}).text.replace('\n', '').replace('  ', '').replace('   ', '') # type: ignore
     except:
         abstract = None
     try:
-        authors = soup.find(attrs={'name':'citation_authors'}).attrs['content'].split(';')
+        authors = soup.find(attrs={'name':'citation_authors'}).attrs['content'].split(';') # type: ignore
     except:
         authors = None
     
@@ -1465,50 +1465,50 @@ def scrape_pmc(url):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
 
     
     try:
-        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
+        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content'] # type: ignore
     except:
         doi = None
     try:
-        item_type = soup.find(attrs={'property':'og:type'}).attrs['content']
+        item_type = soup.find(attrs={'property':'og:type'}).attrs['content'] # type: ignore
     except:
         item_type = None
     try:
-        link = soup.find(attrs={'rel':'canonical'}).attrs['href']
+        link = soup.find(attrs={'rel':'canonical'}).attrs['href'] # type: ignore
     except:
         link = None
     try:
-        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
+        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content'] # type: ignore
     except:
         date = None
     try:
-        source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content']
+        source = soup.find(attrs={'name':'citation_journal_title'}).attrs['content'] # type: ignore
     except:
         source = None
     try:
-        publisher = soup.find(attrs={'name':'DC.Publisher'}).attrs['content']
+        publisher = soup.find(attrs={'name':'DC.Publisher'}).attrs['content'] # type: ignore
     except:
         publisher = None
     repository = 'PubMedCentral'
     try:
-        title = soup.find(attrs={'name':'citation_title'}).attrs['content']
+        title = soup.find(attrs={'name':'citation_title'}).attrs['content'] # type: ignore
     except:
         title = None
     try:
-        description = soup.find(attrs={'property':'og:description'}).attrs['content']
+        description = soup.find(attrs={'property':'og:description'}).attrs['content'] # type: ignore
     except:
         description = None
     try:
-        keywords = soup.find(attrs={'class':"kwd-text"}).text
+        keywords = soup.find(attrs={'class':"kwd-text"}).text # type: ignore
     except:
         keywords = None
     try:
-        abstract = soup.find(attrs={'class':"p p-first-last"}).text
+        abstract = soup.find(attrs={'class':"p p-first-last"}).text # type: ignore
     except:
         abstract = None
     
@@ -1528,11 +1528,11 @@ def scrape_pmc(url):
     except:
         pass
 
-    for i in refs:
-        citations.append(i.text.replace('\n', '').replace('..', '.').replace('  ', '').replace('   ', '').replace('[PubMed]', '').replace('[Google Scholar]', '').replace('[PMC free article]', ''))
+    for i in refs: # type: ignore
+        citations.append(i.text.replace('\n', '').replace('..', '.').replace('  ', '').replace('   ', '').replace('[PubMed]', '').replace('[Google Scholar]', '').replace('[PMC free article]', '')) # type: ignore
 
     try:
-        for i in refs.find_all(attrs={'target':"_blank"}):
+        for i in refs.find_all(attrs={'target':"_blank"}): # type: ignore
             citations_data.append(i.attrs['href'])
     except:
         pass
@@ -1581,46 +1581,46 @@ def scrape_ssrn(url = 'request_input'):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
 
     try:
-        doi = soup.find(attrs={'name':'citation_doi'}).text
+        doi = soup.find(attrs={'name':'citation_doi'}).text # type: ignore
     except:
         doi = None
 
     item_type = 'article'
 
     try:
-        link = soup.find(attrs={'rel':'canonical'}).attrs['href']
+        link = soup.find(attrs={'rel':'canonical'}).attrs['href'] # type: ignore
     except:
         link = None
     
     try:
-        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
+        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content'] # type: ignore
     except:
         date = None
     try:
-        source = soup.find(attrs={'class': 'btn-link'}).text
+        source = soup.find(attrs={'class': 'btn-link'}).text # type: ignore
     except:
         source = None
     publisher = 'SSRN'
     repository = 'SSRN'
     try:
-        title = soup.find(attrs={'name': 'citation_title'}).attrs['content']
+        title = soup.find(attrs={'name': 'citation_title'}).attrs['content'] # type: ignore
     except:
         title = None
     try:
-        description = soup.find(attrs={'name': 'description'}).attrs['content']
+        description = soup.find(attrs={'name': 'description'}).attrs['content'] # type: ignore
     except:
         description = None
     try:
-        keywords = soup.find(attrs={'name': 'citation_keywords'}).attrs['content']
+        keywords = soup.find(attrs={'name': 'citation_keywords'}).attrs['content'] # type: ignore
     except:
         keywords = None
     try:
-        abstract = soup.find(attrs={'class':'abstract-text'}).p.text
+        abstract = soup.find(attrs={'class':'abstract-text'}).p.text # type: ignore
     except:
         abstract = None
     
@@ -1660,7 +1660,7 @@ def scrape_heinonline(url):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
     
@@ -1668,19 +1668,19 @@ def scrape_heinonline(url):
     repository = 'HeinOnline'
 
     try:
-        title = soup.find(attrs={'class':'cite_title'}).text.strip()
+        title = soup.find(attrs={'class':'cite_title'}).text.strip() # type: ignore
     except:
         title = None
     try:
-        description = soup.find(attrs={'name': 'description'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip()
+        description = soup.find(attrs={'name': 'description'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip() # type: ignore
     except:
         description = None
     try:
-        keywords = soup.find(attrs={'name': 'keywords'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip()
+        keywords = soup.find(attrs={'name': 'keywords'}).attrs['content'].replace('\r', '').replace('\n', '').replace('  ', '').replace('   ', '').strip() # type: ignore
     except:
         keywords = None
     try:
-        author_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').strip()
+        author_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').strip() # type: ignore
     except:
         author_res = ''
     
@@ -1697,7 +1697,7 @@ def scrape_heinonline(url):
             authors.append(auth.replace('au','').replace('  ','').strip())
     
     try:
-        date_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').split('.')
+        date_res = soup.find(attrs={'class':"Z3988"}).attrs['title'].replace('ctx_ver', ' ').replace('rft', ' ').replace('=', ' ').replace('%', ' ').replace('&', ' ').split('.') # type: ignore
     except:
         date_res = []
 
@@ -1729,12 +1729,12 @@ def scrape_mdpi(url):
         
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
 
     try:
-        doi = soup.find(attrs={'name':'citation_doi'}).text
+        doi = soup.find(attrs={'name':'citation_doi'}).text # type: ignore
     except:
         doi = None
     
@@ -1742,30 +1742,30 @@ def scrape_mdpi(url):
     link = url
 
     try:
-        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content']
+        date = soup.find(attrs={'name':'citation_publication_date'}).attrs['content'] # type: ignore
     except:
         date = None
     try:
-        source = soup.find(attrs={'name': 'dc.source'}).attrs['content']
+        source = soup.find(attrs={'name': 'dc.source'}).attrs['content'] # type: ignore
     except:
         source = None
     try:
-        publisher = soup.find(attrs={'name': 'dc.publisher'}).attrs['content']
+        publisher = soup.find(attrs={'name': 'dc.publisher'}).attrs['content'] # type: ignore
     except:
         publisher = None
     
     repository = 'PNAS'
 
     try:
-        title = soup.find(attrs={'name': 'title'}).attrs['content']
+        title = soup.find(attrs={'name': 'title'}).attrs['content'] # type: ignore
     except:
         title = None
     try:
-        description = soup.find(attrs={'name': 'description'}).attrs['content']
+        description = soup.find(attrs={'name': 'description'}).attrs['content'] # type: ignore
     except:
         description = None
     try:
-        abstract = soup.find(attrs={'name': 'description'}).attrs['content']
+        abstract = soup.find(attrs={'name': 'description'}).attrs['content'] # type: ignore
     except:
         abstract = None
     
@@ -1815,25 +1815,25 @@ def scrape_acm(url = 'request_input'):
     
     try:
         res = scrape_url(url = url, parse_pdf = False, output = 'html')
-        soup = BeautifulSoup(res, 'lxml')
+        soup = BeautifulSoup(res, 'lxml') # type: ignore
     except:
         soup = BeautifulSoup()
     
     item_type = 'article'
     try:
-        link = soup.find(attrs={'property':'og:url'}).attrs['content']
+        link = soup.find(attrs={'property':'og:url'}).attrs['content'] # type: ignore
     except:
         link = None
     try:
-        doi = link.replace('https://dl.acm.org/', '')
+        doi = link.replace('https://dl.acm.org/', '') # type: ignore
     except:
         doi = None
     try:
-        date = soup.find(attrs={'class':"rlist article-chapter-history-list"}).text.replace('Published: ', '')
+        date = soup.find(attrs={'class':"rlist article-chapter-history-list"}).text.replace('Published: ', '') # type: ignore
     except:
         date = None
     try:
-        source = soup.find(attrs={'class':"epub-section__title"}).text
+        source = soup.find(attrs={'class':"epub-section__title"}).text # type: ignore
     except:
         source = None
      
@@ -1841,17 +1841,17 @@ def scrape_acm(url = 'request_input'):
     repository = 'ACM'
 
     try:
-        title = soup.find(attrs={'property':'og:title'}).attrs['content']
+        title = soup.find(attrs={'property':'og:title'}).attrs['content'] # type: ignore
     except:
         title = None
     try:
-        abstract = soup.find(attrs={'class':"abstractSection abstractInFull"}).p.text.strip()
+        abstract = soup.find(attrs={'class':"abstractSection abstractInFull"}).p.text.strip() # type: ignore
     except:
         abstract = None
     
     keywords = []
     try:
-        chart_terms = soup.find(attrs={'class':"rlist organizational-chart"}).find_all('a')
+        chart_terms = soup.find(attrs={'class':"rlist organizational-chart"}).find_all('a') # type: ignore
         
         for i in chart_terms:
             keywords.append(i.text)
@@ -1915,42 +1915,42 @@ def parse_muse_from_source(source = 'request_input', link = None):
         authors = None
         
     try:
-        item_type = soup.find(attrs={'class':'type'}).text
+        item_type = soup.find(attrs={'class':'type'}).text # type: ignore
     except:
         item_type = None
     
     try:
-        link = soup.find(attrs={'name':'citation_fulltext_html_url'}).attrs['content']
+        link = soup.find(attrs={'name':'citation_fulltext_html_url'}).attrs['content'] # type: ignore
     except:
         link = link
     
     try:
-        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content']
+        doi = soup.find(attrs={'name':'citation_doi'}).attrs['content'] # type: ignore
     except:
         doi = None
     
     try:
-        date = soup.find(attrs={'name':'citation_year'}).attrs['content']
+        date = soup.find(attrs={'name':'citation_year'}).attrs['content'] # type: ignore
     except:
         date = None
     
     try:
-        source = soup.find(attrs={'name':"citation_journal_title"}).attrs['content']
+        source = soup.find(attrs={'name':"citation_journal_title"}).attrs['content'] # type: ignore
     except:
         source = None
     
     try:
-        publisher = soup.find(attrs={'name':'citation_publisher'}).attrs['content']
+        publisher = soup.find(attrs={'name':'citation_publisher'}).attrs['content'] # type: ignore
     except:
         publisher = None
     
     try:
-        title = soup.find(attrs={'name':'citation_title'}).attrs['content']
+        title = soup.find(attrs={'name':'citation_title'}).attrs['content'] # type: ignore
     except:
         title = None
         
     try:
-        abstract = soup.find(attrs={'class':"abstract"}).text.replace('Abstract:', '').replace('\nAbstract', '').replace('   ', ' ').replace('  ', ' ').strip('\n').strip()
+        abstract = soup.find(attrs={'class':"abstract"}).text.replace('Abstract:', '').replace('\nAbstract', '').replace('   ', ' ').replace('  ', ' ').strip('\n').strip() # type: ignore
     except:
         abstract = None
         
@@ -1983,32 +1983,32 @@ def parse_muse_from_source(source = 'request_input', link = None):
             citation = citation + ', '.join(ref_dict['authors']) + ' '
 
         if 'citation_year' in ref_dict.keys():
-            citation = citation + '(' + ref_dict['citation_year'] + '),'
+            citation = citation + '(' + ref_dict['citation_year'] + '),' # type: ignore
 
         if 'citation_title' in ref_dict.keys():
-            citation = citation + ' ' + ref_dict['citation_title'] + '.'
+            citation = citation + ' ' + ref_dict['citation_title'] + '.' # type: ignore
 
         if 'citation_journal_title' in ref_dict.keys():
-            citation = (citation + ' ' 
+            citation = (citation + ' '  # type: ignore
                         + ref_dict['citation_journal_title']
                        )
 
         if 'citation_volume' in ref_dict.keys():
-            citation = (citation + ' ' 
+            citation = (citation + ' '  # type: ignore
                         + ref_dict['citation_journal_title']
                        )
 
         if 'citation_issue' in ref_dict.keys():
-            citation = (citation + '(' + ref_dict['citation_issue']  + ').' )
+            citation = (citation + '(' + ref_dict['citation_issue']  + ').' ) # type: ignore
 
         if 'citation_firstpage' in ref_dict.keys():
-            citation = (citation + ' pp.' + ref_dict['citation_firstpage'])
+            citation = (citation + ' pp.' + ref_dict['citation_firstpage']) # type: ignore
 
         if 'citation_lastpage' in ref_dict.keys():
-            citation = (citation + '-' + ref_dict['citation_lastpage'] + '.')
+            citation = (citation + '-' + ref_dict['citation_lastpage'] + '.') # type: ignore
 
         if 'citation_publisher' in ref_dict.keys():
-            citation = (citation + ' ' + ref_dict['citation_publisher'] + '.')
+            citation = (citation + ' ' + ref_dict['citation_publisher'] + '.') # type: ignore
 
         citation = citation.strip()
         citations.append(citation)
@@ -2046,7 +2046,7 @@ def scrape_muse(url = 'request_input'):
     except:
         res = ''
     
-    result = parse_muse_from_source(source = res, link = url)
+    result = parse_muse_from_source(source = res, link = url) # type: ignore
     
     return result
 
@@ -2105,24 +2105,24 @@ def parse_proquest_from_source(source, link = None):
     repository = 'ProQuest'
 
     try:
-        title = soup.find(attrs={'id':'documentTitle'}).text
+        title = soup.find(attrs={'id':'documentTitle'}).text # type: ignore
     except:
         title = None
 
     try:
-        auths_txt = soup.find(attrs={'class':"truncatedAuthor"}).text.replace('\xa0', '').replace('\\u', ' ').replace('\n', '')
+        auths_txt = soup.find(attrs={'class':"truncatedAuthor"}).text.replace('\xa0', '').replace('\\u', ' ').replace('\n', '') # type: ignore
     except:
         auths_txt = ''
 
     authors = auths_txt.split('.')[0].split(';')
     
     try:
-        abstract = soup.find(attrs={'class':"abstractContainer"}).text.replace('\nTranslate', '').replace('Abstract. ', '').replace('Abstract', '').replace('ABSTRACT. ', '').replace('ABSTRACT', '').replace('You have requested "on-the-fly" machine translation of selected content from our databases. This functionality is provided solely for your convenience and is in no way intended to replace human translation. Show full disclaimerNeither ProQuest nor its licensors make any representations or warranties with respect to the translations. The translations are automatically generated "AS IS" and "AS AVAILABLE" and are not retained in our systems. PROQUEST AND ITS LICENSORS SPECIFICALLY DISCLAIM ANY AND ALL EXPRESS OR IMPLIED WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES FOR AVAILABILITY, ACCURACY, TIMELINESS, COMPLETENESS, NON-INFRINGMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Your use of the translations is subject to all use restrictions contained in your Electronic Products License Agreement and by using the translation functionality you agree to forgo any and all claims against ProQuest or its licensors for your use of the translation functionality and any output derived there from. Hide full disclaimer\n\nLonger documents can take a while to translate. Rather than keep you waiting, we have only translated the first few paragraphs. Click the button below if you want to translate the rest of the document.\nTranslate All', '')
+        abstract = soup.find(attrs={'class':"abstractContainer"}).text.replace('\nTranslate', '').replace('Abstract. ', '').replace('Abstract', '').replace('ABSTRACT. ', '').replace('ABSTRACT', '').replace('You have requested "on-the-fly" machine translation of selected content from our databases. This functionality is provided solely for your convenience and is in no way intended to replace human translation. Show full disclaimerNeither ProQuest nor its licensors make any representations or warranties with respect to the translations. The translations are automatically generated "AS IS" and "AS AVAILABLE" and are not retained in our systems. PROQUEST AND ITS LICENSORS SPECIFICALLY DISCLAIM ANY AND ALL EXPRESS OR IMPLIED WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY WARRANTIES FOR AVAILABILITY, ACCURACY, TIMELINESS, COMPLETENESS, NON-INFRINGMENT, MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. Your use of the translations is subject to all use restrictions contained in your Electronic Products License Agreement and by using the translation functionality you agree to forgo any and all claims against ProQuest or its licensors for your use of the translation functionality and any output derived there from. Hide full disclaimer\n\nLonger documents can take a while to translate. Rather than keep you waiting, we have only translated the first few paragraphs. Click the button below if you want to translate the rest of the document.\nTranslate All', '') # type: ignore
     except:
         abstract = None
         
     try:
-        full_text_list = soup.find(attrs={'id':"fullTextZone"}).find_all('p')
+        full_text_list = soup.find(attrs={'id':"fullTextZone"}).find_all('p') # type: ignore
         full_text_list = [i.text for i in full_text_list]
 
         full_text = '\n'.join(full_text_list).split('\nReferences\n')
@@ -2144,7 +2144,7 @@ def parse_proquest_from_source(source, link = None):
     
     if (main_body == None) or (abstract == None):
         try:
-            main_text = soup.find(attrs={'role':'main'}).find_all('div')
+            main_text = soup.find(attrs={'role':'main'}).find_all('div') # type: ignore
             res_list = [i.find_all('p') for i in main_text if 'ABS' in str(i)]
 
             try:
@@ -2248,7 +2248,7 @@ def parse_jstor_from_source(source = 'request_input', link = None):
         metadata = None
     
     try:
-        entry_citation = soup.find(attrs={'name':'description'}).attrs['content']
+        entry_citation = soup.find(attrs={'name':'description'}).attrs['content'] # type: ignore
     except:
         entry_citation = None
     
@@ -2260,7 +2260,7 @@ def parse_jstor_from_source(source = 'request_input', link = None):
         description = entry_citation
         
         try:
-            authors = entry_citation.split(metadata['itemTitle'])[0].strip().split(', ')
+            authors = entry_citation.split(metadata['itemTitle'])[0].strip().split(', ') # type: ignore
             authors = [i.strip(',') for i in authors]
         except:
             authors = None
@@ -2277,7 +2277,7 @@ def parse_jstor_from_source(source = 'request_input', link = None):
         date = None
     
     try:
-        link = soup.find(attrs={'rel':'canonical'}).attrs['href']
+        link = soup.find(attrs={'rel':'canonical'}).attrs['href'] # type: ignore
     except:
         link = link
     
@@ -2348,7 +2348,7 @@ def scrape_jstor(url = 'request_input'):
     except:
         res = ''
 
-    result = parse_jstor_from_source(source = res, link = url)
+    result = parse_jstor_from_source(source = res, link = url) # type: ignore
     
     return result
 
@@ -2397,13 +2397,13 @@ def parse_google_scholar_source(source = 'request_input'):
             for entry in selected:
                 
                 if 'related:' in entry['href']:
-                    df.loc[index, 'recommendations'] = 'https://scholar.google.com/' + entry['href']
+                    df.loc[index, 'recommendations'] = 'https://scholar.google.com/' + entry['href'] # type: ignore
             
                 if 'user=' in entry['href']:
-                    df.loc[index, 'author_link'] = 'https://scholar.google.com' + entry['href']
+                    df.loc[index, 'author_link'] = 'https://scholar.google.com' + entry['href'] # type: ignore
                 
                 if 'cites=' in entry['href']:
-                    df.loc[index, 'cited_by'] = 'https://scholar.google.com' + entry['href']
+                    df.loc[index, 'cited_by'] = 'https://scholar.google.com' + entry['href'] # type: ignore
             
                 entry_text = entry.get_text()
                 
@@ -2413,7 +2413,7 @@ def parse_google_scholar_source(source = 'request_input'):
                     and (']' not in entry_text)
                     and ('.c' not in entry_text)
                     and ('.n' not in entry_text)
-                    and (entry_text not in df.loc[index, 'title'])
+                    and (entry_text not in df.loc[index, 'title']) # type: ignore
                     and (entry_text != 'Save') 
                     and (entry_text != 'Cite') 
                     and ('Cited by' not in entry_text) 
@@ -2429,12 +2429,12 @@ def parse_google_scholar_source(source = 'request_input'):
         
         df.loc[index, 'authors'] = author_list
             
-        if ((df.loc[index, 'title'] == np.nan) or (df.loc[index, 'title'] == None)) and ('books.google' in df.loc[index, 'link']):
+        if ((df.loc[index, 'title'] == np.nan) or (df.loc[index, 'title'] == None)) and ('books.google' in df.loc[index, 'link']): # type: ignore
 
             try:
                 link = df.loc[index, 'link']
-                gbooks_response = scrape_url(url = link)
-                title=BeautifulSoup(gbooks_response.content,'html').select('title')[0].get_text()
+                gbooks_response = scrape_url(url = link) # type: ignore
+                title=BeautifulSoup(gbooks_response.content,'html').select('title')[0].get_text() # type: ignore
                 df.loc[index, 'title'] = title
             except:
                 df.loc[index, 'title'] = None
@@ -2452,7 +2452,7 @@ def search_google_scholar(query = 'request_input', pages = 1, open_source = Fals
     
     if query == None:
         query = input('Query: ')
-    query = urllib.parse.quote_plus(query)
+    query = urllib.parse.quote_plus(query) # type: ignore
     
     url_base = 'https://scholar.google.com/scholar?start='
     if open_source == True:
@@ -2486,7 +2486,7 @@ def scrape_google_scholar(url):
         raise ValueError('The scraper encountered an error. Google Scholar may have blocked it.')
     
     try:
-        return parse_google_scholar_source(source = source)
+        return parse_google_scholar_source(source = source) # type: ignore
     except:
         raise ValueError('The scraper encountered an error. Google Scholar may have blocked it.')
 
@@ -2497,7 +2497,7 @@ def scrape_google_scholar_search(query):
     
     
     url_base = 'https://scholar.google.com/scholar?q='
-    query = urllib.parse.quote_plus(query)
+    query = urllib.parse.quote_plus(query) # type: ignore
     url = url_base + query
 
     return scrape_google_scholar(url)

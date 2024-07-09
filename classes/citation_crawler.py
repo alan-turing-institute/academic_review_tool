@@ -20,7 +20,7 @@ def crawler_scrape_url(url) -> pd.DataFrame:
     global results_cols
     result = pd.DataFrame(index = [0], columns=results_cols, dtype=object)
 
-    keys = scrape_res.keys()
+    keys = scrape_res.keys() # type: ignore
 
     if 'title' in keys:
         result.loc[0, 'title'] = scrape_res['title'] # type: ignore
@@ -325,7 +325,7 @@ def citation_crawler_engine(
         if use_api == True:
         # Checking if the entry has a valid DOI. If yes, updating data in the entry using Crossref API. If not, updating data using web scraper.
             entry = update_citation_crawler_data(entry, be_polite = be_polite, timeout = timeout)
-            entry = pd.Series(entry)
+            entry = pd.Series(entry)  # type: ignore
 
 
         # Formatting entry citations data
