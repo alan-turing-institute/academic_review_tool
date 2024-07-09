@@ -117,6 +117,11 @@ class Network(Graph):
             dir = 'Directed'
         else:
             dir = 'Undirected'
+        
+        if self.is_bipartite() == True:
+            bi = 'bipartite '
+        else:
+            bi = ''
 
         vertices = list(self.vs.indices)
         vs_len = len(vertices)
@@ -142,7 +147,7 @@ class Network(Graph):
             edges = edges.strip('[').strip(']')
        
 
-        output = f'{dir} network with {vs_len} vertices and {es_len} edges\n'
+        output = f'{dir} {bi}network with {vs_len} vertices and {es_len} edges\n'
         output = f'{(len(output)-1)*"-"}\n' + output + f'{(len(output)-1)*"-"}\n\n'
         output = output + f'Vertices\n--------\n{vertices}\n\n'
         output = output + f'Edges\n-----\n{edges}'
