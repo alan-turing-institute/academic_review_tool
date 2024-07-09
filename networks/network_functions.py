@@ -355,9 +355,16 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                         refs_obj.update_work_ids()
 
                     if 'copy' in refs_obj.__dir__():
-                        df = refs_obj.copy(deep=True).astype(str)
+                        df = refs_obj.copy(deep=True)
+                        
+                    else:
+                         df = refs_obj
+                    
+                    if 'astype' in df.__dir__():
+                            df = df.astype(str)
+                            
                 else:
-                     refs_obj = pd.DataFrame(columns=results_cols, dtype=object)
+                     df = pd.DataFrame(columns=results_cols, dtype=object)
 
                 # Retrieving citations work ids
                 df_index = df.index.to_list()
