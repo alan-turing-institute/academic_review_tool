@@ -1,6 +1,6 @@
 from ..utils.basics import results_cols
 from ..importers.crossref import lookup_doi
-from ..internet.scrapers import get_final_url, scrape_url, scrape_article, can_scrape
+from ..internet.scrapers import get_final_url, scrape_url, scrape_article, can_scrape, get_domain
 from ..internet.crawlers import check_crawl_permission
 
 from ..internet.crawlers import correct_seed_errors as correct_seed_url_errors
@@ -13,10 +13,102 @@ import pandas as pd
 import numpy as np
 
 
-def crawler_scrape_url(url):
+def crawler_scrape_url(url) -> pd.DataFrame:
+
+    final_url = get_final_url(url)
+
+    scrape_res = scrape_url(url=final_url)
 
     global results_cols
-    return pd.Series(index=results_cols, dtype=object)
+    result = pd.DataFrame(index = [0], columns=results_cols, dtype=object)
+
+    keys = scrape_res.keys()
+
+    if 'title' in keys:
+        result.loc[0, 'title'] = scrape_res['title'] # type: ignore
+    
+    if 'author' in keys:
+        auths = scrape_res['author'] # type: ignore
+        if type(auths) == str:
+            auths = auths.replace('[','').replace(']','').replace('{','').replace('}','').replace(';','').replace(', ',',').replace(' ,',',').split(',')
+        result.at[0, 'authors'] = auths
+        result.at[0, 'authors_data'] = auths
+
+    if 'date' in keys:
+        result.loc[0, 'date'] = scrape_res['date'] # type: ignore
+    
+    if ('sitename' in keys) and (scrape_res['sitename'] is not None) and (scrape_res['sitename'] != ''):  # type: ignore
+            result.loc[0, 'source'] = scrape_res['sitename'] # type: ignore
+    else:
+        if ('url' in keys) and (scrape_res['url'] is not None) and (scrape_res['url'] != ''):  # type: ignore
+            domain = get_domain(scrape_res['url']) # type: ignore
+            result.loc[0, 'source'] = domain
+    
+    if ('type' in keys):
+        result.loc[0, 'type'] = scrape_res['type'] # type: ignore
+    else:
+        if ('pagetype' in keys) and (scrape_res['pagetype'] is not None) and (scrape_res['pagetype'] != ''):  # type: ignore
+            result.loc[0, 'type'] = scrape_res['pagetype'] # type: ignore
+        else:
+            result.loc[0, 'type'] = 'website'
+    
+    if ('publisher' in keys) and (scrape_res['publisher'] is not None) and (scrape_res['publisher'] != ''):  # type: ignore
+        result.loc[0, 'publisher'] = scrape_res['publisher'] # type: ignore
+    else:
+        if ('sitename' in keys) and (scrape_res['sitename'] is not None) and (scrape_res['sitename'] != ''):  # type: ignore
+            result.loc[0, 'publisher'] = scrape_res['sitename'] # type: ignore
+        else:
+            if 'url' in keys:
+                domain = get_domain(scrape_res['keys']) # type: ignore
+                result.loc[0, 'publisher'] = domain
+            else:
+                result.loc[0, 'publisher'] = None
+    
+    if ('tags' in keys) and (scrape_res['tags'] is not None) and (scrape_res['tags'] != ''):  # type: ignore
+        tags = scrape_res['tags'] # type: ignore
+        tags_list = tags.replace('[','').replace(']','').replace('{','').replace('}','').replace(';','').replace(', ',',').replace(' ,',',').split(',')
+        result.at[0, 'keywords'] = tags_list
+    else:
+        if ('categories' in keys) and (scrape_res['categories'] is not None) and (scrape_res['categories'] != ''):  # type: ignore
+            cats = scrape_res['categories'] # type: ignore
+            cats_list = cats.replace('[','').replace(']','').replace('{','').replace('}','').replace(';','').replace(', ',',').replace(' ,',',').split(',')
+            result.at[0, 'keywords'] = cats_list
+        else:
+            result.at[0, 'keywords'] = []
+    
+    if ('description' in keys) and (scrape_res['description'] is not None) and (scrape_res['description'] != ''):  # type: ignore
+        result.at[0, 'description'] = scrape_res['description'] # type: ignore
+
+    if ('excerpt' in keys) and (scrape_res['excerpt'] is not None) and (scrape_res['excerpt'] != ''):  # type: ignore
+        result.at[0, 'extract'] = scrape_res['excerpt'] # type: ignore
+    
+    if ('text' in keys) and (scrape_res['text'] is not None) and (scrape_res['text'] != ''):  # type: ignore
+        result.at[0, 'full_text'] = scrape_res['text'] # type: ignore
+    else:
+        if ('raw_text' in keys) and (scrape_res['raw_text'] is not None) and (scrape_res['raw_text'] != ''):  # type: ignore
+            result.at[0, 'full_text'] = scrape_res['raw_text'] # type: ignore
+        else:
+            if ('html' in keys) and (scrape_res['html'] is not None) and (scrape_res['html'] != ''):  # type: ignore
+                result.at[0, 'full_text'] = scrape_res['html'] # type: ignore
+    
+    if ('links' in keys) and (scrape_res['links'] is not None) and (scrape_res['links'] != '') and (scrape_res['links'] != []): # type: ignore
+
+        citations = scrape_res['links'] # type: ignore
+
+        if type(citations) == str:
+            citations = citations.replace('[','').replace(']','').replace('{','').replace('}','').replace(';','').replace(', ',',').replace(' ,',',').split(',')
+        
+        result.at[0, 'citations'] = citations
+        result.at[0, 'citations_data'] = citations
+        result.loc[0, 'citation_count'] = len(citations)
+    
+    if ('language' in keys) and (scrape_res['language'] is not None) and (scrape_res['language'] != ''):  # type: ignore
+        result.at[0, 'language'] = scrape_res['language'] # type: ignore
+
+    if ('url' in keys) and (scrape_res['url'] is not None) and (scrape_res['url'] != ''):  # type: ignore
+        result.loc[0, 'link'] = scrape_res['url'] # type: ignore
+    
+    return result
 
 def citation_crawler_site_test(url: str):
 
