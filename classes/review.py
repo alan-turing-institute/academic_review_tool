@@ -1427,6 +1427,22 @@ class Review:
 
         return output
 
+    def funder_works_dict(self) -> dict:
+
+        output = {}
+
+        for i in self.results.index:
+            data = self.results.loc[i].copy(deep=True)
+            work_id = data['work_id']
+            funders = data['funder']
+
+            if type(funders) == Funders:
+                funders = funders.all
+
+            output[work_id] = funders
+
+        return output
+
     def coauthors_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
