@@ -261,7 +261,7 @@ def generate_funders_network(funders_dict: dict) -> Graph:
         """
 
         
-        # Creating list of all unique author_ids in source dictionary
+        # Creating list of all unique funder_ids in source dictionary
         all_funders = list(set(funders_dict.keys()))
         
         
@@ -285,7 +285,7 @@ def generate_funders_network(funders_dict: dict) -> Graph:
                 # Retrieving vertex index
                 v_index = vertex.index
                 
-                # Retrieving co-author ids
+                # Retrieving co-funder ids
                 v_edges = funders_dict[funder_id]['funder_id'].to_list()
                 
                 # If the vertex has links associated, finds vertices those links direct to
@@ -350,7 +350,10 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                 v_index = vertex.index
                 
                 refs_obj = citations_dict[work_id]
-                if refs_obj is not None:
+                if (refs_obj is None) or (type(refs_obj) == float ) or (refs_obj not np.nan) or (refs_obj is 'none'):
+                     continue
+                
+                if (refs_obj is not None) and (type(refs_obj) != float ) and (refs_obj is not np.nan) and (refs_obj is not 'none'):
                     if 'update_work_ids' in refs_obj.__dir__():
                         refs_obj.update_work_ids()
 
@@ -438,6 +441,9 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
         if type(data) == dict:
              data = pd.DataFrame.from_dict(data, orient='index').T
         
+        if type(data) != pd.DataFrame:
+             continue
+        
         if 'author_id' not in data.columns:
             continue
             
@@ -499,10 +505,13 @@ def generate_author_affils_network(author_affils_dict: dict) -> Graph:
         v_index = vertex.index
 
         data = author_affils_dict[auth_id]
-
+        
         if type(data) == dict:
              data = pd.DataFrame.from_dict(data, orient='index').T
         
+        if type(data) != pd.DataFrame:
+             continue
+
         if 'affiliation_id' not in data.columns:
             continue
             
@@ -566,6 +575,9 @@ def generate_funder_works_network(funder_works_dict: dict) -> Graph:
         if type(data) == dict:
              data = pd.DataFrame.from_dict(data, orient='index').T
         
+        if type(data) != pd.DataFrame:
+             continue
+
         if 'funder_id' not in data.columns:
             continue
             
