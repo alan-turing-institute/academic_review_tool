@@ -506,44 +506,9 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
         except:
             result['html'] = ''
         
-        # Extracting links
         current_url = url
 
-        if ('html' in result.keys()) and (result['html'] is not None):
-            soup = BeautifulSoup(result['html'], "html.parser")
-            try:
-                href_select = soup.select("a")
-                links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs] # type: ignore
-            except:
-                links = []
-            result['links'] = links
 
-            try:
-                html_find = soup.find('html')
-                html_attrs = html_find.attrs # type: ignore
-                if 'lang' in html_attrs:
-                    lang = html_attrs['lang']
-                else:
-                    lang = None
-            except:
-                lang = None
-            if ('language' not in result.keys()) or (result['language'] is None) or (result['language'] == ''):
-                result['language'] = lang
-
-            try:
-                head_find = soup.find('head')
-                title_find = head_find.find('title') # type: ignore
-                if title_find is not None:
-                    if 'contents' in title_find.__dict__.keys():
-                        title = str(title_find.contents).replace('[','').replace(']','') # type: ignore
-                    else:
-                        title = None
-            except:
-                title = None
-                
-            if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == ''):
-                result['title'] = title
-        
         # If parse_pdf is selected, check if URL is PDF and parse
         
         if parse_pdf == True:
@@ -554,14 +519,61 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
                 pdf_parsed = read_pdf_url(url = url)
                 
                 # Appending result
-                result['title'] = pdf_parsed['title']
-                result['author'] = pdf_parsed['authors']
+                if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == '') or (result['title'] == 'Just a moment...'):
+                    result['title'] = pdf_parsed['title']
+                
+                if ('author' not in result.keys()) or (result['author'] is None) or (result['author'] == '') or (result['author'] == []) or (result['author'] == '[]'):
+                    result['author'] = pdf_parsed['authors']
+
                 result['raw_text'] = pdf_parsed['raw']
                 result['text'] = pdf_parsed['full_text']
-                result['date'] = pdf_parsed['date']
+
+                if ('date' not in result.keys()) or (result['date'] is None) or (result['date'] == ''):
+                    result['date'] = pdf_parsed['date']
+                
                 result['links'] = pdf_parsed['links']
                 result['format'] = 'PDF'
                 result['type'] = 'document'
+
+        # otherwise, trying to parse the HTML result
+        else:
+        
+            if ('html' in result.keys()) and (result['html'] is not None):
+                soup = BeautifulSoup(result['html'], "html.parser")
+                try:
+                    href_select = soup.select("a")
+                    links = [correct_link_errors(source_domain = current_url, url = i['href']) for i in href_select if 'href' in i.attrs] # type: ignore
+                except:
+                    links = []
+                result['links'] = links
+
+                try:
+                    html_find = soup.find('html')
+                    html_attrs = html_find.attrs # type: ignore
+                    if 'lang' in html_attrs:
+                        lang = html_attrs['lang']
+                    else:
+                        lang = None
+                except:
+                    lang = None
+                if ('language' not in result.keys()) or (result['language'] is None) or (result['language'] == ''):
+                    result['language'] = lang
+
+                try:
+                    head_find = soup.find('head')
+                    title_find = head_find.find('title') # type: ignore
+                    if title_find is not None:
+                        if 'contents' in title_find.__dict__.keys():
+                            title = str(title_find.contents).replace('[','').replace(']','').replace('"','').replace("'","").strip() # type: ignore
+                        else:
+                            title = None
+                except:
+                    title = None
+                    
+                if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == ''):
+                    result['title'] = title
+        
+        
         
         # Scraping URL metadata using trafilatura
         metadata = scrape_url_metadata(url = url)
