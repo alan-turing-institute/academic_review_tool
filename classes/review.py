@@ -1098,7 +1098,7 @@ class Review:
         
         return self
 
-    def from_doi(doi = 'request_input', timeout = 60, update_formatting: bool = True): # type: ignore
+    def from_doi(doi: str = 'request_input', timeout = 60, update_formatting: bool = True): # type: ignore
 
         review = Review()
         review.add_doi(doi = doi, timeout = timeout, update_formatting = update_formatting)
@@ -1116,6 +1116,14 @@ class Review:
 
         return self
     
+    def from_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True): # type: ignore
+
+        review = Review()
+        review.add_dois(dois_list = dois_list, rate_limit=rate_limit, timeout = timeout, update_formatting = update_formatting)
+
+        return review
+
+
     def update_from_dois(self, timeout: int = 60, update_formatting: bool = True):
         self.results.update_from_dois(timeout=timeout) # type: ignore
 
