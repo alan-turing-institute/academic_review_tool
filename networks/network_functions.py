@@ -239,7 +239,9 @@ def generate_coauthors_network(coauthors_dict: dict) -> Graph:
                                            'name': f'{auth_id} <-> {author}',
                                            'weight': weight
                                            })
-                    
+        
+        g = g.simplify(combine_edges='first')
+
         return g
 
 def generate_funders_network(funders_dict: dict) -> Graph:
@@ -307,7 +309,9 @@ def generate_funders_network(funders_dict: dict) -> Graph:
                                            'name': f'{funder_id} <-> {f}',
                                            'weight': weight
                                            })
-                    
+        
+        g = g.simplify(combine_edges='first')
+
         return g
 
 def generate_citations_network(citations_dict: dict) -> Graph:
@@ -399,7 +403,9 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                                         attributes={
                                            'name': f'{work_id} -> {citation_stripped}'
                                            })
-                    
+        
+        g = g.simplify(combine_edges='first')
+
         return g
 
 def generate_author_works_network(author_works_dict: dict) -> Graph:
@@ -465,7 +471,9 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
                                         attributes={
                                            'name': f'{work_id} <-> {a}'
                                            })
-        
+    
+    g = g.simplify(combine_edges='first')
+
     return g
 
 def generate_author_affils_network(author_affils_dict: dict) -> Graph:
@@ -533,7 +541,9 @@ def generate_author_affils_network(author_affils_dict: dict) -> Graph:
                                         attributes={
                                            'name': f'{auth_id_stripped} <-> {a}'
                                            })
-        
+    
+    g = g.simplify(combine_edges='first')
+
     return g
 
 def generate_funder_works_network(funder_works_dict: dict) -> Graph:
@@ -599,6 +609,8 @@ def generate_funder_works_network(funder_works_dict: dict) -> Graph:
                                         attributes={
                                            'name': f'{work_id} <-> {f}'
                                            })
-        
+    
+    g = g.simplify(combine_edges='first')
+
     return g
 
