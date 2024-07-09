@@ -1528,7 +1528,7 @@ class Review:
         
         return graph
 
-    def author_works_network(self, 
+    def author_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
                                 add_to_networks: bool = True
@@ -1538,7 +1538,7 @@ class Review:
             self.format()
         
         if update_attrs == True:
-            self.update_entity_attrs()
+            self.update_author_attrs()
         
         author_works_dict = self.author_works_dict()
 
