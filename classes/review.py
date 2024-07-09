@@ -1653,8 +1653,19 @@ class Review:
             self.update_entity_attrs()
         
         author_works = self.author_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks).to_igraph()
+        del author_works.vs['type']
+        author_works.vs['type'] = author_works.vs['category']
+        del author_works.vs['category']
+
         funder_works = self.funder_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks).to_igraph()
+        del funder_works.vs['type']
+        funder_works.vs['type'] = funder_works.vs['category']
+        del funder_works.vs['category']
+
         author_affils = self.author_affils_network(format=False, update_attrs=False, add_to_networks=add_to_networks).to_igraph()
+        del author_affils.vs['type']
+        author_affils.vs['type'] = author_affils.vs['category']
+        del author_affils.vs['category']
 
         g = Graph.union(author_works, [funder_works, author_affils])
 
