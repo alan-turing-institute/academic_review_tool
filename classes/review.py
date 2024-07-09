@@ -1466,7 +1466,7 @@ class Review:
                                 update_attrs: bool = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
-                                ) -> Graph:
+                                ) -> Network:
 
         co_auths = self.get_coauthors(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
 
@@ -1476,8 +1476,14 @@ class Review:
 
             auth_id = v['name']
             auth_obj = self.authors.details[auth_id]
-            pubs = auth_obj.publications
-            affils = auth_obj.affiliations
+            if 'publications' in auth_obj.__dict__.keys():
+                pubs = auth_obj.publications
+            else:
+                pubs = []
+            if 'affiliations' in auth_obj.__dict__.keys():
+                affils = auth_obj.affiliations
+            else:
+                affils = []
             details = auth_obj.details
 
             for c in details.columns:
@@ -1486,19 +1492,20 @@ class Review:
             v['publications'] = pubs
             v['affiliations'] = affils
 
+        network = Network(graph = g)
 
         if add_to_networks == True:
-            network = Network(graph = g)
+            
             self.networks.__dict__['coauthors'] = network
         
-        return g
+        return network
 
     def cofunders_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
-                                ) -> Graph:
+                                ) -> Network:
 
         co_funders = self.get_cofunders(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
 
@@ -1518,18 +1525,20 @@ class Review:
                 v['publications'] = pubs
 
 
+        network = Network(graph = g)
+
         if add_to_networks == True:
-            network = Network(graph = g)
+            
             self.networks.__dict__['cofunders'] = network
         
-        return g
+        return network
 
     def citations_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
                                 add_citations_to_results=True,
                                 add_to_networks: bool = True
-                                ) -> Graph:
+                                ) -> Network:
         
         if add_citations_to_results == True:
             self.add_citations_to_results(update_formatting = format)
@@ -1556,11 +1565,13 @@ class Review:
                 for c in work_data.index:
                     v[c] = work_data[c]
 
+        network = Network(graph)
+
         if add_to_networks == True:
-            network = Network(graph)
+            
             self.networks.__dict__['citations'] = network
         
-        return graph
+        return network
 
     def author_works_network(self,
                                 format: bool = True, 
@@ -1629,6 +1640,30 @@ class Review:
 
         return network
 
+    def entities_network(self,
+                                format: bool = True, 
+                                update_attrs: bool = True,
+                                add_to_networks: bool = True
+                                ) -> Network:
+        
+        if format == True:
+            self.format()
+        
+        if update_attrs == True:
+            self.update_entity_attrs()
+        
+        author_works = self.author_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks).to_igraph()
+        funder_works = self.funder_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks).to_igraph()
+        author_affils = self.author_affils_network(format=False, update_attrs=False, add_to_networks=add_to_networks).to_igraph()
+
+        g = Graph.union(author_works, [funder_works, author_affils])
+
+        network = Network(graph=g)
+
+        if add_to_networks == True:
+            self.networks.__dict__['all_entities'] = network
+        
+        return network
 
     ## Legacy code for saving reviews, taken from Projects class in IDEA. Requires overhaul.
 
