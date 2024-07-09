@@ -384,7 +384,7 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                     
                     for i in df_index:
 
-                        citation_data = refs_obj.loc[i]
+                        citation_data = refs_obj.loc[i] # type: ignore
                         citation = citation_data['work_id']
                         citation_stripped = citation.split('#')[0].strip()
 

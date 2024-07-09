@@ -1690,9 +1690,16 @@ class Review:
         if update_attrs == True:
             self.update_entity_attrs()
         
+        citations_network = self.citations_network(format=False, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
+
+        if format == True:
+            self.format()
+        
+        if update_attrs == True:
+            self.update_entity_attrs()
+
         coauthors_network = self.coauthors_network(format=False, update_attrs=False, ignore_case=ignore_case, add_to_networks=add_to_networks)
         cofunders_network = self.cofunders_network(format=False, update_attrs=False, ignore_case=ignore_case, add_to_networks=add_to_networks)
-        citations_network = self.citations_network(format=False, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
         author_works_network = self.author_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
         funder_works_network = self.funder_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
         author_affils_network = self.author_affils_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
