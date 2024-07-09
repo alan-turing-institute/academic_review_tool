@@ -201,7 +201,7 @@ class Review:
     activity_log = ActivityLog()
     description = ''
 
-    def __init__(self, review_name = 'request_input', file_location = None, file_type = None):
+    def __init__(self, review_name = None, file_location = None, file_type = None):
         
         """
         Initialises a Review instance.
