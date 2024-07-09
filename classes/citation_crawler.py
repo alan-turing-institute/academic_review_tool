@@ -1,6 +1,6 @@
 from ..utils.basics import results_cols
 from ..importers.crossref import lookup_doi
-from ..internet.scrapers import get_final_url, scrape_url, scrape_article, can_scrape, get_domain
+from ..internet.scrapers import get_final_url, scrape_url, scrape_article, can_scrape, get_domain, scrape_google_scholar
 from ..internet.crawlers import check_crawl_permission
 
 from ..internet.crawlers import correct_seed_errors as correct_seed_url_errors
@@ -134,18 +134,26 @@ def academic_scraper(url, be_polite = False):
             except:
                 pass
     
-    if citation_crawler_site_test(url) == True:
+    if 'scholar.google.com' in url:
 
         try:
-            res_df = scrape_article(url)
+            res_df = scrape_google_scholar(url)
         except:
             res_df = pd.DataFrame(columns=results_cols)
 
     else:
-        try:
-            res_df = crawler_scrape_url(url)
-        except:
-            res_df = pd.DataFrame(columns=results_cols)
+        if citation_crawler_site_test(url) == True:
+
+            try:
+                res_df = scrape_article(url)
+            except:
+                res_df = pd.DataFrame(columns=results_cols)
+
+        else:
+            try:
+                res_df = crawler_scrape_url(url)
+            except:
+                res_df = pd.DataFrame(columns=results_cols)
     
     return res_df
 

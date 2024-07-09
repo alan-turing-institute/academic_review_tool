@@ -14,7 +14,7 @@ from .references import References, is_formatted_reference, extract_references
 from .activitylog import ActivityLog
 from .authors import Author, Authors, format_authors as orig_format_authors
 from .networks import Network, Networks
-from .citation_crawler import citation_crawler
+from .citation_crawler import citation_crawler, academic_scraper
 
 
 import copy
@@ -1037,6 +1037,18 @@ class Review:
         df = scrape_google_scholar_search(url)
         self.results.add_dataframe(df) # type: ignore
     
+    def scrape(self, url = 'request_input', add_to_results=True):
+
+        if url == 'request_input':
+            url = input('URL: ')
+        
+        df = academic_scraper(url)
+
+        if add_to_results == True:
+            self.add_dataframe(df)
+        
+        return df
+
     def search_crossref(self,
                 bibliographic: str = None,  # type: ignore
                 title: str = None, # type: ignore
