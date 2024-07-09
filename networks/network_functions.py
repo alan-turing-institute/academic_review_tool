@@ -350,10 +350,10 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                 v_index = vertex.index
                 
                 refs_obj = citations_dict[work_id]
-                if (refs_obj is None) or (type(refs_obj) == float ) or (refs_obj is np.nan) or (refs_obj is 'none'):
+                if (refs_obj is None) or (type(refs_obj) == float ) or (refs_obj is np.nan) or (type(refs_obj) == str):
                      continue
                 
-                if (refs_obj is not None) and (type(refs_obj) != float ) and (refs_obj is not np.nan) and (refs_obj is not 'none'):
+                if (refs_obj is not None) and (type(refs_obj) != float ) and (refs_obj is not np.nan) and (type(refs_obj) != str):
                     if 'update_work_ids' in refs_obj.__dir__():
                         refs_obj.update_work_ids()
 
