@@ -1427,6 +1427,24 @@ class Review:
 
         return output
 
+    def author_affiliations_dict(self) -> dict:
+
+        output = {}
+
+        auths = self.authors.all.copy(deep=True)
+
+        for i in auths.index:
+            data = auths.loc[i]
+            auth_id = data['author_id']
+            affils = data['affiliations']
+
+            if type(affils) == Affiliations:
+                affils = affils.all
+
+            output[auth_id] = affils
+
+        return output
+
     def funder_works_dict(self) -> dict:
 
         output = {}
