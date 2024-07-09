@@ -310,9 +310,6 @@ def generate_funders_network(funders_dict: dict) -> Graph:
                     
         return g
 
-
-
-
 def generate_citations_network(citations_dict: dict) -> Graph:
         
         """
@@ -387,3 +384,23 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                                            })
                     
         return g
+
+def generate_author_works_network(author_works_dict: dict) -> Graph:
+
+    """
+        Returns an undirected bipartite network representing the relationships between authors and publications.
+        
+        Parameters
+        ----------
+        author_works_dict : dict
+            a dictionary with the following structure:
+                * keys: work IDs
+                * values: Pandas DataFrames containing details on authors.
+        
+        Returns
+        -------
+        g : Graph
+            an iGraph Graph object.
+        """
+
+    

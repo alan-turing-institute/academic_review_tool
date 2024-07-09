@@ -1411,6 +1411,22 @@ class Review:
 
         return output
 
+    def author_works_dict(self) -> dict:
+
+        output = {}
+
+        for i in self.results.index:
+            data = self.results.loc[i].copy(deep=True)
+            work_id = data['work_id']
+            auths = data['authors']
+
+            if type(auths) == Authors:
+                auths = auths.all
+
+            output[work_id] = auths
+
+        return output
+
     def generate_coauthors_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
