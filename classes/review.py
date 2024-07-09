@@ -133,7 +133,10 @@ def format_citations(self, add_work_ids = False, update_from_doi = False):
             processing_count = 0
             for i in indices:
                 refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
-                refs_count = len(refs) # type: ignore
+                try:
+                    refs_count = len(refs) # type: ignore
+                except:
+                    refs_count = 0
                 processing_count = processing_count + refs_count
                 self.at[i, 'citations'] = refs
             
