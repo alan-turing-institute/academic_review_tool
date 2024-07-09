@@ -362,8 +362,11 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                     
                     if 'astype' in df.__dir__():
                             df = df.astype(str)
-                            
+
                 else:
+                    df = pd.DataFrame(columns=results_cols, dtype=object)
+
+                if type(df) == float:
                      df = pd.DataFrame(columns=results_cols, dtype=object)
 
                 # Retrieving citations work ids
