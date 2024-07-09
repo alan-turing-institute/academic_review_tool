@@ -122,19 +122,21 @@ def citation_crawler_site_test(url: str):
     
     return False
 
-def academic_scraper(url, be_polite = True):
+def academic_scraper(url, be_polite = False):
 
     # Checking if URL is bad. If True, tries to correct it.
     url = correct_seed_url_errors(url)
+    domain = get_domain(url)
         
     # If be_polite is True, checks if crawler has permission to crawl/scrape URL
     if be_polite == True:
-        try:
-            # If the crawler does not have permission, skips URL
-            if check_crawl_permission(url) == False:
-                return pd.DataFrame(columns=results_cols)
-        except:
-            pass
+        if domain != 'acm.org': # ACM blanket refuses crawler permissions
+            try:
+                # If the crawler does not have permission, skips URL
+                if check_crawl_permission(url) == False:
+                    return pd.DataFrame(columns=results_cols)
+            except:
+                pass
     
     if citation_crawler_site_test(url) == True:
 
