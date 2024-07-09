@@ -534,12 +534,13 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
                 head_find = soup.find('head')
                 title_find = head_find.find('title') # type: ignore
                 if title_find is not None:
-                    if 'title' in title_find.__dict__.keys():
+                    if 'contents' in title_find.__dict__.keys():
                         title = str(title_find.contents).replace('[','').replace(']','') # type: ignore
                     else:
                         title = None
             except:
                 title = None
+                
             if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == ''):
                 result['title'] = title
         
