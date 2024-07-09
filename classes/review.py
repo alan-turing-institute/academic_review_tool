@@ -529,7 +529,6 @@ class Review:
                     auths.add_author(auth)
                 self.authors.merge(auths)
     
-
     def update_author_attrs(self, ignore_case: bool = True):
 
         self.authors.sync()
@@ -837,6 +836,8 @@ class Review:
 
         if update_formatting == True:
             self.format()
+        
+        return self
 
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True):
         self.update_properties()
@@ -1095,6 +1096,14 @@ class Review:
         if update_formatting == True:
             self.format()
         
+        return self
+
+    def from_doi(doi = 'request_input', timeout = 60, update_formatting: bool = True): # type: ignore
+
+        review = Review()
+        review.add_doi(doi = doi, timeout = timeout, update_formatting = update_formatting)
+
+        return review
 
     def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
@@ -1104,6 +1113,8 @@ class Review:
 
         if update_formatting == True:
             self.format()
+
+        return self
     
     def update_from_dois(self, timeout: int = 60, update_formatting: bool = True):
         self.results.update_from_dois(timeout=timeout) # type: ignore
@@ -1111,11 +1122,16 @@ class Review:
         if update_formatting == True:
             self.format()
 
+        return self
+
     def sync_apis(self, timeout: int = 60):
 
         self.update_from_dois(timeout=timeout)
         self.update_from_orcid()
         self.format()
+
+        return self
+
 
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
