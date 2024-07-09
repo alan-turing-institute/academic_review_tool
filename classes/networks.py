@@ -716,7 +716,6 @@ class Network(Graph):
     def to_igraph(self) -> Graph:
 
         is_dir = self.is_directed()
-        is_bi = self.is_bipartite()
 
         g_attrs = self.attributes()
 
@@ -736,6 +735,8 @@ class Network(Graph):
         
         for a in e_attrs:
             g.es[a] = self.es[a]
+        
+        return g
 
     def export_network_to_kumu(self, file_name: str = 'request_input', folder_address = 'request_input'):
         
