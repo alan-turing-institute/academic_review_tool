@@ -508,37 +508,7 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
         
         current_url = url
 
-
-        # If parse_pdf is selected, check if URL is PDF and parse
-        
-        if parse_pdf == True:
-            
-            if url.endswith('.pdf') == True:
-                
-                # Running PDF downloader and parser
-                pdf_parsed = read_pdf_url(url = url)
-                
-                # Appending result
-                if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == '') or (result['title'] == 'Just a moment...'):
-                    result['title'] = pdf_parsed['title']
-                
-                if ('author' not in result.keys()) or (result['author'] is None) or (result['author'] == '') or (result['author'] == []) or (result['author'] == '[]'):
-                    result['author'] = pdf_parsed['authors']
-
-                result['raw_text'] = pdf_parsed['raw']
-                result['text'] = pdf_parsed['full_text']
-
-                if ('date' not in result.keys()) or (result['date'] is None) or (result['date'] == ''):
-                    result['date'] = pdf_parsed['date']
-                
-                result['links'] = pdf_parsed['links']
-                result['format'] = 'PDF'
-                result['type'] = 'document'
-
-        # otherwise, trying to parse the HTML result
-        else:
-        
-            if ('html' in result.keys()) and (result['html'] is not None):
+        if ('html' in result.keys()) and (result['html'] is not None):
                 soup = BeautifulSoup(result['html'], "html.parser")
                 try:
                     href_select = soup.select("a")
@@ -573,7 +543,31 @@ def scrape_url(url = 'request_input', parse_pdf = True, output: str = 'dict'):
                 if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == ''):
                     result['title'] = title
         
+        # If parse_pdf is selected, check if URL is PDF and parse
         
+        if parse_pdf == True:
+            
+            if url.endswith('.pdf') == True:
+                
+                # Running PDF downloader and parser
+                pdf_parsed = read_pdf_url(url = url)
+                
+                # Appending result
+                if ('title' not in result.keys()) or (result['title'] is None) or (result['title'] == '') or (result['title'] == 'Just a moment...'):
+                    result['title'] = pdf_parsed['title']
+                
+                if ('author' not in result.keys()) or (result['author'] is None) or (result['author'] == '') or (result['author'] == []) or (result['author'] == '[]'):
+                    result['author'] = pdf_parsed['authors']
+
+                result['raw_text'] = pdf_parsed['raw']
+                result['text'] = pdf_parsed['full_text']
+
+                if ('date' not in result.keys()) or (result['date'] is None) or (result['date'] == ''):
+                    result['date'] = pdf_parsed['date']
+                
+                result['links'] = pdf_parsed['links']
+                result['format'] = 'PDF'
+                result['type'] = 'document'
         
         # Scraping URL metadata using trafilatura
         metadata = scrape_url_metadata(url = url)
