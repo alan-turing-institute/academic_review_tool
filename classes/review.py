@@ -1690,10 +1690,7 @@ class Review:
         if update_attrs == True:
             self.update_entity_attrs()
         
-        citations_network = self.citations_network(format=False, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
-
-        if format == True:
-            self.format()
+        citations_network = self.citations_network(format=format, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
         
         if update_attrs == True:
             self.update_entity_attrs()
