@@ -713,6 +713,30 @@ class Network(Graph):
 
     # Methods for exporting network to external files
     
+    def to_igraph(self) -> Graph:
+
+        is_dir = self.is_directed()
+        is_bi = self.is_bipartite()
+
+        g_attrs = self.attributes()
+
+        vs_len = len(self.vs)
+        v_attrs = self.vs.attributes()
+
+        edgelist = self.get_edgelist()
+        e_attrs = self.es.attributes()
+
+        g = Graph(n=vs_len, edges=edgelist, directed=is_dir)
+
+        for a in g_attrs:
+            g[a] = self[a]
+
+        for a in v_attrs:
+            g.vs[a] = self.vs[a]
+        
+        for a in e_attrs:
+            g.es[a] = self.es[a]
+
     def export_network_to_kumu(self, file_name: str = 'request_input', folder_address = 'request_input'):
         
         """
