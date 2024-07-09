@@ -57,7 +57,7 @@ def crawler_scrape_url(url) -> pd.DataFrame:
             result.loc[0, 'publisher'] = scrape_res['sitename'] # type: ignore
         else:
             if 'url' in keys:
-                domain = get_domain(scrape_res['keys']) # type: ignore
+                domain = get_domain(scrape_res['url']) # type: ignore
                 result.loc[0, 'publisher'] = domain
             else:
                 result.loc[0, 'publisher'] = None
