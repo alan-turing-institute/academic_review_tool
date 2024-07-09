@@ -1115,7 +1115,7 @@ def scrape_springer(url):
             citations_data.append(i.select('a')[0].attrs['href'])
 
         except:
-            None
+            pass
 
     try:
         sections = soup.find_all('section')
