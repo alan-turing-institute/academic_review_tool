@@ -122,9 +122,7 @@ def citation_crawler_site_test(url: str):
     
     return False
 
-def citation_crawler_scraper(entry: pd.Series, be_polite = True):
-    
-    url = entry['link']
+def academic_scraper(url, be_polite = True):
 
     # Checking if URL is bad. If True, tries to correct it.
     url = correct_seed_url_errors(url)
@@ -134,7 +132,7 @@ def citation_crawler_scraper(entry: pd.Series, be_polite = True):
         try:
             # If the crawler does not have permission, skips URL
             if check_crawl_permission(url) == False:
-                return entry
+                return pd.DataFrame(columns=results_cols)
         except:
             pass
     
@@ -142,19 +140,27 @@ def citation_crawler_scraper(entry: pd.Series, be_polite = True):
 
         try:
             res_df = scrape_article(url)
-            if len(res_df) > 0: 
-                res_series = res_df.loc[0]
-                for i in res_series.index:
-                    entry[i] = res_series[i]
-        
         except:
-            pass
+            res_df = pd.DataFrame(columns=results_cols)
 
     else:
         try:
-            res = crawler_scrape_url(url)
+            res_df = crawler_scrape_url(url)
         except:
-            pass
+            res_df = pd.DataFrame(columns=results_cols)
+    
+    return res_df
+
+def citation_crawler_scraper(entry: pd.Series, be_polite = True):
+    
+    url = entry['link']
+
+    res_df = academic_scraper(url=url, be_polite=be_polite)
+    
+    if len(res_df) > 0: 
+                res_series = res_df.loc[0]
+                for i in res_series.index:
+                    entry[i] = res_series[i]
     
     return entry
         
