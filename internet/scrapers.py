@@ -309,7 +309,9 @@ def scrape_url_xml(url = 'request_input') -> str:
         
         # Extracting data and assigning to result variable
         result = extract(downloaded, output_format="xml", include_tables=True, include_comments=True, include_images=True, include_links=True)
-    
+    else:
+        result = ''
+        
     return result
 
 def scrape_url_json(url = 'request_input') -> str:
