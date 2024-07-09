@@ -419,7 +419,7 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
 
         v_index = vertex.index
 
-        data = author_works_dict['work_id']
+        data = author_works_dict[work_id]
 
         if type(data) == dict:
              data = pd.DataFrame.from_dict(data, orient='index').T
@@ -431,7 +431,7 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
         auth_ids = [i.split('#')[0].strip() for i in auth_ids if type(i) == str]
 
         for a in auth_ids:
-            
+
             if a not in g.vs['name']:
                 g.add_vertex(name=a, type=True)
                 
@@ -446,4 +446,4 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
                                            'name': f'{work_id} <-> {a}'
                                            })
         
-        return g
+    return g
