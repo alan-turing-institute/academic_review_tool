@@ -180,7 +180,6 @@ def colinks_in(links_network: Graph) -> pd.DataFrame:
     
     return df
 
-
 def generate_coauthors_network(coauthors_dict: dict) -> Graph:
         
         """
@@ -240,7 +239,6 @@ def generate_coauthors_network(coauthors_dict: dict) -> Graph:
                                            })
                     
         return g
-
 
 def generate_funders_network(funders_dict: dict) -> Graph:
         
@@ -448,7 +446,6 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
         
     return g
 
-
 def generate_author_affils_network(author_affils_dict: dict) -> Graph:
 
     """
@@ -513,7 +510,6 @@ def generate_author_affils_network(author_affils_dict: dict) -> Graph:
                                            })
         
     return g
-
 
 def generate_funder_works_network(funder_works_dict: dict) -> Graph:
 

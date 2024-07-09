@@ -3,7 +3,7 @@ from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
-from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network
+from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network, generate_author_affils_network
 
 
 from .properties import Properties
@@ -1605,6 +1605,27 @@ class Review:
 
         if add_to_networks == True:
             self.networks.__dict__['funder_works'] = network
+
+        return network
+
+    def author_affils_network(self,
+                                format: bool = True, 
+                                update_attrs: bool = True,
+                                add_to_networks: bool = True
+                                ) -> Network:
+        
+        if format == True:
+            self.format()
+        
+        if update_attrs == True:
+            self.update_affiliation_attrs(update_authors=True)
+        
+        d = self.author_affiliations_dict()
+        g = generate_author_affils_network(d)
+        network = Network(graph=g)
+
+        if add_to_networks == True:
+            self.networks.__dict__['author_affiliations'] = network
 
         return network
 
