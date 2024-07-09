@@ -401,6 +401,49 @@ def generate_author_works_network(author_works_dict: dict) -> Graph:
         -------
         g : Graph
             an iGraph Graph object.
-        """
+    """
 
-    
+    work_ids = author_works_dict.keys()
+    work_ids = [i for i in work_ids if (i != None) and (len(i) > 0)]
+    works_len = len(work_ids)
+    init_types = [False]*works_len
+
+    g = Graph.Bipartite(types=init_types, edges=[], directed=False)
+    g.vs['name'] = work_ids
+    g.vs['category'] = ['publication']*works_len
+
+    for work_id in work_ids:
+
+        # Getting vertex object
+        vertex = g.vs.find(name = work_id)
+
+        v_index = vertex.index
+
+        data = author_works_dict['work_id']
+
+        if type(data) == dict:
+             data = pd.DataFrame.from_dict(data, orient='index').T
+        
+        if 'author_id' not in data.columns:
+            continue
+            
+        auth_ids = data['author_id'].to_list()
+        auth_ids = [i.split('#')[0].strip() for i in auth_ids if type(i) == str]
+
+        for a in auth_ids:
+            
+            if a not in g.vs['name']:
+                g.add_vertex(name=a, type=True)
+                
+            author_vertex = g.vs.find(name = a)
+            author_index = author_vertex.index
+            author_vertex['category'] = 'author'
+
+            # Adding edges between linked vertices
+            Graph.add_edges(g, 
+                                        [(v_index, author_index)], 
+                                        attributes={
+                                           'name': f'{work_id} <-> {a}'
+                                           })
+        
+        return g
