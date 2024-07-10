@@ -1305,8 +1305,10 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                     row = masked.loc[index]
 
                     for c in first_row.index:
+                        data = first_row[c]
+                        dtype = type(data)
 
-                        if (first_row[c] is None) or (first_row[c] is np.nan) or (first_row[c] == '') or  (first_row[c] == 'None') or  (first_row[c] == 'none'):
+                        if (data is None) or (data is np.nan) or ((dtype == str) and (data == '')) or  ((dtype == str) and (data == 'None')) or  ((dtype == str) and (data == 'none')):
                             first_row[c] = row[c]
 
                 df.loc[first_index] = first_row
