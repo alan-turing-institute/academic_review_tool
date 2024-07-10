@@ -261,15 +261,20 @@ class Results(pd.DataFrame):
         if drop_duplicates == True:
             self.remove_duplicates()
 
-    def add_doi(self, doi: str = 'request_input', timeout: int = 60):
+    def add_doi(self, doi: str = 'request_input', drop_duplicates = True, timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
         self.add_dataframe(dataframe=df)
+
+        if drop_duplicates == True:
+            self.remove_duplicates()
+
+
 
     def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
         self.add_dataframe(dataframe=df)
 
-    def correct_dois(self):
+    def correct_dois(self, drop_duplicates = True):
 
         no_doi = self[(self['doi'] == None) | (self['doi'] == np.nan) | (self['doi'] == 'None')]
         doi_in_link = no_doi[no_doi['link'].str.contains('doi.org')]
@@ -278,6 +283,9 @@ class Results(pd.DataFrame):
             link = str(doi_in_link.loc[i, 'link'])
             doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip()
             doi_in_link.loc[i, 'doi'] = doi
+        
+        if drop_duplicates == True:
+            self.remove_duplicates()
 
     def generate_work_ids(self):
 
@@ -285,16 +293,19 @@ class Results(pd.DataFrame):
             work_id = generate_work_id(self.loc[i])
             self.loc[i, 'work_id'] = work_id
 
-    def update_work_ids(self):
+    def update_work_ids(self, drop_duplicates = False):
 
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
             if self.loc[i, 'work_id'] != work_id:
                 # work_id = self.get_unique_id(work_id, i)
                 self.loc[i, 'work_id'] = work_id
+        
+        if drop_duplicates == True:
+            self.remove_duplicates()
 
 
-    def update_from_doi(self, index, timeout: int = 60):
+    def update_from_doi(self, index, drop_duplicates = True, timeout: int = 60):
         
         try:
             old_series = self.loc[index]
@@ -315,12 +326,19 @@ class Results(pd.DataFrame):
         except:
             pass
 
-    def update_from_dois(self, timeout: int = 60):
+        if drop_duplicates == True:
+            self.remove_duplicates()
+        
 
-        self.correct_dois()
+    def update_from_dois(self, drop_duplicates = True, timeout: int = 60):
+
+        self.correct_dois(drop_duplicates=False)
 
         for i in self.index:
-            self.update_from_doi(index = i, timeout=timeout)
+            self.update_from_doi(index = i, drop_duplicates = False, timeout=timeout)
+        
+        if drop_duplicates == True:
+            self.remove_duplicates()
 
     def __add__(self, results_obj):
 
@@ -347,7 +365,7 @@ class Results(pd.DataFrame):
     def to_dataframe(self):
         return self.copy(deep=True)
     
-    def from_dataframe(dataframe): # type: ignore
+    def from_dataframe(dataframe, drop_duplicates = True): # type: ignore
         
         dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
         results_table = Results(index = dataframe.index)
@@ -356,6 +374,9 @@ class Results(pd.DataFrame):
 
         for c in dataframe.columns:
             results_table[c] = dataframe[c]
+
+        if drop_duplicates == True:
+            results_table.remove_duplicates()
 
         return results_table
 
@@ -846,7 +867,6 @@ class Results(pd.DataFrame):
         masked = self[self['authors'].apply(affil_masker)]
 
         return masked
-
 
     def mask_entities(self, column, query: str = 'request_input', ignore_case: bool = True):
 
