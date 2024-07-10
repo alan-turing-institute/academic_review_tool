@@ -143,6 +143,21 @@ class Results(pd.DataFrame):
             if type(dataframe) == pd.DataFrame:
                 self = Results.from_dataframe(dataframe = df)
 
+    def drop_na_rows(self):
+
+        ignore_cols = ['work_id', 'authors', 'funder', 'citations']
+
+        df = self.dropna(axis=0, how='all')
+        drop_cols = [c for c in df.columns if c not in ignore_cols]
+        df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
+
+        results = Results.from_dataframe(dataframe=df, drop_duplicates=False) # type: ignore
+
+        self.__dict__.update(results.__dict__)
+
+        return self
+
+
 
 
     def remove_duplicates(self, update_from_api = False):
