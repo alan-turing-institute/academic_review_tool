@@ -1303,4 +1303,4 @@ def deduplicate_entries(dataframe, update_from_apis = True):
         if 'update_from_dois' in final_df.__dir__():
             final_df.update_from_dois()
     
-    return df
+    return final_df
