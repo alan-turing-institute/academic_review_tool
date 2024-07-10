@@ -104,6 +104,8 @@ class Results(pd.DataFrame):
             if type(dataframe) == pd.DataFrame:
                 self = Results.from_dataframe(dataframe = df)
 
+
+
     def remove_duplicates(self, update_from_api = False):
         
         self['doi'] = self['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
@@ -115,12 +117,12 @@ class Results(pd.DataFrame):
             results.update_from_dois()
         
         results.update_work_ids()
-        df2 = self.drop_duplicates(subset='work_id').reset_index().drop('index',axis=1)
+        df2 = results.drop_duplicates(subset='work_id').reset_index().drop('index',axis=1)
 
-        results2 = Results.from_dataframe(dataframe = df2) # type: ignore
-        self = results2
-
+        results2 = Results.from_dataframe(dataframe=df)
         
+        self.__dict__.update(results2.__dict__)
+
         return self
 
         
@@ -311,6 +313,13 @@ class Results(pd.DataFrame):
             results_table[c] = dataframe[c]
 
         return results_table
+
+    def clear_rows(self):
+
+        results = Results()
+        self.__dict__.update(results.__dict__)
+
+        return self
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
 
