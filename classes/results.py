@@ -32,7 +32,7 @@ def generate_work_id(work_data: pd.Series):
                     work_data['authors'] = work_data['authors'].all['full_name'].sort_values().to_list()
             
 
-        work_data = work_data.astype(str)
+        work_data = work_data.astype(str).str.lower()
 
         if 'authors' in work_data.index:
             authors = work_data['authors']
@@ -77,15 +77,25 @@ def generate_work_id(work_data: pd.Series):
         if (date != None) and (date != '') and (date != 'None'):
             work_id = work_id + '-' + str(date)
 
-        uid = work_data['doi']
-        if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = work_data['isbn']
+        uid = ''
+
+        if 'doi' in work_data.index:
+            uid = work_data['doi']
+
             if (uid == None) or (uid == 'None') or (uid == ''):
-                uid = work_data['issn']
+                if 'isbn' in work_data.index:
+                    uid = work_data['isbn']
+
                 if (uid == None) or (uid == 'None') or (uid == ''):
-                    uid = work_data['link']
+                    if 'issn' in work_data.index:
+                        uid = work_data['issn']
+
                     if (uid == None) or (uid == 'None') or (uid == ''):
-                        uid = ''
+                        if 'link' in work_data.index:
+                            uid = work_data['link']
+
+                        if (uid == None) or (uid == 'None') or (uid == ''):
+                            uid = ''
         
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:30]
 
