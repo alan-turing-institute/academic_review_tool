@@ -1283,14 +1283,15 @@ def merge_duplicate_ids(dataframe, merge_on: str):
     df = dataframe.copy(deep=True)
     
 
-    if merge_on in dataframe.columns:
+    if merge_on in df.columns:
 
         dropna_indexes = df[merge_on].dropna().index
-        df = df.loc[dropna_indexes]
-
-        ids = set(df[merge_on].to_list())
+        df_dropna = df.copy(deep=True).loc[dropna_indexes]
+        
+        ids = set(df_dropna[merge_on].to_list())
 
         for i in ids:
+
             masked = df[df[merge_on]==i]
             masked_indexes = masked.index.to_list()
             masked = masked.reset_index().drop('index', axis=1)
@@ -1299,12 +1300,14 @@ def merge_duplicate_ids(dataframe, merge_on: str):
             if len_masked > 0:
 
                 first_index = masked_indexes[0]
+                duplicate_indexes = masked_indexes[1:]
                 first_row = masked.loc[0]
 
                 for index in range(1, len_masked):
                     row = masked.loc[index]
 
                     for c in first_row.index:
+
                         data = first_row[c]
                         dtype = type(data)
 
@@ -1312,7 +1315,6 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                             first_row[c] = row[c]
 
                 df.loc[first_index] = first_row
-                duplicate_indexes = masked_indexes[1:]
                 df = df.drop(labels=duplicate_indexes)
         
         dataframe = df
@@ -1322,9 +1324,13 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 def merge_all_duplicate_ids(dataframe):
 
     id_names = ['doi', 'isbn', 'issn', 'uri', 'crossref_id', 'crossref', 'link', 'website']
+    df = dataframe.copy(deep=True)
+
+
 
     for i in id_names:
-        dataframe = merge_duplicate_ids(dataframe, merge_on = i)
+        if i in dataframe.columns:
+            dataframe = merge_duplicate_ids(dataframe, merge_on = i)
     
     return dataframe
 
