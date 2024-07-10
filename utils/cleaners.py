@@ -1352,12 +1352,13 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                                         concat_df = deduplicate(concat_df)
                                         first_row[c].all = concat_df
                                     continue
+  
+                    try:
+                        first_row = pd.Series(first_row)
+                        df.loc[first_index] = first_row
+                    except:
+                        pass
 
-
-                                    
-                                    
-
-                    df.at[first_index] = first_row
                     df = df.drop(labels=duplicate_indexes)
         
         dataframe = df
