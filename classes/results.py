@@ -112,6 +112,8 @@ class Results(pd.DataFrame):
         if update_from_api == True:
             self.update_from_dois()
         
+        self.update_work_ids()
+        
         return self
 
         
