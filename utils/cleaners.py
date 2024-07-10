@@ -1278,9 +1278,48 @@ def correct_series_of_lists(series: pd.Series) -> pd.Series:
     
     return series
 
+def merge_duplicate_ids(dataframe, merge_on: str):
+
+    df = dataframe.copy(deep=True)
+    
+
+    if merge_on in dataframe.columns:
+
+        dropna_indexes = df[merge_on].dropna().index
+        df = df.loc[dropna_indexes]
+
+        ids = set(df[merge_on].to_list())
+
+        for i in ids:
+            masked = df[df[merge_on]==i]
+            masked_indexes = masked.index.to_list()
+            masked = masked.reset_index().drop('index', axis=1)
+            len_masked = len(masked)
+
+            if len_masked > 0:
+
+                first_index = masked_indexes[0]
+                first_row = masked.loc[0]
+
+                for index in range(1, len_masked):
+                    row = masked.loc[index]
+
+                    for c in first_row.index:
+
+                        if (first_row[c] is None) or (first_row[c] is np.nan) or (first_row[c] is '') or  (first_row[c] is 'None') or  (first_row[c] is 'none'):
+                            first_row[c] = row[c]
+
+                df.loc[first_index] = first_row
+                duplicate_indexes = masked_indexes[1:]
+                df = df.drop(labels=duplicate_indexes)
+        
+        dataframe = df
+        
+    return df
+
 def deduplicate_entries(dataframe, update_from_apis = True):
 
-    id_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id', 'link']
+    ignore_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id', 'alt_names', 'given_name', 'affiliations', 'publications', 'address', 'work_count', 'tokens', 'other_links', 'website', 'link', 'other_links']
 
     df = dataframe.copy(deep=True)
     
@@ -1291,8 +1330,8 @@ def deduplicate_entries(dataframe, update_from_apis = True):
     df_dropna = df.dropna(axis=1).astype(str)
 
     # Removing duplicates
-    cols_no_id = [c for c in df_dropna.columns if c not in id_cols]
-    df_dropna = df_dropna.drop_duplicates(subset=cols_no_id)
+    col_subset = [c for c in df_dropna.columns if c not in ignore_cols]
+    df_dropna = df_dropna.drop_duplicates(subset=col_subset)
 
     df_dropna_index = df_dropna.index
 
@@ -1305,5 +1344,8 @@ def deduplicate_entries(dataframe, update_from_apis = True):
 
         if 'update_from_dois' in final_df.__dir__():
             final_df.update_from_dois()
-    
+
+    final_df = deduplicate_entries(final_df, update_from_apis=False)
+    final_df = final_df.reset_index().drop('index', axis=1)
+
     return final_df
