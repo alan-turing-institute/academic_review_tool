@@ -97,7 +97,7 @@ def generate_work_id(work_data: pd.Series):
                         if (uid == None) or (uid == 'None') or (uid == ''):
                             uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:30]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:20]
 
         work_id = work_id + '-' + uid_shortened
         work_id = work_id.replace('W:-', 'W:').replace("'s", '').replace('\r', '').replace('\n', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('.', '').replace('’','').replace('--', '-').replace('W:-', 'W:').strip('-')
