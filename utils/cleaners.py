@@ -1386,6 +1386,7 @@ def deduplicate(dataframe):
     else:
         first_dedpublication = df_dropna
     first_dedpublication_index = first_dedpublication.index
+    
     df2 = dataframe.loc[first_dedpublication_index]
 
     # Checking for duplicate UIDs; merging rows that share UIDs

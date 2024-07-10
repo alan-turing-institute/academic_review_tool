@@ -1,5 +1,5 @@
 from ..utils.basics import results_cols
-from ..utils.cleaners import strip_list_str
+from ..utils.cleaners import strip_list_str, deduplicate
 from ..importers.pdf import read_pdf_to_table
 from ..importers.jstor import import_jstor_metadata, import_jstor_full
 from ..importers.crossref import lookup_doi, lookup_dois
@@ -103,6 +103,18 @@ class Results(pd.DataFrame):
             df = dataframe
             if type(dataframe) == pd.DataFrame:
                 self = Results.from_dataframe(dataframe = df)
+
+    def remove_duplicates(self, update_from_api = False):
+        
+        df = deduplicate(self)
+        self = Results.from_dataframe(dataframe = df)
+
+        if update_from_api == True:
+            self.update_from_dois()
+        
+        return self
+
+        
 
     def get(self, work_id: str):
 
