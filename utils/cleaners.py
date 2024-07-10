@@ -1285,7 +1285,7 @@ def deduplicate_entries(dataframe, update_from_apis = True):
     df = dataframe.copy(deep=True)
     
     if 'doi' in df.columns:
-        df['doi'] = df['doi'].str.replace('https://').str.replace('http://').str.replace('dx.').str.replace('doi.org/').str.replace('doi/')
+        df['doi'] = df['doi'].str.replace('https://', '').str.replace('http://', '').str.replace('dx.', '').str.replace('doi.org/', '').str.replace('doi/', '')
 
     # Creating dataframe without empty columns; converting to string to avoid errors
     df_dropna = df.dropna(axis=1).astype(str)
