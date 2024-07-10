@@ -192,7 +192,7 @@ class Results(pd.DataFrame):
 
         return self
     
-    def add_row(self, data):
+    def add_row(self, data, drop_duplicates=True):
 
         if type(data) != pd.Series:
             raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
@@ -206,11 +206,14 @@ class Results(pd.DataFrame):
         index = len(self)
 
         work_id = generate_work_id(data)
-        work_id = self.get_unique_id(work_id, index)
+        # work_id = self.get_unique_id(work_id, index)
         data['work_id'] = work_id
 
         
         self.loc[index] = data
+
+        if drop_duplicates == True:
+            self.remove_duplicates()
         
     def get_unique_id(self, work_id, index):
 
@@ -220,7 +223,7 @@ class Results(pd.DataFrame):
                 if work_id in self['work_id'].to_list():
                 
                     df = self.copy(deep=True).astype(str)
-                    df['work_id'] = df['work_id'].astype(str)
+                    df['work_id'] = df['work_id'].dropna()
                     masked = df[df['work_id'].str.contains(work_id)]
                     masked_indexes = masked.index.to_list()
                     if index not in masked_indexes:
@@ -230,7 +233,7 @@ class Results(pd.DataFrame):
                 pass
         return work_id
 
-    def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True):
+    def add_dataframe(self, dataframe, drop_duplicates = True, update_work_ids = True, format_authors = True):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
@@ -250,10 +253,13 @@ class Results(pd.DataFrame):
 
                 if update_work_ids == True:
                     work_id = generate_work_id(dataframe.loc[i])
-                    work_id = self.get_unique_id(work_id, i)
+                    # work_id = self.get_unique_id(work_id, i)
                     self.loc[index, 'work_id'] = work_id
 
                 index += 1
+        
+        if drop_duplicates == True:
+            self.remove_duplicates()
 
     def add_doi(self, doi: str = 'request_input', timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
@@ -284,7 +290,7 @@ class Results(pd.DataFrame):
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
             if self.loc[i, 'work_id'] != work_id:
-                work_id = self.get_unique_id(work_id, i)
+                # work_id = self.get_unique_id(work_id, i)
                 self.loc[i, 'work_id'] = work_id
 
 
