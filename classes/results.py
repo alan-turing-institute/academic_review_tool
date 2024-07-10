@@ -158,7 +158,7 @@ class Results(pd.DataFrame):
         results.update_work_ids()
         df2 = results.drop_duplicates(subset='work_id').reset_index().drop('index',axis=1)
 
-        results2 = Results.from_dataframe(dataframe=df)
+        results2 = Results.from_dataframe(dataframe=df, drop_duplicates=False)
         
         self.__dict__.update(results2.__dict__)
 
