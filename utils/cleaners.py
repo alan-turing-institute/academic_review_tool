@@ -1381,7 +1381,10 @@ def deduplicate(dataframe):
 
     # Removing duplicates
     col_subset = [c for c in df_dropna.columns if c not in ignore_cols]
-    first_dedpublication = df_dropna.drop_duplicates(subset=col_subset)
+    if len(col_subset) > 0:
+        first_dedpublication = df_dropna.drop_duplicates(subset=col_subset)
+    else:
+        first_dedpublication = df_dropna
     first_dedpublication_index = first_dedpublication.index
     df2 = dataframe.loc[first_dedpublication_index]
 
