@@ -9,12 +9,12 @@ import copy
 from datetime import datetime, date, timedelta
 import numpy as np
 import pandas as pd
-from selectolax.parser import HTMLParser
+from selectolax.parser import HTMLParser # type: ignore
 import requests
 # import requests_html <-- raising an error
 # from requests_html import HTML
 
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize # type: ignore
 
 def join_list_by_colon(item):
     
@@ -38,7 +38,6 @@ def split_str_by_colon(item):
     
     else:
         return item
-
 
 def join_list_by_semicolon(item: list) -> str:
     
@@ -177,7 +176,6 @@ def remove_stopwords(
         
     return result
         
-
 def html_words_cleaner(words_list: List[str], to_remove: List[str] = 'default', ignore_case: bool = True, retain_order: bool = True) -> list:
     
     """
@@ -202,7 +200,6 @@ def html_words_cleaner(words_list: List[str], to_remove: List[str] = 'default', 
 
     return output_list
 
-
 def html_extract_all_words(html: str = 'request_input', to_remove: List[str] = 'default', ignore_case: bool = True, retain_order: bool = True) -> list:
     
     """
@@ -220,7 +217,6 @@ def html_extract_all_words(html: str = 'request_input', to_remove: List[str] = '
     html_words = html_words_cleaner(words_list = html_tokenized, to_remove = to_remove, ignore_case = ignore_case, retain_order = retain_order)
     
     return html_words
-
 
 def text_splitter(data: str, parse_by: str = '.', replace: List[str] = ['\n', '\\n', '\\\\']) -> list:
     
@@ -248,7 +244,6 @@ def text_splitter(data: str, parse_by: str = '.', replace: List[str] = ['\n', '\
     else:
         return
     
-
 def html_get_tags(html: str) -> list:
     
     """
@@ -293,7 +288,6 @@ def get_text_selectolax(html:str) -> str:
     text = tree.body.text(separator='\n')
     
     return text
-
 
 def html_text_cleaner(text: str) -> str:
     
@@ -373,9 +367,6 @@ def get_html_clean_words(html: str) -> list:
     
     return words_list
 
-
-
-
 def list_remove_nones(list_item: list) -> list:
     
     """
@@ -383,8 +374,6 @@ def list_remove_nones(list_item: list) -> list:
     """
     
     return [i for i in list_item if i != None]
-
-
 
 def none_list_to_empty_list(list_item: list) -> list:
     
@@ -523,7 +512,6 @@ def empty_to_none(item):
     except:
         return item
     
-
 def parse_data(data, data_type: str, ignore_case: bool = True, stopwords: str = 'all', language: str = 'english', retain_word_order: bool = False) -> dict:
     
     """
@@ -623,8 +611,6 @@ def parse_data(data, data_type: str, ignore_case: bool = True, stopwords: str = 
     
     return output
 
-        
-
 def parse_data_to_set(data, data_type: str, ignore_case: bool = True) -> set:
     
     """
@@ -639,8 +625,6 @@ def parse_data_to_set(data, data_type: str, ignore_case: bool = True) -> set:
         parsed_data[key] = set(parsed_data[key])
     
     return parsed_data
-
-    
 
 def is_int(string: str) -> bool:
     
@@ -1070,8 +1054,7 @@ def str_to_time(string: str, print_format: bool = False):
     
     else:
         raise TypeError('Input is not a valid time')
-
-        
+      
 def is_datetime(string: str, print_format: bool = False) -> tuple:
     
     """
@@ -1237,7 +1220,6 @@ def str_to_datetime(string: str, print_format:bool = False) -> datetime:
                 
                 else:
                     raise TypeError('Input is not a valid date-time')
-    
 
 def list_to_datetimes(item: list) -> list:
     
@@ -1295,3 +1277,22 @@ def correct_series_of_lists(series: pd.Series) -> pd.Series:
         series.at[i] = item
     
     return series
+
+def deduplicate(dataframe):
+
+    id_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id']
+
+    df = dataframe.copy(deep=True)
+    
+    # Creating dataframe without empty columns; converting to string to avoid errors
+    df_dropna = df.dropna(axis=1).astype(str)
+
+    # Removing duplicates
+    cols_no_id = [c for c in df_dropna.columns if c not in id_cols]
+    df_dropna = df_dropna.drop_duplicates(subset=cols_no_id)
+
+    df_dropna_index = df_dropna.index
+
+    df = df.loc[df_dropna_index]
+    
+    return df
