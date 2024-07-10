@@ -26,9 +26,11 @@ def generate_work_id(work_data: pd.Series):
             authors_str = str(authors).lower().strip().replace('[','').replace(']','').replace("'", "").replace('"', '').replace(' ','-')
             authors_list = authors_str.split(',')
             authors_list = [i.strip() for i in authors_list]
+            
             if len(authors_list) > 0:
-                first_author = authors_list[0]
-                first_author = first_author.split(' ')[-1]
+                authors_sorted = (pd.Series(authors_list).sort_values())
+                first_author = authors_sorted[0]
+                first_author = first_author.split(' ')[-1].split(' ')[-1]
             else:
                 first_author = ''
             
