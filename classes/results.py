@@ -92,12 +92,12 @@ def generate_work_id(work_data: pd.Series):
 
                     if (uid == None) or (uid == 'None') or (uid == ''):
                         if 'link' in work_data.index:
-                            uid = work_data['link']
+                            uid = work_data['link'][:15] # keeping URLs short as these can produce very long IDs
 
                         if (uid == None) or (uid == 'None') or (uid == ''):
                             uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:20]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('doi.org.','').replace('scholar.google.com/','')[:23] # DOIs are 23 characters long
 
         work_id = work_id + '-' + uid_shortened
         work_id = work_id.replace('W:-', 'W:').replace("'s", '').replace('\r', '').replace('\n', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('.', '').replace('’','').replace('--', '-').replace('W:-', 'W:').strip('-')
