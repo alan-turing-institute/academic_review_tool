@@ -1357,7 +1357,7 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                                     
                                     
 
-                    df.loc[first_index] = first_row
+                    df.at[first_index] = first_row
                     df = df.drop(labels=duplicate_indexes)
         
         dataframe = df
