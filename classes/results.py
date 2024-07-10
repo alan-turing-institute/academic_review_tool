@@ -109,13 +109,17 @@ class Results(pd.DataFrame):
         self['doi'] = self['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
 
         df = deduplicate(self)
-        self = Results.from_dataframe(dataframe = df)
+        results = Results.from_dataframe(dataframe = df)
 
         if update_from_api == True:
-            self.update_from_dois()
+            results.update_from_dois()
         
-        self.update_work_ids()
-        self = self.drop_duplicates(subset='work_id').reset_index().drop('index',axis=1)
+        results.update_work_ids()
+        df2 = self.drop_duplicates(subset='work_id').reset_index().drop('index',axis=1)
+
+        results2 = Results.from_dataframe(dataframe = df2) # type: ignore
+        self = results2
+
         
         return self
 
