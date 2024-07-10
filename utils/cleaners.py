@@ -1351,8 +1351,8 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                                     
                                         concat_df = pd.concat([data.all, data2.all])
                                         concat_df = deduplicate(concat_df)
-                                        
                                         first_row[c].all = concat_df
+                                    continue
 
 
                                     
