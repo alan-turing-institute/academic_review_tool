@@ -143,7 +143,7 @@ class Results(pd.DataFrame):
             if type(dataframe) == pd.DataFrame:
                 self = Results.from_dataframe(dataframe = df)
 
-    def drop_na_rows(self):
+    def drop_empty_rows(self):
 
         ignore_cols = ['work_id', 'authors', 'funder', 'citations']
 
@@ -160,8 +160,11 @@ class Results(pd.DataFrame):
 
 
 
-    def remove_duplicates(self, update_from_api = False):
-        
+    def remove_duplicates(self, drop_empty_rows = True, update_from_api = False):
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
         self['doi'] = self['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
 
         df = deduplicate(self)
@@ -228,7 +231,7 @@ class Results(pd.DataFrame):
         self.loc[index] = data
 
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=False)
         
     def get_unique_id(self, work_id, index):
 
@@ -248,10 +251,13 @@ class Results(pd.DataFrame):
                 pass
         return work_id
 
-    def add_dataframe(self, dataframe, drop_duplicates = True, update_work_ids = True, format_authors = True):
+    def add_dataframe(self, dataframe, drop_empty_rows = True, drop_duplicates = True, update_work_ids = True, format_authors = True):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
         dataframe = dataframe.reset_index().drop('index', axis=1)
         dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
@@ -274,20 +280,23 @@ class Results(pd.DataFrame):
                 index += 1
         
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-    def add_doi(self, doi: str = 'request_input', drop_duplicates = True, timeout: int = 60):
+    def add_doi(self, doi: str = 'request_input', drop_empty_rows = True, drop_duplicates = True, timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
         self.add_dataframe(dataframe=df)
 
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=False)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
 
 
-    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+    def add_dois(self, dois_list: list = [], drop_empty_rows = True, rate_limit: float = 0.1, timeout = 60):
         df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
-        self.add_dataframe(dataframe=df)
+        self.add_dataframe(dataframe=df, drop_empty_rows = True)
 
     def correct_dois(self, drop_duplicates = True):
 
@@ -300,7 +309,7 @@ class Results(pd.DataFrame):
             doi_in_link.loc[i, 'doi'] = doi
         
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=False)
 
     def generate_work_ids(self):
 
@@ -317,10 +326,10 @@ class Results(pd.DataFrame):
                 self.loc[i, 'work_id'] = work_id
         
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=False)
 
 
-    def update_from_doi(self, index, drop_duplicates = True, timeout: int = 60):
+    def update_from_doi(self, index, drop_empty_rows = True, drop_duplicates = True, timeout: int = 60):
         
         try:
             old_series = self.loc[index]
@@ -342,10 +351,13 @@ class Results(pd.DataFrame):
             pass
 
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=False)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
         
 
-    def update_from_dois(self, drop_duplicates = True, timeout: int = 60):
+    def update_from_dois(self, drop_empty_rows = True, drop_duplicates = True, timeout: int = 60):
 
         self.correct_dois(drop_duplicates=False)
 
@@ -353,7 +365,10 @@ class Results(pd.DataFrame):
             self.update_from_doi(index = i, drop_duplicates = False, timeout=timeout)
         
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=False)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
     def __add__(self, results_obj):
 
@@ -380,7 +395,7 @@ class Results(pd.DataFrame):
     def to_dataframe(self):
         return self.copy(deep=True)
     
-    def from_dataframe(dataframe, drop_duplicates = True): # type: ignore
+    def from_dataframe(dataframe, drop_empty_rows = True, drop_duplicates = True): # type: ignore
         
         dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
         results_table = Results(index = dataframe.index)
@@ -391,7 +406,10 @@ class Results(pd.DataFrame):
             results_table[c] = dataframe[c]
 
         if drop_duplicates == True:
-            results_table.remove_duplicates()
+            results_table.remove_duplicates(drop_empty_rows=False)
+        
+        if drop_empty_rows == True:
+            results_table.drop_empty_rows()
 
         return results_table
 
