@@ -150,7 +150,7 @@ class Results(pd.DataFrame):
         self['doi'] = self['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
 
         df = deduplicate(self)
-        results = Results.from_dataframe(dataframe = df)
+        results = Results.from_dataframe(dataframe = df, drop_duplicates=False)
 
         if update_from_api == True:
             results.update_from_dois()
