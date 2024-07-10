@@ -395,7 +395,7 @@ class Results(pd.DataFrame):
     def to_dataframe(self):
         return self.copy(deep=True)
     
-    def from_dataframe(dataframe, drop_empty_rows = True, drop_duplicates = True): # type: ignore
+    def from_dataframe(dataframe, drop_empty_rows = False, drop_duplicates = True): # type: ignore
         
         dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
         results_table = Results(index = dataframe.index)
