@@ -1327,7 +1327,7 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
 def merge_all_duplicate_ids(dataframe):
 
-    id_names = ['doi', 'isbn', 'issn', 'uri', 'crossref_id', 'crossref', 'link', 'website']
+    id_names = ['doi', 'isbn', 'issn', 'uri', 'crossref_id', 'crossref', 'address', 'link', 'website']
     df = dataframe.copy(deep=True)
 
 
@@ -1356,17 +1356,18 @@ def deduplicate_entries(dataframe, update_from_apis = True):
 
     df_dropna_index = df_dropna.index
 
-    final_df = dataframe.loc[df_dropna_index]
-    if 'doi' in final_df.columns:
-        final_df['doi'] = final_df['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
+    df2 = dataframe.loc[df_dropna_index]
+    if 'doi' in df2.columns:
+        df2['doi'] = df2['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
 
+    df3 = merge_all_duplicate_ids(df2)
 
     if update_from_apis == True:
 
-        if 'update_from_dois' in final_df.__dir__():
-            final_df.update_from_dois()
+        if 'update_from_dois' in df2.__dir__():
+            df2.update_from_dois()
 
-    final_df = deduplicate_entries(final_df, update_from_apis=False)
-    final_df = final_df.reset_index().drop('index', axis=1)
+    df2 = deduplicate_entries(df2, update_from_apis=False)
+    df2 = df2.reset_index().drop('index', axis=1)
 
-    return final_df
+    return df2
