@@ -834,9 +834,9 @@ class Review:
         if update_formatting == True:
             self.format()
 
-    def add_dataframe(self, dataframe: pd.DataFrame, update_formatting: bool = True):
+    def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = False, drop_duplicates=False, update_formatting: bool = True):
 
-        self.results.add_dataframe(dataframe=dataframe) # type: ignore
+        self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
 
         if update_formatting == True:
             self.format()
