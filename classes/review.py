@@ -175,8 +175,9 @@ def add_citations_to_results(self, add_work_ids = False, update_from_doi = False
                 diff_len = len(new_ids.difference(existing_ids))
 
                 if diff_len > 0:
-                    self.add_dataframe(dataframe=df)
+                    self.add_dataframe(dataframe=df, drop_empty_rows = False)
         
+        self.drop_empty_rows()
         self.update_work_ids()
         self.format_authors()
 
