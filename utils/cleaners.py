@@ -1285,41 +1285,45 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
     if merge_on in df.columns:
 
+        # Checking if there are valid IDs in the column (i.e., not None or NaN)
         dropna_indexes = df[merge_on].dropna().index
-        df_dropna = df.copy(deep=True).loc[dropna_indexes]
-        
-        ids = set(df_dropna[merge_on].to_list())
 
-        for i in ids:
+        if len(dropna_indexes) > 0:
 
-            masked = df[df[merge_on]==i]
-            masked_indexes = masked.index.to_list()
-            masked = masked.reset_index().drop('index', axis=1)
-            len_masked = len(masked)
+            df_dropna = df.copy(deep=True).loc[dropna_indexes]
+            ids = set(df_dropna[merge_on].to_list())
 
-            if len_masked > 0:
+            for i in ids:
 
-                first_index = masked_indexes[0]
-                duplicate_indexes = masked_indexes[1:]
-                first_row = masked.loc[0]
+                masked = df[df[merge_on]==i]
+                masked_indexes = masked.index.to_list()
+                masked = masked.reset_index().drop('index', axis=1)
+                len_masked = len(masked)
 
-                for index in range(1, len_masked):
-                    row = masked.loc[index]
+                if len_masked > 0:
 
-                    for c in first_row.index:
+                    first_index = masked_indexes[0]
+                    duplicate_indexes = masked_indexes[1:]
+                    first_row = masked.loc[0]
 
-                        data = first_row[c]
-                        dtype = type(data)
+                    for index in range(1, len_masked):
 
-                        if (data is None) or (data is np.nan) or ((dtype == str) and (data == '')) or  ((dtype == str) and (data == 'None')) or  ((dtype == str) and (data == 'none')):
-                            first_row[c] = row[c]
+                        row = masked.loc[index]
 
-                df.loc[first_index] = first_row
-                df = df.drop(labels=duplicate_indexes)
+                        for c in first_row.index:
+
+                            data = first_row[c]
+                            dtype = type(data)
+
+                            if (data is None) or (data is np.nan) or ((dtype == str) and (data == '')) or  ((dtype == str) and (data == 'None')) or  ((dtype == str) and (data == 'none')):
+                                first_row[c] = row[c]
+
+                    df.loc[first_index] = first_row
+                    df = df.drop(labels=duplicate_indexes)
         
         dataframe = df
 
-    return df
+    return dataframe
 
 def merge_all_duplicate_ids(dataframe):
 
