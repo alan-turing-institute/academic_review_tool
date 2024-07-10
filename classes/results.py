@@ -16,20 +16,35 @@ from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_work_id(work_data: pd.Series):
 
-        work_id = 'W:'
-        work_data = work_data.astype(str)
-        authors = work_data['authors']
-        title = work_data['title']
-        date = work_data['date']
+        work_data = work_data.dropna()
 
-        if (authors != None) and (authors != '') and (authors != 'None'):
-            authors_str = str(authors).lower().strip().replace('[','').replace(']','').replace("'", "").replace('"', '').replace(' ','-')
+        work_id = 'W:'
+        
+        work_data = work_data.astype(str)
+
+        if 'authors' in work_data.index:
+            authors = work_data['authors']
+        else:
+            authors = ''
+        
+        if 'title' in work_data.index:
+            title = work_data['title']
+        else:
+            title = ''
+        
+        if 'date' in work_data.index:
+            date = work_data['date']
+        else:
+            date = ''
+
+        if (authors != None) and (authors != '') and (authors != 'None') and (authors != [])and (authors != '[]'):
+            authors_str = authors.lower().strip().replace('[','').replace(']','').replace("'", "").replace('"', '')
             authors_list = authors_str.split(',')
             authors_list = [i.strip() for i in authors_list]
             
             if len(authors_list) > 0:
                 authors_sorted = (pd.Series(authors_list).sort_values())
-                first_author = authors_sorted[0]
+                first_author = str(authors_sorted[0])
                 first_author = first_author.split(' ')[-1].split(' ')[-1]
             else:
                 first_author = ''
