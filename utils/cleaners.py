@@ -1353,10 +1353,10 @@ def deduplicate(dataframe, update_from_apis = True):
     # Removing duplicates
     col_subset = [c for c in df_dropna.columns if c not in ignore_cols]
     first_dedpublication = df_dropna.drop_duplicates(subset=col_subset)
-
     first_dedpublication_index = first_dedpublication.index
-
     df2 = dataframe.loc[first_dedpublication_index]
+
+    # Checking for duplicate UIDs; merging rows that share UIDs
     df3 = merge_all_duplicate_ids(df2)
 
     final_df = df3.reset_index().drop('index', axis=1)
