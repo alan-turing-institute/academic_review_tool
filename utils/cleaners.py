@@ -1314,8 +1314,19 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
                             data = first_row[c]
                             dtype = type(data)
+                            str_data = str(data)
 
-                            if (data is None) or (data is np.nan) or ((dtype == str) and (data == '')) or  ((dtype == str) and (data == 'None')) or  ((dtype == str) and (data == 'none')) or ((dtype == list) and (data == [])):
+                            if ((data is None) 
+                            or (data is np.nan) 
+                            or ((dtype == str) and (data == '')) 
+                            or ((dtype == str) and (data == '[]'))
+                            or ((dtype == str) and (data == '[]'))
+                            or  ((dtype == str) and (data == 'None'))
+                            or  ((dtype == str) and (data == 'none'))
+                            or ((dtype == list) and (data == []))
+                            or (str_data == '[]')
+                            or (str_data == '{}')
+                            ):
                                 first_row[c] = row[c]
 
                     df.loc[first_index] = first_row
@@ -1340,7 +1351,25 @@ def merge_all_duplicate_ids(dataframe):
 
 def deduplicate(dataframe):
 
-    ignore_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id', 'alt_names', 'given_name', 'affiliations', 'publications', 'address', 'work_count', 'tokens', 'other_links', 'website', 'link', 'other_links']
+    ignore_cols = ['work_id',
+                   'author_id',
+                   'funder_id',
+                   'affiliation_id',
+                   'alt_names',
+                   'authors', 
+                    'funder',
+                    'given_name',
+                    'affiliations',
+                    'citations',
+                    'citations_data',
+                    'publications',
+                    'address',
+                    'work_count',
+                    'tokens',
+                    'other_links',
+                    'website',
+                    'link',
+                    'other_links']
 
     df = dataframe.copy(deep=True)
     
