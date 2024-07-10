@@ -1314,20 +1314,49 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
                             data = first_row[c]
                             dtype = type(data)
+                            dtype_str = str(dtype)
                             str_data = str(data)
 
                             if ((data is None) 
-                            or (data is np.nan) 
-                            or ((dtype == str) and (data == '')) 
-                            or ((dtype == str) and (data == '[]'))
-                            or ((dtype == str) and (data == '[]'))
-                            or  ((dtype == str) and (data == 'None'))
-                            or  ((dtype == str) and (data == 'none'))
-                            or ((dtype == list) and (data == []))
-                            or (str_data == '[]')
-                            or (str_data == '{}')
-                            ):
-                                first_row[c] = row[c]
+                                or (data is np.nan) 
+                                or ((dtype == str) and (data == '')) 
+                                or ((dtype == str) and (data == '[]'))
+                                or ((dtype == str) and (data == '[]'))
+                                or  ((dtype == str) and (data == 'None'))
+                                or  ((dtype == str) and (data == 'none'))
+                                or ((dtype == list) and (data == []))
+                                or (str_data == '[]')
+                                or (str_data == '{}')
+                                ):
+                                    first_row[c] = row[c]
+                                    continue
+                            
+                            else:
+                                if '.Results' in dtype_str:
+                                    data2 = row[c]
+                                    dtype2 = type(data2)
+                                    dtype_str2 = str(dtype2)
+                                    if (dtype2 == pd.DataFrame) or ('.Results' in dtype_str2):
+                                        data2_copy = data2.copy(deep=True)
+                                        first_row[c].add_dataframe(data2_copy)
+                                        first_row[c].remove_duplicates()
+                                    continue
+
+                                if ('.Authors' in dtype_str) or ('.Funders' in dtype_str) or ('.Affiliations' in dtype_str):
+                                    data2 = row[c]
+                                    dtype2 = type(data2)
+                                    dtype_str2 = str(dtype2)
+
+                                    if ('.Authors' in dtype_str2) or ('.Funders' in dtype_str2) or ('.Affiliations' in dtype_str2):
+                                    
+                                        concat_df = pd.concat([data.all, data2.all])
+                                        concat_df = deduplicate(concat_df)
+                                        
+                                        first_row[c].all = concat_df
+
+
+                                    
+                                    
 
                     df.loc[first_index] = first_row
                     df = df.drop(labels=duplicate_indexes)
