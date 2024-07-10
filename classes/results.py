@@ -106,6 +106,8 @@ class Results(pd.DataFrame):
 
     def remove_duplicates(self, update_from_api = False):
         
+        self['doi'] = self['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
+
         df = deduplicate(self)
         self = Results.from_dataframe(dataframe = df)
 

@@ -1348,7 +1348,6 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                                     dtype_str2 = str(dtype2)
 
                                     if ('.Authors' in dtype_str2) or ('.Funders' in dtype_str2) or ('.Affiliations' in dtype_str2):
-                                    
                                         concat_df = pd.concat([data.all, data2.all])
                                         concat_df = deduplicate(concat_df)
                                         first_row[c].all = concat_df
