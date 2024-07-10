@@ -1306,7 +1306,7 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
                     for c in first_row.index:
 
-                        if (first_row[c] is None) or (first_row[c] is np.nan) or (first_row[c] is '') or  (first_row[c] is 'None') or  (first_row[c] is 'none'):
+                        if (first_row[c] is None) or (first_row[c] is np.nan) or (first_row[c] == '') or  (first_row[c] == 'None') or  (first_row[c] == 'none'):
                             first_row[c] = row[c]
 
                 df.loc[first_index] = first_row
@@ -1314,8 +1314,17 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                 df = df.drop(labels=duplicate_indexes)
         
         dataframe = df
-        
+
     return df
+
+def merge_all_duplicate_ids(dataframe):
+
+    id_names = ['doi', 'isbn', 'issn', 'uri', 'crossref_id', 'crossref', 'link', 'website']
+
+    for i in id_names:
+        dataframe = merge_duplicate_ids(dataframe, merge_on = i)
+    
+    return dataframe
 
 def deduplicate_entries(dataframe, update_from_apis = True):
 
