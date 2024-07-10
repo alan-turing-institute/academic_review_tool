@@ -1338,7 +1338,7 @@ def merge_all_duplicate_ids(dataframe):
     
     return dataframe
 
-def deduplicate(dataframe, update_from_apis = True):
+def deduplicate(dataframe):
 
     ignore_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id', 'alt_names', 'given_name', 'affiliations', 'publications', 'address', 'work_count', 'tokens', 'other_links', 'website', 'link', 'other_links']
 
