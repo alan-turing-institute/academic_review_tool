@@ -1278,12 +1278,15 @@ def correct_series_of_lists(series: pd.Series) -> pd.Series:
     
     return series
 
-def deduplicate(dataframe):
+def deduplicate_entries(dataframe, update_from_apis = True):
 
-    id_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id']
+    id_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id', 'link']
 
     df = dataframe.copy(deep=True)
     
+    if 'doi' in df.columns:
+        df['doi'] = df['doi'].str.replace('https://').str.replace('http://').str.replace('dx.').str.replace('doi.org/').str.replace('doi/')
+
     # Creating dataframe without empty columns; converting to string to avoid errors
     df_dropna = df.dropna(axis=1).astype(str)
 
@@ -1293,6 +1296,11 @@ def deduplicate(dataframe):
 
     df_dropna_index = df_dropna.index
 
-    df = df.loc[df_dropna_index]
+    final_df = dataframe.loc[df_dropna_index]
+
+    if update_from_apis == True:
+
+        if 'update_from_dois' in final_df.__dir__():
+            final_df.update_from_dois()
     
     return df
