@@ -1315,7 +1315,7 @@ def merge_duplicate_ids(dataframe, merge_on: str):
                             data = first_row[c]
                             dtype = type(data)
 
-                            if (data is None) or (data is np.nan) or ((dtype == str) and (data == '')) or  ((dtype == str) and (data == 'None')) or  ((dtype == str) and (data == 'none')):
+                            if (data is None) or (data is np.nan) or ((dtype == str) and (data == '')) or  ((dtype == str) and (data == 'None')) or  ((dtype == str) and (data == 'none')) or ((dtype == list) and (data == [])):
                                 first_row[c] = row[c]
 
                     df.loc[first_index] = first_row
@@ -1338,7 +1338,7 @@ def merge_all_duplicate_ids(dataframe):
     
     return dataframe
 
-def deduplicate_entries(dataframe, update_from_apis = True):
+def deduplicate(dataframe, update_from_apis = True):
 
     ignore_cols = ['work_id', 'author_id', 'funder_id', 'affiliation_id', 'alt_names', 'given_name', 'affiliations', 'publications', 'address', 'work_count', 'tokens', 'other_links', 'website', 'link', 'other_links']
 
@@ -1352,22 +1352,13 @@ def deduplicate_entries(dataframe, update_from_apis = True):
 
     # Removing duplicates
     col_subset = [c for c in df_dropna.columns if c not in ignore_cols]
-    df_dropna = df_dropna.drop_duplicates(subset=col_subset)
+    first_dedpublication = df_dropna.drop_duplicates(subset=col_subset)
 
-    df_dropna_index = df_dropna.index
+    first_dedpublication_index = first_dedpublication.index
 
-    df2 = dataframe.loc[df_dropna_index]
-    if 'doi' in df2.columns:
-        df2['doi'] = df2['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
-
+    df2 = dataframe.loc[first_dedpublication_index]
     df3 = merge_all_duplicate_ids(df2)
 
-    if update_from_apis == True:
+    final_df = df3.reset_index().drop('index', axis=1)
 
-        if 'update_from_dois' in df2.__dir__():
-            df2.update_from_dois()
-
-    df2 = deduplicate_entries(df2, update_from_apis=False)
-    df2 = df2.reset_index().drop('index', axis=1)
-
-    return df2
+    return final_df
