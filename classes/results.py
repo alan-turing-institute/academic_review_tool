@@ -113,6 +113,7 @@ class Results(pd.DataFrame):
             self.update_from_dois()
         
         self.update_work_ids()
+        self = self.drop_duplicates(subset='work_id').reset_index().drop('index',axis=1)
         
         return self
 
