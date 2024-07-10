@@ -1376,8 +1376,12 @@ def deduplicate(dataframe):
     if 'doi' in df.columns:
         df['doi'] = df['doi'].str.replace('https://', '', regex = False).str.replace('http://', '', regex = False).str.replace('dx.', '', regex = False).str.replace('doi.org/', '', regex = False).str.replace('doi/', '', regex = False)
 
-    # Creating dataframe without empty columns
-    df_dropna = df.dropna(axis=1)
+    # Creating dataframe without empty columns; converting to string to avoid errors
+    df_dropna = df.dropna(axis=1).astype(str)
+
+    # Converting strings to lowercase to improve matching
+    for c in df_dropna.columns:
+        df_dropna[c] = df_dropna[c].str.lower()
 
     # Removing duplicates
     col_subset = [c for c in df_dropna.columns if c not in ignore_cols]
@@ -1385,7 +1389,7 @@ def deduplicate(dataframe):
         first_dedpublication = df_dropna.drop_duplicates(subset=col_subset)
     else:
         first_dedpublication = df_dropna
-
+        
     first_dedpublication_index = first_dedpublication.index
 
     df2 = dataframe.loc[first_dedpublication_index]
