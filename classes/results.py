@@ -16,10 +16,22 @@ from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_work_id(work_data: pd.Series):
 
-        work_data = work_data.dropna()
+        work_data = work_data.copy(deep=True).dropna()
 
         work_id = 'W:'
         
+        if 'authors' in work_data.index:
+            auths_type = type(work_data['authors'])
+            auths_type_str = str(auths_type)
+
+            if auths_type == list:
+                work_data['authors'] = pd.Series(work_data['authors'],  dtype=object).sort_values().to_list()
+            
+            else:
+                if '.Authors' in auths_type_str:
+                    work_data['authors'] = work_data['authors'].all['full_name'].sort_values().to_list()
+            
+
         work_data = work_data.astype(str)
 
         if 'authors' in work_data.index:
@@ -43,7 +55,7 @@ def generate_work_id(work_data: pd.Series):
             authors_list = [i.strip() for i in authors_list]
             
             if len(authors_list) > 0:
-                authors_sorted = (pd.Series(authors_list).sort_values())
+                authors_sorted = (pd.Series(authors_list, dtype=object).sort_values())
                 first_author = str(authors_sorted[0])
                 first_author = first_author.split(' ')[-1].split(' ')[-1]
             else:
