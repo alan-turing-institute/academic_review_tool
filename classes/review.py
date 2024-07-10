@@ -72,7 +72,7 @@ def add_row(self, data):
 
 Results.add_row = add_row # type: ignore
 
-def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True):
+def add_dataframe(self,  dataframe, drop_empty_rows = True, update_work_ids = True, format_authors = True):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
@@ -97,6 +97,9 @@ def add_dataframe(self, dataframe, update_work_ids = True, format_authors = True
 
                 index += 1
         
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
         if format_authors == True:
             self.format_authors()
 
