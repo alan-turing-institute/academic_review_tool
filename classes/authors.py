@@ -189,10 +189,10 @@ class Author(Entity):
     def update_id(self):
 
         current_id = self.details.loc[0, 'author_id']
+        new_id = self.generate_id()
 
-        if (current_id == None) or (current_id == 'None') or (current_id == '') or (current_id == 'A:000'):
-            auth_id = self.generate_id()
-            self.details.loc[0, 'author_id'] = auth_id
+        if (current_id != new_id) or (current_id == None) or (current_id == 'None') or (current_id == '') or (current_id == 'A:#NA#'):
+            self.details.loc[0, 'author_id'] = new_id
         
     
     def __getitem__(self, key):
@@ -534,10 +534,13 @@ class Authors(Entities):
 
         author_id = str(author.details.loc[0, 'author_id'])
 
-        if author_id in self.all['author_id'].to_list():
-            id_count = len(self.all[self.all['author_id'].str.contains(author_id)]) # type: ignore
-            author_id = author_id + f'#{id_count + 1}'
-            author.details.loc[0, 'author_id'] = author_id
+        if (author_id in self.details.keys()) or (author_id in self.all['author_id'].to_list()):
+            print(f'Warning: {author_id} is already in authors')
+
+        # if author_id in self.all['author_id'].to_list():
+        #     id_count = len(self.all[self.all['author_id'].str.contains(author_id)]) # type: ignore
+        #     author_id = author_id + f'#{id_count + 1}'
+        #     author.details.loc[0, 'author_id'] = author_id
 
         self.all = pd.concat([self.all, author.details])
         self.all = self.all.reset_index().drop('index', axis=1)
@@ -577,6 +580,13 @@ class Authors(Entities):
 
         return masked
 
+    def update_author_ids(self):
+
+        for i in self.all.index:
+            author_data = self.all.loc[i]
+            author_id = generate_author_id(author_data)
+            self.all.loc[i, 'author_id'] = author_id
+
     def sync_all(self):
 
         for i in self.details.keys():
@@ -588,6 +598,8 @@ class Authors(Entities):
             self.all.loc[auth_index] = series
 
     def sync_details(self):
+
+        self.update_author_ids()
 
         for i in self.all.index:
 
@@ -603,6 +615,12 @@ class Authors(Entities):
                 auth_data['author_id'] = auth_id
                 auth = Author.from_series(auth_data) # type: ignore
                 self.details[auth_id] = auth
+        
+        for key in self.details.keys():
+            auth_ids = self.all['author_ids'].to_list()
+            if key not in auth_ids:
+                del self.details[key]
+
 
     def sync(self):
         
