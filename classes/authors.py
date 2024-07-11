@@ -27,7 +27,7 @@ def generate_author_id(author_data: pd.Series):
         else:
             full_name = ''
 
-        if ((family_name == None) or (family_name == '') or (family_name == 'None')) and (full_name != None):
+        if ((family_name == None) or (family_name == '') or (family_name == 'None')) and ((full_name != None) and (len(full_name)>0)):
             
             if full_name == 'no_name_given':
                 author_id = author_id + '#NA#'
@@ -44,7 +44,7 @@ def generate_author_id(author_data: pd.Series):
                 else:
                     if ',' in full_name:
                         full_split = full_name.lower().split(',')
-                        first = full_split[-1].strip()
+                        first = full_split[-1].split(' ')[0].strip()
                         last = full_split[0].strip()
                     else:
                         first = full_name
@@ -56,8 +56,8 @@ def generate_author_id(author_data: pd.Series):
         else:
 
             if (given_name != None) and (len(given_name)>0):
-                given_shortened = given_name.lower().split(' ')[0].strip()
-                author_id = author_id + '-' + given_shortened
+                first = given_name.lower().split(' ')[0].strip()
+                author_id = author_id + '-' + first
             
             
             if (family_name != None) and (len(family_name)>0):
