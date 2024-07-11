@@ -639,6 +639,22 @@ class Authors(Entities):
                 self.sync_all()
                 return
 
+
+    def drop_empty_rows(self):
+
+        ignore_cols = ['author_id', 'affiliations', 'publications', 'other_links']
+
+        df = self.all.copy(deep=True)
+        df['full_name'] = df['full_name'].replace('no_name_given', None)
+        df = df.dropna(axis=0, how='all')
+        drop_cols = [c for c in df.columns if c not in ignore_cols]
+        df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
+
+        self.all = df
+        self.sync_details()
+        
+        return self
+
     def format_affiliations(self):
 
         affils = self.all['affiliations'].apply(func=format_affiliations) # type: ignore
