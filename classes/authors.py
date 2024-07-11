@@ -491,7 +491,7 @@ class Authors(Entities):
         df['orcid'] = df['orcid'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('orcid.org/', '', regex=False).str.strip('/')
         df['google_scholar'] = df['google_scholar'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('scholar.google.com/', '', regex=False).str.replace('citations?', '', regex=False).str.replace('user=', '', regex=False).str.strip('/')
        
-        df = df.all.sort_values(by = ['orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']).reset_index().drop('index', axis=1)
+        df = df.sort_values(by = ['orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']).reset_index().drop('index', axis=1)
         self.all = deduplicate(self.all)
 
         self.sync_details()
