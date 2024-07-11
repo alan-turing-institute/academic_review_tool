@@ -8,16 +8,29 @@ import numpy as np
 
 def generate_author_id(author_data: pd.Series):
 
+        author_data = author_data.copy(deep=True).dropna().astype(str).str.lower()
+
         author_id = 'A:'
 
-        given_name = author_data['given_name']
-        family_name = author_data['family_name']
-        full_name = author_data['full_name']
+        if 'given_name' in author_data.index:
+            given_name = author_data['given_name']
+        else:
+            given_name = ''
+        
+        if 'family_name' in author_data.index:
+            family_name = author_data['family_name']
+        else:
+            family_name = ''
+
+        if 'full_name' in author_data.index:
+            full_name = author_data['full_name']
+        else:
+            full_name = ''
 
         if (family_name == None) and (full_name != None):
             
             if full_name == 'no_name_given':
-                author_id = author_id + '-' + '000'
+                author_id = author_id + '000000'
             
             else:
             
@@ -39,15 +52,26 @@ def generate_author_id(author_data: pd.Series):
                 family_clean = family_name.lower().replace(' ', '-')
                 author_id = author_id + '-' + family_clean
 
-        uid = author_data['orcid']
+        uid = ''
+
+        if 'orcid' in author_data.index:
+            uid = author_data['orcid']
+        
         if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = author_data['google_scholar']
+            
+            if 'google_scholar' in author_data.index:
+                uid = author_data['google_scholar']
+            
             if (uid == None) or (uid == 'None') or (uid == ''):
-                uid = author_data['scopus']
+                if 'scopus' in author_data.index:
+                    uid = author_data['scopus']
+                
                 if (uid == None) or (uid == 'None') or (uid == ''):
-                    uid = author_data['crossref']
+                    if 'crossref' in author_data.index:
+                        uid = author_data['crossref']
+                    
                     if (uid == None) or (uid == 'None') or (uid == ''):
-                        uid = ''
+                            uid = ''
         
         uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('orcid.org/','').replace('scholar.google.com/','').replace('citations?','').replace('user=','')[:30]
 

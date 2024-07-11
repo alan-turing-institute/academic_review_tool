@@ -72,6 +72,7 @@ def generate_work_id(work_data: pd.Series):
             else:
                 title_last = ''
             title_shortened = title_first2 + '-' + title_last
+            title_shortened = title_shortened[:15] # capping at 15 characters to avoid overly long UIDs
             work_id = work_id + '-' + title_shortened
         
         if (date != None) and (date != '') and (date != 'None'):
