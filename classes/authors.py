@@ -616,7 +616,8 @@ class Authors(Entities):
                 auth = Author.from_series(auth_data) # type: ignore
                 self.details[auth_id] = auth
         
-        for key in self.details.keys():
+        keys = self.details.keys()
+        for key in keys:
             auth_ids = self.all['author_id'].to_list()
             if key not in auth_ids:
                 del self.details[key]
@@ -652,7 +653,7 @@ class Authors(Entities):
 
         self.all = df
         self.sync_details()
-        
+
         return self
 
     def format_affiliations(self):
