@@ -500,7 +500,7 @@ class Authors(Entities):
         
 
 
-    def merge(self, authors):
+    def merge(self, authors, drop_duplicates = False, drop_empty_rows=False):
 
         left = self.all.copy(deep=True)
         right = authors.all.copy(deep=True)
@@ -538,10 +538,16 @@ class Authors(Entities):
         merged_data = pd.Series(merged_data).value_counts().index.to_list()
 
         self.data = merged_data
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         return self
 
-    def add_author(self, author: Author, data = None, update_from_orcid = False):
+    def add_author(self, author: Author, data = None, drop_duplicates = True, drop_empty_rows = False, update_from_orcid = False):
 
         if update_from_orcid == True:
             orcid = author.details.loc[0,'orcid']
@@ -570,12 +576,24 @@ class Authors(Entities):
         
         self.data.append(data)
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
-    def add_authors_list(self, authors_list: list):
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+
+    def add_authors_list(self, authors_list: list, drop_duplicates = True, drop_empty_rows = False):
         
         for i in authors_list:
             if type(i) == Author:
-                self.add_author(author = i)
+                self.add_author(author = i, drop_duplicates=False)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def mask_entities(self, column, query: str = 'request_input', ignore_case: bool = True):
 
@@ -605,7 +623,7 @@ class Authors(Entities):
             author_id = generate_author_id(author_data)
             self.all.loc[i, 'author_id'] = author_id
 
-    def sync_all(self):
+    def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
 
         for i in self.details.keys():
             author = self.details[i]
@@ -615,7 +633,13 @@ class Authors(Entities):
             auth_index = all[all['author_id'] == i].index.to_list()[0]
             self.all.loc[auth_index] = series
 
-    def sync_details(self):
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+    def sync_details(self, drop_duplicates = False, drop_empty_rows=False):
 
         self.update_author_ids()
 
@@ -640,22 +664,27 @@ class Authors(Entities):
             if key not in auth_ids:
                 del self.details[key]
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
-    def sync(self):
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+    def sync(self, drop_duplicates = False, drop_empty_rows=False):
         
         all_len = len(self.all)
         details_len = len(self.details)
 
         if all_len > details_len:
-            self.sync_details()
+            self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
             return
         else:
             if details_len > all_len:
-                self.sync_all()
+                self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
             else:
-                self.sync_details()
-                self.sync_all()
+                self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
 
 
@@ -674,13 +703,16 @@ class Authors(Entities):
 
         return self
 
-    def format_affiliations(self):
+    def format_affiliations(self, drop_empty_rows=False):
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
         affils = self.all['affiliations'].apply(func=format_affiliations) # type: ignore
         self.all['affiliations'] = affils
         self.sync_details()
 
-    def update_from_orcid(self):
+    def update_from_orcid(self, drop_duplicates = False, drop_empty_rows=False):
 
         self.sync()
 
@@ -698,41 +730,59 @@ class Authors(Entities):
             if new_id != a:
                 self.details[new_id] = self.details[a]
                 del self.details[a]
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
-    def import_orcid_ids(self, orcid_ids: list):
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+    def import_orcid_ids(self, orcid_ids: list, drop_duplicates = False, drop_empty_rows=False):
 
         for i in orcid_ids:
 
             auth = Author.from_orcid(i) # type: ignore
             self.add_author(author = auth, data = i)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
 
-    def from_orcid_ids(orcid_ids: list): # type: ignore
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+    def from_orcid_ids(orcid_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         authors = Authors()
-        authors.import_orcid_ids(orcid_ids)
-
+        authors.import_orcid_ids(orcid_ids, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+        
         return authors
 
     def with_orcid(self):
         return self.all[~self.all['orcid'].isna()]
 
-    def import_crossref(self, crossref_result: list):
+    def import_crossref(self, crossref_result: list, drop_duplicates = False, drop_empty_rows=False):
 
         for i in crossref_result:
 
             auth = Author.from_crossref(i) # type: ignore
             self.add_author(author = auth, data = i)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
     
-    def from_crossref(crossref_result: list): # type: ignore
+    def from_crossref(crossref_result: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         authors = Authors()
-        authors.import_crossref(crossref_result)
+        authors.import_crossref(crossref_result, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return authors
     
-    def affiliations(self):
+    def affiliations(self, drop_duplicates = False, drop_empty_rows=False):
 
-        self.sync_details()
+        self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         output = {}
         for auth_id in self.details.keys():
@@ -742,7 +792,7 @@ class Authors(Entities):
         
         return output
 
-def format_authors(author_data):
+def format_authors(author_data, drop_duplicates = False, drop_empty_rows=False):
         
         result = Authors()
 
@@ -765,5 +815,11 @@ def format_authors(author_data):
             result.add_author(author)
     
         result.format_affiliations()
+
+        if drop_empty_rows == True:
+            result.drop_empty_rows()
+
+        if drop_duplicates == True:
+            result.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         return result
