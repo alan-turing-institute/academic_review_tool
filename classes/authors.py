@@ -43,12 +43,12 @@ def generate_author_id(author_data: pd.Series):
 
         else:
 
-            if given_name != None:
+            if (given_name != None) and (len(given_name)>0):
                 given_shortened = given_name.lower()[0]
                 author_id = author_id + '-' + given_shortened
             
             
-            if family_name != None:
+            if (family_name != None) and (len(family_name)>0):
                 family_clean = family_name.lower().replace(' ', '-')
                 author_id = author_id + '-' + family_clean
 
