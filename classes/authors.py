@@ -616,7 +616,7 @@ class Authors(Entities):
                 auth = Author.from_series(auth_data) # type: ignore
                 self.details[auth_id] = auth
         
-        keys = self.details.keys()
+        keys = list(self.details.keys())
         for key in keys:
             auth_ids = self.all['author_id'].to_list()
             if key not in auth_ids:
