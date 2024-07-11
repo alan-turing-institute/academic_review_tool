@@ -1,4 +1,5 @@
 from ..utils.basics import Iterator, results_cols
+from ..utils.cleaners import deduplicate
 from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
@@ -160,7 +161,13 @@ def format_authors(self):
 Results.format_authors = format_authors # type: ignore
     
 
-def add_citations_to_results(self, add_work_ids = False, update_from_doi = False):
+def add_citations_to_results(self, add_work_ids = False, update_from_doi = False, drop_duplicates = True, drop_empty_rows = True):
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates()
 
         unformatted = self.lacks_formatted_citations()
         if len(unformatted) > 0:
@@ -515,7 +522,7 @@ class Review:
     def format_citations(self):
         self.results.format_citations() # type: ignore
 
-    def format_authors(self):
+    def format_authors(self, drop_duplicates = True, drop_empty_rows=True):
 
         self.results.format_authors() # type: ignore
 
@@ -525,7 +532,7 @@ class Review:
 
             if type(i) == Authors:
                 self.authors.merge(i)
-            
+          
             if (type(i) == str) and (len(i) > 0):
                 i = i.split(',')
 
@@ -535,10 +542,12 @@ class Review:
                     auth = Author(full_name=a.strip())
                     auths.add_author(auth)
                 self.authors.merge(auths)
+        
+        self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
     
-    def update_author_attrs(self, ignore_case: bool = True):
+    def update_author_attrs(self, ignore_case: bool = True, drop_duplicates = True, drop_empty_rows=True):
 
-        self.authors.sync()
+        self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         auths_data = self.authors.all[['author_id', 'orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']]
         auths_data = auths_data.dropna(axis=1, how='all')
@@ -712,13 +721,13 @@ class Review:
         self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
         self.update_funder_attrs(ignore_case=ignore_case)
 
-    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True):
+    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True, drop_duplicates = True, drop_empty_rows=True):
 
         if format == True:
             self.format()
         
         if update_attrs == True:
-            self.update_author_attrs(ignore_case=ignore_case)
+            self.update_author_attrs(ignore_case=ignore_case, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         auth_ids = self.authors.details.keys()
         output = {}
@@ -810,29 +819,35 @@ class Review:
                 self.funders.details[f].cofunders = all_cofunders
 
         return output
+ 
 
-                    
-
-    def format(self, update_entities = False):
+    def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True):
 
         self.format_funders()
         self.format_citations()
-        self.format_authors()
+        self.format_authors(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         self.format_affiliations()
 
         if update_entities == True:
             self.update_entity_attrs()
 
 
-    def add_citations_to_results(self, update_formatting: bool = True):
-        self.results.add_citations_to_results() # type: ignore
+    def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows = True):
+        
+        self.results.add_citations_to_results(drop_duplicates = drop_duplicates, drop_empty_rows = drop_empty_rows) # type: ignore
+
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
 
-    def update_from_orcid(self, update_formatting: bool = True):
-        self.authors.update_from_orcid()
+    def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows=True):
+        self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         if update_formatting == True:
             self.format()
@@ -842,41 +857,42 @@ class Review:
         self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         return self
 
-    def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True):
+    def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.update_properties()
         self.results.import_excel(file_path, sheet_name) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return self
     
-    def from_excel(file_path = 'request_input', sheet_name = None): # type: ignore
+    def from_excel(file_path = 'request_input', sheet_name = None, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
-        review.format()
+        review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         return review
 
-    def import_csv(self, file_path = 'request_input', update_formatting: bool = True):
+    def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.update_properties()
         self.results.import_csv(file_path) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return self
     
-    def from_csv(file_path = 'request_input'): # type: ignore
+    def from_csv(file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
         review = Review()
         review.results = Results.from_csv(file_path) # type: ignore
-        review.format()
+        if update_formatting == True:
+            review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return review
 
@@ -896,19 +912,19 @@ class Review:
 
         return review
     
-    def import_file(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True):
+    def import_file(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
 
         self.update_properties()
         self.results.import_file(file_path, sheet_name) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
     
-    def from_file(file_path = 'request_input', sheet_name = None): # type: ignore
+    def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
         review = Review()
         review.results = Results.from_file(file_path, sheet_name) # type: ignore
-        review.format() # type: ignore
+        review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
         return review
 
@@ -1108,54 +1124,54 @@ class Review:
     def lookup_doi(self, doi = 'request_input', timeout = 60):
         return lookup_doi(doi=doi, timeout=timeout)
     
-    def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True):
+    def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
             
         self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         return self
 
-    def from_doi(doi: str = 'request_input', timeout = 60, update_formatting: bool = True): # type: ignore
+    def from_doi(doi: str = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
         review = Review()
-        review.add_doi(doi = doi, timeout = timeout, update_formatting = update_formatting)
+        review.add_doi(doi = doi, timeout = timeout, update_formatting = update_formatting, update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return review
 
     def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
-    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True):
+    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return self
     
-    def from_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True): # type: ignore
+    def from_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
         review = Review()
-        review.add_dois(dois_list = dois_list, rate_limit=rate_limit, timeout = timeout, update_formatting = update_formatting)
+        review.add_dois(dois_list = dois_list, rate_limit=rate_limit, timeout = timeout, update_formatting = update_formatting, update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return review
 
 
-    def update_from_dois(self, timeout: int = 60, update_formatting: bool = True):
+    def update_from_dois(self, timeout: int = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.results.update_from_dois(timeout=timeout) # type: ignore
 
         if update_formatting == True:
-            self.format()
+            self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return self
 
-    def sync_apis(self, timeout: int = 60):
+    def sync_apis(self, timeout: int = 60, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
 
         self.update_from_dois(timeout=timeout)
         self.update_from_orcid()
-        self.format()
+        self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return self
 
@@ -1383,7 +1399,9 @@ class Review:
                     be_polite: bool = True,
                     rate_limit: float = 0.05,
                     timeout: int = 60,
-                    add_to_results = True
+                    add_to_results = True,
+                    drop_duplicates = True,
+                    drop_empty_rows = True
                     ):
     
         """
@@ -1432,11 +1450,14 @@ class Review:
                     timeout = timeout
                     )
         
+        if drop_duplicates == True:
+            result = deduplicate(result)
+
         if add_to_results == True:
 
             df = result.drop(labels=0, axis=0).reset_index().drop('index', axis=1)
             self.results.add_dataframe(df) # type: ignore
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         
         return result
@@ -1507,9 +1528,17 @@ class Review:
     def coauthors_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
+
+        if drop_empty_rows == True:
+            self.authors.drop_empty_rows()
+        
+        if drop_duplicates == True:
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         co_auths = self.get_coauthors(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
 
@@ -1546,6 +1575,8 @@ class Review:
     def cofunders_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
@@ -1579,15 +1610,23 @@ class Review:
     def citations_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 add_citations_to_results=True,
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         if add_citations_to_results == True:
-            self.add_citations_to_results(update_formatting = format)
+            self.add_citations_to_results(update_formatting = format, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         else:
             if format == True:
-                self.format()
+                self.format(update_entities=update_attrs, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_entity_attrs()
@@ -1619,11 +1658,21 @@ class Review:
     def author_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         if format == True:
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_author_attrs()
@@ -1642,11 +1691,19 @@ class Review:
     def funder_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         if format == True:
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_funder_attrs()
@@ -1665,11 +1722,19 @@ class Review:
     def author_affils_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        if drop_empty_rows == True:
+            self.authors.drop_empty_rows()
+        
+        if drop_duplicates == True:
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         if format == True:
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_affiliation_attrs(update_authors=True)
@@ -1686,11 +1751,21 @@ class Review:
     def entities_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         if format == True:
-            self.format()
+            self.format(update_entities=update_attrs, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_entity_attrs()
@@ -1722,13 +1797,23 @@ class Review:
     def all_networks(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
+                                drop_duplicates = True,
+                                drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_citations_to_results: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Networks:
         
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         if format == True:
-            self.format()
+            self.format(update_entities=update_attrs, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_entity_attrs()
