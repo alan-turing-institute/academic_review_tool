@@ -647,6 +647,8 @@ class Authors(Entities):
 
     def update_from_orcid(self):
 
+        self.sync()
+
         author_ids = self.details.keys()
 
         for a in author_ids:
