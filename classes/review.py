@@ -830,6 +830,14 @@ class Review:
 
         if update_entities == True:
             self.update_entity_attrs()
+        
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
 
 
     def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows = True):
@@ -838,9 +846,11 @@ class Review:
 
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
-
+            self.authors.drop_empty_rows() # type: ignore
+        
         if drop_duplicates == True:
             self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
 
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -856,6 +866,13 @@ class Review:
 
         self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
 
+        if drop_empty_rows == True:
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
@@ -864,6 +881,14 @@ class Review:
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.update_properties()
         self.results.import_excel(file_path, sheet_name) # type: ignore
+
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -881,6 +906,14 @@ class Review:
     def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.update_properties()
         self.results.import_csv(file_path) # type: ignore
+
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -902,7 +935,7 @@ class Review:
 
         if update_formatting == True:
             self.format()
-
+        
         return self
     
     def from_json(file_path = 'request_input'): # type: ignore
@@ -919,6 +952,14 @@ class Review:
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
     
     def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
@@ -1131,6 +1172,14 @@ class Review:
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         return self
 
     def from_doi(doi: str = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
@@ -1149,6 +1198,14 @@ class Review:
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+
         return self
     
     def from_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
@@ -1164,6 +1221,14 @@ class Review:
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        if drop_empty_rows == True:
+            self.results.drop_empty_rows() # type: ignore
+            self.authors.drop_empty_rows() # type: ignore
+        
+        if drop_duplicates == True:
+            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
 
         return self
 
