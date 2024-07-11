@@ -27,29 +27,41 @@ def generate_author_id(author_data: pd.Series):
         else:
             full_name = ''
 
-        if (family_name == None) and (full_name != None):
+        if ((family_name == None) or (family_name == '') or (family_name == 'None')) and (full_name != None):
             
             if full_name == 'no_name_given':
-                author_id = author_id + '000000'
+                author_id = author_id + '#NA#'
             
             else:
-            
-                full_split = full_name.lower().split(' ')
-                first = full_split[0]
-                first_shortened = first[0]
-                last = full_split[-1]
+                
 
-                author_id = author_id + '-' + first_shortened + '-' + last
+                if ' ' in full_name:
+
+                    full_split = full_name.lower().split(' ')
+                    first = full_split[0].split(' ')[0].strip()
+                    last = full_split[-1]
+                
+                else:
+                    if ',' in full_name:
+                        full_split = full_name.lower().split(',')
+                        first = full_split[-1].strip()
+                        last = full_split[0].strip()
+                    else:
+                        first = full_name
+                        last = ''
+
+
+                author_id = author_id + '-' + first + '-' + last
 
         else:
 
             if (given_name != None) and (len(given_name)>0):
-                given_shortened = given_name.lower()[0]
+                given_shortened = given_name.lower().split(' ')[0].strip()
                 author_id = author_id + '-' + given_shortened
             
             
             if (family_name != None) and (len(family_name)>0):
-                family_clean = family_name.lower().replace(' ', '-')
+                family_clean = family_name.lower().strip().replace(' ', '-')
                 author_id = author_id + '-' + family_clean
 
         uid = ''
