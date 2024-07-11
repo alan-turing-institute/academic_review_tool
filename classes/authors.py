@@ -1,3 +1,4 @@
+from ..utils.cleaners import deduplicate
 from ..importers.orcid import lookup_orcid
 from .entities import Entity, Entities
 from .results import Results
@@ -480,6 +481,23 @@ class Authors(Entities):
     
     def __len__(self) -> int:
         return len(self.details.keys())
+
+    def remove_duplicates(self, drop_empty_rows = True):
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+        
+        df = self.all.copy(deep=True)
+        df['orcid'] = df['orcid'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('orcid.org/', '', regex=False).str.strip('/')
+        df['google_scholar'] = df['google_scholar'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('scholar.google.com/', '', regex=False).str.replace('citations?', '', regex=False).str.replace('user=', '', regex=False).str.strip('/')
+       
+        df = df.all.sort_values(by = ['orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']).reset_index().drop('index', axis=1)
+        self.all = deduplicate(self.all)
+
+        self.sync_details()
+
+        return self
+        
 
 
     def merge(self, authors):
