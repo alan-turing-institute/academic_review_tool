@@ -16,14 +16,20 @@ from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_funder_id(funder_data: pd.Series):
 
+        funder_data = funder_data.copy(deep=True).dropna().astype(str).str.lower()
+
         funder_id = 'F:'
 
-        name = funder_data['name']
+        if 'name' in funder_data.index:
+            name = funder_data['name']
+        else:
+            name = ''
 
         if (name == None) or (name == ''):
             name = 'no_name_given'
         
         if name != 'no_name_given':
+
             name = name.strip().lower()
             name_tokens = list(word_tokenize(name))
             name_tokens = [i for i in name_tokens if ((i not in all_stopwords) and (i != "'s"))]
@@ -40,16 +46,23 @@ def generate_funder_id(funder_data: pd.Series):
 
         funder_id = funder_id + '-' + name_shortened
         
+        uid = ''
 
-        uid = funder_data['uri']
-        if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = funder_data['crossref_id']
+        if 'uri' in funder_data.index:
+            uid = funder_data['uri']
+
             if (uid == None) or (uid == 'None') or (uid == ''):
-                uid = funder_data['website']
-                if (uid == None) or (uid == 'None') or (uid == ''):
-                        uid = ''
+                if 'crossref_id' in funder_data.index:
+                    uid = funder_data['crossref_id']
+                    
+                    if (uid == None) or (uid == 'None') or (uid == ''):
+                        if 'website' in funder_data.index:
+                            uid = funder_data['website']
+
+                            if (uid == None) or (uid == 'None') or (uid == ''):
+                                    uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:30]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:24]
 
         funder_id = funder_id + '-' + uid_shortened
         funder_id = funder_id.replace('F:-', 'F:').replace("'s", '').replace('\r', '').replace('\n', '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('F:-', 'F:').strip('-')
