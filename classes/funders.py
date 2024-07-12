@@ -505,7 +505,7 @@ class Funders(Entities):
     def __len__(self) -> int:
         return len(self.details.keys())
 
-    def merge(self, funders):
+    def merge(self, funders, drop_empty_rows = True, drop_duplicates = True):
 
         left = self.all.copy(deep=True)
         right = funders.all.copy(deep=True)
@@ -543,12 +543,19 @@ class Funders(Entities):
         merged_data = pd.Series(merged_data).value_counts().index.to_list()
 
         self.data = merged_data
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+        
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
         return self
 
 
-    def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = True): # type: ignore
+    def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = True, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
         
 
@@ -605,12 +612,24 @@ class Funders(Entities):
 
         self.update_ids()
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+        
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-    def add_funders_list(self, funders_list: list):
+
+    def add_funders_list(self, funders_list: list, drop_empty_rows = False, drop_duplicates = False):
         
         for i in funders_list:
             if type(i) == Funder:
                 self.add_funder(funder = i)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+        
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def drop_empty_rows(self):
 
@@ -639,7 +658,7 @@ class Funders(Entities):
 
         return self
 
-    def sync_all(self):
+    def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
 
         for i in self.details.keys():
             funder = self.details[i]
@@ -652,11 +671,78 @@ class Funders(Entities):
                 all_copy = self.all.copy(deep=True)
                 all_copy.loc[auth_index] = series
                 self.all = all_copy
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+    def sync_details(self, drop_duplicates = False, drop_empty_rows=False):
+
+        self.update_ids(sync=False)
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+        for i in self.all.index:
+
+            f_data = self.all.loc[i]
+            f_id = f_data['funder_id']
+
+            if f_id != None:
+                f = Funder.from_series(f_data) # type: ignore
+                self.details[f_id] = f
+
+            else:
+                f_id = generate_funder_id(f_data)
+                f_data['funder_id'] = f_id
+                f = Funder.from_series(f_data) # type: ignore
+                self.details[f_id] = f
+        
+        keys = list(self.details.keys())
+        for key in keys:
+            f_ids = self.all['funder_id'].to_list()
+            if key not in f_ids:
+                del self.details[key]
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+
+    def sync(self, drop_duplicates = False, drop_empty_rows=False):
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+        all_len = len(self.all)
+        details_len = len(self.details)
+
+        if all_len > details_len:
+            self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+            return
+        else:
+            if details_len > all_len:
+                self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                return
+            else:
+                self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                return
 
     def update_ids(self, sync=False):
         
         if sync == True:
-            self.sync_all()
+            self.sync()
 
         for i in self.all.index:
             all_copy = self.all.copy(deep=True)
@@ -685,7 +771,7 @@ class Funders(Entities):
                 self.details[new_id] = funder
 
 
-    def update_from_crossref(self):
+    def update_from_crossref(self, drop_duplicates = False, drop_empty_rows=False):
 
         funder_ids = self.details.keys()
 
@@ -702,23 +788,36 @@ class Funders(Entities):
                 self.details[new_id] = self.details[a]
                 del self.details[a]
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
+        
 
 
-    def import_crossref_ids(self, crossref_ids: list):
+    def import_crossref_ids(self, crossref_ids: list, drop_duplicates = False, drop_empty_rows=False):
 
         for i in crossref_ids:
 
             auth = Funder.from_crossref(i) # type: ignore
             self.add_funder(funder = auth, data = i)
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
 
-    def from_crossref_ids(crossref_ids: list): # type: ignore
+    def from_crossref_ids(crossref_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         funders = Funders()
-        funders.import_crossref_ids(crossref_ids)
+        funders.import_crossref_ids(crossref_ids, drop_duplicates = drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return funders
 
@@ -728,21 +827,27 @@ class Funders(Entities):
     def with_uri(self):
         return self.all[~self.all['uri'].isna()]
 
-    def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False):
+    def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False):
 
         for i in crossref_result.index:
             
             data = crossref_result.loc[i]
             fu = Funder.from_crossref_result(crossref_result=data) # type: ignore
             self.add_funder(funder = fu, data = data, use_api=use_api)
+        
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         self.update_ids()
 
 
-    def from_crossref_result(crossref_result: pd.DataFrame): # type: ignore
+    def from_crossref_result(crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         funders = Funders()
-        funders.import_crossref_result(crossref_result)
+        funders.import_crossref_result(crossref_result, use_api=use_api, drop_duplicates = drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return funders
 
@@ -842,7 +947,7 @@ class Funders(Entities):
         
         return result
 
-def format_funders(funder_data, use_api = False):
+def format_funders(funder_data, use_api = False, drop_duplicates = False, drop_empty_rows=False):
         
         result = Funders()
 
@@ -861,30 +966,54 @@ def format_funders(funder_data, use_api = False):
 
         if funder_type == Funders:
             result = funder_data
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if funder_type == Funder:
             result.add_funder(funder=funder_data, use_api=use_api)
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if funder_type == pd.Series:
             funder = Funder()
             funder.add_series(funder_data)
             result.add_funder(funder=funder, use_api=use_api)
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if funder_type == pd.DataFrame:
             result.import_crossref_result(funder_data, use_api=use_api) # type: ignore
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
         
         if (funder_type == dict):
             funder = Funder.from_dict(funder_data) # type: ignore
-            result.add_funder(funder = funder, use_api=use_api) # type: ignorex
+            result.add_funder(funder = funder, use_api=use_api) # type: ignore
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if (funder_type == list) and (len(funder_data) > 0) and (type(funder_data[0]) == Funder):
             result = Funders()
             result.add_funders_list(funder_data)
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if (funder_type == list) and (len(funder_data) > 0) and (type(funder_data[0]) == dict):
@@ -892,5 +1021,10 @@ def format_funders(funder_data, use_api = False):
             for i in funder_data:
                 funder = Funder.from_dict(i) # type: ignore
                 result.add_funder(funder = funder, use_api=use_api) # type: ignore
-    
+
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
             return result
