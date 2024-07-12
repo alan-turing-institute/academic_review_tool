@@ -741,7 +741,7 @@ class Affiliations(Entities):
                 return
 
 
-    def merge(self, affiliations):
+    def merge(self, affiliations, drop_duplicates = True, drop_empty_rows=True):
 
         left = self.all.copy(deep=True)
         right = affiliations.all.copy(deep=True)
@@ -779,12 +779,19 @@ class Affiliations(Entities):
         merged_data = pd.Series(merged_data).value_counts().index.to_list()
 
         self.data = merged_data
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
         return self
 
 
-    def add_affiliation(self, affiliation: Affiliation =  None, name: str = None, uri: str = None, crossrea_id: int = None, data = None, use_api = True): # type: ignore
+    def add_affiliation(self, affiliation: Affiliation =  None, name: str = None, uri: str = None, crossrea_id: int = None, data = None, use_api = True, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         if type(affiliation) == str:
 
@@ -833,10 +840,16 @@ class Affiliations(Entities):
         
         self.data.append(data)
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
 
-    def add_list(self, affiliations_list: list, use_api: bool = False):
+    def add_list(self, affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False):
         
         for i in affiliations_list:
             if type(i) == Affiliation:
@@ -850,9 +863,15 @@ class Affiliations(Entities):
                         affil = Affiliation.from_series(i)  # type: ignore
                         self.add_affiliation(affiliation = affil, use_api=use_api)
         
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
-    def update_ids(self, sync=False):
+    def update_ids(self, sync=False, drop_duplicates = False, drop_empty_rows=False):
 
         if sync == True:
             self.sync()
@@ -880,7 +899,16 @@ class Affiliations(Entities):
                 affiliation.details.loc[0, 'affiliation_id'] = new_id
                 self.details[new_id] = affiliation
 
-    def update_addresses(self):
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+    def update_addresses(self, sync=True, drop_duplicates = False, drop_empty_rows=False):
+
+        if sync == True:
+            self.sync(drop_duplicates=drop_duplicates,drop_empty_rows=drop_empty_rows)
 
         affiliation_ids = self.details.keys()
 
@@ -899,7 +927,7 @@ class Affiliations(Entities):
 
         self.update_ids()
 
-    def update_from_crossref(self):
+    def update_from_crossref(self, drop_duplicates = False, drop_empty_rows=False):
 
         affiliation_ids = self.details.keys()
 
@@ -916,23 +944,35 @@ class Affiliations(Entities):
                 self.details[new_id] = self.details[a]
                 del self.details[a]
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
 
-    def import_crossrea_ids(self, crossrea_ids: list):
+    def import_crossrea_ids(self, crossrea_ids: list, drop_duplicates = False, drop_empty_rows=False):
 
         for i in crossrea_ids:
 
             auth = Affiliation.from_crossref(i) # type: ignore
             self.add_affiliation(affiliation = auth)
 
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
         self.update_ids()
 
 
-    def from_crossrea_ids(crossrea_ids: list): # type: ignore
+    def from_crossrea_ids(crossrea_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         affiliations = Affiliations()
-        affiliations.import_crossrea_ids(crossrea_ids)
+        affiliations.import_crossrea_ids(crossrea_ids, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates)
 
         return affiliations
 
@@ -942,31 +982,31 @@ class Affiliations(Entities):
     def with_uri(self):
         return self.all[~self.all['uri'].isna()]
 
-    def from_list(affiliations_list: list, use_api: bool = False): # type: ignore
+    def from_list(affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
         affiliations = Affiliations()
-        affiliations.add_list(affiliations_list, use_api=use_api)
+        affiliations.add_list(affiliations_list, use_api=use_api, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return affiliations
     
-    def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False):
+    def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False):
 
         for i in crossref_result.index:
             
             data = crossref_result.loc[i]
             affil = Affiliation.from_crossref_result(crossref_result=data, use_api=use_api) # type: ignore
-            self.add_affiliation(affiliation = affil, use_api=use_api)
+            self.add_affiliation(affiliation = affil, use_api=use_api, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         self.update_ids()
 
 
-    def from_crossref_result(crossref_result: pd.DataFrame, use_api: bool = False): # type: ignore
+    def from_crossref_result(crossref_result: pd.DataFrame, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         affiliations = Affiliations()
-        affiliations.import_crossref_result(crossref_result, use_api=use_api)
+        affiliations.import_crossref_result(crossref_result, use_api=use_api, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return affiliations
 
-def format_affiliations(affiliation_data, use_api = False):
+def format_affiliations(affiliation_data, use_api = False, drop_duplicates = True, drop_empty_rows=True):
         
         result = Affiliations()
 
@@ -981,35 +1021,63 @@ def format_affiliations(affiliation_data, use_api = False):
             and (affil_type != dict)
             ):
             result = Affiliations()
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if affil_type == Affiliations:
             result = affiliation_data
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if affil_type == Affiliation:
             result.add_affiliation(affiliation=affiliation_data, use_api=use_api)
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if affil_type == pd.Series:
             affiliation = Affiliation()
             affiliation.add_series(affiliation_data)
             result.add_affiliation(affiliation=affiliation, use_api=use_api)
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if affil_type == pd.DataFrame:
             result.import_crossref_result(affiliation_data, use_api=use_api) # type: ignore
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
         if affil_type == dict:
             affiliation = Affiliation.from_dict(affiliation_data) # type: ignore
             result.add_affiliation(affiliation = affiliation, use_api=use_api) # type: ignore
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
 
 
         if (affil_type == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == Affiliation):
             result = Affiliations()
             result.add_list(affiliation_data)
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
             return result
             
 
@@ -1018,5 +1086,10 @@ def format_affiliations(affiliation_data, use_api = False):
             for i in affiliation_data:
                 affiliation = Affiliation.from_dict(i) # type: ignore
                 result.add_affiliation(affiliation = affiliation, use_api=use_api) # type: ignore
+            
+            if drop_empty_rows == True:
+                result.drop_empty_rows()
+            if drop_duplicates == True:
+                result.remove_duplicates(drop_empty_rows=drop_empty_rows)
     
             return result
