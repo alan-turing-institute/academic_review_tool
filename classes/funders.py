@@ -645,7 +645,7 @@ class Funders(Entities):
 
         return self
 
-    def remove_duplicates(self, drop_empty_rows = True):
+    def remove_duplicates(self, drop_empty_rows = True, sync = False):
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -655,6 +655,9 @@ class Funders(Entities):
         
         df = df.sort_values(by = ['uri', 'crossref_id', 'website', 'name']).reset_index().drop('index', axis=1)
         self.all = deduplicate(self.all)
+
+        if sync == True:
+            self.sync_details(drop_duplicates=False, drop_empty_rows=False)
 
         return self
 
