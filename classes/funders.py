@@ -613,6 +613,19 @@ class Funders(Entities):
 
         return self
 
+    def remove_duplicates(self, drop_empty_rows = True):
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+        
+        df = self.all.copy(deep=True)
+        df['uri'] = df['uri'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('wwww.', '', regex=False).str.replace('dx.', '', regex=False).str.replace('doi.org/', '', regex=False).str.strip('/')
+        
+        df = df.sort_values(by = ['uri', 'crossref_id', 'website', 'name']).reset_index().drop('index', axis=1)
+        self.all = deduplicate(self.all)
+
+        return self
+
     def sync_all(self):
 
         for i in self.details.keys():
