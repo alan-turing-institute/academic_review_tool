@@ -877,6 +877,7 @@ class Affiliations(Entities):
             self.sync()
 
         for i in self.all.index:
+            
             data = self.all.loc[i].copy(deep=True)
             old_id = self.all.loc[i, 'affiliation_id']
             new_id = generate_affiliation_id(data)

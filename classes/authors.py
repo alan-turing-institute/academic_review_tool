@@ -482,7 +482,7 @@ class Authors(Entities):
     def __len__(self) -> int:
         return len(self.details.keys())
 
-    def remove_duplicates(self, drop_empty_rows = True):
+    def remove_duplicates(self, drop_empty_rows = True, sync=True):
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -494,7 +494,8 @@ class Authors(Entities):
         df = df.sort_values(by = ['orcid', 'google_scholar', 'crossref', 'full_name']).reset_index().drop('index', axis=1)
         self.all = deduplicate(self.all)
 
-        self.sync_details()
+        if sync == True:
+            self.sync_details()
 
         return self
         

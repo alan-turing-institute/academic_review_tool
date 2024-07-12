@@ -823,6 +823,12 @@ class Review:
 
         return output
  
+    def remove_duplicates(self, drop_empty_rows=True, use_api=False):
+
+        self.results.remove_duplicates(drop_empty_rows=drop_empty_rows, update_from_api=use_api) # type: ignore
+        self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
+        self.funders.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
+        self.affiliations.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
 
     def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True):
 
@@ -839,9 +845,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
     def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows = True):
         
@@ -858,6 +862,7 @@ class Review:
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
+    
 
     def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows=True):
         self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
