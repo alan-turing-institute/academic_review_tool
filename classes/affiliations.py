@@ -55,6 +55,8 @@ def generate_affiliation_id(affiliation_data: pd.Series):
         
         affiliation_id = affiliation_id + '-' + location_shortened.lower()
 
+        uid = ''
+        
         if 'uri' in affiliation_data.index:
             uid = affiliation_data['uri']
 
