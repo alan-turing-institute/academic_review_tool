@@ -695,14 +695,14 @@ class Affiliations(Entities):
             a_id = a_data['affiliation_id']
 
             if a_id != None:
-                f = Funder.from_series(a_data) # type: ignore
-                self.details[a_id] = f
+                a = Affiliation.from_series(a_data) # type: ignore
+                self.details[a_id] = a
 
             else:
                 a_id = generate_affiliation_id(a_data)
                 a_data['affiliation_id'] = a_id
-                f = Funder.from_series(a_data) # type: ignore
-                self.details[a_id] = f
+                a = Affiliation.from_series(a_data) # type: ignore
+                self.details[a_id] = a
         
         keys = list(self.details.keys())
         for key in keys:
