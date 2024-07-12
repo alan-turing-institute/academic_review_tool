@@ -1,3 +1,5 @@
+from ..utils.cleaners import deduplicate
+
 from ..importers.crossref import search_funder_works, lookup_funder
 from ..datasets.stopwords.stopwords import all_stopwords
 
@@ -596,6 +598,20 @@ class Funders(Entities):
         for i in funders_list:
             if type(i) == Funder:
                 self.add_funder(funder = i)
+
+    def drop_empty_rows(self):
+
+        ignore_cols = ['funder_id', 'alt_names', 'publications', 'tokens', 'other_links']
+
+        df = self.all.copy(deep=True)
+        df['name'] = df['name'].replace('no_name_given', None)
+        df = df.dropna(axis=0, how='all')
+        drop_cols = [c for c in df.columns if c not in ignore_cols]
+        df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
+
+        self.all = df
+
+        return self
 
     def sync_all(self):
 
