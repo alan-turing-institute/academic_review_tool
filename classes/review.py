@@ -102,7 +102,7 @@ def add_dataframe(self,  dataframe, drop_duplicates = False, drop_empty_rows = F
             self.drop_empty_rows()
         
         if drop_duplicates == True:
-            self.remove_empty_rows()
+            self.remove_duplicates()
 
         if format_authors == True:
             self.format_authors()
@@ -856,8 +856,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -878,8 +877,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -895,8 +893,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -920,8 +917,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -966,8 +962,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
     
     def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
@@ -1185,8 +1180,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         return self
 
@@ -1211,8 +1205,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         return self
     
@@ -1235,8 +1228,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         return self
 
@@ -1783,8 +1775,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if format == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1815,7 +1806,7 @@ class Review:
             self.results.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if format == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1846,7 +1837,7 @@ class Review:
             self.authors.drop_empty_rows()
         
         if drop_duplicates == True:
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows)
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if format == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1876,8 +1867,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if format == True:
             self.format(update_entities=update_attrs, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1924,8 +1914,7 @@ class Review:
             self.authors.drop_empty_rows() # type: ignore
         
         if drop_duplicates == True:
-            self.results.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
-            self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows) # type: ignore
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
         if format == True:
             self.format(update_entities=update_attrs, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
