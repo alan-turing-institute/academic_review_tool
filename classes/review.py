@@ -1104,7 +1104,7 @@ class Review:
         df = scrape_google_scholar_search(url)
         self.results.add_dataframe(df) # type: ignore
     
-    def scrape(self, url = 'request_input', add_to_results=True):
+    def scrape(self, url = 'request_input', add_to_results=True, drop_empty_rows = True, drop_duplicates = True):
 
         if url == 'request_input':
             url = input('URL: ')
@@ -1112,7 +1112,10 @@ class Review:
         df = academic_scraper(url)
 
         if add_to_results == True:
-            self.add_dataframe(df)
+            self.add_dataframe(df, drop_empty_rows=drop_empty_rows)
+        
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
         
         return df
 
