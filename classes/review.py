@@ -1536,6 +1536,10 @@ class Review:
             work_id = data['work_id']
             work_id_stripped = work_id.split('#')[0].strip()
             citations = data['citations']
+
+            if type(citations) == References:
+                citations.update_work_ids()
+
             output[work_id_stripped] = citations
 
         return output
@@ -1550,6 +1554,7 @@ class Review:
             auths = data['authors']
 
             if type(auths) == Authors:
+                auths.update_author_ids()
                 auths = auths.all
 
             output[work_id] = auths
@@ -1568,6 +1573,7 @@ class Review:
             affils = data['affiliations']
 
             if type(affils) == Affiliations:
+                affils.update_ids()
                 affils = affils.all
 
             output[auth_id] = affils
@@ -1584,6 +1590,7 @@ class Review:
             funders = data['funder']
 
             if type(funders) == Funders:
+                funders.update_ids()
                 funders = funders.all
 
             output[work_id] = funders
@@ -1671,14 +1678,31 @@ class Review:
         for v in g.vs:
 
             f_id = v['name']
-            if 'f_id' in self.funders.details.keys():
+
+            if (f_id is not None) and (f_id != ''):
+
+                f_keys = list(self.funders.details.keys())
+                
+                if f_id not in f_keys:
+                    keys_series = pd.Series(f_keys)
+                    keys_masked = keys_series[keys_series.str.contains(f_id)]
+                    if len(keys_masked) > 0:
+                        f_id = list(keys_masked)[0]
+
+                        if f_id in g.vs['name']:
+                            v = g.vs.find(name = f_id)
+                        else:
+                            v['name'] = f_id
+                    else:
+                        continue
+
                 funder_obj = self.funders.details[f_id]
                 pubs = funder_obj.publications
                 details = funder_obj.details
 
                 for c in details.columns:
-                    v[c] = details.loc[0, c]
-                
+                        v[c] = details.loc[0, c]
+                    
                 v['publications'] = pubs
 
 
