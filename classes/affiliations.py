@@ -12,9 +12,14 @@ from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_affiliation_id(affiliation_data: pd.Series):
 
+        affiliation_data = affiliation_data.copy(deep=True).dropna().astype(str).str.lower()
+
         affiliation_id = 'AFFIL:'
 
-        name = affiliation_data['name']
+        if 'name' in affiliation_data.index:
+            name = affiliation_data['name']
+        else:
+            name = ''
 
         if (name == None) or (name == ''):
             name = 'no_name_given'
@@ -36,29 +41,38 @@ def generate_affiliation_id(affiliation_data: pd.Series):
 
         affiliation_id = affiliation_id + '-' + name_shortened.lower()
 
-        location = affiliation_data['location']
-        if type(location) == str:
-            location = location.split(',')
-            location_shortened = location[0].strip()
-            if location[0] != location[-1]:
-                location_shortened = location_shortened + '-' + location[-1].strip()
+        if 'location' in affiliation_data.index:
+            location = affiliation_data['location']
+            if type(location) == str:
+                location = location.split(',')
+                location_shortened = location[0].strip()
+                if location[0] != location[-1]:
+                    location_shortened = location_shortened + '-' + location[-1].strip()
+            else:
+                location_shortened = ''
         else:
             location_shortened = ''
         
         affiliation_id = affiliation_id + '-' + location_shortened.lower()
 
-        uid = affiliation_data['uri']
-        if (uid == None) or (uid == 'None') or (uid == ''):
-            uid = affiliation_data['crossref_id']
+        if 'uri' in affiliation_data.index:
+            uid = affiliation_data['uri']
+
             if (uid == None) or (uid == 'None') or (uid == ''):
-                uid = affiliation_data['website']
-                if (uid == None) or (uid == 'None') or (uid == ''):
-                        uid = ''
+                if 'crossref_id' in affiliation_data.index:
+                    uid = affiliation_data['crossref_id']
+
+                    if (uid == None) or (uid == 'None') or (uid == ''):
+                        if 'website' in affiliation_data.index:
+                            uid = affiliation_data['website']
+
+                            if (uid == None) or (uid == 'None') or (uid == ''):
+                                uid = ''
         
-        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:30]
+        uid_shortened = uid.replace('https://', '').replace('http://', '').replace('www.', '').replace('dx.','').replace('doi.org/','').replace('user=','')[:24]
 
         affiliation_id = affiliation_id + '-' + uid_shortened
-        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace("'s", '').replace('\r', '').replace('\n', '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('AFFIL:-', 'AFFIL:').strip('-')
+        affiliation_id = affiliation_id.replace('AFFIL:-', 'AFFIL:').replace("'s", '').replace('\r', '').replace('\n', '').replace('.', '').replace("'", "").replace('"', '').replace('(','').replace(')','').replace('`','').replace('’','').replace('--', '-').replace('AFFIL:-', 'AFFIL:').replace(' ', '-').strip('-')
 
         return affiliation_id
 
