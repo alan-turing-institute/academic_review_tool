@@ -1616,13 +1616,17 @@ class Review:
             if (auth_id is not None) and (auth_id != ''):
 
                 auth_keys = list(self.authors.details.keys())
-                
+
                 if auth_id not in auth_keys:
                     keys_series = pd.Series(auth_keys)
                     keys_masked = keys_series[keys_series.str.contains(auth_id)]
                     if len(keys_masked) > 0:
                         auth_id = list(keys_masked)[0]
-                        v['name'] = auth_id
+
+                        if auth_id in g.vs['name']:
+                            v = g.vs.find(name = auth_id)
+                        else:
+                            v['name'] = auth_id
                     else:
                         continue
 
