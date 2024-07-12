@@ -664,7 +664,7 @@ class Review:
         if update_authors == True:
             self.update_author_attrs(ignore_case=ignore_case)
 
-        affils_data = self.affiliations.all[['affiliation_id', 'name', 'uri', 'crossref_id', 'website']]
+        affils_data = self.affiliations.all[['affiliation_id', 'name', 'uri', 'website']]
         affils_data = affils_data.dropna(axis=1, how='all')
 
         global results_cols
