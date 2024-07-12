@@ -1612,22 +1612,36 @@ class Review:
         for v in g.vs:
 
             auth_id = v['name']
-            auth_obj = self.authors.details[auth_id]
-            if 'publications' in auth_obj.__dict__.keys():
-                pubs = auth_obj.publications
-            else:
-                pubs = []
-            if 'affiliations' in auth_obj.__dict__.keys():
-                affils = auth_obj.affiliations
-            else:
-                affils = []
-            details = auth_obj.details
 
-            for c in details.columns:
-                v[c] = details.loc[0, c]
-            
-            v['publications'] = pubs
-            v['affiliations'] = affils
+            if (auth_id is not None) and (auth_id != ''):
+
+                auth_keys = list(self.authors.details.keys())
+                
+                if auth_id not in auth_keys:
+                    keys_series = pd.Series(auth_keys)
+                    keys_masked = keys_series[keys_series.str.contains(auth_id)]
+                    if len(keys_masked) > 0:
+                        auth_id = list(keys_masked)[0]
+                        v['name'] = auth_id
+                    else:
+                        continue
+
+                auth_obj = self.authors.details[auth_id]
+                if 'publications' in auth_obj.__dict__.keys():
+                    pubs = auth_obj.publications
+                else:
+                    pubs = []
+                if 'affiliations' in auth_obj.__dict__.keys():
+                    affils = auth_obj.affiliations
+                else:
+                    affils = []
+                details = auth_obj.details
+
+                for c in details.columns:
+                    v[c] = details.loc[0, c]
+                
+                v['publications'] = pubs
+                v['affiliations'] = affils
 
         network = Network(graph = g)
 
