@@ -56,7 +56,7 @@ def generate_affiliation_id(affiliation_data: pd.Series):
         affiliation_id = affiliation_id + '-' + location_shortened.lower()
 
         uid = ''
-        
+
         if 'uri' in affiliation_data.index:
             uid = affiliation_data['uri']
 
@@ -703,11 +703,11 @@ class Affiliations(Entities):
 
         affiliation_id = str(affiliation.details.loc[0, 'affiliation_id'])
 
-        if affiliation_id in self.all['affiliation_id'].to_list():
-            all_copy = self.all.copy(deep=True).astype(str)
-            id_count = len(all_copy[all_copy['affiliation_id'].str.contains(affiliation_id)]) # type: ignore
-            affiliation_id = affiliation_id + f'#{id_count + 1}'
-            affiliation.details.loc[0, 'affiliation_id'] = affiliation_id
+        # if affiliation_id in self.all['affiliation_id'].to_list():
+        #     all_copy = self.all.copy(deep=True).astype(str)
+        #     id_count = len(all_copy[all_copy['affiliation_id'].str.contains(affiliation_id)]) # type: ignore
+        #     affiliation_id = affiliation_id + f'#{id_count + 1}'
+        #     affiliation.details.loc[0, 'affiliation_id'] = affiliation_id
 
         self.all = pd.concat([self.all, affiliation.details])
         self.all = self.all.reset_index().drop('index', axis=1)
@@ -771,11 +771,11 @@ class Affiliations(Entities):
             new_id = generate_affiliation_id(data)
             new_id = str(new_id)
 
-            if new_id in self.all['affiliation_id'].to_list():
-                df_copy = self.all.copy(deep=True)
-                df_copy = df_copy.astype(str)
-                id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)])
-                new_id = new_id + f'#{id_count + 1}'
+            # if new_id in self.all['affiliation_id'].to_list():
+            #     df_copy = self.all.copy(deep=True)
+            #     df_copy = df_copy.astype(str)
+            #     id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)])
+            #     new_id = new_id + f'#{id_count + 1}'
 
             self.all.at[i, 'affiliation_id'] = new_id
             if old_id in self.details.keys():
