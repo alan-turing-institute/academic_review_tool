@@ -724,7 +724,7 @@ class Review:
     def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True, drop_duplicates = True, drop_empty_rows=True):
 
         if format == True:
-            self.format()
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if update_attrs == True:
             self.update_author_attrs(ignore_case=ignore_case, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)

@@ -210,14 +210,18 @@ def generate_coauthors_network(coauthors_dict: dict) -> Graph:
         
         
         # Adding edges by iterating through vertices and retrieving links associated
-        for vertex in g.vs:
-            
-            # Getting vertex id
-            auth_id = vertex['name']
+        for auth_id in all_auths:
             
             # Ignoring None and empty string vertex IDs
             if (auth_id != None) and (len(auth_id) > 0):
                 
+                # Adding vertex if none in graph
+                if auth_id not in g.vs['name']:
+                    g.add_vertex(name=auth_id)
+
+                # Getting vertex
+                vertex = g.vs.find(name=auth_id)
+            
                 # Retrieving vertex index
                 v_index = vertex.index
                 
@@ -228,6 +232,10 @@ def generate_coauthors_network(coauthors_dict: dict) -> Graph:
                 if len(v_edges) > 0:
                     
                     for author in v_edges:
+
+                        if author not in g.vs['name']:
+                            g.add_vertex(name=author)
+
                         end_index = g.vs.find(name = author).index
                         df_index = coauthors_dict[auth_id][coauthors_dict[auth_id]['author_id'] == author].index.to_list()[0]
                         weight = coauthors_dict[auth_id].loc[df_index, 'frequency']
@@ -346,6 +354,9 @@ def generate_citations_network(citations_dict: dict) -> Graph:
             
             # Ignoring None and empty string vertex IDs
             if (work_id != None) and (len(work_id) > 0):
+                
+                if work_id not in g.vs['name']:
+                    g.add_vertex(name=work_id)
 
                 # Getting vertex object
                 vertex = g.vs.find(name = work_id)
@@ -386,12 +397,11 @@ def generate_citations_network(citations_dict: dict) -> Graph:
 
                         citation_data = refs_obj.loc[i] # type: ignore
                         citation = citation_data['work_id']
-                        citation_stripped = citation.split('#')[0].strip()
 
-                        if citation_stripped not in g.vs['name']:
-                             g.add_vertex(name=citation_stripped)
+                        if citation not in g.vs['name']:
+                             g.add_vertex(name=citation)
 
-                        end_index = g.vs.find(name = citation_stripped).index
+                        end_index = g.vs.find(name = citation).index
 
                         for i in citation_data.index.to_list():
                              data = citation_data[i]
@@ -401,7 +411,7 @@ def generate_citations_network(citations_dict: dict) -> Graph:
                         Graph.add_edges(g, 
                                         [(v_index, end_index)], 
                                         attributes={
-                                           'name': f'{work_id} -> {citation_stripped}'
+                                           'name': f'{work_id} -> {citation}'
                                            })
         
         g = g.simplify(combine_edges='first')
