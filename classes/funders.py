@@ -575,10 +575,10 @@ class Funders(Entities):
 
         funder_id = str(funder.details.loc[0, 'funder_id'])
 
-        if funder_id in self.all['funder_id'].to_list():
-            id_count = len(self.all[self.all['funder_id'].str.contains(funder_id)]) # type: ignore
-            funder_id = funder_id + f'#{id_count + 1}'
-            funder.details.loc[0, 'funder_id'] = funder_id
+        # if funder_id in self.all['funder_id'].to_list():
+        #     id_count = len(self.all[self.all['funder_id'].str.contains(funder_id)]) # type: ignore
+        #     funder_id = funder_id + f'#{id_count + 1}'
+        #     funder.details.loc[0, 'funder_id'] = funder_id
 
         self.all = pd.concat([self.all, funder.details])
         self.all = self.all.reset_index().drop('index', axis=1)
@@ -640,9 +640,10 @@ class Funders(Entities):
                 all_copy.loc[auth_index] = series
                 self.all = all_copy
 
-    def update_ids(self):
-
-        self.sync_all()
+    def update_ids(self, sync=False):
+        
+        if sync == True:
+            self.sync_all()
 
         for i in self.all.index:
             all_copy = self.all.copy(deep=True)
@@ -650,12 +651,11 @@ class Funders(Entities):
             old_id = all_copy.loc[i, 'funder_id']
             new_id = generate_funder_id(data)
 
-            if new_id in self.all['funder_id'].to_list():
-                df_copy = self.all.copy(deep=True)
-                df_copy = df_copy.astype(str)
-                id_count = len(df_copy[df_copy['funder_id'].str.contains(new_id)]) # type: ignore
-                new_id = new_id + f'#{id_count + 1}'
-
+            # if new_id in self.all['funder_id'].to_list():
+            #     df_copy = self.all.copy(deep=True)
+            #     df_copy = df_copy.astype(str)
+            #     id_count = len(df_copy[df_copy['funder_id'].str.contains(new_id)]) # type: ignore
+            #     new_id = new_id + f'#{id_count + 1}'
 
             all_copy2 = self.all.copy(deep=True)
             all_copy2.loc[i, 'funder_id'] = new_id
