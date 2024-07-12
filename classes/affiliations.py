@@ -627,6 +627,20 @@ class Affiliations(Entities):
     def __len__(self) -> int:
         return len(self.details.keys())
 
+    def drop_empty_rows(self):
+
+        ignore_cols = ['affiliation_id', 'address', 'email', 'other_links']
+
+        df = self.all.copy(deep=True)
+        df['name'] = df['name'].replace('no_name_given', None)
+        df = df.dropna(axis=0, how='all')
+        drop_cols = [c for c in df.columns if c not in ignore_cols]
+        df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
+
+        self.all = df
+
+        return self
+
     def merge(self, affiliations):
 
         left = self.all.copy(deep=True)
