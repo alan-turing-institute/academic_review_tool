@@ -517,8 +517,6 @@ class Authors(Entities):
         ----------
         """
 
-        author_class = Author()
-
         super().__init__()
         
         global author_cols
