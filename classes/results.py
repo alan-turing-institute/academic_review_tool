@@ -307,7 +307,7 @@ class Results(pd.DataFrame):
         for i in doi_in_link.index:
             link = str(doi_in_link.loc[i, 'link'])
             doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip()
-            doi_in_link.loc[i, 'doi'] = doi
+            self.loc[i, 'doi'] = doi
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=False)
