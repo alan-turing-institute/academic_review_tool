@@ -1,6 +1,7 @@
 
 from ..utils.cleaners import deduplicate
 from ..importers.orcid import lookup_orcid, get_author, get_author_works
+from ..importers.orcid import search as search_orcid # type: ignore
 from .entities import Entity, Entities
 from .results import Results
 from .affiliations import Affiliation, Affiliations, format_affiliations
@@ -886,6 +887,19 @@ class Authors(Entities):
             output[auth_id] = affiliation
         
         return output
+    
+    def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
+
+        res = search_orcid(query=query)
+        res = res.rename({'credit-name': 'full_name', 'given-names': 'given_name', 'family-name': 'family_name', 'institution-name': 'affiliations', 'orcid-id': 'orcid'}) # type: ignore
+
+        if add_to_authors == True:
+
+            self.all = pd.concat([self.all, res])
+            self.sync_details()
+            self.drop_empty_rows()
+        
+        return res
 
 def format_authors(author_data, drop_duplicates = False, drop_empty_rows=False):
         
@@ -918,3 +932,7 @@ def format_authors(author_data, drop_duplicates = False, drop_empty_rows=False):
             result.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         return result
+
+
+
+
