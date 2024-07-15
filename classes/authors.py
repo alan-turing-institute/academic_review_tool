@@ -1,11 +1,13 @@
+
 from ..utils.cleaners import deduplicate
-from ..importers.orcid import lookup_orcid
+from ..importers.orcid import lookup_orcid, get_author, get_author_works
 from .entities import Entity, Entities
 from .results import Results
 from .affiliations import Affiliation, Affiliations, format_affiliations
 
 import pandas as pd
 import numpy as np
+from pyorcid import Orcid # type: ignore
 
 def generate_author_id(author_data: pd.Series):
 
@@ -149,13 +151,15 @@ class Author(Entity):
                                 'given_name',
                                 'family_name',
                                 'email',
+                                'keywords',
                                 'affiliations',
                                 'publications',
                                 'orcid',
                                 'google_scholar',
                                 'scopus',
                                 'crossref',
-                                'other_links'
+                                'other_links',
+                                'other_ids'
                                 ],
                                 dtype = object)
         
@@ -327,35 +331,134 @@ class Author(Entity):
     
     def import_orcid(self, orcid_id: str):
 
-        auth_df = lookup_orcid(orcid_id)
-        cols = auth_df.columns.to_list()
+        try:
+            auth_res = get_author(orcid_id)
+            auth_record = auth_res.record()
 
-        if len(auth_df) > 0:
+        except:
+            auth_record = {}
+            auth_res = None
 
-            author_details = auth_df.loc[0]
+            try:
+                auth_df = lookup_orcid(orcid_id)
+                cols = auth_df.columns.to_list()
 
-            if 'name' in cols:
-                self.details.loc[0, 'given_name'] = author_details['name']
-            
-            if 'family name' in cols:
-                self.details.loc[0, 'family_name'] = author_details['family name']
-            
-            if 'emails' in cols:
-                self.details.at[0, 'email'] = author_details['emails']
-            
-            if 'employment' in cols:
-                self.details.at[0, 'affiliations'] = author_details['employment']
-            
-            if 'works' in cols:
-                self.details.at[0, 'publications'] = author_details['works']
-            
-            self.details.loc[0, 'orcid'] = orcid_id
+                if len(auth_df) > 0:
 
-            self.update_full_name()
-        
+                    author_details = auth_df.loc[0]
+
+                    if 'name' in cols:
+                        self.details.loc[0, 'given_name'] = author_details['name']
+                    
+                    if 'family name' in cols:
+                        self.details.loc[0, 'family_name'] = author_details['family name']
+                    
+                    if 'emails' in cols:
+                        self.details.at[0, 'email'] = author_details['emails']
+                    
+                    if 'employment' in cols:
+                        self.details.at[0, 'affiliations'] = author_details['employment']
+                    
+                    if 'works' in cols:
+                        self.details.at[0, 'publications'] = author_details['works']
+                    
+                    self.details.loc[0, 'orcid'] = orcid_id
+                    self.details.loc[0, 'orcid'] = orcid_id
+                    self.update_full_name()
+
+                    return
+
+            except:
+                pass
+
+
+        if 'person' in auth_record.keys():
+            author_details = auth_record['person']
         else:
-            self.details.loc[0, 'orcid'] = orcid_id
-            self.update_full_name()
+            author_details = {}
+        
+        details_keys = author_details.keys()
+        
+        if 'name' in details_keys:
+            
+            if 'given-names' in author_details['name']:
+                given_list = list(author_details['name']['given-names'].values())
+                given = ' '.join(given_list)
+                self.details.loc[0, 'given_name'] = given
+
+            if 'family-name' in author_details['name']:
+                family_list = list(author_details['name']['family-name'].values())
+                family = ' '.join(family_list)
+                self.details.loc[0, 'family_name'] = family
+            
+        if 'emails' in details_keys:
+            emails_dict = author_details['emails']
+            if type(emails_dict) == dict:
+                if 'email' in emails_dict.keys():
+                    emails_data = emails_dict['email']
+                    emails_list = []
+
+                    if (type(emails_data) == list) and (len(emails_data)>0):
+                        for i in emails_data:
+                            email_addr = i['email']
+                            emails_list.append(email_addr)
+
+                    self.details.at[0, 'email'] = emails_list
+        
+        if 'keywords' in details_keys:
+            kws_dict = author_details['keywords']
+            if type(kws_dict) == dict:
+                if 'keyword' in kws_dict.keys():
+                    kws_data = kws_dict['keyword']
+                    kws_list = []
+
+                    if (type(kws_data) == list) and (len(kws_data)>0):
+                        for i in kws_data:
+                            kwd = i['content']
+                            kws_list.append(kwd)
+
+                    self.details.at[0, 'keywords'] = kws_list
+
+        if 'external-identifiers' in details_keys:
+            ext_ids_dict = author_details['external-identifiers']
+            if type(ext_ids_dict) == dict:
+                if 'external-identifier' in ext_ids_dict.keys():
+                    ext_ids_data = ext_ids_dict['external-identifier']
+                    ext_ids_formatted = {}
+
+                    if (type(ext_ids_data) == list) and (len(ext_ids_data)>0):
+                        for i in ext_ids_data:
+                            id_type = i['external-id-type']
+                            value = i['external-id-value']
+                            url = i['external-id-url']
+                            ext_ids_formatted[id_type] = {'id': value, 'url': url}
+
+                    self.details.at[0, 'keywords'] = ext_ids_formatted
+
+        
+        
+        self.details.loc[0, 'orcid'] = orcid_id
+
+        if type(auth_res) == Orcid:
+            try:
+                works = auth_res.works() # type: ignore
+            except:
+                works = tuple()
+        else:
+            works = tuple()
+        
+        if len(works) > 0:
+
+            works_list = works[0]
+
+            df = pd.DataFrame(works_list)
+            df = df.rename(columns={'publication-date': 'date', 'journal title':'source', 'url':'link'})
+
+            self.publications.add_dataframe(df)
+            self.publications.drop_empty_rows()
+            self.publications.remove_duplicates(drop_empty_rows=True)
+        
+        self.update_full_name()
         
 
     def from_crossref(crossref_result: dict): # type: ignore
@@ -406,21 +509,11 @@ class Authors(Entities):
         ----------
         """
 
-        super().__init__()
+        author_class = Author()
 
-        self.all = pd.DataFrame(columns = [
-                                'author_id',
-                                'full_name',
-                                'given_name',
-                                'family_name',
-                                'email',
-                                'affiliations',
-                                'publications',
-                                'orcid',
-                                'google_scholar',
-                                'crossref',
-                                'other_links'
-                                ],
+        super().__init__()
+        
+        self.all = pd.DataFrame(columns = author_class.details.columns.to_list(),
                                 dtype = object)
         
 
