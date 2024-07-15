@@ -453,6 +453,7 @@ class Author(Entity):
 
             df = pd.DataFrame(works_list)
             df = df.rename(columns={'publication-date': 'date', 'journal title':'source', 'url':'link'})
+            df = df.drop(['organization', 'organization-address'], axis=1)
 
             self.publications.add_dataframe(df)
             self.publications.drop_empty_rows()

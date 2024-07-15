@@ -301,7 +301,7 @@ class Results(pd.DataFrame):
 
     def correct_dois(self, drop_duplicates = True):
 
-        no_doi = self[(self['doi'] == None) | (self['doi'] == np.nan) | (self['doi'] == 'None')]
+        no_doi = self[~self['doi'].isna()]
         doi_in_link = no_doi[no_doi['link'].str.contains('doi.org')]
 
         for i in doi_in_link.index:
