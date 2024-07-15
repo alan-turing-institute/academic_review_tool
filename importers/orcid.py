@@ -82,6 +82,22 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
     orcidSearch = OrcidSearch(orcid_access_token=public_access_token)
     results = orcidSearch.search(query=query, start=start, rows=limit)
 
+    error_msg = ''
+    if 'response-code' in results.keys():
+        error_msg = f'{error_msg}Response code: {results["response-code"]}.'
+    
+    if 'error-code' in results.keys():
+        error_msg = f'{error_msg} Error code: {results["error-code"]}.'
+    
+    if 'developer-message' in results.keys():
+        error_msg = f'{error_msg} {results["developer-message"]}.'
+
+    if 'more-info' in results.keys():
+        error_msg = f'{error_msg} For more info, see: {results["more-info"]}.'
+
+    if len(error_msg) > 0:
+        raise ValueError(error_msg)
+
     if 'num-found' in results.keys():
         num_found = results['num-found']
         print(f'{num_found} results found') # type: ignore
@@ -91,7 +107,7 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
     else:
         results_list = []
 
-    if (type(output) == str) and (output.lower().strip() == 'orcidsearch'):
+    if (output == dict) or (output.lower().strip() == 'dict'):
         return results
 
     if (output == list) or (output.lower().strip() == 'list'):
