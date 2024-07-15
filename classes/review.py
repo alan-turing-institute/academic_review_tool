@@ -1391,6 +1391,9 @@ class Review:
         
         return df
 
+    def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
+        return self.authors.search_orcid(query=query, add_to_authors=add_to_authors)
+
     def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format_authors = True, update_from_doi = False):
 
         iteration = 1
