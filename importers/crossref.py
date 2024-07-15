@@ -1,4 +1,4 @@
-"""Functions to load and parse JSTOR database files"""
+"""Functions to interface with the Crossref API"""
 
 from ..utils.basics import results_cols
 from ..utils.cleaners import is_int
