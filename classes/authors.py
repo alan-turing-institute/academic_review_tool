@@ -31,10 +31,10 @@ def get_full_name(series: pd.Series):
             given = series.loc['given_name']
             family = series.loc['family_name']
 
-            if given == None:
+            if (given is None) or (given is np.nan):
                 given = ''
             
-            if family == None:
+            if (family is None) or (family is np.nan):
                 family = ''
 
             if ((type(family) == str) and (',' in family)) and ((given == None) or (given == 'None') or (given == '')):
