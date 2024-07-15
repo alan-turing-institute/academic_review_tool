@@ -96,7 +96,7 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
         error_msg = f'{error_msg} For more info, see: {results["more-info"]}.'
 
     if len(error_msg) > 0:
-        raise ValueError(error_msg)
+        raise ValueError(f'{error_msg}')
 
     if 'num-found' in results.keys():
         num_found = results['num-found']
