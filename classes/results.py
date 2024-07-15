@@ -301,12 +301,12 @@ class Results(pd.DataFrame):
 
     def correct_dois(self, drop_duplicates = True):
 
-        no_doi = self[~self['doi'].isna()]
+        no_doi = self[self['doi'].isna()]
         doi_in_link = no_doi[no_doi['link'].str.contains('doi.org')]
 
         for i in doi_in_link.index:
             link = str(doi_in_link.loc[i, 'link'])
-            doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip()
+            doi = link.replace('http://', '').replace('https://', '').replace('www.', '').replace('dx.', '').replace('doi.org/', '').strip('/').strip()
             self.loc[i, 'doi'] = doi
         
         if drop_duplicates == True:
