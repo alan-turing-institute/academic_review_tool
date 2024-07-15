@@ -891,7 +891,7 @@ class Authors(Entities):
     def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
 
         res = search_orcid(query=query)
-        res = res.rename({'credit-name': 'full_name', 'given-names': 'given_name', 'family-name': 'family_name', 'institution-name': 'affiliations', 'orcid-id': 'orcid'}) # type: ignore
+        res = res.rename(columns={'credit-name': 'full_name', 'given-names': 'given_name', 'family-name': 'family_name', 'institution-name': 'affiliations', 'orcid-id': 'orcid'}) # type: ignore
 
         if add_to_authors == True:
 
