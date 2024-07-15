@@ -10,10 +10,10 @@ import pandas as pd
 import numpy as np
 from pyorcid import Orcid # type: ignore
 
-def get_full_name(dataframe: pd.DataFrame):
+def get_full_name(series: pd.Series):
 
-            given = dataframe.loc[0, 'given_name']
-            family = dataframe.loc[0, 'family_name']
+            given = series.loc['given_name']
+            family = series.loc['family_name']
 
             if given == None:
                 given = ''
@@ -24,10 +24,10 @@ def get_full_name(dataframe: pd.DataFrame):
             if ((type(family) == str) and (',' in family)) and ((given == None) or (given == 'None') or (given == '')):
                 split_name = family.split(',')
                 given = split_name[0].strip()
-                dataframe.loc[0, 'given_name'] = given
+                series.loc['given_name'] = given
 
                 family = split_name[1].strip()
-                dataframe.loc[0, 'family_name'] = family
+                series.loc['family_name'] = family
 
             full = given + ' ' + family # type: ignore
             full = full.strip()
@@ -35,7 +35,7 @@ def get_full_name(dataframe: pd.DataFrame):
             if (full == '') or (full == ' '):
                 full = 'no_name_given'
 
-            full_name = dataframe.loc[0, 'full_name']
+            full_name = series.loc[0, 'full_name']
             if (full_name == None) or (full_name == 'None') or (full_name == '') or (full_name == 'no_name_given'):
                 result = full
             else:
@@ -253,37 +253,8 @@ class Author(Entity):
         return str(self.details.loc[0, 'full_name'])
     
     def get_full_name(self):
-
-            given = self.details.loc[0, 'given_name']
-            family = self.details.loc[0, 'family_name']
-
-            if given == None:
-                given = ''
-            
-            if family == None:
-                family = ''
-
-            if ((type(family) == str) and (',' in family)) and ((given == None) or (given == 'None') or (given == '')):
-                split_name = family.split(',')
-                given = split_name[0].strip()
-                self.details.loc[0, 'given_name'] = given
-
-                family = split_name[1].strip()
-                self.details.loc[0, 'family_name'] = family
-
-            full = given + ' ' + family # type: ignore
-            full = full.strip()
-
-            if (full == '') or (full == ' '):
-                full = 'no_name_given'
-
-            full_name = self.details.loc[0, 'full_name']
-            if (full_name == None) or (full_name == 'None') or (full_name == '') or (full_name == 'no_name_given'):
-                result = full
-            else:
-                result = full_name
-
-            return result
+        series = self.details.loc[0]
+        return get_full_name(series=series) # type: ignore
 
 
     def update_full_name(self):
@@ -675,6 +646,15 @@ class Authors(Entities):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         return self
+
+    def update_full_names(self):
+
+        for i in self.all.index:
+            full_name = get_full_name(self.all.loc[i])
+            self.all.loc[i, 'full_name'] = full_name
+        
+        self.update_author_ids()
+        self.sync_details()
 
     def add_author(self, author: Author, data = None, drop_duplicates = True, drop_empty_rows = False, update_from_orcid = False):
 
