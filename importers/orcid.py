@@ -82,8 +82,9 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
     orcidSearch = OrcidSearch(orcid_access_token=public_access_token)
     results = orcidSearch.search(query=query, start=start, rows=limit)
 
-    num_found = results['num-found']
-    print(f'{num_found} results found') # type: ignore
+    if 'num-found' in results.keys():
+        num_found = results['num-found']
+        print(f'{num_found} results found') # type: ignore
 
     results_list = results['expanded-result']
 
