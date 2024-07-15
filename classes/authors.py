@@ -650,8 +650,11 @@ class Authors(Entities):
     def update_full_names(self):
 
         for i in self.all.index:
-            full_name = get_full_name(self.all.loc[i])
-            self.all.loc[i, 'full_name'] = full_name
+            new = get_full_name(self.all.loc[i])
+            old = self.all.loc[i, 'full_name']
+
+            if (type(old) != str) or ((type(old) == str) and (len(old) == 0)) or (old is None) or (old == '') or (old is np.nan):
+                self.all.loc[i, 'full_name'] = new
         
         self.update_author_ids()
         self.sync_details()
@@ -909,7 +912,7 @@ class Authors(Entities):
         if add_to_authors == True:
 
             self.all = pd.concat([self.all, res])
-            self.sync_details()
+            self.update_full_names()
             self.drop_empty_rows()
         
         return res
