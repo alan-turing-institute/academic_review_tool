@@ -139,3 +139,5 @@ def save_summary(self: Orcid, file_name: str = 'request_input', file_path: str =
     new_addr = file_path + '/' + file_name + '.md'
 
     self.generate_markdown_file(output_file=new_addr)
+
+Orcid.save_summary = save_summary
