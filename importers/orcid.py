@@ -86,7 +86,10 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
         num_found = results['num-found']
         print(f'{num_found} results found') # type: ignore
 
-    results_list = results['expanded-result']
+    if 'expanded-result' in results.keys():
+        results_list = results['expanded-result']
+    else:
+        results_list = []
 
     if (output == list) or (output.lower().strip() == 'list'):
         return results_list
