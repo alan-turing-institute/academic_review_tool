@@ -910,6 +910,8 @@ class Authors(Entities):
         res = search_orcid(query=query)
         res = res.rename(columns={'credit-name': 'full_name', 'given-names': 'given_name', 'family-name': 'family_name', 'institution-name': 'affiliations', 'orcid-id': 'orcid'}) # type: ignore
 
+        res = res.replace(np.nan, '')
+
         if add_to_authors == True:
 
             self.all = pd.concat([self.all, res])
