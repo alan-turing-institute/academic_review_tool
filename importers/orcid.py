@@ -7,8 +7,10 @@ from ..internet.webanalysis import is_url
 from time import sleep
 
 from requests import RequestException
+from pathlib import Path
+
 import pyorcid # type: ignore
-from pyorcid import OrcidAuthentication, Orcid # type: ignore
+from pyorcid import OrcidAuthentication, Orcid, OrcidSearch # type: ignore
 
 import pandas as pd
 import numpy as np
@@ -69,3 +71,48 @@ def get_author_works(orcid_id = 'request_input', output = 'dataframe'):
     
     if output == 'dataframe':
         return pd.DataFrame(works_list)
+
+def search(query: str = 'request_input', start: int = 0, limit: int = 1000, output: str = 'dataframe'):
+
+    if query == 'request_input':
+        query = input('Search query: ')
+
+    global public_access_token
+    
+    orcidSearch = OrcidSearch(orcid_access_token=public_access_token)
+    results = orcidSearch.search(query=query, start=start, rows=limit)
+
+    num_found = results['num-found']
+    print(f'{num_found} results found') # type: ignore
+
+    results_list = results['expanded-result']
+
+    if (output == list) or (output.lower().strip() == 'list'):
+        return results_list
+    
+    if (output == pd.DataFrame) or (output.lower().strip() == 'dataframe'):
+        return pd.DataFrame(results_list)
+
+
+
+    
+
+
+def save_summary(self: Orcid, file_name: str = 'request_input', file_path: str = 'request_input'):
+
+    if file_name == 'request_input':
+        file_name = input('File name: ')
+    
+    file_name = file_name.strip('.md')
+    
+    if file_path == 'request_input':
+        file_path = input('File path: ')
+    
+    path_obj = Path(file_path)
+
+    if path_obj.exists() == False:
+        raise ValueError('File path {file_path} does not exist')
+
+    new_addr = file_path + '/' + file_name + '.md'
+
+    self.generate_markdown_file(output_file=new_addr)
