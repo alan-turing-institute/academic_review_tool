@@ -17,13 +17,13 @@ The Academic Review Tool (ART) is a package for performing academic reviews and 
 ART is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale.
 
 The tool's functionalities include:
-* Searching for works using keywords, authors, funders, and other information.
+* Searching for works using keywords, dates, authors, funders, and other information.
 * Searching for authors and their works.
 * Searching for funders and their funded works.
 * Looking up DOIs, ISBNs, ISSNs, ORCID IDs, URLs, and other unique identifiers.
 * Scraping academic repositories and websites.
 * Citation and weblink crawling.
-* Citationa and coauthorship analysis.
+* Citation and coauthorship analysis.
 * Generating networks representing:
     * Citations and references
     * Coauthors
@@ -35,9 +35,9 @@ ART uses the following APIs:
 * ORCID
 * Geopy / Nominatim
 
+The tool is object-oriented and leverages Pandas, Numpy, iGraph, and other standard Python libraries for ease of use. 
 
-
-It provides a Python package which bundles functionality for case management, item/evidence comparisons, triangulation, checking for corroboration, data cleaning, metadata analysis, internet analysis, network analysis, web crawling, and more. IDEA can read and write your results to a large variety of file types (e.g. .xlsx, .csv, .txt, .json, .graphML).
+ART can read and write your results to a large variety of file types (e.g. .xlsx, .csv, .txt, .json, .graphML).
 
 ## Beginners Guide
 
