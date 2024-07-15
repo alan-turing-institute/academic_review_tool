@@ -10,6 +10,39 @@ import pandas as pd
 import numpy as np
 from pyorcid import Orcid # type: ignore
 
+def get_full_name(dataframe: pd.DataFrame):
+
+            given = dataframe.loc[0, 'given_name']
+            family = dataframe.loc[0, 'family_name']
+
+            if given == None:
+                given = ''
+            
+            if family == None:
+                family = ''
+
+            if ((type(family) == str) and (',' in family)) and ((given == None) or (given == 'None') or (given == '')):
+                split_name = family.split(',')
+                given = split_name[0].strip()
+                dataframe.loc[0, 'given_name'] = given
+
+                family = split_name[1].strip()
+                dataframe.loc[0, 'family_name'] = family
+
+            full = given + ' ' + family # type: ignore
+            full = full.strip()
+
+            if (full == '') or (full == ' '):
+                full = 'no_name_given'
+
+            full_name = dataframe.loc[0, 'full_name']
+            if (full_name == None) or (full_name == 'None') or (full_name == '') or (full_name == 'no_name_given'):
+                result = full
+            else:
+                result = full_name
+
+            return result
+
 def generate_author_id(author_data: pd.Series):
 
         author_data = author_data.copy(deep=True).dropna().astype(str).str.lower()
