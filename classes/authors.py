@@ -10,6 +10,22 @@ import pandas as pd
 import numpy as np
 from pyorcid import Orcid # type: ignore
 
+author_cols = ['author_id',
+                                'full_name',
+                                'given_name',
+                                'family_name',
+                                'email',
+                                'keywords',
+                                'affiliations',
+                                'publications',
+                                'orcid',
+                                'google_scholar',
+                                'scopus',
+                                'crossref',
+                                'other_links',
+                                'other_ids'
+                                ]
+
 def get_full_name(series: pd.Series):
 
             given = series.loc['given_name']
@@ -178,23 +194,9 @@ class Author(Entity):
             family_name = split_name[1].strip()
 
         
+        global author_cols
 
-        self.details = pd.DataFrame(columns = [
-                                'author_id',
-                                'full_name',
-                                'given_name',
-                                'family_name',
-                                'email',
-                                'keywords',
-                                'affiliations',
-                                'publications',
-                                'orcid',
-                                'google_scholar',
-                                'scopus',
-                                'crossref',
-                                'other_links',
-                                'other_ids'
-                                ],
+        self.details = pd.DataFrame(columns = author_cols,
                                 dtype = object)
         
         
@@ -519,7 +521,8 @@ class Authors(Entities):
 
         super().__init__()
         
-        self.all = pd.DataFrame(columns = author_class.details.columns.to_list(),
+        global author_cols
+        self.all = pd.DataFrame(columns = author_cols,
                                 dtype = object)
         
 
