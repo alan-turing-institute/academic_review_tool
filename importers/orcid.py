@@ -91,6 +91,9 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
     else:
         results_list = []
 
+    if (type(output) == str) and (output.lower().strip() == 'orcidsearch'):
+        return results
+
     if (output == list) or (output.lower().strip() == 'list'):
         return results_list
     
