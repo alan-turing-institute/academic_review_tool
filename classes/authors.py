@@ -51,7 +51,7 @@ def get_full_name(series: pd.Series):
             if (full == '') or (full == ' '):
                 full = 'no_name_given'
 
-            full_name = series.loc[0, 'full_name']
+            full_name = series.loc['full_name']
             if (full_name == None) or (full_name == 'None') or (full_name == '') or (full_name == 'no_name_given'):
                 result = full
             else:
