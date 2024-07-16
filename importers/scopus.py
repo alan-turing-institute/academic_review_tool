@@ -46,7 +46,6 @@ def search(query: str = 'request_input',
                                     'affilname': 'author_affiliations',
                                     'coverDate': 'date',
                                     'publicationName': 'source',
-                                    'eIssn': 'issn',
                                     'citedby_count': 'cited_by_count',
                                     'authkeywords': 'keywords',
                                     'openaccess': 'access_type'
