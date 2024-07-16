@@ -20,7 +20,7 @@ def search(query: str = 'request_input',
            integrity_action='raise', 
            subscriber=False):
     
-    if query == 'request_input'
+    if query == 'request_input':
         query = input('Search query: ')
     
     res = ScopusSearch(query=query, 
