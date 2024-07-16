@@ -64,3 +64,80 @@ def search(query: str = 'request_input',
     res_df = res_df.dropna(axis=1, how='all')
 
     return res_df
+
+def lookup(work_id: str = 'request_input',
+           refresh = False,
+           view = 'META',
+           id_type = None):
+
+    if work_id == 'request_input':
+        work_id = input('ID: ')
+    
+    work_id = work_id.strip()
+
+    res = AbstractRetrieval(
+                            identifier=work_id,
+                            refresh=refresh,
+                            view=view,
+                            id_type=id_type
+                            )
+    
+    if type(res) == AbstractRetrieval:
+
+        js = res._json
+        js_keys = js.keys()
+
+        if 'affiliation' in js_keys:
+            affils = js['affiliation']
+        else:
+            affils = []
+        
+        if 'coredata' in js_keys:
+            data = js['coredata']
+        else:
+            data = {}
+
+        df = pd.DataFrame.from_dict(data, orient='index').T
+
+        df = df.rename(columns={
+                                    'eid': 'scopus_id',
+                                    'dc:title': 'title',
+                                    'subtypeDescription': 'type',
+                                    'dc:creator': 'authors',
+                                    'prism:coverDate': 'date',
+                                    'prism:publicationName': 'source',
+                                    'citedby_count': 'cited_by_count',
+                                    'openaccess': 'access_type',
+                                    'link': 'other_links',
+                                    'prism:url': 'link',
+                                    'prism:doi': 'doi',
+                                    'prism:issn': 'issn',
+                                    'dc:publisher': 'publisher'
+                                    })
+        
+        df.at[0, 'author_affiliations'] = affils
+        df['access_type'] = df['access_type'].replace(1, 'open_access').replace(0, None)
+        
+        other_links = df.at[0, 'other_links']
+
+        if (type(other_links) == list) and (len(other_links) > 0):
+
+            for i in other_links:
+
+                link = i['@href']
+
+                if (type(link) == str) and (link.startswith('https://api.elsevier.com/content/abstract/')):
+                     df.at[0, 'abstract'] = link
+                     continue
+                
+                if (type(link) == str) and (link.startswith('https://www.scopus.com/inward/citedby')):
+                     df.at[0, 'cited_by_data'] = link
+                     continue
+
+                    
+
+        
+    else:
+        df = pd.DataFrame(columns=results_cols, dtype=object)
+
+    return df
