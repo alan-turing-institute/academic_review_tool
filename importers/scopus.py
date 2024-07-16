@@ -115,24 +115,28 @@ def lookup(work_id: str = 'request_input',
                                     'dc:publisher': 'publisher'
                                     })
         
-        df.at[0, 'author_affiliations'] = affils
-        df['access_type'] = df['access_type'].replace(1, 'open_access').replace(0, None)
-        
-        other_links = df.at[0, 'other_links']
+        df['author_affiliations'] = pd.Series(dtype=object).replace(np.nan, None)
 
-        if (type(other_links) == list) and (len(other_links) > 0):
+        if len(df) > 0:
 
-            for i in other_links:
+            df.at[0, 'author_affiliations'] = affils
+            df['access_type'] = df['access_type'].replace(1, 'open_access').replace(0, None)
+            
+            other_links = df.at[0, 'other_links']
 
-                link = i['@href']
+            if (type(other_links) == list) and (len(other_links) > 0):
 
-                if (type(link) == str) and (link.startswith('https://api.elsevier.com/content/abstract/')):
-                     df.at[0, 'abstract'] = link
-                     continue
-                
-                if (type(link) == str) and (link.startswith('https://www.scopus.com/inward/citedby')):
-                     df.at[0, 'cited_by_data'] = link
-                     continue
+                for i in other_links:
+
+                    link = i['@href']
+
+                    if (type(link) == str) and (link.startswith('https://api.elsevier.com/content/abstract/')):
+                        df.at[0, 'abstract'] = link
+                        continue
+                    
+                    if (type(link) == str) and (link.startswith('https://www.scopus.com/inward/citedby')):
+                        df.at[0, 'cited_by_data'] = link
+                        continue
 
                     
 
