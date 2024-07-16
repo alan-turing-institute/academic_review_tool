@@ -8,7 +8,6 @@ results_cols = [
                             'work_id',
                             'title',
                             'authors',
-                            'authors_data',
                             'date',
                             'source',
                             'type',
@@ -20,6 +19,10 @@ results_cols = [
                             'description',
                             'extract',
                             'full_text',
+                            'access_type',
+                            'authors_data',
+                            'author_count',
+                            'author_affiliations',
                             'citations',
                             'citation_count',
                             'citations_data',
@@ -32,6 +35,10 @@ results_cols = [
                             'doi',
                             'isbn',
                             'issn',
+                            'pii',
+                            'scopus_id',
+                            'wos_id',
+                            'pubmed_id',
                             'other_ids',
                             'link'
                                 ]
@@ -241,4 +248,4 @@ def stat_file_to_dict(self):
     
     return dictionary
 
-stat_result.to_dict = stat_file_to_dict
+stat_result.to_dict = stat_file_to_dict # type: ignore
