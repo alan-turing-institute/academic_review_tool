@@ -1162,6 +1162,8 @@ class Review:
                 rate_limit = rate_limit,
                 timeout = timeout)
         
+        df['repository'] = 'crossref'
+
         if add_to_results == True:
             self.results.add_dataframe(dataframe=df) # type: ignore
             self.format_authors()
@@ -1170,7 +1172,7 @@ class Review:
 
     def search_scopus(self,
                     query: str = 'request_input',
-                    refresh=True, 
+                    refresh=False, 
                     view=None, 
                     verbose=False, 
                     download=True, 
@@ -1190,12 +1192,13 @@ class Review:
                            integrity_action=integrity_action,
                            subscriber=subscriber)
         
-        if add_to_results == True:
-
-            for c in df.columns:
+        for c in df.columns:
                 if c not in self.results.columns:
                     df = df.drop(c, axis=1)
-            
+        
+        df['repository'] = 'scopus'
+
+        if add_to_results == True:
             self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
         return df
