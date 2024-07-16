@@ -65,18 +65,18 @@ def search(query: str = 'request_input',
 
     return res_df
 
-def lookup(work_id: str = 'request_input',
+def lookup(uid: str = 'request_input',
            refresh = False,
            view = 'META',
            id_type = None):
 
-    if work_id == 'request_input':
-        work_id = input('ID: ')
+    if uid == 'request_input':
+        uid = input('ID: ')
     
-    work_id = work_id.strip()
+    uid = uid.strip()
 
     res = AbstractRetrieval(
-                            identifier=work_id,
+                            identifier=uid,
                             refresh=refresh,
                             view=view,
                             id_type=id_type

@@ -3,7 +3,7 @@ from ..utils.cleaners import deduplicate
 from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
-from ..importers.scopus import search as search_scopus
+from ..importers.scopus import search as search_scopus, lookup as lookup_scopus
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network, generate_author_affils_network
 
@@ -773,7 +773,6 @@ class Review:
 
         return output
 
-
     def get_cofunders(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_funders: bool = True):
 
         if format == True:
@@ -860,8 +859,6 @@ class Review:
 
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
-
-    
 
     def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows=True):
         self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1014,7 +1011,6 @@ class Review:
         output = output[cols]
 
         return output
-
 
     def export_txt(self, file_name = 'request_input', file_address = 'request_input'):
         
@@ -1203,11 +1199,36 @@ class Review:
 
         return df
 
-    
-
     def lookup_doi(self, doi = 'request_input', timeout = 60):
         return lookup_doi(doi=doi, timeout=timeout)
     
+    def lookup_scopus(self, 
+                      uid = 'request_input',
+                      refresh = False,
+                      view = 'META',
+                      id_type=None,
+                      add_to_results=False):
+
+        if uid == 'request_input':
+            uid = input('ID: ')
+        
+        df = lookup_scopus(uid = uid, 
+                            refresh=refresh,
+                            view=view,
+                            id_type=id_type
+                            )
+        
+        for c in df.columns:
+                if c not in self.results.columns:
+                    df = df.drop(c, axis=1)
+        
+        df['repository'] = 'scopus'
+
+        if add_to_results == True:
+            self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
+
+        return df
+
     def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
             
         self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
