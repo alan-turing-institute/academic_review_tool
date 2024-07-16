@@ -27,7 +27,6 @@ import numpy as np
 from igraph import Graph # type: ignore
 
 
-
 def add_pdf(self, path = 'request_input'):
         
         if path == 'request_input':
@@ -48,7 +47,6 @@ def add_pdf(self, path = 'request_input'):
         return self
 
 Results.add_pdf = add_pdf # type: ignore
-
 
 def add_row(self, data):
 
@@ -114,12 +112,10 @@ def has_formatted_citations(self):
 
 Results.has_formatted_citations = has_formatted_citations # type: ignore
 
-
 def lacks_formatted_citations(self):
         return self[~self['citations'].apply(is_formatted_reference)]
 
 Results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
-
 
 def format_citations(self, add_work_ids = False, update_from_doi = False):
 
@@ -155,7 +151,6 @@ def format_citations(self, add_work_ids = False, update_from_doi = False):
 
 Results.format_citations = format_citations # type: ignore
 
-
 def format_authors(self):
 
         self['authors'] = self['authors_data'].apply(orig_format_authors) # type: ignore
@@ -163,7 +158,6 @@ def format_authors(self):
 
 Results.format_authors = format_authors # type: ignore
     
-
 def add_citations_to_results(self, add_work_ids = False, update_from_doi = False, drop_duplicates = True, drop_empty_rows = True):
 
         if drop_empty_rows == True:
@@ -302,7 +296,6 @@ class Review:
         
         if key in self.authors.all.columns.to_list():
             return self.authors.all[key]
-
 
     def __setitem__(self, index, data):
         
@@ -1277,7 +1270,6 @@ class Review:
 
         return review
 
-
     def update_from_dois(self, timeout: int = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         self.results.update_from_dois(timeout=timeout) # type: ignore
 
@@ -1300,7 +1292,6 @@ class Review:
         self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return self
-
 
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
