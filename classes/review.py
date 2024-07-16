@@ -1200,7 +1200,10 @@ class Review:
                       refresh = False,
                       view = 'META',
                       id_type=None,
-                      add_to_results=False):
+                      add_to_results=False,
+                      drop_duplicates = False,
+                      drop_empty_rows = False
+                      ):
 
         if uid == 'request_input':
             uid = input('ID: ')
