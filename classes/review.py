@@ -1177,7 +1177,9 @@ class Review:
            integrity_fields=None, 
            integrity_action='raise', 
            subscriber=False,
-           add_to_results = False):
+           add_to_results = False,
+           drop_empty_rows = False,
+           drop_duplicates = False):
         
         df = search_scopus(query=query, 
                            refresh=refresh, 
@@ -1194,7 +1196,17 @@ class Review:
                 if c not in self.results.columns:
                     df = df.drop(c, axis=1)
             
-            self.results.add_dataframe(dataframe=df) # type: ignore
+            for c in self.results.columns:
+                if c not in df.columns:
+                    df[c] = pd.Series(dtype=object)
+            
+            df = df.reset_index().drop('index', axis=1)
+
+            res_copy = self.results.copy(deep=True).reset_index().drop('index', axis=1)
+            
+            combined_df = pd.concat([res_copy, df])
+
+            self.results = Results.from_dataframe(combined_df, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
 
         return df
 
