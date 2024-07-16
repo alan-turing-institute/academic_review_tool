@@ -1169,17 +1169,17 @@ class Review:
         return df
 
     def search_scopus(self,
-                      query: str = 'request_input',
-           refresh=True, 
-           view=None, 
-           verbose=False, 
-           download=True, 
-           integrity_fields=None, 
-           integrity_action='raise', 
-           subscriber=False,
-           add_to_results = False,
-           drop_empty_rows = False,
-           drop_duplicates = False):
+                    query: str = 'request_input',
+                    refresh=True, 
+                    view=None, 
+                    verbose=False, 
+                    download=True, 
+                    integrity_fields=None, 
+                    integrity_action='raise', 
+                    subscriber=False,
+                    add_to_results = False,
+                    drop_empty_rows = False,
+                    drop_duplicates = False):
         
         df = search_scopus(query=query, 
                            refresh=refresh, 

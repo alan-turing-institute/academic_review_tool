@@ -5,7 +5,7 @@ title: 'Academic Review Tool (ART)'
 Academic Review Tool (ART)
 ===
 
-The Academic Review Tool (ART) is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale. ART uses APIs from Crossref, Orcid, and more.
+The Academic Review Tool (ART) is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale. ART accesses records from Crossref, Scopus, Orcid, and more.
 
 ## Table of Contents
 
@@ -32,6 +32,7 @@ The tool's functionalities include:
 
 ART uses the following APIs:
 * Crossref
+* Scopus
 * ORCID
 * Geopy / Nominatim
 
