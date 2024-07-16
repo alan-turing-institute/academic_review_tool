@@ -20,7 +20,7 @@ def search(query: str = 'request_input',
            integrity_action='raise', 
            subscriber=False):
     
-    if query == 'request_input':
+    if query == 'request_input'
         query = input('Search query: ')
     
     res = ScopusSearch(query=query, 
@@ -48,7 +48,8 @@ def search(query: str = 'request_input',
                                     'publicationName': 'source',
                                     'eIssn': 'issn',
                                     'citedby_count': 'cited_by_count',
-                                    'authkeywords': 'keywords'
+                                    'authkeywords': 'keywords',
+                                    'openaccess': 'access_type'
                                     })
 
     res_df['author_affiliations'] = res_df['author_affiliations'].astype(str).replace('None', '').replace('none', '')
@@ -57,9 +58,9 @@ def search(query: str = 'request_input',
     res_df['author_affiliations'] = res_df['author_affiliations'] + ', ' + res_df['affiliation_city'] + ', ' + res_df['affiliation_country']
 
     
-    res_df['access_type'] = res_df['openaccess'].replace(1, 'open_access').replace(0, None)
+    res_df['access_type'] = res_df['access_type'].replace(1, 'open_access').replace(0, None)
 
-    res_df = res_df.drop(['affiliation_city', 'affiliation_country', 'openaccess'], axis=1)
+    res_df = res_df.drop(['subtype', 'coverDisplayDate', 'affiliation_city', 'affiliation_country'], axis=1)
 
     res_df = res_df.dropna(axis=1, how='all')
 
