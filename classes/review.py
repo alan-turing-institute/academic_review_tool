@@ -1196,17 +1196,7 @@ class Review:
                 if c not in self.results.columns:
                     df = df.drop(c, axis=1)
             
-            for c in self.results.columns:
-                if c not in df.columns:
-                    df[c] = pd.Series(dtype=object)
-            
-            df = df.reset_index().drop('index', axis=1)
-
-            res_copy = self.results.copy(deep=True).reset_index().drop('index', axis=1)
-            
-            combined_df = pd.concat([res_copy, df])
-
-            self.results = Results.from_dataframe(combined_df, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
+            self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
         return df
 
