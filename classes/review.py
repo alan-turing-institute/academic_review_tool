@@ -3,9 +3,9 @@ from ..utils.cleaners import deduplicate
 from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
+from ..importers.scopus import search as search_scopus
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network, generate_author_affils_network
-
 
 from .properties import Properties
 from .affiliations import Affiliation, Affiliations, format_affiliations
@@ -1167,6 +1167,38 @@ class Review:
             self.format_authors()
         
         return df
+
+    def search_scopus(self,
+                      query: str = 'request_input',
+           refresh=True, 
+           view=None, 
+           verbose=False, 
+           download=True, 
+           integrity_fields=None, 
+           integrity_action='raise', 
+           subscriber=False,
+           add_to_results = False):
+        
+        df = search_scopus(query=query, 
+                           refresh=refresh, 
+                           view=view, 
+                           verbose=verbose, 
+                           download=download, 
+                           integrity_fields=integrity_fields, 
+                           integrity_action=integrity_action,
+                           subscriber=subscriber)
+        
+        if add_to_results == True:
+
+            for c in df.columns:
+                if c not in self.results.columns:
+                    df = df.drop(c, axis=1)
+            
+            self.results.add_dataframe(dataframe=df) # type: ignore
+
+        return df
+
+    
 
     def lookup_doi(self, doi = 'request_input', timeout = 60):
         return lookup_doi(doi=doi, timeout=timeout)
