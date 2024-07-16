@@ -28,6 +28,7 @@ results_cols = [
                             'citations_data',
                             'cited_by',
                             'cited_by_count',
+                            'cited_by_data',
                             'recommendations',
                             'crossref_score',
                             'repository',
