@@ -290,5 +290,35 @@ def journals_search_engine(issn: str = 'request_input'):
         except ApiException as e:
             print("Exception when calling JournalsApi->journals_get: %s\n" % e)
 
+    
+def search_journals(
+            query = 'request_input'
+           ):
+    
+
+    api_response = journals_search_engine(issn=query)
+    
+    if (api_response is not None) and (type(api_response) == DocumentsList):
+
+        res_dict = api_response.to_dict()
+        meta = res_dict['metadata']
+        found = meta['total']
+        lim = meta['limit']
+        page_num = meta['page']
+        print(f'{found} results found. {lim} results returned from page {page_num}') # type: ignore
+
+        df = pd.DataFrame(res_dict['hits'], dtype=object)
+        df = df.rename(columns={
+                                'id': 'wos_id',
+                                'links': 'link'
+                            })
+        
+        df = df.replace(np.nan, None)
+    
+    else:
+        df = pd.DataFrame(columns=results_cols, dtype=object)
+    
+    return df
+
 
 
