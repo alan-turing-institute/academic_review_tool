@@ -187,7 +187,7 @@ def search_engine(query: str = 'request_input',
             print("Exception when calling DocumentsApi->documents_get: %s\n" % e)
 
 def search(
-            all_fields = '',
+            all_fields = None,
             title = None,
             year = None,
             author = None,
