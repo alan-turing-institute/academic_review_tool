@@ -270,3 +270,25 @@ def search(
         df = pd.DataFrame(columns=results_cols, dtype=object)
     
     return df
+
+def journals_search_engine(issn: str = 'request_input'):
+
+    if issn == 'request_input':
+        issn = input('ISSN to search: ')
+    
+    global configuration
+    
+    with wos_client.ApiClient(configuration) as api_client:
+
+        api_instance = wos_client.JournalsApi(api_client)
+
+        try:
+            # Query Web of Science documents 
+            api_response = api_instance.journals_get(issn=issn)
+            return api_response
+
+        except ApiException as e:
+            print("Exception when calling JournalsApi->journals_get: %s\n" % e)
+
+
+
