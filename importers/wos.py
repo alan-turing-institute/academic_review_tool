@@ -12,6 +12,7 @@ import metaknowledge as mk
 import clarivate.wos_starter.client as wos_client # type: ignore
 from clarivate.wos_starter.client.rest import ApiException # type: ignore
 from clarivate.wos_starter.client.models.documents_list import DocumentsList # type: ignore
+from clarivate.wos_starter.client.models.journals_list import JournalsList # type: ignore
 
 
 
@@ -298,7 +299,7 @@ def search_journals(
 
     api_response = journals_search_engine(issn=query)
     
-    if (api_response is not None) and (type(api_response) == DocumentsList):
+    if (api_response is not None) and (type(api_response) == JournalsList):
 
         res_dict = api_response.to_dict()
         meta = res_dict['metadata']
