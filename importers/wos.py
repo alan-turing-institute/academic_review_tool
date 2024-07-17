@@ -33,6 +33,124 @@ def import_wos(file_path: str = 'request_input'):
 
     return RC
 
+def operator_logic(default_operator: str, string: str):
+
+    operator = default_operator
+
+    if string.startswith('AND '):
+            operator = 'AND'
+        
+    else:
+        if string.startswith('OR '):
+            operator = 'OR'
+        
+        else:
+            if string.startswith('NOT '):
+                operator = 'NOT'
+            
+            else:
+                if string.startswith('NEAR '):
+                    operator = 'NEAR'
+                
+                else:
+                    if string.startswith('SAME '):
+                        operator = 'SAME'
+                    
+                    else:
+                        operator = default_operator
+
+    string_stripped = string.strip(f'{operator} ').strip()
+    
+
+    return (operator, string_stripped)
+
+def query_builder(default_operator = 'AND',
+                    all_fields = '',
+                    title = None,
+                    year = None,
+                    author = None,
+                    author_identifier = None,
+                    affiliation = None,
+                    doctype = None,
+                    doi = None,
+                    issn = None,
+                    isbn = None,
+                    pubmed_id = None,
+                    source_title = None,
+                    volume = None,
+                    page = None,
+                    issue = None,
+                    topics = None
+                    ):
+    
+    query = all_fields
+
+    if (title is not None) and (type(title) == str): # type: ignore
+        title_tuple = operator_logic(default_operator=default_operator, string=title)
+        query = query + ' ' + title_tuple[0] + ' TI=' + title_tuple[1]
+    
+    if (year is not None) and (type(year) == str): # type: ignore
+        year_tuple = operator_logic(default_operator=default_operator, string=year)
+        query = query + ' ' + year_tuple[0] + ' PY=' + year_tuple[1]
+    
+    if (author is not None) and (type(author) == str): # type: ignore
+        auth_tuple = operator_logic(default_operator=default_operator, string=author)
+        query = query + ' ' + auth_tuple[0] + ' AU=' + auth_tuple[1]
+    
+    if (author_identifier is not None) and (type(author_identifier) == str): # type: ignore
+        auth_id_tuple = operator_logic(default_operator=default_operator, string=author_identifier)
+        query = query + ' ' + auth_id_tuple[0] + ' AI=' + auth_id_tuple[1]
+    
+    if (affiliation is not None) and (type(affiliation) == str): # type: ignore
+        affil_tuple = operator_logic(default_operator=default_operator, string=affiliation)
+        query = query + ' ' + affil_tuple[0] + ' OG=' + affil_tuple[1]
+    
+    if (doctype is not None) and (type(doctype) == str): # type: ignore
+        doctype_tuple = operator_logic(default_operator=default_operator, string=doctype)
+        query = query + ' ' + doctype_tuple[0] + ' DT=' + doctype_tuple[1]
+    
+    if (doi is not None) and (type(doi) == str): # type: ignore
+        doi_tuple = operator_logic(default_operator=default_operator, string=doi)
+        query = query + ' ' + doi_tuple[0] + ' DO=' + doi_tuple[1]
+    
+    if (issn is not None) and (type(issn) == str): # type: ignore
+        issn_tuple = operator_logic(default_operator=default_operator, string=issn)
+        query = query + ' ' + issn_tuple[0] + ' IS=' + issn_tuple[1]
+    
+    if (isbn is not None) and (type(isbn) == str): # type: ignore
+        isbn_tuple = operator_logic(default_operator=default_operator, string=isbn)
+        query = query + ' ' + isbn_tuple[0] + ' IS=' + isbn_tuple[1]
+    
+    if (pubmed_id is not None) and (type(pubmed_id) == str): # type: ignore
+        pubmed_tuple = operator_logic(default_operator=default_operator, string=pubmed_id)
+        query = query + ' ' + pubmed_tuple[0] + ' PMID=' + pubmed_tuple[1]
+    
+    if (source_title is not None) and (type(source_title) == str): # type: ignore
+        st_tuple = operator_logic(default_operator=default_operator, string=source_title)
+        query = query + ' ' + st_tuple[0] + ' SO=' + st_tuple[1]
+    
+    if (volume is not None) and (type(volume) == str): # type: ignore
+        volume_tuple = operator_logic(default_operator=default_operator, string=volume)
+        query = query + ' ' + volume_tuple[0] + ' VL=' + volume_tuple[1]
+    
+    if (page is not None) and (type(page) == str): # type: ignore
+        page_tuple = operator_logic(default_operator=default_operator, string=page)
+        query = query + ' ' + page_tuple[0] + ' PG=' + page_tuple[1]
+    
+    if (issue is not None) and (type(issue) == str): # type: ignore
+        issue_tuple = operator_logic(default_operator=default_operator, string=issue)
+        query = query + ' ' + issue_tuple[0] + ' CS=' + issue_tuple[1]
+    
+    if (topics is not None) and (type(topics) == str): # type: ignore
+        topics_tuple = operator_logic(default_operator=default_operator, string=topics)
+        query = query + ' ' + topics_tuple[0] + ' TS=' + topics_tuple[1]
+    
+    query = query.strip().strip('AND ').strip('OR ').strip('NOT ').strip('NEAR ').strip('SAME ').strip()
+
+    return query
+        
+
+
 
 def search_engine(query: str = 'request_input', 
            database: str = 'WOK',
