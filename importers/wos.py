@@ -146,6 +146,7 @@ def query_builder(default_operator = 'AND',
         query = query + ' ' + topics_tuple[0] + ' TS=' + topics_tuple[1]
     
     query = query.strip()
+    query = query.strip('AND ')
     
 
     return query
