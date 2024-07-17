@@ -145,11 +145,12 @@ def query_builder(default_operator = 'AND',
         topics_tuple = operator_logic(default_operator=default_operator, string=topics)
         query = query + ' ' + topics_tuple[0] + ' TS=' + topics_tuple[1]
     
-    query = query.strip(' AND ')
-    query = query.strip(' OR ')
-    # query = query.strip(' NOT ')
-    query = query.strip(' NEAR ')
-    query = query.strip(' SAME ')
+    query = query.strip()
+    if query.startswith('AND ') == True:
+        query = query[4:]
+    if query.startswith('OR ') == True:
+        query = query[3:]
+    
     
     return query
         
