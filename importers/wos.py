@@ -14,9 +14,6 @@ from clarivate.wos_starter.client.rest import ApiException # type: ignore
 from clarivate.wos_starter.client.models.documents_list import DocumentsList # type: ignore
 from clarivate.wos_starter.client.models.journals_list import JournalsList # type: ignore
 
-
-
-
 configuration = wos_client.Configuration(
     host = "http://api.clarivate.com/apis/wos-starter/v1"
 )
