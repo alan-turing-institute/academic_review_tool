@@ -87,7 +87,7 @@ def query_builder(default_operator = 'AND',
 
     if (title is not None) and (type(title) == str): # type: ignore
         title_tuple = operator_logic(default_operator=default_operator, string=title)
-        query = query + ' ' + title_tuple[0] + ' TI=' + title_tuple[1]
+        query = query + ' ' + title_tuple[0] + ' ' + 'TI=' + title_tuple[1]
     
     if (year is not None) and (type(year) == str): # type: ignore
         year_tuple = operator_logic(default_operator=default_operator, string=year)
@@ -145,7 +145,7 @@ def query_builder(default_operator = 'AND',
         topics_tuple = operator_logic(default_operator=default_operator, string=topics)
         query = query + ' ' + topics_tuple[0] + ' TS=' + topics_tuple[1]
     
-    query = query.strip().strip('AND ').strip('OR ').strip('NOT ').strip('NEAR ').strip('SAME ').strip()
+    query = query.strip().strip('AND ').strip('OR ').strip('NOT ').strip('NEAR ').strip('SAME ')
 
     return query
         
