@@ -157,9 +157,6 @@ def query_builder(default_operator = 'AND',
     
     return query
         
-
-
-
 def search_engine(query: str = 'request_input', 
            database: str = 'WOK',
            limit: int = 10,
@@ -291,7 +288,6 @@ def journals_search_engine(issn: str = 'request_input'):
         except ApiException as e:
             print("Exception when calling JournalsApi->journals_get: %s\n" % e)
 
-    
 def search_journals(
             query = 'request_input'
            ):
