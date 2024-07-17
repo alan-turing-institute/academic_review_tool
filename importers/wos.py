@@ -212,7 +212,7 @@ def search(query: str = 'request_input',
         df = df.rename(columns={
                                 'uid': 'wos_id',
                                 'sourceTypes': 'type',
-                                'types': 'other_types'
+                                'types': 'other_types',
                                 'names': 'authors',
                                 'links': 'link'
                             })
