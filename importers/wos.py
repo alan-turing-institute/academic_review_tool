@@ -65,7 +65,7 @@ def operator_logic(default_operator: str, string: str):
     return (operator, string_stripped)
 
 def query_builder(default_operator = 'AND',
-                    all_fields = '',
+                    all_fields = None,
                     title = None,
                     year = None,
                     author = None,
@@ -83,7 +83,10 @@ def query_builder(default_operator = 'AND',
                     topics = None
                     ):
     
-    query = all_fields
+    query = ''
+    
+    if (all_fields is not None) and (type(all_fields) == str): # type: ignore
+        query = query + 'ALL=' + all_fields
 
     if (title is not None) and (type(title) == str): # type: ignore
         title_tuple = operator_logic(default_operator=default_operator, string=title)
