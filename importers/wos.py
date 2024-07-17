@@ -11,7 +11,7 @@ import metaknowledge as mk
 
 import clarivate.wos_starter.client as wos_client # type: ignore
 from clarivate.wos_starter.client.rest import ApiException # type: ignore
-from clarivate.wos_starter.client.models.documents_list import DocumentsList
+from clarivate.wos_starter.client.models.documents_list import DocumentsList # type: ignore
 
 
 
@@ -93,7 +93,8 @@ def search(query: str = 'request_input',
         df = pd.DataFrame(res_dict['hits'], dtype=object)
         df = df.rename(columns={
                                 'uid': 'wos_id',
-                                'types': 'type',
+                                'sourceTypes': 'type',
+                                'types': 'other_types'
                                 'names': 'authors',
                                 'links': 'link'
                             })
