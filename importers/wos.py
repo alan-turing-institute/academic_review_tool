@@ -86,7 +86,7 @@ def query_builder(default_operator = 'AND',
     query = ''
     
     if (all_fields is not None) and (type(all_fields) == str): # type: ignore
-        query = query + '=' + all_fields
+        query = query + 'TS=' + all_fields
 
     if (title is not None) and (type(title) == str): # type: ignore
         title_tuple = operator_logic(default_operator=default_operator, string=title)
