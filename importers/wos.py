@@ -148,8 +148,8 @@ def query_builder(default_operator = 'AND',
     query = query.strip(' AND ')
     query = query.strip(' OR ')
     # query = query.strip(' NOT ')
-    # query = query.strip(' NEAR ')
-    # query = query.strip(' SAME ')
+    query = query.strip(' NEAR ')
+    query = query.strip(' SAME ')
     
     return query
         
