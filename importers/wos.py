@@ -151,7 +151,6 @@ def query_builder(default_operator = 'AND',
     if query.startswith('OR ') == True:
         query = query[3:]
     
-    
     return query
         
 
@@ -184,20 +183,56 @@ def search_engine(query: str = 'request_input',
         except ApiException as e:
             print("Exception when calling DocumentsApi->documents_get: %s\n" % e)
 
-def search(query: str = 'request_input', 
+def search(
+            all_fields = '',
+            title = None,
+            year = None,
+            author = None,
+            author_identifier = None,
+            affiliation = None,
+            doctype = None,
+            doi = None,
+            issn = None,
+            isbn = None,
+            pubmed_id = None,
+            source_title = None,
+            volume = None,
+            page = None,
+            issue = None,
+            topics = None,
+            default_operator = 'AND',
            database: str = 'WOK',
            limit: int = 10,
-           page: int = 1,
+           page_limit: int = 1,
            sort_field: str = 'RS+D',
            modified_time_span = None,
            tc_modified_time_span = None,
            detail = None
            ):
     
+    query = query_builder(default_operator = default_operator,
+                    all_fields = all_fields,
+                    title = title,
+                    year = year,
+                    author = author,
+                    author_identifier = author_identifier,
+                    affiliation = affiliation,
+                    doctype = doctype,
+                    doi = doi,
+                    issn = issn,
+                    isbn = isbn,
+                    pubmed_id = pubmed_id,
+                    source_title = source_title,
+                    volume = volume,
+                    page = page,
+                    issue = issue,
+                    topics = topics
+                    )
+
     api_response = search_engine(query=query, 
            database=database,
            limit=limit,
-           page=page,
+           page=page_limit,
            sort_field=sort_field,
            modified_time_span = modified_time_span,
            tc_modified_time_span = tc_modified_time_span,
