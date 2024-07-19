@@ -25,6 +25,7 @@ def import_metadata(file_path = 'request_input',
                                         'docType': 'type',
                                         'provider': 'repository',
                                         'url': 'link',
+                                        'placeOfPublication': 'publisher_location',
                                         'creator': 'authors',
                                         'keyphrase': 'keywords'
                                             })
