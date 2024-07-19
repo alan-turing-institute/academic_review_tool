@@ -43,6 +43,7 @@ def import_metadata(file_path = 'request_input',
 
     output_df = import_df.drop(labels=to_drop, axis='columns')
     output_df['authors'] = output_df['authors'].str.split(';')
+    output_df['authors_data'] = output_df['authors'].copy(deep=True)
     output_df['keywords'] = output_df['keywords'].str.lower().str.split(';')
 
     output_df = output_df.replace(np.nan, None).replace('untitled', None)
