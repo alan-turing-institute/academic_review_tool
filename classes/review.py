@@ -964,8 +964,9 @@ class Review:
 
         return review
 
-    def import_jstor_metadata(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True):
-        self.results.import_jstor_metadata(file_path = file_path, drop_empty_rows=drop_empty_rows,drop_duplicates=drop_duplicates, update_work_ids=update_work_ids) # type: ignore
+    def import_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True):
+        
+        self.results.import_jstor(file_path = file_path, drop_empty_rows=drop_empty_rows,drop_duplicates=drop_duplicates, update_work_ids=update_work_ids) # type: ignore
         
         if format_citations == True:
             self.format_citations()
@@ -979,13 +980,12 @@ class Review:
         if format_affiliations == True:
             self.format_affiliations()
     
-    def from_jstor_metadata(file_path: str = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
+    def from_jstor(file_path: str = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
 
         review = Review()
-        review.import_jstor_metadata(file_path=file_path, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates, update_work_ids=update_work_ids, format_citations=format_citations, format_authors = format_authors, format_funders = format_funders, format_affiliations=format_affiliations)
+        review.import_jstor(file_path=file_path, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates, update_work_ids=update_work_ids, format_citations=format_citations, format_authors = format_authors, format_funders = format_funders, format_affiliations=format_affiliations)
 
-    def import_jstor_full(self, file_path = 'request_input', clean_results = True):
-        self.results.import_jstor_full(file_path = file_path, clean_results = clean_results) # type: ignore
+        return review
 
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
         return self.results.search_field(field = field, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
