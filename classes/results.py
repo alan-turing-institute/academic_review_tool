@@ -560,14 +560,14 @@ class Results(pd.DataFrame):
         else:
             raise ValueError('File does not exist')
 
-    def import_jstor_metadata(self, file_path = 'request_input', clean_results = True):
+    def import_jstor_metadata(self, file_path = 'request_input'):
 
-        df = import_jstor_metadata(file_path = file_path, clean_results = clean_results)
+        df = import_jstor_metadata(file_path = file_path)
         self.add_dataframe(df)
     
-    def import_jstor_full(self, file_path = 'request_input', clean_results = True):
+    def import_jstor_full(self, file_path = 'request_input'):
 
-        df = import_jstor_full(file_path = file_path, clean_results = clean_results)
+        df = import_jstor_full(file_path = file_path)
         self.add_dataframe(df)
 
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
