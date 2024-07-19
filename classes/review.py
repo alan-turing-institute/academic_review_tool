@@ -72,7 +72,7 @@ def add_row(self, data):
 
 Results.add_row = add_row # type: ignore
 
-def add_dataframe(self,  dataframe, drop_duplicates = False, drop_empty_rows = False, update_work_ids = True, format_authors = True):
+def add_dataframe(self,  dataframe: pd.DataFrame, drop_duplicates = False, drop_empty_rows = False, update_work_ids = True, format_authors = False):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
@@ -84,24 +84,25 @@ def add_dataframe(self,  dataframe, drop_duplicates = False, drop_empty_rows = F
             for c in dataframe.columns:
                 if c not in self.columns:
                     self[c] = pd.Series(dtype=object)
-
         
-        index = len(self)
-        for i in dataframe.index:
-                self.loc[index] = dataframe.loc[i]
+        self_copy = self.copy(deep=True)
+        concat_df = pd.concat([self_copy, dataframe])
 
-                if update_work_ids == True:
-                    work_id = generate_work_id(dataframe.loc[i])
-                    work_id = self.get_unique_id(work_id, i)
-                    self.loc[index, 'work_id'] = work_id
+        new_results = Results()
 
-                index += 1
+        for c in concat_df.columns:
+            new_results[c] = concat_df[c]
         
+        self.__dict__.update(new_results.__dict__)
+
         if drop_empty_rows == True:
             self.drop_empty_rows()
-        
+
+        if update_work_ids == True:
+            self.update_work_ids(drop_duplicates=drop_duplicates)
+
         if drop_duplicates == True:
-            self.remove_duplicates()
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
         if format_authors == True:
             self.format_authors()
