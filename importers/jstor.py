@@ -62,7 +62,9 @@ def import_metadata(file_path = 'request_input',
     
     return output_df
 
-def import_full(file_path = 'request_input', clean_results = True):
+def import_full(file_path = 'request_input', 
+                # clean_results = True
+                ):
     
     if file_path == 'request_input':
         file_path = input('File path: ')
@@ -89,18 +91,18 @@ def import_full(file_path = 'request_input', clean_results = True):
     output_df = output_df.replace(np.nan, None).replace('untitled', None)
     
     
-    if clean_results == True:
+    # if clean_results == True:
         
-        cleaning_list = ['book review:',
-                        '\[',
-                        'references',
-                         'index'
-                        ]
+    #     cleaning_list = ['book review:',
+    #                     '\[',
+    #                     'references',
+    #                      'index'
+    #                     ]
 
-        for item in cleaning_list:
-            instances = output_df[output_df['title'].str.contains(item) == True].index.to_list()
-            for i in instances:
-                output_df.loc[i, 'title'] = None
+    #     for item in cleaning_list:
+    #         instances = output_df[output_df['title'].str.contains(item) == True].index.to_list()
+    #         for i in instances:
+    #             output_df.loc[i, 'title'] = None
     
     return output_df
     
