@@ -979,7 +979,7 @@ class Review:
         if format_affiliations == True:
             self.format_affiliations()
     
-    def from_jstor_metadata(file_path: str = 'request_input', drop_empty_rows = True, drop_duplicates = True, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True) # type: ignore
+    def from_jstor_metadata(file_path: str = 'request_input', drop_empty_rows = True, drop_duplicates = True, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
 
         review = Review()
         review.import_jstor_metadata(file_path=file_path, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates, update_work_ids=update_work_ids, format_citations=format_citations, format_authors = format_authors, format_funders = format_funders, format_affiliations=format_affiliations)
