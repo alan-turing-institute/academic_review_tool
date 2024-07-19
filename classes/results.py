@@ -252,7 +252,7 @@ class Results(pd.DataFrame):
                 pass
         return work_id
 
-    def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = True, drop_duplicates = True, update_work_ids = True, format_authors = True):
+    def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = True, drop_duplicates = True, update_work_ids = True):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
@@ -561,10 +561,10 @@ class Results(pd.DataFrame):
         else:
             raise ValueError('File does not exist')
 
-    def import_jstor_metadata(self, file_path = 'request_input'):
+    def import_jstor_metadata(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True):
 
         df = import_jstor_metadata(file_path = file_path)
-        self.add_dataframe(df)
+        self.add_dataframe(dataframe=df, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_work_ids = update_work_ids)
     
     def import_jstor_full(self, file_path = 'request_input'):
 
