@@ -1,7 +1,7 @@
 from ..utils.basics import results_cols
 from ..utils.cleaners import strip_list_str, deduplicate
 from ..importers.pdf import read_pdf_to_table
-from ..importers.jstor import import_jstor_metadata, import_jstor_full
+from ..importers.jstor import import_metadata as import_jstor_metadata, import_full as import_jstor_full
 from ..importers.crossref import lookup_doi, lookup_dois
 from ..datasets import stopwords
 
