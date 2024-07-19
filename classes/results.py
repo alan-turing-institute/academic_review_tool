@@ -566,10 +566,10 @@ class Results(pd.DataFrame):
         df = import_jstor_metadata(file_path = file_path)
         self.add_dataframe(dataframe=df, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_work_ids = update_work_ids)
     
-    def import_jstor_full(self, file_path = 'request_input'):
+    def import_jstor_full(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True):
 
         df = import_jstor_full(file_path = file_path)
-        self.add_dataframe(df)
+        self.add_dataframe(dataframe=df, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_work_ids = update_work_ids)
 
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
         
