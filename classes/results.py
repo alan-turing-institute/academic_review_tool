@@ -279,7 +279,7 @@ class Results(pd.DataFrame):
             self.drop_empty_rows()
 
         if update_work_ids == True:
-            self.update_work_ids(drop_duplicates=drop_duplicates)
+            self.update_work_ids(drop_duplicates=False)
 
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
