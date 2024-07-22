@@ -915,6 +915,28 @@ class Authors(Entities):
         
         authors_df = pd.DataFrame(authors_data)
         authors_df = authors_df.rename(columns={'displayName': 'full_name', 'researcherId': 'wos'}).drop('wosStandard',axis=1)
+        
+        names_split = authors_df['full_name'].str.split(',').to_list()
+        for i in range(0,len(names_split)):
+            
+            name = names_split[i]
+
+            if len(name) == 0:
+                continue
+
+            if len(name) == 1:
+                family = name[0]
+                full = name[0]
+                given = None
+
+            if len(name) > 1:
+                given = name[1].strip()
+                family = name[0].strip()
+                full = family + ' ' + given
+
+            authors_df.loc[i, 'full_name'] = full
+            authors_df.loc[i, 'given_name'] = given
+            authors_df.loc[i, 'family_name'] = family
 
         self.all = pd.concat([self.all, authors_df])
 
