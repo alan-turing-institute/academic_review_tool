@@ -540,8 +540,8 @@ class Review:
                     self.affiliations.merge(affiliations=affils)
                     continue
 
-    def format_citations(self):
-        self.results.format_citations() # type: ignore
+    def format_citations(self, add_work_ids = False, update_from_doi = False, verbose=True):
+        self.results.format_citations(add_work_ids = add_work_ids, update_from_doi=update_from_doi, verbose=verbose) # type: ignore
 
     def format_authors(self, drop_duplicates = True, drop_empty_rows=True):
 
@@ -847,10 +847,10 @@ class Review:
         self.funders.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
         self.affiliations.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
 
-    def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True):
+    def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True, verbose=False):
 
         self.format_funders()
-        self.format_citations()
+        self.format_citations(verbose=verbose)
         self.format_authors(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         self.format_affiliations()
 
