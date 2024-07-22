@@ -926,7 +926,7 @@ class Authors(Entities):
 
         self.sync_details(drop_duplicates=False, drop_empty_rows=False)
 
-    def from_wos(wos_result: dict | list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+    def from_wos(wos_result, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         authors = Authors()
         authors.import_wos(wos_result=wos_result, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
