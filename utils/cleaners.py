@@ -1284,6 +1284,10 @@ def merge_duplicate_ids(dataframe, merge_on: str):
     
     if merge_on in df.columns:
 
+        # sorting index to prioritise entries with real values
+
+        df = df.sort_values(merge_on)
+
         # Checking if there are valid IDs in the column (i.e., not None or NaN)
         dropna_indexes = df[merge_on].dropna().index
 
