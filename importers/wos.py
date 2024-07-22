@@ -260,6 +260,7 @@ def search(
                 df[c] = pd.Series(dtype=object)
         
         df = df.replace(np.nan, None)
+        df['authors_data'] = df['authors'].copy(deep=True)
     
     else:
         df = pd.DataFrame(columns=results_cols, dtype=object)
