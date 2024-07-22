@@ -155,7 +155,16 @@ Results.format_citations = format_citations # type: ignore
 
 def format_authors(self):
 
-        self['authors'] = self['authors_data'].apply(orig_format_authors) # type: ignore
+        if len(self[self['authors_data'].isna()]) < len(self['authors_data']):
+            authors_data = self['authors_data']
+        
+        else:
+            authors_data = self['authors']
+
+        new_series = authors_data.apply(orig_format_authors) # type: ignore
+
+        self['authors'] = new_series
+        
         return self['authors']
 
 Results.format_authors = format_authors # type: ignore
