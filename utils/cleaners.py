@@ -666,7 +666,7 @@ def is_float(string: str) -> bool:
     except:
         return False
 
-def correct_float(string: str) -> float:
+def correct_float(string: str):
     
     """
     Converts a string to a float if it can be converted successfully. Uses exception handling to avoid errors.
@@ -1282,7 +1282,6 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
     df = dataframe.copy(deep=True)
     
-
     if merge_on in df.columns:
 
         # Checking if there are valid IDs in the column (i.e., not None or NaN)
@@ -1367,7 +1366,7 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
 def merge_all_duplicate_ids(dataframe):
 
-    id_names = ['doi', 'isbn', 'issn', 'uri', 'crossref_id', 'crossref', 'address', 'link', 'website']
+    id_names = ['doi', 'isbn', 'issn', 'uri', 'orcid', 'crossref_id', 'crossref', 'scopus_id', 'scopus', 'wos_id', 'wos', 'pubmed_id', 'address', 'link', 'website']
     df = dataframe.copy(deep=True)
 
 
