@@ -267,6 +267,7 @@ class Results(pd.DataFrame):
         
         self_copy = self.copy(deep=True)
         concat_df = pd.concat([self_copy, dataframe])
+        concat_df = concat_df.reset_index().drop('index', axis=1)
 
         new_results = Results()
 

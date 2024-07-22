@@ -62,8 +62,8 @@ def generate_affiliation_id(affiliation_data: pd.Series):
             uid = affiliation_data['uri']
 
             if (uid == None) or (uid == 'None') or (uid == ''):
-                if 'crossrea_id' in affiliation_data.index:
-                    uid = affiliation_data['crossrea_id']
+                if 'crossref_id' in affiliation_data.index:
+                    uid = affiliation_data['crossref_id']
 
                     if (uid == None) or (uid == 'None') or (uid == ''):
                         if 'website' in affiliation_data.index:
@@ -99,7 +99,7 @@ class Affiliation(Entity):
                  address: str = None, # type: ignore
                  email: str = None, # type: ignore
                  uri: str = None, # type: ignore
-                 crossrea_id: int = None, # type: ignore
+                 crossref_id: int = None, # type: ignore
                  website: str = None,  # type: ignore
                  other_links = [], # type: ignore
                  use_api: bool = False
@@ -152,7 +152,7 @@ class Affiliation(Entity):
                                 'address',
                                 'email',
                                 'uri',
-                                'crossrea_id',
+                                'crossref_id',
                                 'website',
                                 'other_links'
                                 ],
@@ -166,7 +166,7 @@ class Affiliation(Entity):
         self.details.loc[0, 'address'] = address
         self.details.loc[0, 'email'] = email
         self.details.loc[0, 'uri'] = uri
-        self.details.loc[0, 'crossrea_id'] = crossrea_id
+        self.details.loc[0, 'crossref_id'] = crossref_id
         self.details.loc[0, 'website'] = website
         self.details.at[0, 'other_links'] = other_links
 
@@ -258,9 +258,9 @@ class Affiliation(Entity):
             address = data['address']
             self.details.loc[0, 'address'] = address
         
-        if 'crossrea_id' in data.keys():
-            crossrea_id = data['crossrea_id']
-            self.details.loc[0, 'crossrea_id'] = crossrea_id
+        if 'crossref_id' in data.keys():
+            crossref_id = data['crossref_id']
+            self.details.loc[0, 'crossref_id'] = crossref_id
 
         if 'DOI' in data.keys():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
@@ -304,10 +304,10 @@ class Affiliation(Entity):
         else:
             email = None
 
-        if 'crossrea_id' in data.keys():
-            crossrea_id = data['crossrea_id']
+        if 'crossref_id' in data.keys():
+            crossref_id = data['crossref_id']
         else:
-            crossrea_id = None
+            crossref_id = None
 
         if 'DOI' in data.keys():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
@@ -341,7 +341,7 @@ class Affiliation(Entity):
                     else:
                         website = None
 
-        affiliation = Affiliation(name=name, location=location, address=address, email=email, uri=uri, crossrea_id=crossrea_id, website=website, use_api=use_api) # type: ignore
+        affiliation = Affiliation(name=name, location=location, address=address, email=email, uri=uri, crossref_id=crossref_id, website=website, use_api=use_api) # type: ignore
 
         return affiliation
         
@@ -387,15 +387,15 @@ class Affiliation(Entity):
             uri = self.details.loc[0, 'uri']
 
         if 'id' in crossref_result.index:
-            crossrea_id = crossref_result['id']
+            crossref_id = crossref_result['id']
         else:
-            crossrea_id = self.details.loc[0, 'crossrea_id']
+            crossref_id = self.details.loc[0, 'crossref_id']
         
         self.details.loc[0, 'name'] = name
         self.details.loc[0, 'location'] = location
         self.details.loc[0, 'email'] = email
         self.details.loc[0, 'uri'] = uri
-        self.details.loc[0, 'crossrea_id'] = crossrea_id
+        self.details.loc[0, 'crossref_id'] = crossref_id
 
     def from_crossref_result(crossref_result: pd.Series, use_api: bool = False): # type: ignore
         
@@ -420,21 +420,21 @@ class Affiliation(Entity):
             uri = None
 
         if 'id' in crossref_result.index:
-            crossrea_id = crossref_result['id']
+            crossref_id = crossref_result['id']
         else:
-            crossrea_id = None
+            crossref_id = None
 
-        affiliation = Affiliation(name=name, location=location, email=email, uri=uri, crossrea_id=crossrea_id, use_api=use_api) # type: ignore
+        affiliation = Affiliation(name=name, location=location, email=email, uri=uri, crossref_id=crossref_id, use_api=use_api) # type: ignore
 
         return affiliation
 
-    def import_crossref(self, crossrea_id: str, timeout = 60):
+    def import_crossref(self, crossref_id: str, timeout = 60):
 
-        res = lookup_funder(crossrea_id, timeout)
+        res = lookup_funder(crossref_id, timeout)
         self.import_crossref_result(res.loc[0]) # type: ignore
 
-    def from_crossref(crossrea_id: str, use_api=True, timeout = 60): # type: ignore
-        res = lookup_funder(crossrea_id, timeout)
+    def from_crossref(crossref_id: str, use_api=True, timeout = 60): # type: ignore
+        res = lookup_funder(crossref_id, timeout)
         affiliation = Affiliation.from_crossref_result(crossref_result=res, use_api=use_api) # type: ignore
 
         return affiliation
@@ -494,7 +494,7 @@ class Affiliation(Entity):
 
     def update_from_crossref(self, timeout = 60):
 
-        uid = self.details.loc[0,'crossrea_id']
+        uid = self.details.loc[0,'crossref_id']
         if uid == None:
             uid = self.details.loc[0,'uri']
             if uid == None:
@@ -548,7 +548,7 @@ class Affiliations(Entities):
                                 'address',
                                 'email',
                                 'uri',
-                                'crossrea_id',
+                                'crossref_id',
                                 'website',
                                 'other_links'
                                 ],
@@ -650,7 +650,7 @@ class Affiliations(Entities):
         df = self.all.copy(deep=True)
         df['uri'] = df['uri'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('wwww.', '', regex=False).str.replace('dx.', '', regex=False).str.replace('doi.org/', '', regex=False).str.strip('/')
         
-        df = df.sort_values(by = ['uri', 'crossrea_id', 'website', 'name', 'location', 'address']).reset_index().drop('index', axis=1)
+        df = df.sort_values(by = ['uri', 'crossref_id', 'website', 'name', 'location', 'address']).reset_index().drop('index', axis=1)
         self.all = deduplicate(self.all)
 
         if sync == True:
@@ -791,7 +791,7 @@ class Affiliations(Entities):
         return self
 
 
-    def add_affiliation(self, affiliation: Affiliation =  None, name: str = None, uri: str = None, crossrea_id: int = None, data = None, use_api = True, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+    def add_affiliation(self, affiliation: Affiliation =  None, name: str = None, uri: str = None, crossref_id: int = None, data = None, use_api = True, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         if type(affiliation) == str:
 
@@ -814,7 +814,7 @@ class Affiliations(Entities):
 
 
         if affiliation is None:
-            affiliation = Affiliation(name=name, uri=uri, crossrea_id=crossrea_id, use_api = use_api)
+            affiliation = Affiliation(name=name, uri=uri, crossref_id=crossref_id, use_api = use_api)
 
         if use_api == True:
             affiliation.update_from_crossref()
@@ -954,9 +954,9 @@ class Affiliations(Entities):
         self.update_ids()
 
 
-    def import_crossrea_ids(self, crossrea_ids: list, drop_duplicates = False, drop_empty_rows=False):
+    def import_crossref_ids(self, crossref_ids: list, drop_duplicates = False, drop_empty_rows=False):
 
-        for i in crossrea_ids:
+        for i in crossref_ids:
 
             auth = Affiliation.from_crossref(i) # type: ignore
             self.add_affiliation(affiliation = auth)
@@ -970,15 +970,15 @@ class Affiliations(Entities):
         self.update_ids()
 
 
-    def from_crossrea_ids(crossrea_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+    def from_crossref_ids(crossref_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
         affiliations = Affiliations()
-        affiliations.import_crossrea_ids(crossrea_ids, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates)
+        affiliations.import_crossref_ids(crossref_ids, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates)
 
         return affiliations
 
     def with_crossref(self):
-        return self.all[~self.all['crossrea_id'].isna()]
+        return self.all[~self.all['crossref_id'].isna()]
     
     def with_uri(self):
         return self.all[~self.all['uri'].isna()]
