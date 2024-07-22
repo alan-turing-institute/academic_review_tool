@@ -45,6 +45,20 @@ def extract_source(source_dict):
 
     return source
 
+def extract_cite_counts(citations_dict):
+
+    count = None
+
+    if (type(citations_dict) == list) and (len(citations_dict)>0):
+        citations_dict = citations_dict[0]
+
+    if type(citations_dict) == dict:
+
+        if 'count' in citations_dict.keys():
+            count = citations_dict['count']
+
+    return count
+
 def extract_isbn(identifiers):
 
     isbn = None
@@ -375,6 +389,8 @@ def search(
         df['keywords'] = df['keywords'].apply(extract_keywords)
         df['recommendations'] = df['link'].apply(extract_related)
         df['link'] = df['link'].apply(extract_links)
+        df['citation_count'] = df['citations'].apply(extract_cite_counts)
+        df['citations_data'] = df['citations']
         df['repository'] = database
 
         df = df.drop('identifiers', axis=1)
