@@ -21,6 +21,7 @@ author_cols = ['author_id',
                                 'orcid',
                                 'google_scholar',
                                 'scopus',
+                                'wos',
                                 'crossref',
                                 'other_links',
                                 'other_ids'
@@ -893,6 +894,45 @@ class Authors(Entities):
 
         return authors
     
+    def import_wos(self, wos_result: dict | list, drop_duplicates = False, drop_empty_rows=False):
+        
+        authors_data = []
+
+        if type(wos_result) == list:
+            authors_data = wos_result
+        
+        elif type(wos_result) == dict:
+
+            if 'authors' in wos_result.keys():
+                authors_data = wos_result['authors']
+            else:
+                authors_data = []
+            
+            if 'bookEditors' in wos_result.keys():
+                editors_data = wos_result['bookEditors']
+            else:
+                editors_data = []
+        
+        authors_df = pd.DataFrame(authors_data)
+        authors_df = authors_df.rename(columns={'displayName': 'full_name', 'researcherId': 'wos'}).drop('wosStandard',axis=1)
+
+        self.all = pd.concat([self.all, authors_df])
+
+        if drop_empty_rows == True:
+            self.drop_empty_rows()
+        
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows=drop_empty_rows)
+
+        self.sync_details(drop_duplicates=False, drop_empty_rows=False)
+
+    def from_wos(wos_result: dict | list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        authors = Authors()
+        authors.import_wos(wos_result=wos_result, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        return authors
+
     def affiliations(self, drop_duplicates = False, drop_empty_rows=False):
 
         self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -941,6 +981,9 @@ def format_authors(author_data, drop_duplicates = False, drop_empty_rows=False):
             author = Author.from_crossref(author_data) # type: ignore
             result = Authors()
             result.add_author(author)
+        
+        if (type(author_data) == dict) and ('authors' in author_data.keys()):
+            result = Authors.from_wos(wos_result=author_data, drop_duplicates=True, drop_empty_rows=True) # type: ignore
     
         result.format_affiliations()
 
