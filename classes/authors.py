@@ -932,7 +932,7 @@ class Authors(Entities):
             if len(name) > 1:
                 given = name[1].strip()
                 family = name[0].strip()
-                full = family + ' ' + given
+                full = given + ' ' + family
 
             authors_df.loc[i, 'full_name'] = full
             authors_df.loc[i, 'given_name'] = given
