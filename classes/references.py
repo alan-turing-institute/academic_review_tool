@@ -85,8 +85,16 @@ def extract_references(references_data, add_work_ids = True, update_from_doi = F
         refs = References.from_dataframe(df) # type: ignore
         refs.refs_count = count
 
+        if 'db' in refs.columns:
+            refs = refs.drop('db', axis=1)
+        
+        if 'count' in refs.columns:
+            refs = refs.drop('count', axis=1)
+        
+        refs = refs.dropna(axis=0, how='all').reset_index().drop('index', axis=1)
+
         if add_work_ids == True:
-            refs.generate_work_ids()
+            refs.generate_work_ids() # type: ignore
     
     if (type(references_data) == list) and (len(references_data) > 0) and (type(references_data[0]) == str):
         df = pd.DataFrame(columns=results_cols, dtype=object)
@@ -98,6 +106,7 @@ def extract_references(references_data, add_work_ids = True, update_from_doi = F
             refs.generate_work_ids()
 
         refs.refs_count = None
+
 
     return refs
 
