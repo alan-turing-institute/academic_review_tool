@@ -894,7 +894,7 @@ class Authors(Entities):
 
         return authors
     
-    def import_wos(self, wos_result: dict | list, drop_duplicates = False, drop_empty_rows=False):
+    def import_wos(self, wos_result, drop_duplicates = False, drop_empty_rows=False):
         
         authors_data = []
 
