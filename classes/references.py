@@ -92,6 +92,7 @@ def extract_references(references_data, add_work_ids = True, update_from_doi = F
             refs = refs.drop('count', axis=1)
         
         refs = refs.dropna(axis=0, how='all').reset_index().drop('index', axis=1)
+        refs = References.from_dataframe(dataframe=refs) # type: ignore
 
         if add_work_ids == True:
             refs.generate_work_ids() # type: ignore
