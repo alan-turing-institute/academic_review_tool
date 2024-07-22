@@ -315,5 +315,19 @@ def search_journals(
     
     return df
 
+def extract_links(links_dict: dict) -> str:
 
+    link = ''
+
+    if 'record' in links_dict.keys():
+        link = links_dict['record']
+    
+    else:
+        if 'references' in links_dict.keys():
+            link = links_dict['references']
+        else:
+            if 'related' in links_dict.keys():
+                link = links_dict['related']
+
+    return link
 
