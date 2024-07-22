@@ -1290,7 +1290,11 @@ def merge_duplicate_ids(dataframe, merge_on: str):
         if len(dropna_indexes) > 0:
 
             df_dropna = df.copy(deep=True).loc[dropna_indexes]
-            ids = set(df_dropna[merge_on].to_list())
+
+            try:
+                ids = set(df_dropna[merge_on].to_list())
+            except:
+                ids = set(df_dropna[merge_on].astype(str).to_list())
 
             for i in ids:
 
