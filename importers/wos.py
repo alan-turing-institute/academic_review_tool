@@ -45,6 +45,48 @@ def extract_source(source_dict):
 
     return source
 
+def extract_isbn(identifiers):
+
+    isbn = None
+
+    if (type(identifiers) == list) and (len(identifiers)>0):
+        identifiers = identifiers[0]
+
+    if type(identifiers) == dict:
+
+        if 'isbn' in identifiers.keys():
+            isbn = identifiers['isbn']
+
+    return isbn
+
+def extract_issn(identifiers):
+
+    issn = None
+
+    if (type(identifiers) == list) and (len(identifiers)>0):
+        identifiers = identifiers[0]
+
+    if type(identifiers) == dict:
+
+        if 'issn' in identifiers.keys():
+            issn = identifiers['issn']
+
+    return issn
+
+def extract_doi(identifiers):
+
+    doi = None
+
+    if (type(identifiers) == list) and (len(identifiers)>0):
+        identifiers = identifiers[0]
+
+    if type(identifiers) == dict:
+
+        if 'doi' in identifiers.keys():
+            doi = identifiers['doi']
+
+    return doi
+
 def extract_keywords(keywords_dict):
 
     kws = None
@@ -327,10 +369,15 @@ def search(
         df = df.replace(np.nan, None)
         df['authors_data'] = df['authors'].copy(deep=True)
         df['source'] = df['source'].apply(extract_source)
+        df['doi'] = df['identifiers'].apply(extract_doi)
+        df['isbn'] = df['identifiers'].apply(extract_isbn)
+        df['issn'] = df['identifiers'].apply(extract_issn)
         df['keywords'] = df['keywords'].apply(extract_keywords)
         df['recommendations'] = df['link'].apply(extract_related)
         df['link'] = df['link'].apply(extract_links)
         df['repository'] = database
+
+        df = df.drop('identifiers', axis=1)
     
     else:
         df = pd.DataFrame(columns=results_cols, dtype=object)
