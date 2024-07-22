@@ -31,6 +31,30 @@ def import_wos(file_path: str = 'request_input'):
 
     return RC
 
+
+def extract_links(links_dict):
+
+    link = None
+
+    if (type(links_dict) == list) and (len(links_dict)>0):
+        links_dict = links_dict[0]
+
+    if type(links_dict) == dict:
+
+        if 'record' in links_dict.keys():
+            link = links_dict['record']
+        
+        else:
+            if 'references' in links_dict.keys():
+                link = links_dict['references']
+            else:
+                if 'related' in links_dict.keys():
+                    link = links_dict['related']
+
+    return link
+
+
+
 def operator_logic(default_operator: str, string: str):
 
     operator = default_operator
@@ -261,10 +285,12 @@ def search(
         
         df = df.replace(np.nan, None)
         df['authors_data'] = df['authors'].copy(deep=True)
+        df['link'] = df['link'].apply(extract_links)
     
     else:
         df = pd.DataFrame(columns=results_cols, dtype=object)
     
+
     return df
 
 def journals_search_engine(issn: str = 'request_input'):
@@ -309,25 +335,9 @@ def search_journals(
                             })
         
         df = df.replace(np.nan, None)
+        df['link'] = df['link'].apply(extract_links)
     
     else:
         df = pd.DataFrame(columns=results_cols, dtype=object)
     
     return df
-
-def extract_links(links_dict: dict) -> str:
-
-    link = ''
-
-    if 'record' in links_dict.keys():
-        link = links_dict['record']
-    
-    else:
-        if 'references' in links_dict.keys():
-            link = links_dict['references']
-        else:
-            if 'related' in links_dict.keys():
-                link = links_dict['related']
-
-    return link
-
