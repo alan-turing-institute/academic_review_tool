@@ -31,6 +31,47 @@ def import_wos(file_path: str = 'request_input'):
 
     return RC
 
+def extract_source(source_dict):
+
+    source = None
+
+    if (type(source_dict) == list) and (len(source_dict)>0):
+        source_dict = source_dict[0]
+
+    if type(source_dict) == dict:
+
+        if 'sourceTitle' in source_dict.keys():
+            source = source_dict['sourceTitle']
+
+    return source
+
+def extract_keywords(keywords_dict):
+
+    kws = None
+
+    if (type(keywords_dict) == list) and (len(keywords_dict)>0):
+        keywords_dict = keywords_dict[0]
+
+    if type(keywords_dict) == dict:
+
+        if 'authorKeywords' in keywords_dict.keys():
+            kws = keywords_dict['authorKeywords']
+
+    return kws
+
+def extract_related(links_dict):
+
+    link = None
+
+    if (type(links_dict) == list) and (len(links_dict)>0):
+        links_dict = links_dict[0]
+
+    if type(links_dict) == dict:
+
+        if 'related' in links_dict.keys():
+            link = links_dict['related']
+
+    return link
 
 def extract_links(links_dict):
 
@@ -285,7 +326,11 @@ def search(
         
         df = df.replace(np.nan, None)
         df['authors_data'] = df['authors'].copy(deep=True)
+        df['source'] = df['source'].apply(extract_source)
+        df['keywords'] = df['keywords'].apply(extract_keywords)
+        df['recommendations'] = df['link'].apply(extract_related)
         df['link'] = df['link'].apply(extract_links)
+        df['repository'] = database
     
     else:
         df = pd.DataFrame(columns=results_cols, dtype=object)
