@@ -119,37 +119,51 @@ def lacks_formatted_citations(self):
 
 Results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
 
-def format_citations(self, add_work_ids = False, update_from_doi = False):
+def format_citations(self, add_work_ids = False, update_from_doi = False, verbose = True):
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
 
+        if len(self[self['citations_data'].isna()]) == len(self['citations_data']):
+            self['citations_data'] = self['citations'].copy(deep=True)
+
         unformatted = self.lacks_formatted_citations()
         length = len(unformatted)
         if length > 0:
-
-            if length == 1:
-                intro_message = '\nFormatting 1 set of citations...'
-            else:
-                intro_message = f'\nFormatting {length} sets of citations...'
-            print(intro_message)
+            
+            if verbose == True:
+                if length == 1:
+                    intro_message = '\nFormatting 1 set of citations...'
+                else:
+                    intro_message = f'\nFormatting {length} sets of citations...'
+                
+                print(intro_message)
 
             indices = unformatted.index
             processing_count = 0
             for i in indices:
                 refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
-                try:
-                    refs_count = len(refs) # type: ignore
-                except:
-                    refs_count = 0
+                refs_count  = None
+
+                if 'refs_count' in refs.__dict__.keys():
+                    refs_count  = refs.refs_count
+                
+                if refs_count is None:
+                    try:
+                        refs_count = len(refs) # type: ignore
+                    except:
+                        refs_count = 0
+
                 processing_count = processing_count + refs_count
                 self.at[i, 'citations'] = refs
+                self.at[i, 'citation_count'] = refs_count
             
-            if processing_count == 1:
-                outro_message = '1 citation formatted\n'
-            else:
-                outro_message = f'{processing_count} citations formatted\n'
-            print(outro_message)
+            if verbose == True:
+                if processing_count == 1:
+                    outro_message = '1 citation formatted\n'
+                else:
+                    outro_message = f'{processing_count} citations formatted\n'
+                print(outro_message)
 
 Results.format_citations = format_citations # type: ignore
 
@@ -164,7 +178,7 @@ def format_authors(self):
         new_series = authors_data.apply(orig_format_authors) # type: ignore
 
         self['authors'] = new_series
-        
+
         return self['authors']
 
 Results.format_authors = format_authors # type: ignore
