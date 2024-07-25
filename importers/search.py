@@ -44,56 +44,62 @@ def search(default_query = None,
     df = pd.DataFrame(dtype=object)
 
     if crossref == True:
-        cr_result = search_crossref(
-                bibliographic = default_query, # type: ignore
-                title = title, # type: ignore
-                author = author, # type: ignore
-                author_affiliation = affiliation, # type: ignore
-                editor = editor, # type: ignore
-                entry_type = entry_type, # type: ignore
-                published_date = year, # type: ignore
-                doi = doi, # type: ignore
-                issn = issn, # type: ignore
-                publisher_name = publisher, # type: ignore
-                funder_name = funder,
-                source = source_title, # type: ignore
-                link = link, # type: ignore
-                limit = limit_per_api,
-                rate_limit = rate_limit,
-                timeout = timeout)
-        
-        df = pd.concat([df, cr_result])
-        df = df.reset_index().drop('index',axis=1)
+        try:
+            cr_result = search_crossref(
+                    bibliographic = default_query, # type: ignore
+                    title = title, # type: ignore
+                    author = author, # type: ignore
+                    author_affiliation = affiliation, # type: ignore
+                    editor = editor, # type: ignore
+                    entry_type = entry_type, # type: ignore
+                    published_date = year, # type: ignore
+                    doi = doi, # type: ignore
+                    issn = issn, # type: ignore
+                    publisher_name = publisher, # type: ignore
+                    funder_name = funder,
+                    source = source_title, # type: ignore
+                    link = link, # type: ignore
+                    limit = limit_per_api,
+                    rate_limit = rate_limit,
+                    timeout = timeout)
+            
+            df = pd.concat([df, cr_result])
+            df = df.reset_index().drop('index',axis=1)
+        except:
+            pass
     
     if scopus == True:
-        scopus_result = search_scopus(tile_abs_key_auth = default_query,
-                    all_fields = all_fields,
-                    title = title,
-                    year = year,
-                    author = author,
-                    author_identifier = author_identifier,
-                    affiliation = affiliation,
-                    editor = editor,
-                    publisher = publisher,
-                    funder = funder,
-                    abstract = abstract,
-                    keywords = keywords,
-                    doctype = entry_type,
-                    doi = doi,
-                    issn = issn,
-                    isbn = isbn,
-                    pubmed_id = pubmed_id,
-                    source_title = source_title,
-                    volume = volume,
-                    page = page,
-                    issue = issue,
-                    language = language,
-                    link = link,
-                    references = references,
-                    default_operator = default_operator)
+        try:
+            scopus_result = search_scopus(tile_abs_key_auth = default_query,
+                        all_fields = all_fields,
+                        title = title,
+                        year = year,
+                        author = author,
+                        author_identifier = author_identifier,
+                        affiliation = affiliation,
+                        editor = editor,
+                        publisher = publisher,
+                        funder = funder,
+                        abstract = abstract,
+                        keywords = keywords,
+                        doctype = entry_type,
+                        doi = doi,
+                        issn = issn,
+                        isbn = isbn,
+                        pubmed_id = pubmed_id,
+                        source_title = source_title,
+                        volume = volume,
+                        page = page,
+                        issue = issue,
+                        language = language,
+                        link = link,
+                        references = references,
+                        default_operator = default_operator)
 
-        df = pd.concat([df, scopus_result])
-        df = df.reset_index().drop('index',axis=1)
+            df = pd.concat([df, scopus_result])
+            df = df.reset_index().drop('index',axis=1)
+        except:
+            pass
     
     if wos == True:
 
@@ -102,28 +108,31 @@ def search(default_query = None,
         else:
             all_fields_updated = all_fields
 
-        wos_result = search_wos(
-            all_fields = all_fields_updated,
-            title = title,
-            year = year,
-            author = author,
-            author_identifier = author_identifier,
-            affiliation = affiliation,
-            doctype = entry_type,
-            doi = doi,
-            issn = issn,
-            isbn = isbn,
-            pubmed_id = pubmed_id,
-            source_title = source_title,
-            volume = volume,
-            page = page,
-            issue = issue,
-            topics = topics,
-            default_operator = default_operator,
-            limit = limit_per_api)
+        try:
+            wos_result = search_wos(
+                all_fields = all_fields_updated,
+                title = title,
+                year = year,
+                author = author,
+                author_identifier = author_identifier,
+                affiliation = affiliation,
+                doctype = entry_type,
+                doi = doi,
+                issn = issn,
+                isbn = isbn,
+                pubmed_id = pubmed_id,
+                source_title = source_title,
+                volume = volume,
+                page = page,
+                issue = issue,
+                topics = topics,
+                default_operator = default_operator,
+                limit = limit_per_api)
 
-        df = pd.concat([df, wos_result])
-        df = df.reset_index().drop('index',axis=1)
+            df = pd.concat([df, wos_result])
+            df = df.reset_index().drop('index',axis=1)
+        except:
+            pass
     
     if orcid == True:
 
@@ -132,12 +141,15 @@ def search(default_query = None,
         else:
             all_fields_updated = all_fields
 
-        orcid_result = search_orcid(query = all_fields_updated, # type: ignore
-            limit = limit_per_api)
+        try:
+            orcid_result = search_orcid(query = all_fields_updated, # type: ignore
+                limit = limit_per_api)
 
-        if type(orcid_result) == pd.DataFrame:
-            df = pd.concat([df, orcid_result])
-            df = df.reset_index().drop('index',axis=1)
+            if type(orcid_result) == pd.DataFrame:
+                df = pd.concat([df, orcid_result])
+                df = df.reset_index().drop('index',axis=1)
+        except:
+            pass
     
     df = df.dropna(axis=0, how='all').dropna(axis=1, how='all').reset_index().drop('index', axis=1)
 
