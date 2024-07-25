@@ -5,7 +5,7 @@ from ..exporters.general_exporters import obj_to_folder
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..importers.scopus import query_builder as scopus_query_builder, search as search_scopus, lookup as lookup_scopus
-from ..importers.wos import search as search_wos
+from ..importers.wos import search as search_wos, query_builder as wos_query_builder
 from ..importers.search import search as api_search
 
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
@@ -434,8 +434,7 @@ class Review:
         res_diff = new_res_len - old_res_len
 
         changes = {'results': res_diff}
-        self.activity_log.add_activity(type='deduplicated', changes_dict=changes)
-
+        self.activity_log.add_activity(type='data import', activity='added PDF data to results', location = ['results'], changes_dict=changes)
         
         if update_formatting == True:
             self.format()
@@ -878,7 +877,7 @@ class Review:
                    'funders': funders_diff,
                    'affiliations': affils_diff}
 
-        self.activity_log.add_activity(type='deduplicated', changes_dict=changes)
+        self.activity_log.add_activity(type='data cleaning', activity='deduplication', location = ['results', 'authors', 'funders', 'affiliations'], changes_dict=changes)
 
         
 
@@ -907,7 +906,7 @@ class Review:
             changes = {'results': res_diff,
                    'authors': auths_diff}
 
-            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(changes.keys()), changes_dict=changes)
 
         
         if drop_duplicates == True:
@@ -932,7 +931,7 @@ class Review:
             changes = {'results': res_diff,
                    'authors': auths_diff}
 
-            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(changes.keys()), changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -950,7 +949,7 @@ class Review:
         len_diff = new_auths_len - old_auths_len
 
         changes = {'authors': {'orcid_updated': orcid_len, 'count': len_diff}}
-        self.activity_log.add_activity(type='updated authors from ORCID', changes_dict = changes)
+        self.activity_log.add_activity(type='API retrieval', activity='updated authors from ORCID', location = ['authors'], changes_dict = changes)
         
 
         if update_formatting == True:
@@ -965,7 +964,7 @@ class Review:
         len_diff = orig_len - new_len
 
         changes = {'results': len_diff}
-        self.activity_log.add_activity(type='added dataframe to results', changes_dict=changes)
+        self.activity_log.add_activity(type='data merge', activity='added dataframe to results', location=['results'], changes_dict=changes)
 
         if drop_empty_rows == True:
             
@@ -976,7 +975,7 @@ class Review:
 
             changes = {'results': res_diff}
 
-            self.activity_log.add_activity(type='removed empty rows from results', changes_dict=changes)
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=['results'], changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -994,7 +993,7 @@ class Review:
         len_diff = orig_len - new_len
 
         changes = {'results': len_diff}
-        self.activity_log.add_activity(type='imported Excel file to results', changes_dict=changes)
+        self.activity_log.add_activity(type='data import', activity='imported Excel file to results', location=['results'], changes_dict=changes)
 
         if drop_empty_rows == True:
 
@@ -1011,7 +1010,7 @@ class Review:
             changes = {'results': res_diff,
                    'authors': auths_diff}
 
-            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(changes.keys()), changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -1027,7 +1026,7 @@ class Review:
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
         review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-        review.activity_log.add_activity(type='created Review from imported Excel file')
+        review.activity_log.add_activity(type='data import', activity='created Review from imported Excel file', location=['results', 'authors', 'funders', 'affiliations'])
         
         return review
 
@@ -1039,7 +1038,7 @@ class Review:
         len_diff = orig_len - new_len
 
         changes = {'results': len_diff}
-        self.activity_log.add_activity(type='imported CSV file to results', changes_dict=changes)
+        self.activity_log.add_activity(type='data import', activity='imported CSV file to results', location=['results'], changes_dict=changes)
 
         if drop_empty_rows == True:
 
@@ -1056,7 +1055,7 @@ class Review:
             changes = {'results': res_diff,
                    'authors': auths_diff}
 
-            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(changes.keys()), changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -1073,7 +1072,7 @@ class Review:
         if update_formatting == True:
             review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-        review.activity_log.add_activity(type='created Review from imported CSV file')
+        review.activity_log.add_activity(type='data import', activity='created Review from imported CSV file', location=['results', 'authors', 'funders', 'affiliations'])
 
         return review
 
@@ -1124,7 +1123,7 @@ class Review:
 
         len_diff = new_len - old_len
         changes = {'results': len_diff}
-        self.activity_log.add_activity(type='imported JSTOR JSON file to results', changes_dict=changes)
+        self.activity_log.add_activity(type='data import', activity='imported JSTOR JSON file to results', location=['results'], changes_dict=changes)
 
         if format_citations == True:
             self.format_citations()
@@ -1244,7 +1243,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_article(url)
-        self.activity_log.add_activity(type='scraped URL and added to results', url=url)
+        self.activity_log.add_activity(type='web scraping', activity='scraped URL and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_doi(self, doi = 'request_input'):
@@ -1254,7 +1253,7 @@ class Review:
 
         df = scrape_doi(doi)
         url = f'https://doi.org/{doi}'
-        self.activity_log.add_activity(type='scraped DOI and added to results', url=url)
+        self.activity_log.add_activity(type='web scraping', activity='scraped DOI and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_google_scholar(self, url = 'request_input'):
@@ -1263,7 +1262,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_google_scholar(url)
-        self.activity_log.add_activity(type='scraped Google Scholar and added to results', url=url)
+        self.activity_log.add_activity(type='web scraping', activity='scraped Google Scholar and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
     
     def scrape_google_scholar_search(self, url = 'request_input'):
@@ -1272,6 +1271,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_google_scholar_search(url)
+        self.activity_log.add_activity(type='web scraping', activity='scraped Google Scholar search and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
     
     def scrape(self, url = 'request_input', add_to_results=True, drop_empty_rows = True, drop_duplicates = True):
@@ -1282,7 +1282,7 @@ class Review:
         df = academic_scraper(url)
 
         if add_to_results == True:
-            self.activity_log.add_activity(type='scraped URL and added to results', url=url)
+            self.activity_log.add_activity(type='web scraping', activity='scraped URL and added to results', location=['results'], url=url)
             self.add_dataframe(df, drop_empty_rows=drop_empty_rows)
         
         if drop_duplicates == True:
@@ -1336,9 +1336,9 @@ class Review:
         df['repository'] = 'crossref'
 
         if add_to_results == True:
-            self.activity_log.add_activity(type='searched Crossref and added to results', database='crossref', query=bibliographic)
-            self.results.add_dataframe(dataframe=df) # type: ignore
-            self.format_authors()
+            self.activity_log.add_activity(type='API search', activity='searched Crossref and added to results', location=['results'], database='crossref', query=bibliographic)
+            self.add_dataframe(dataframe=df) # type: ignore
+            self.format()
         
         return df
 
@@ -1448,8 +1448,8 @@ class Review:
                             references = references,
                             default_operator = default_operator)
 
-            self.activity_log.add_activity(type='searched Scopus and added to results', database='scopus', query=query)
-            self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
+            self.activity_log.add_activity(type='API search', activity='searched Scopus and added to results', location=['results'], database='scopus', query=query)
+            self.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
         return df
 
@@ -1515,6 +1515,26 @@ class Review:
                     df = df.drop(c, axis=1)
 
         if add_to_results == True:
+            
+            query = wos_query_builder(all_fields = all_fields,
+                                        title = title,
+                                        year = year,
+                                        author = author,
+                                        author_identifier = author_identifier,
+                                        affiliation = affiliation,
+                                        doctype = doctype,
+                                        doi = doi,
+                                        issn = issn,
+                                        isbn = isbn,
+                                        pubmed_id = pubmed_id,
+                                        source_title = source_title,
+                                        volume = volume,
+                                        page = page,
+                                        issue = issue,
+                                        topics = topics,
+                                        default_operator = default_operator)
+
+            self.activity_log.add_activity(type='API search', activity='searched World of Science and added to results', location=['results'], database=database, query=query)
             self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
 
@@ -1554,15 +1574,35 @@ class Review:
         return df
 
     def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
-            
+        
+        old_len = len(self.results)
         self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
+        new_len = len(self.results)
+        
+        len_diff = new_len - old_len
+        change = {'results': len_diff}
+        self.activity_log.add_activity(type='API search', activity='searched Crossref for DOI entry and added to results', location=['results'], database='crossref', changes_dict=change)
+        
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         if drop_empty_rows == True:
+
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff =  new_res_len - orig_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = new_auths_len - orig_auths_len
+
+            drop_changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(drop_changes.keys()), changes_dict=drop_changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -1580,14 +1620,36 @@ class Review:
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
     def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
+        
+        old_len = len(self.results)
         self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
+        new_len = len(self.results)
+
+        len_diff = new_len - old_len
+        change = {'results': len_diff}
+        self.activity_log.add_activity(type='API search', activity='searched Crossref for list of DOI entries and added to results', location=['results'], database='crossref', changes_dict=change)
+        
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         if drop_empty_rows == True:
+
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff =  new_res_len - orig_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = new_auths_len - orig_auths_len
+
+            drop_changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(drop_changes.keys()), changes_dict=drop_changes)
+        
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -1602,14 +1664,33 @@ class Review:
         return review
 
     def update_from_dois(self, timeout: int = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
+        
+        has_doi = len(self.results.has('doi')) # type: ignore
         self.results.update_from_dois(timeout=timeout) # type: ignore
+
+        changes = {'results': has_doi}
+        self.activity_log.add_activity(type='API retrieval', activity='updated results data from Crossref using DOIs', location = ['results'], changes_dict = changes)
+        
 
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         if drop_empty_rows == True:
+
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff =  new_res_len - orig_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = new_auths_len - orig_auths_len
+
+            drop_changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='data cleaning', activity='removed empty rows', location=list(drop_changes.keys()), changes_dict=drop_changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -1689,9 +1770,12 @@ class Review:
                                           )
             
             if add_to_results == True:
-                self.results.add_dataframe(dataframe=df) # type: ignore
-                self.format_citations()
-                self.format_authors()
+                
+                self.activity_log.add_activity(type='API search', activity='searched Crossref for journal publications using ISSN and added to results', location=['results'], query=issn)
+        
+
+                self.add_dataframe(dataframe=df) # type: ignore
+                self.format()
         
             return df
     
@@ -1766,12 +1850,18 @@ class Review:
                                 timeout=timeout)
             
         if add_to_results == True:
-                self.results.add_dataframe(dataframe=df) # type: ignore
+                
+                self.activity_log.add_activity(type='API search', activity='searched Crossref for funder publications using ID and added to results', location=['results'], query=funder_id)
+                self.add_dataframe(dataframe=df) # type: ignore
                 self.format_authors()
         
         return df
 
     def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
+
+        if add_to_authors == True:
+            self.activity_log.add_activity(type='API search', activity='searched ORCID for author and added to authors', location=['authors'], query=query)
+                
         return self.authors.search_orcid(query=query, add_to_authors=add_to_authors)
 
     def api_search(self,
@@ -1847,15 +1937,25 @@ class Review:
                     df = df.drop(c, axis=1)
 
         if add_to_results == True:
-            self.results.add_dataframe(dataframe=df) # type: ignore
+
+            apis = ''
+            if crossref == True:
+                apis = apis + 'Crossref, '
+            if scopus == True:
+                apis = apis + 'Scopus, '
+            if wos == True:
+                apis = apis + 'Web of Science'
+            apis = apis.strip().strip(',').strip()
+
+            self.activity_log.add_activity(type='API search', activity=f'searched {apis} for works and added to results', location=['results'], query=default_query)
+                
+            self.add_dataframe(dataframe=df) # type: ignore
             self.format()
         
         return df
         
 
-        
-
-    def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format_authors = True, update_from_doi = False):
+    def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format = True, update_from_doi = False):
 
         iteration = 1
         processed_indexes = []
@@ -1914,10 +2014,12 @@ class Review:
         self.results.update_work_ids() # type: ignore
         df = self.results.drop_duplicates(subset=['work_id']).reset_index().drop('index', axis=1)
         self.results = Results.from_dataframe(df) # type: ignore
-        
 
-        if format_authors == True:
-            self.format_authors()
+
+        self.activity_log.add_activity(type='citation crawl', activity=f'crawled stored citations and added to results', location=['results'])
+
+        if format == True:
+            self.format()
         
         print(f'Crawl complete:\n    - Entries processed: {len(processed_indexes)}\n    - Results added: {final_len_diff}\n')
 
@@ -1988,6 +2090,7 @@ class Review:
         if add_to_results == True:
 
             df = result.drop(labels=0, axis=0).reset_index().drop('index', axis=1)
+            self.activity_log.add_activity(type='citation crawl', activity=f'crawled citations using APIs and added to results', location=['results'])
             self.results.add_dataframe(df) # type: ignore
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -2124,7 +2227,7 @@ class Review:
         network = Network(graph = g)
 
         if add_to_networks == True:
-            
+            self.activity_log.add_activity(type='network generation', activity=f'generated coauthors network and added to networks', location=['networks'])
             self.networks.__dict__['coauthors'] = network
         
         return network
@@ -2176,6 +2279,8 @@ class Review:
         network = Network(graph = g)
 
         if add_to_networks == True:
+
+            self.activity_log.add_activity(type='network generation', activity=f'generated cofunders network and added to networks', location=['networks'])
             
             self.networks.__dict__['cofunders'] = network
         
@@ -2224,7 +2329,7 @@ class Review:
         network = Network(graph)
 
         if add_to_networks == True:
-            
+            self.activity_log.add_activity(type='network generation', activity=f'generated citations network and added to networks', location=['networks'])
             self.networks.__dict__['citations'] = network
         
         return network
@@ -2257,6 +2362,7 @@ class Review:
         network = Network(graph=g)
 
         if add_to_networks == True:
+            self.activity_log.add_activity(type='network generation', activity=f'generated author-works network and added to networks', location=['networks'])
             self.networks.__dict__['author_works'] = network
 
         return network
@@ -2288,6 +2394,7 @@ class Review:
         network = Network(graph=g)
 
         if add_to_networks == True:
+            self.activity_log.add_activity(type='network generation', activity=f'generated funder-works network and added to networks', location=['networks'])
             self.networks.__dict__['funder_works'] = network
 
         return network
@@ -2317,6 +2424,7 @@ class Review:
         network = Network(graph=g)
 
         if add_to_networks == True:
+            self.activity_log.add_activity(type='network generation', activity=f'generated author-affiliations network and added to networks', location=['networks'])
             self.networks.__dict__['author_affiliations'] = network
 
         return network
@@ -2362,6 +2470,7 @@ class Review:
         network = Network(graph=g)
 
         if add_to_networks == True:
+            self.activity_log.add_activity(type='network generation', activity=f'generated entities network and added to networks', location=['networks'])
             self.networks.__dict__['all_entities'] = network
         
         return network

@@ -30,7 +30,8 @@ class ActivityLog(pd.DataFrame):
         super().__init__(dtype=object, columns = [ # type: ignore
                                 'timestamp',
                                 'type',
-                                'summary',
+                                'activity',
+                                'location',
                                 'database',
                                 'url',
                                 'query',
@@ -41,12 +42,13 @@ class ActivityLog(pd.DataFrame):
         self.replace(np.nan, None)
     
 
-    def add_activity(self, type, summary, database = None, query = None, url = None, changes_dict = None):
+    def add_activity(self, type: str, activity: str, location: list, database = None, query = None, url = None, changes_dict = None):
 
         new_index = len(self)
         self.loc[new_index, 'timestamp'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.loc[new_index, 'type'] = type
-        self.loc[new_index, 'summary'] = summary
+        self.loc[new_index, 'activity'] = activity
+        self.at[new_index, 'location'] = location
         self.loc[new_index, 'database'] = database
         self.loc[new_index, 'url'] = url
         self.loc[new_index, 'query'] = query
