@@ -66,7 +66,7 @@ def search(default_query = None,
             df = pd.concat([df, cr_result])
             df = df.reset_index().drop('index',axis=1)
         except Exception as e:
-            print(e)
+            print(f'Encountered Crossref search error: {e}')
             pass
     
     if scopus == True:
@@ -100,7 +100,7 @@ def search(default_query = None,
             df = pd.concat([df, scopus_result])
             df = df.reset_index().drop('index',axis=1)
         except Exception as e:
-            print(e)
+            print(f'Encountered Scopus search error: {e}')
             pass
     
     if wos == True:
@@ -134,7 +134,7 @@ def search(default_query = None,
             df = pd.concat([df, wos_result])
             df = df.reset_index().drop('index',axis=1)
         except Exception as e:
-            print(e)
+            print(f'Encountered Web of Science search error: {e}')
             pass
     
     if orcid == True:
@@ -152,7 +152,7 @@ def search(default_query = None,
                 df = pd.concat([df, orcid_result])
                 df = df.reset_index().drop('index',axis=1)
         except Exception as e:
-            print(e)
+            print(f'Encountered ORCID search error: {e}')
             pass
     
     df = df.dropna(axis=0, how='all').dropna(axis=1, how='all').reset_index().drop('index', axis=1)
