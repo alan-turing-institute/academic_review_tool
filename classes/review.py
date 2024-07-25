@@ -1338,7 +1338,8 @@ class Review:
 
         if add_to_results == True:
 
-            query = crossref_query_builder(title = title,
+            query = crossref_query_builder(bibliographic = bibliographic,
+                title = title,
                 author = author,
                 author_affiliation = author_affiliation,
                 editor = editor,
