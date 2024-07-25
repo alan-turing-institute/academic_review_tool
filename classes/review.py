@@ -4,6 +4,7 @@ from ..exporters.general_exporters import obj_to_folder
 
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
+from ..importers.crossref import query_builder as crossref_query_builder
 from ..importers.scopus import query_builder as scopus_query_builder, search as search_scopus, lookup as lookup_scopus
 from ..importers.wos import search as search_wos, query_builder as wos_query_builder
 from ..importers.search import search as api_search
@@ -1336,7 +1337,21 @@ class Review:
         df['repository'] = 'crossref'
 
         if add_to_results == True:
-            self.activity_log.add_activity(type='API search', activity='searched Crossref and added to results', location=['results'], database='crossref', query=bibliographic)
+
+            query = crossref_query_builder(title = title,
+                author = author,
+                author_affiliation = author_affiliation,
+                editor = editor,
+                entry_type = entry_type,
+                published_date = published_date,
+                doi = doi,
+                issn = issn,
+                publisher_name = publisher_name,
+                funder_name = funder_name,
+                source = source,
+                link = link)
+
+            self.activity_log.add_activity(type='API search', activity='searched Crossref and added to results', location=['results'], database='crossref', query=query)
             self.add_dataframe(dataframe=df) # type: ignore
             self.format()
         

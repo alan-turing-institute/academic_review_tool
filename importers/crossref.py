@@ -338,8 +338,117 @@ def references_to_df(references_list: list, update_from_doi = False) -> pd.DataF
 
     return df
 
+
+def operator_logic(default_operator: str, string: str):
+
+    operator = default_operator
+
+    if string.startswith('AND '):
+            operator = 'AND'
+        
+    else:
+        if string.startswith('OR '):
+            operator = 'OR'
+        
+        else:
+            if string.startswith('NOT '):
+                operator = 'NOT'
+            
+                    
+            else:
+                operator = default_operator
+
+    string_stripped = string.strip(f'{operator} ').strip()
+    
+
+    return (operator, string_stripped)
+
+
+def query_builder(default_operator = 'AND',
+                  bibliographic: str = None, # type: ignore
+                    title: str = None, # type: ignore
+                    author: str = None, # type: ignore
+                    author_affiliation: str = None, # type: ignore
+                    editor: str = None, # type: ignore
+                    entry_type: str = None, # type: ignore
+                    published_date: str = None, # type: ignore
+                    doi: str = None, # type: ignore
+                    issn: str = None, # type: ignore
+                    publisher_name: str = None, # type: ignore
+                    funder_name = None, # type: ignore
+                    source: str = None, # type: ignore
+                    link: str = None, # type: ignore
+                    ):
+    
+    query = ''
+    
+    if (bibliographic is not None) and (type(bibliographic) == str): # type: ignore
+        bib_tuple = operator_logic(default_operator=default_operator, string=bibliographic)
+        query = query + ' ' + bib_tuple[0] + ' ' + 'BIBLIOGRAPHIC: ' + bib_tuple[1]
+
+    if (title is not None) and (type(title) == str): # type: ignore
+        title_tuple = operator_logic(default_operator=default_operator, string=title)
+        query = query + ' ' + title_tuple[0] + ' ' + 'TITLE: ' + title_tuple[1]
+    
+    if (published_date is not None) and (type(published_date) == str): # type: ignore
+        year_tuple = operator_logic(default_operator=default_operator, string=published_date)
+        query = query + ' ' + year_tuple[0] + ' DATE: ' + year_tuple[1]
+    
+    if (author is not None) and (type(author) == str): # type: ignore
+        auth_tuple = operator_logic(default_operator=default_operator, string=author)
+        query = query + ' ' + auth_tuple[0] + ' AUTHOR: ' + auth_tuple[1]
+    
+    if (author_affiliation is not None) and (type(author_affiliation) == str): # type: ignore
+        affil_tuple = operator_logic(default_operator=default_operator, string=author_affiliation)
+        query = query + ' ' + affil_tuple[0] + ' AUTHOR AFFIL:' + affil_tuple[1]
+    
+    if (entry_type is not None) and (type(entry_type) == str): # type: ignore
+        doctype_tuple = operator_logic(default_operator=default_operator, string=entry_type)
+        query = query + ' ' + doctype_tuple[0] + ' TYPE: ' + doctype_tuple[1]
+    
+    if (doi is not None) and (type(doi) == str): # type: ignore
+        doi_tuple = operator_logic(default_operator=default_operator, string=doi)
+        query = query + ' ' + doi_tuple[0] + ' DOI: ' + doi_tuple[1]
+    
+    if (editor is not None) and (type(editor) == str): # type: ignore
+        ed_tuple = operator_logic(default_operator=default_operator, string=editor)
+        query = query + ' ' + ed_tuple[0] + ' EDITOR: ' + ed_tuple[1]
+    
+    if (publisher_name is not None) and (type(publisher_name) == str): # type: ignore
+        pub_tuple = operator_logic(default_operator=default_operator, string=publisher_name)
+        query = query + ' ' + pub_tuple[0] + ' PUBLISHER: ' + pub_tuple[1]
+    
+    if (funder_name is not None) and (type(funder_name) == str): # type: ignore
+        funder_tuple = operator_logic(default_operator=default_operator, string=funder_name)
+        query = query + ' ' + funder_tuple[0] + ' FUNDER: ' + funder_tuple[1]
+    
+    if (issn is not None) and (type(issn) == str): # type: ignore
+        issn_tuple = operator_logic(default_operator=default_operator, string=issn)
+        query = query + ' ' + issn_tuple[0] + ' ISSN: ' + issn_tuple[1]
+    
+    if (source is not None) and (type(source) == str): # type: ignore
+        st_tuple = operator_logic(default_operator=default_operator, string=source)
+        query = query + ' ' + st_tuple[0] + ' SOURCE:' + st_tuple[1]
+    
+    if (link is not None) and (type(link) == str): # type: ignore
+        link_tuple = operator_logic(default_operator=default_operator, string=link)
+        query = query + ' ' + link_tuple[0] + ' LINK: ' + link_tuple[1]
+        
+    
+    query = query.strip()
+    if query.startswith('AND ') == True:
+        query = query[4:]
+    if query.startswith('NOT ') == True:
+        query = query[4:]
+    if query.startswith('OR ') == True:
+        query = query[3:]
+    query = query.strip()
+    
+    return query
+   
+
 def search_works(
-                bibliographic: str = None, # type: ignore
+                bibliographic = None, # type: ignore
                 title: str = None, # type: ignore
                 author: str = None, # type: ignore
                 author_affiliation: str = None, # type: ignore
