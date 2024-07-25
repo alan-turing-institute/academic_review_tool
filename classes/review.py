@@ -1266,7 +1266,7 @@ class Review:
                             language = language,
                             link = link,
                             references = references,
-                            default_operator = 'AND',
+                            default_operator = default_operator,
                            refresh=refresh, 
                            view=view, 
                            verbose=verbose, 
