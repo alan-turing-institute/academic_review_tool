@@ -46,5 +46,5 @@ class ActivityLog(pd.DataFrame):
         self.loc[new_index, 'timestamp'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.loc[new_index, 'database'] = database
         self.loc[new_index, 'query'] = query
-        self.loc[new_index, 'changes'] = changes_dict
+        self.at[new_index, 'changes'] = changes_dict
 
