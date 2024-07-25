@@ -846,10 +846,34 @@ class Review:
  
     def remove_duplicates(self, drop_empty_rows=True, use_api=False):
 
+        orig_res_len = len(self.results)
         self.results.remove_duplicates(drop_empty_rows=drop_empty_rows, update_from_api=use_api) # type: ignore
+        new_res_len = len(self.results)
+        res_diff = orig_res_len - new_res_len
+
+        orig_auths_len = len(self.authors.all)
         self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
+        new_auths_len = len(self.authors.all)
+        auths_diff = orig_auths_len - new_auths_len
+
+        orig_funders_len = len(self.funders.all)
         self.funders.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
+        new_funders_len = len(self.funders.all)
+        funders_diff = orig_funders_len - new_funders_len
+
+        orig_affils_len = len(self.affiliations.all)
         self.affiliations.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
+        new_affils_len = len(self.affiliations.all)
+        affils_diff = orig_affils_len - new_affils_len
+
+        changes = {'results': res_diff,
+                   'authors': auths_diff,
+                   'funders': funders_diff,
+                   'affiliations': affils_diff}
+
+        self.activity_log.add_activity(type='deduplicated', changes_dict=changes)
+
+        
 
     def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True, verbose=False):
 
@@ -862,8 +886,22 @@ class Review:
             self.update_entity_attrs()
         
         if drop_empty_rows == True:
+
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff = orig_res_len - new_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = orig_auths_len - new_auths_len
+
+            changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
+
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -873,8 +911,21 @@ class Review:
         self.results.add_citations_to_results(drop_duplicates = drop_duplicates, drop_empty_rows = drop_empty_rows) # type: ignore
 
         if drop_empty_rows == True:
+
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff = orig_res_len - new_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = orig_auths_len - new_auths_len
+
+            changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -883,17 +934,38 @@ class Review:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
     def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows=True):
+
+        orcid_len = len(self.authors.with_orcid())
         self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        changes = {'authors': orcid_len}
+        self.activity_log.add_activity(type='updated authors from ORCID', changes_dict = changes)
+        
 
         if update_formatting == True:
             self.format()
+        
 
     def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = True):
 
+        orig_len = len(self.results)
         self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
+        new_len = len(self.results)
+        len_diff = orig_len - new_len
+
+        changes = {'results': len_diff}
+        self.activity_log.add_activity(type='added dataframe to results', changes_dict=changes)
 
         if drop_empty_rows == True:
-            self.authors.drop_empty_rows() # type: ignore
+            
+            orig_res_len = len(self.results)
+            self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff = orig_res_len - new_res_len
+
+            changes = {'results': res_diff}
+
+            self.activity_log.add_activity(type='removed empty rows from results', changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -904,12 +976,31 @@ class Review:
         return self
 
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
-        self.update_properties()
+        
+        orig_len = len(self.results)
         self.results.import_excel(file_path, sheet_name) # type: ignore
+        new_len = len(self.results)
+        len_diff = orig_len - new_len
+
+        changes = {'results': len_diff}
+        self.activity_log.add_activity(type='imported Excel file to results', changes_dict=changes)
 
         if drop_empty_rows == True:
+
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff = orig_res_len - new_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = orig_auths_len - new_auths_len
+
+            changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
@@ -928,12 +1019,31 @@ class Review:
         return review
 
     def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
-        self.update_properties()
+        
+        orig_len = len(self.results)
         self.results.import_csv(file_path) # type: ignore
+        new_len = len(self.results)
+        len_diff = orig_len - new_len
+
+        changes = {'results': len_diff}
+        self.activity_log.add_activity(type='imported CSV file to results', changes_dict=changes)
 
         if drop_empty_rows == True:
+            
+            orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
+            new_res_len = len(self.results)
+            res_diff = orig_res_len - new_res_len
+
+            orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
+            new_auths_len = len(self.authors.all)
+            auths_diff = orig_auths_len - new_auths_len
+
+            changes = {'results': res_diff,
+                   'authors': auths_diff}
+
+            self.activity_log.add_activity(type='removed empty rows', changes_dict=changes)
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)

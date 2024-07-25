@@ -38,7 +38,8 @@ class ActivityLog(pd.DataFrame):
         
         self.replace(np.nan, None)
     
-    def add_activity(self, type, database = None, query = None, changes_dict = {}):
+
+    def add_activity(self, type, database = None, query = None, changes_dict = None):
 
         new_index = len(self)
         self.loc[new_index, 'type'] = type
