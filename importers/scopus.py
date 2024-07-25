@@ -267,8 +267,11 @@ def search(tile_abs_key_auth = None,
     res_df['affiliation_country'] = res_df['affiliation_country'].astype(str).replace('None', '').replace('none', '')
     res_df['author_affiliations'] = res_df['author_affiliations'] + ', ' + res_df['affiliation_city'] + ', ' + res_df['affiliation_country']
 
+    res_df['title'] = res_df['title'].str.replace('&amp;', '&')
     
     res_df['access_type'] = res_df['access_type'].replace(1, 'open_access').replace(0, None)
+
+    res_df['authors_data'] = res_df['authors']
 
     res_df = res_df.drop(['subtype', 'coverDisplayDate', 'affiliation_city', 'affiliation_country'], axis=1)
 
