@@ -134,7 +134,7 @@ def items_to_df(items: list) -> pd.DataFrame:
             funder = None
 
         if 'doi' in i.keys():
-            doi = i['DOI']
+            doi = i['doi']
         else:
             doi = None
 
@@ -226,18 +226,18 @@ def reference_to_df(reference: dict, update_from_doi = False) -> pd.DataFrame:
     df_data = {}
 
     
-    if 'DOI' in keys:
+    if 'doi' in keys:
 
         if update_from_doi == True:
             try:
-                doi = reference['DOI']
+                doi = reference['doi']
                 df = lookup_doi(doi)
                 return df
             
             except:
                 pass
         else:
-            doi = reference['DOI']
+            doi = reference['doi']
     
     if 'URL' in keys:
 
@@ -346,8 +346,8 @@ def search_works(
                 editor: str = None, # type: ignore
                 entry_type: str = None, # type: ignore
                 published_date: str = None, # type: ignore
-                DOI: str = None, # type: ignore
-                ISSN: str = None, # type: ignore
+                doi: str = None, # type: ignore
+                issn: str = None, # type: ignore
                 publisher_name: str = None, # type: ignore
                 funder_name = None, # type: ignore
                 source: str = None, # type: ignore
@@ -369,11 +369,11 @@ def search_works(
     if entry_type != None:
         bibliographic = bibliographic + ', ' + str(entry_type)
 
-    if DOI != None:
-        bibliographic = bibliographic + ', ' + str(DOI)
+    if doi != None:
+        bibliographic = bibliographic + ', ' + str(doi)
 
-    if ISSN != None:
-        bibliographic = bibliographic + ', ' + str(ISSN)
+    if issn != None:
+        bibliographic = bibliographic + ', ' + str(issn)
     
     if published_date != None:
         bibliographic = bibliographic + ', ' + str(published_date)
@@ -469,7 +469,7 @@ def search_works(
 def lookup_doi(doi = 'request_input', timeout = 60):
 
     if doi == 'request_input':
-        doi = input('DOI: ')
+        doi = input('doi: ')
 
     global my_etiquette
     works = Works(etiquette=my_etiquette, timeout=timeout)
@@ -500,7 +500,7 @@ def lookup_dois(dois_list: list = [], rate_limit: float = 0.05, timeout = 60):
 def lookup_journal(issn = 'request_input', timeout = 60):
 
     if issn == 'request_input':
-        issn = input('Journal ISSN: ')
+        issn = input('Journal issn: ')
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout)
@@ -559,7 +559,7 @@ def get_journal_entries(issn = 'request_input',
                         timeout = 60):
 
     if issn == 'request_input':
-        issn = input('Journal ISSN: ')
+        issn = input('Journal issn: ')
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout)
@@ -620,7 +620,7 @@ def search_journal_entries(issn = 'request_input',
                         editor: str = None, # type: ignore
                         entry_type: str = None, # type: ignore
                         published_date: str = None, # type: ignore
-                        DOI: str = None, # type: ignore
+                        doi: str = None, # type: ignore
                         publisher_name: str = None, # type: ignore
                         funder_name = None, # type: ignore
                         source: str = None, # type: ignore
@@ -634,7 +634,7 @@ def search_journal_entries(issn = 'request_input',
     
 
     if issn == 'request_input':
-        issn = input('Journal ISSN: ')
+        issn = input('Journal issn: ')
 
     if bibliographic == None:
         bibliographic = ''
@@ -645,8 +645,8 @@ def search_journal_entries(issn = 'request_input',
     if entry_type != None:
         bibliographic = bibliographic + ', ' + str(entry_type)
 
-    if DOI != None:
-        bibliographic = bibliographic + ', ' + str(DOI)
+    if doi != None:
+        bibliographic = bibliographic + ', ' + str(doi)
 
     if published_date != None:
         bibliographic = bibliographic + ', ' + str(published_date)
@@ -896,7 +896,7 @@ def search_funder_works(funder_id = 'request_input',
                         editor: str = None, # type: ignore
                         entry_type: str = None, # type: ignore
                         published_date: str = None, # type: ignore
-                        DOI: str = None, # type: ignore
+                        doi: str = None, # type: ignore
                         publisher_name: str = None, # type: ignore
                         funder_name = None, # type: ignore
                         source: str = None, # type: ignore
@@ -921,8 +921,8 @@ def search_funder_works(funder_id = 'request_input',
     if entry_type != None:
         bibliographic = bibliographic + ', ' + str(entry_type)
 
-    if DOI != None:
-        bibliographic = bibliographic + ', ' + str(DOI)
+    if doi != None:
+        bibliographic = bibliographic + ', ' + str(doi)
 
     if published_date != None:
         bibliographic = bibliographic + ', ' + str(published_date)
