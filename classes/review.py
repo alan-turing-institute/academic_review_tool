@@ -4,7 +4,7 @@ from ..exporters.general_exporters import obj_to_folder
 
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
-from ..importers.scopus import search as search_scopus, lookup as lookup_scopus
+from ..importers.scopus import query_builder as scopus_query_builder, search as search_scopus, lookup as lookup_scopus
 from ..importers.wos import search as search_wos
 from ..importers.search import search as api_search
 
@@ -428,7 +428,14 @@ class Review:
     
     def add_pdf(self, path = 'request_input', update_formatting: bool = True):
         
+        old_res_len = len(self.results)
         self.results.add_pdf(path) # type: ignore
+        new_res_len = len(self.results)
+        res_diff = new_res_len - old_res_len
+
+        changes = {'results': res_diff}
+        self.activity_log.add_activity(type='deduplicated', changes_dict=changes)
+
         
         if update_formatting == True:
             self.format()
@@ -849,22 +856,22 @@ class Review:
         orig_res_len = len(self.results)
         self.results.remove_duplicates(drop_empty_rows=drop_empty_rows, update_from_api=use_api) # type: ignore
         new_res_len = len(self.results)
-        res_diff = orig_res_len - new_res_len
+        res_diff = new_res_len - orig_res_len
 
         orig_auths_len = len(self.authors.all)
         self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
         new_auths_len = len(self.authors.all)
-        auths_diff = orig_auths_len - new_auths_len
+        auths_diff = new_auths_len - orig_auths_len
 
         orig_funders_len = len(self.funders.all)
         self.funders.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
         new_funders_len = len(self.funders.all)
-        funders_diff = orig_funders_len - new_funders_len
+        funders_diff = new_funders_len - orig_funders_len
 
         orig_affils_len = len(self.affiliations.all)
         self.affiliations.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
         new_affils_len = len(self.affiliations.all)
-        affils_diff = orig_affils_len - new_affils_len
+        affils_diff = new_affils_len - orig_affils_len
 
         changes = {'results': res_diff,
                    'authors': auths_diff,
@@ -890,12 +897,12 @@ class Review:
             orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
             new_res_len = len(self.results)
-            res_diff = orig_res_len - new_res_len
+            res_diff = new_res_len - orig_res_len
 
             orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
             new_auths_len = len(self.authors.all)
-            auths_diff = orig_auths_len - new_auths_len
+            auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
                    'authors': auths_diff}
@@ -915,12 +922,12 @@ class Review:
             orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
             new_res_len = len(self.results)
-            res_diff = orig_res_len - new_res_len
+            res_diff = new_res_len - orig_res_len
 
             orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
             new_auths_len = len(self.authors.all)
-            auths_diff = orig_auths_len - new_auths_len
+            auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
                    'authors': auths_diff}
@@ -936,9 +943,13 @@ class Review:
     def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows=True):
 
         orcid_len = len(self.authors.with_orcid())
-        self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-        changes = {'authors': orcid_len}
+        old_auths_len = len(self.authors.all)
+        self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+        new_auths_len = len(self.authors.all)
+        len_diff = new_auths_len - old_auths_len
+
+        changes = {'authors': {'orcid_updated': orcid_len, 'count': len_diff}}
         self.activity_log.add_activity(type='updated authors from ORCID', changes_dict = changes)
         
 
@@ -961,7 +972,7 @@ class Review:
             orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
             new_res_len = len(self.results)
-            res_diff = orig_res_len - new_res_len
+            res_diff = new_res_len - orig_res_len
 
             changes = {'results': res_diff}
 
@@ -990,12 +1001,12 @@ class Review:
             orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
             new_res_len = len(self.results)
-            res_diff = orig_res_len - new_res_len
+            res_diff = new_res_len - orig_res_len
 
             orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
             new_auths_len = len(self.authors.all)
-            auths_diff = orig_auths_len - new_auths_len
+            auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
                    'authors': auths_diff}
@@ -1015,6 +1026,8 @@ class Review:
         review = Review()
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
         review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        review.activity_log.add_activity(type='created Review from imported Excel file')
         
         return review
 
@@ -1029,16 +1042,16 @@ class Review:
         self.activity_log.add_activity(type='imported CSV file to results', changes_dict=changes)
 
         if drop_empty_rows == True:
-            
+
             orig_res_len = len(self.results)
             self.results.drop_empty_rows() # type: ignore
             new_res_len = len(self.results)
-            res_diff = orig_res_len - new_res_len
+            res_diff =  new_res_len - orig_res_len
 
             orig_auths_len = len(self.authors.all)
             self.authors.drop_empty_rows() # type: ignore
             new_auths_len = len(self.authors.all)
-            auths_diff = orig_auths_len - new_auths_len
+            auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
                    'authors': auths_diff}
@@ -1059,6 +1072,8 @@ class Review:
         review.results = Results.from_csv(file_path) # type: ignore
         if update_formatting == True:
             review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        review.activity_log.add_activity(type='created Review from imported CSV file')
 
         return review
 
@@ -1103,8 +1118,14 @@ class Review:
 
     def import_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True):
         
+        old_len = len(self.results)
         self.results.import_jstor(file_path = file_path, drop_empty_rows=drop_empty_rows,drop_duplicates=drop_duplicates, update_work_ids=update_work_ids) # type: ignore
-        
+        new_len = len(self.results)
+
+        len_diff = new_len - old_len
+        changes = {'results': len_diff}
+        self.activity_log.add_activity(type='imported JSTOR JSON file to results', changes_dict=changes)
+
         if format_citations == True:
             self.format_citations()
 
@@ -1223,6 +1244,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_article(url)
+        self.activity_log.add_activity(type='scraped URL and added to results', url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_doi(self, doi = 'request_input'):
@@ -1231,6 +1253,8 @@ class Review:
             doi = input('doi or URL: ')
 
         df = scrape_doi(doi)
+        url = f'https://doi.org/{doi}'
+        self.activity_log.add_activity(type='scraped DOI and added to results', url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_google_scholar(self, url = 'request_input'):
@@ -1239,6 +1263,7 @@ class Review:
             url = input('URL: ')
 
         df = scrape_google_scholar(url)
+        self.activity_log.add_activity(type='scraped Google Scholar and added to results', url=url)
         self.results.add_dataframe(df) # type: ignore
     
     def scrape_google_scholar_search(self, url = 'request_input'):
@@ -1257,6 +1282,7 @@ class Review:
         df = academic_scraper(url)
 
         if add_to_results == True:
+            self.activity_log.add_activity(type='scraped URL and added to results', url=url)
             self.add_dataframe(df, drop_empty_rows=drop_empty_rows)
         
         if drop_duplicates == True:
@@ -1310,6 +1336,7 @@ class Review:
         df['repository'] = 'crossref'
 
         if add_to_results == True:
+            self.activity_log.add_activity(type='searched Crossref and added to results', database='crossref', query=bibliographic)
             self.results.add_dataframe(dataframe=df) # type: ignore
             self.format_authors()
         
@@ -1385,6 +1412,8 @@ class Review:
                            integrity_action=integrity_action,
                            subscriber=subscriber)
         
+        
+
         for c in df.columns:
                 if c not in self.results.columns:
                     df = df.drop(c, axis=1)
@@ -1392,6 +1421,34 @@ class Review:
         df['repository'] = 'scopus'
 
         if add_to_results == True:
+
+            query = scopus_query_builder(tile_abs_key_auth = tile_abs_key_auth,
+                            all_fields = all_fields,
+                            title = title,
+                            year = year,
+                            author = author,
+                            author_identifier = author_identifier,
+                            affiliation = affiliation,
+                            editor = editor,
+                            publisher = publisher,
+                            funder = funder,
+                            abstract = abstract,
+                            keywords = keywords,
+                            doctype = doctype,
+                            doi = doi,
+                            issn = issn,
+                            isbn = isbn,
+                            pubmed_id = pubmed_id,
+                            source_title = source_title,
+                            volume = volume,
+                            page = page,
+                            issue = issue,
+                            language = language,
+                            link = link,
+                            references = references,
+                            default_operator = default_operator)
+
+            self.activity_log.add_activity(type='searched Scopus and added to results', database='scopus', query=query)
             self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
         return df
