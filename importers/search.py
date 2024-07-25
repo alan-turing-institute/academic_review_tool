@@ -38,7 +38,7 @@ def search(default_query = None,
                     crossref = True,
                     scopus = True,
                     wos = True,
-                    orcid = True
+                    orcid = False
                     ):
     
     df = pd.DataFrame(dtype=object)
@@ -63,6 +63,8 @@ def search(default_query = None,
                     rate_limit = rate_limit,
                     timeout = timeout)
             
+            cr_result['repository'] = 'crossref'
+
             df = pd.concat([df, cr_result])
             df = df.reset_index().drop('index',axis=1)
         except Exception as e:
@@ -96,6 +98,8 @@ def search(default_query = None,
                         link = link,
                         references = references,
                         default_operator = default_operator)
+
+            scopus_result['repository'] = 'scopus'
 
             df = pd.concat([df, scopus_result])
             df = df.reset_index().drop('index',axis=1)
@@ -131,6 +135,8 @@ def search(default_query = None,
                 default_operator = default_operator,
                 limit = limit_per_api)
 
+            wos_result['repository'] = 'WOK'
+
             df = pd.concat([df, wos_result])
             df = df.reset_index().drop('index',axis=1)
         except Exception as e:
@@ -149,6 +155,7 @@ def search(default_query = None,
                 limit = limit_per_api)
 
             if type(orcid_result) == pd.DataFrame:
+                orcid_result['repository'] = 'ORCID'
                 df = pd.concat([df, orcid_result])
                 df = df.reset_index().drop('index',axis=1)
         except Exception as e:

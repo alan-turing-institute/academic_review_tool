@@ -1,10 +1,13 @@
 from ..utils.basics import Iterator, results_cols
 from ..utils.cleaners import deduplicate
 from ..exporters.general_exporters import obj_to_folder
+
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..importers.scopus import search as search_scopus, lookup as lookup_scopus
 from ..importers.wos import search as search_wos
+from ..importers.search import search as api_search
+
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
 from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network, generate_author_affils_network
 
@@ -1115,7 +1118,7 @@ class Review:
     def scrape_doi(self, doi = 'request_input'):
         
         if doi == 'request_input':
-            doi = input('DOI or URL: ')
+            doi = input('doi or URL: ')
 
         df = scrape_doi(doi)
         self.results.add_dataframe(df) # type: ignore
@@ -1159,8 +1162,8 @@ class Review:
                 editor: str = None, # type: ignore
                 entry_type: str = None, # type: ignore
                 published_date: str = None, # type: ignore
-                DOI: str = None, # type: ignore
-                ISSN: str = None, # type: ignore
+                doi: str = None, # type: ignore
+                issn: str = None, # type: ignore
                 publisher_name: str = None, # type: ignore
                 funder_name = None, # type: ignore
                 source: str = None, # type: ignore
@@ -1181,8 +1184,8 @@ class Review:
                 editor = editor,
                 entry_type = entry_type,
                 published_date = published_date,
-                DOI = DOI,
-                ISSN = ISSN,
+                doi = doi,
+                issn = issn,
                 publisher_name = publisher_name,
                 funder_name = funder_name,
                 source = source,
@@ -1203,7 +1206,31 @@ class Review:
         return df
 
     def search_scopus(self,
-                    query: str = 'request_input',
+                    tile_abs_key_auth = None,
+                    all_fields = None,
+                    title = None,
+                    year = None,
+                    author = None,
+                    author_identifier = None,
+                    affiliation = None,
+                    editor = None,
+                    publisher = None,
+                    funder = None,
+                    abstract = None,
+                    keywords = None,
+                    doctype = None,
+                    doi = None,
+                    issn = None,
+                    isbn = None,
+                    pubmed_id = None,
+                    source_title = None,
+                    volume = None,
+                    page = None,
+                    issue = None,
+                    language = None,
+                    link = None,
+                    references = None,
+                    default_operator = 'AND',
                     refresh=False, 
                     view=None, 
                     verbose=False, 
@@ -1215,7 +1242,31 @@ class Review:
                     drop_empty_rows = False,
                     drop_duplicates = False):
         
-        df = search_scopus(query=query, 
+        df = search_scopus(tile_abs_key_auth = tile_abs_key_auth,
+                            all_fields = all_fields,
+                            title = title,
+                            year = year,
+                            author = author,
+                            author_identifier = author_identifier,
+                            affiliation = affiliation,
+                            editor = editor,
+                            publisher = publisher,
+                            funder = funder,
+                            abstract = abstract,
+                            keywords = keywords,
+                            doctype = doctype,
+                            doi = doi,
+                            issn = issn,
+                            isbn = isbn,
+                            pubmed_id = pubmed_id,
+                            source_title = source_title,
+                            volume = volume,
+                            page = page,
+                            issue = issue,
+                            language = language,
+                            link = link,
+                            references = references,
+                            default_operator = 'AND',
                            refresh=refresh, 
                            view=view, 
                            verbose=verbose, 
@@ -1436,7 +1487,7 @@ class Review:
                         editor: str = None, # type: ignore
                         entry_type: str = None, # type: ignore
                         published_date: str = None, # type: ignore
-                        DOI: str = None, # type: ignore
+                        doi: str = None, # type: ignore
                         publisher_name: str = None, # type: ignore
                         funder_name: str = None, # type: ignore
                         source: str = None, # type: ignore
@@ -1457,7 +1508,7 @@ class Review:
                                           editor=editor,
                                           entry_type=entry_type,
                                           published_date = published_date,
-                                          DOI = DOI,
+                                          doi = doi,
                                           publisher_name = publisher_name,
                                           funder_name = funder_name,
                                           source = source,
@@ -1513,7 +1564,7 @@ class Review:
                         editor: str = None, # type: ignore
                         entry_type: str = None, # type: ignore
                         published_date: str = None, # type: ignore
-                        DOI: str = None, # type: ignore
+                        doi: str = None, # type: ignore
                         publisher_name: str = None, # type: ignore
                         funder_name = None,
                         source: str = None, # type: ignore
@@ -1535,7 +1586,7 @@ class Review:
                                 editor=editor,
                                 entry_type=entry_type,
                                 published_date=published_date,
-                                DOI=DOI,
+                                doi=doi,
                                 publisher_name=publisher_name,
                                 funder_name=funder_name,
                                 source=source,
@@ -1555,6 +1606,87 @@ class Review:
 
     def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
         return self.authors.search_orcid(query=query, add_to_authors=add_to_authors)
+
+    def api_search(self,
+                    default_query = None,
+                    all_fields = None,
+                    title = None,
+                    year = None,
+                    author = None,
+                    author_identifier = None,
+                    entry_type: str = None, # type: ignore
+                    affiliation = None,
+                    editor = None,
+                    publisher = None,
+                    funder = None,
+                    abstract = None,
+                    keywords = None,
+                    doi = None,
+                    issn = None,
+                    isbn = None,
+                    pubmed_id = None,
+                    source_title = None,
+                    volume = None,
+                    page = None,
+                    issue = None,
+                    language = None,
+                    link = None,
+                    references = None,
+                    topics = None,
+                    default_operator = 'AND',
+                    limit_per_api: int = 20,
+                    rate_limit: float = 0.05,
+                    timeout = 60,
+                    crossref = True,
+                    scopus = True,
+                    wos = True, 
+                    add_to_results = False):
+        
+        df = api_search(default_query = default_query,
+                    all_fields = all_fields,
+                    title = title,
+                    year = year,
+                    author = author,
+                    author_identifier = author_identifier,
+                    entry_type = entry_type,
+                    affiliation = affiliation,
+                    editor = editor,
+                    publisher = publisher,
+                    funder = funder,
+                    abstract = abstract,
+                    keywords = keywords,
+                    doi = doi,
+                    issn = issn,
+                    isbn = isbn,
+                    pubmed_id = pubmed_id,
+                    source_title = source_title,
+                    volume = volume,
+                    page = page,
+                    issue = issue,
+                    language = language,
+                    link = link,
+                    references = references,
+                    topics = topics,
+                    default_operator = default_operator,
+                    limit_per_api = limit_per_api,
+                    rate_limit = rate_limit,
+                    timeout = timeout,
+                    crossref = crossref,
+                    scopus = scopus,
+                    wos = wos)
+        
+        for c in df.columns:
+            if c not in self.results.columns:
+                    df = df.drop(c, axis=1)
+
+        if add_to_results == True:
+            self.results.add_dataframe(dataframe=df) # type: ignore
+            self.format()
+        
+        return df
+        
+
+        
 
     def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format_authors = True, update_from_doi = False):
 
@@ -1642,8 +1774,8 @@ class Review:
         
         The crawler iterates through queue of works; extracts their citations; runs checks to validate each reference;
         based on these, selects a source to retrieve data from: 
-            (a) if has a valid DOI: Crossref API.
-            (b) if no valid DOI: bespoke web scraping for specific academic websites.
+            (a) if has a valid doi: Crossref API.
+            (b) if no valid doi: bespoke web scraping for specific academic websites.
             (c) else if a link is present: general web scraping.
         
         Retrieves data and adds the entries to the dataframe. 

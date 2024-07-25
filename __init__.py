@@ -4,7 +4,7 @@ from .importers.crossref import search_works as search_crossref
 from .importers.wos import search as search_wos
 from .importers.scopus import search as search_scopus, lookup as lookup_scopus
 from .importers.orcid import lookup_orcid, search as search_orcid
-from .importers.search import search as search_api
+from .importers.search import search as api_search
 from .importers import pdf, orcid, crossref, scopus, jstor, wos
 from .classes import Results, References, Author, Authors, Funder, Funders, Affiliation, Affiliations, Review
 from .classes.networks import Network, Networks
