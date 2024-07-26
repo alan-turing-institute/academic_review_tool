@@ -732,10 +732,18 @@ def generate_cocitation_network(citation_network):
     
     # cocitation_graph = cocitation_graph.simplify()
 
-    for work_id in citation_network.vs['name']:
-         if work_id not in cocitation_graph.vs['name']:
+    for v in citation_network.vs:
+        
+        work_id = v['name']
+        if work_id not in cocitation_graph.vs['name']:
               cocitation_graph.add_vertex(name=work_id)
+        
+        attrs = citation_network.vs.attributes()
+        cocit_v = cocitation_graph.vs.find(name=work_id)
 
+        for a in attrs:
+             cocit_v[a] = v[a]
+             
     return cocitation_graph
 
 

@@ -10,7 +10,7 @@ from ..importers.wos import search as search_wos, query_builder as wos_query_bui
 from ..importers.search import search as api_search
 
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
-from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network, generate_author_affils_network
+from ..networks.network_functions import generate_coauthors_network, generate_citations_network, generate_funders_network, generate_author_works_network, generate_funder_works_network, generate_author_affils_network, generate_cocitation_network
 
 from .properties import Properties
 from .affiliations import Affiliation, Affiliations, format_affiliations
@@ -2302,11 +2302,11 @@ class Review:
         
         return network
 
-    def citations_network(self, 
+    def citation_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
-                                drop_empty_rows = True,
+                                drop_duplicates = False,
+                                drop_empty_rows = False,
                                 add_citations_to_results=True,
                                 add_to_networks: bool = True
                                 ) -> Network:
@@ -2349,6 +2349,28 @@ class Review:
             self.networks.__dict__['citations'] = network
         
         return network
+
+    def cocitation_network(self, 
+                           format: bool = True, 
+                            update_attrs: bool = True,
+                            drop_duplicates = False,
+                            drop_empty_rows = False,
+                            add_citations_to_results=True,
+                            add_to_networks: bool = True):
+
+        citation_network = self.citation_network(format=format,
+                                                 update_attrs=update_attrs,
+                                                 drop_duplicates=drop_duplicates,
+                                                 drop_empty_rows=drop_empty_rows,
+                                                 add_citations_to_results=add_citations_to_results,
+                                                 add_to_networks=add_to_networks)
+
+        graph = generate_cocitation_network(citation_network)
+        network = Network(graph)
+
+        if add_to_networks == True:
+            self.activity_log.add_activity(type='network generation', activity=f'generated co-citations network and added to networks', location=['networks'])
+            self.networks.__dict__['cocitations'] = network
 
     def author_works_network(self,
                                 format: bool = True, 
@@ -2514,7 +2536,7 @@ class Review:
         if update_attrs == True:
             self.update_entity_attrs()
         
-        citations_network = self.citations_network(format=format, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
+        citations_network = self.citation_network(format=format, update_attrs=False, add_citations_to_results=add_citations_to_results, add_to_networks=add_to_networks)
         
         if update_attrs == True:
             self.update_entity_attrs()
