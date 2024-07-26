@@ -626,17 +626,8 @@ def generate_funder_works_network(funder_works_dict: dict) -> Graph:
 
     return g
 
-
-def generate_cocitation_network(citation_network):
-    
-    """
-#     Generates a co-citation network from a citation network.
-    
-#     Notes
-#     -----
-#     Is able to take igraph.Graph, Network, and NetworkX objects.
-#   """
-    
+def cocitation_dict(citation_network) -> dict:
+     
     # Converting NetworkX objects to igraph objects
     if (
             (type(citation_network) == NetworkX_Undir)
@@ -676,10 +667,76 @@ def generate_cocitation_network(citation_network):
             cocitation_tuples_dict[pair]['Co-cited by'].append(work_id)
             
             # Adding combination to count
-            cocitation_tuples_dict[pair]['Frequency'] = len(cocitation_tuples_dict[pair]['Co-cited by'])
-
+            cocitation_tuples_dict[pair]['Frequency'] = len(set(cocitation_tuples_dict[pair]['Co-cited by']))
     
     return cocitation_tuples_dict
+
+def generate_cocitation_network(citation_network):
+    
+    """
+#     Generates a co-citation network from a citation network.
+    
+#     Notes
+#     -----
+#     Is able to take igraph.Graph, Network, and NetworkX objects.
+#   """
+    
+    
+    cocitations = cocitation_dict(citation_network)
+    
+    cocitation_graph = Graph()
+
+    for k in cocitations.keys():
+
+        v1_id = k[0]
+        v2_id = k[1]
+        freq = cocitations[k]['Frequency']
+        cocited_by = cocitations[k]['Co-cited by']
+
+        if v1_id not in cocitation_graph.vs['name']:
+              cocitation_graph.add_vertex(name=v1_id)
+        
+        if v2_id not in cocitation_graph.vs['name']:
+              cocitation_graph.add_vertex(name=v2_id)
+        
+        v1 = cocitation_graph.vs.find(name=v1_id)
+        v1_index = v1.index
+
+        v2 = cocitation_graph.vs.find(name=v2_id)
+        v2_index = v2.index
+
+        if (cocitation_graph.are_connected(v1_index, v2_index) == False) and (cocitation_graph.are_connected(v2_index, v1_index) == False):
+             Graph.add_edges(cocitation_graph, 
+                                        [(v1_index, v2_index)], 
+                                        attributes={
+                                           'name': f'{v1_id} <-> {v2_id}',
+                                           'weight': freq,
+                                           'cocited_by': cocited_by
+                                           })
+        
+        else:
+             edgelist_1 = list(cocitation_graph.es.select(_source=v1_index, _target=v2_index))
+             edgelist_2 = list(cocitation_graph.es.select(_source=v2_index, _target=v1_index))
+             edgelist_3 = edgelist_1 + edgelist_2
+             edgelist_4 = list(set(edgelist_3))
+
+             if len(edgelist_4) > 0:
+                edge = edgelist_4[0]
+                edge_index = edge.index
+
+                old_cocited_by = cocitation_graph.es[edge_index]['cocited_by']
+                new_cocited_by = old_cocited_by + cocited_by
+                new_cocited_by = list(set(new_cocited_by))
+                new_freq = len(new_cocited_by)
+
+                cocitation_graph.es[edge_index]['cocited_by'] = new_cocited_by
+                cocitation_graph.es[edge_index]['weight'] = new_freq
+    
+    cocitation_graph = cocitation_graph.simplify()
+
+    return cocitation_graph
+
+
 
 # def generate_cocitation_network(citation_network):
     
