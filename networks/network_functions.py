@@ -674,21 +674,17 @@ def cocitation_dict(citation_network) -> dict:
 def generate_cocitation_network(citation_network):
     
     """
-#     Generates a co-citation network from a citation network.
+    Generates a co-citation network from a citation network.
     
-#     Notes
-#     -----
-#     Is able to take igraph.Graph, Network, and NetworkX objects.
-#   """
+    Notes
+    -----
+    Is able to take igraph.Graph, Network, and NetworkX objects.
+    """
     
     
     cocitations = cocitation_dict(citation_network)
     
-    cocitation_graph = Graph()
-    cocitation_graph.vs['name'] = []
-    cocitation_graph.es['name'] = []
-    cocitation_graph.es['weight'] = []
-    cocitation_graph.es['cocited_by'] = []
+    cocitation_graph = Graph(directed=False, vertex_attrs={'name':[]}, edge_attrs={'name':[], 'weight': [], 'cocited_by': []})
 
     for k in cocitations.keys():
 
@@ -719,13 +715,11 @@ def generate_cocitation_network(citation_network):
                                            })
         
         else:
-             edgelist_1 = list(cocitation_graph.es.select(_source=v1_index, _target=v2_index))
-             edgelist_2 = list(cocitation_graph.es.select(_source=v2_index, _target=v1_index))
-             edgelist_3 = edgelist_1 + edgelist_2
-             edgelist_4 = list(set(edgelist_3))
+             edgelist = list(cocitation_graph.es.select(_between= ([v1_index], [v2_index])))
 
-             if len(edgelist_4) > 0:
-                edge = edgelist_4[0]
+             if len(edgelist) > 0:
+
+                edge = edgelist[0]
                 edge_index = edge.index
 
                 old_cocited_by = cocitation_graph.es[edge_index]['cocited_by']
@@ -736,7 +730,7 @@ def generate_cocitation_network(citation_network):
                 cocitation_graph.es[edge_index]['cocited_by'] = new_cocited_by
                 cocitation_graph.es[edge_index]['weight'] = new_freq
     
-    cocitation_graph = cocitation_graph.simplify()
+    # cocitation_graph = cocitation_graph.simplify()
 
     return cocitation_graph
 
