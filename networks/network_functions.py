@@ -686,9 +686,9 @@ def generate_cocitation_network(citation_network):
     
     cocitation_graph = Graph()
     cocitation_graph.vs['name'] = []
-    cocitation_graph.es.['name'] = []
-    cocitation_graph.es.['weight'] = []
-    cocitation_graph.es.['cocited_by'] = []
+    cocitation_graph.es['name'] = []
+    cocitation_graph.es['weight'] = []
+    cocitation_graph.es['cocited_by'] = []
 
     for k in cocitations.keys():
 
