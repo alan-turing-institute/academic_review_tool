@@ -627,73 +627,15 @@ def generate_funder_works_network(funder_works_dict: dict) -> Graph:
     return g
 
 
-# def cocitation_out(links_network: Graph) -> pd.DataFrame:
+def generate_cocitation_network(citation_network):
     
-#     """
-#     Conducts out-bound colink analysis. Returns a pandas.DataFrame.
+    """
+#     Generates a co-citation network from a citation network.
     
 #     Notes
 #     -----
 #     Is able to take igraph.Graph, Network, and NetworkX objects.
-#     """
-    
-#     # Converting NetworkX objects to igraph objects
-#     if (
-#             (type(links_network) == NetworkX_Undir)
-#             or (type(links_network) == NetworkX_Dir)
-#             or (type(links_network) == NetworkX_Multi)
-#         ):
-#             links_network = Graph.from_networkx(links_network)
-    
-#     # Retrieving URLs list
-#     urls = links_network.vs['name']
-    
-#     # Initialising dictionary to store tuples of co-linked URLs
-#     colink_tuples_dict = {}
-    
-#     # Iterating through vertices to identify pairs of co-linked URLs
-#     for v in links_network.vs:
-        
-#         # Retrieving vertex URL
-#         url = v['name']
-        
-#         # Creating list of URLS linked by selected URL 
-#         children = v.successors()
-#         names = [v['name'] for v in children]
-        
-#         # Creating list of all combinations of linked URLs
-#         # Stored as a list of tuples
-#         tuples = list(itertools.combinations(names, 2))
-#         tuples = [tuple(set(i)) for i in tuples]
-        
-#         # Iterating through linked URLs combinations and adding to dictionary of colinks
-#         for pair in tuples:
-            
-#             # Adding to dictionary of colinks
-#             if pair not in colink_tuples_dict.keys():
-#                 colink_tuples_dict[pair] = {'Co-link to': [], 'Frequency': 0}
-
-#             colink_tuples_dict[pair]['Co-link to'].append(url)
-            
-#             # Adding combination to count
-#             colink_tuples_dict[pair]['Frequency'] += 1
-
-#     # Creating and formatting output dataframe
-#     df = pd.DataFrame.from_dict(colink_tuples_dict).T
-#     df.index.name = 'Names'
-#     df = df.sort_values('Frequency', ascending=False)
-    
-#     return df
-
-def generate_cocitation_network(citation_network):
-    
-    """
-    Generates a co-citation network from a citation network.
-    
-    Notes
-    -----
-    Is able to take igraph.Graph, Network, and NetworkX objects.
-    """
+#   """
     
     # Converting NetworkX objects to igraph objects
     if (
@@ -703,37 +645,91 @@ def generate_cocitation_network(citation_network):
         ):
             citation_network = Graph.from_networkx(citation_network)
     
-    # Retrieving work IDs list
+    # Retrieving URLs list
     ids = citation_network.vs['name']
     
-    # Initialising dictionary to store tuples of co-cited works
-    coupling_dict = {}
+    # Initialising dictionary to store tuples of co-linked URLs
+    cocitation_tuples_dict = {}
     
-    # Iterating through vertices to identify pairs of co-cited works
+    # Iterating through vertices to identify pairs of co-linked URLs
     for v in citation_network.vs:
         
-        # Retrieving work ID
+        # Retrieving vertex URL
         work_id = v['name']
         
-        # Creating list of IDs citing the selected work 
-        parents = v.predecessors()
-        parent_ids = [v['name'] for v in parents]
+        # Creating list of URLS linked by selected URL 
+        children = v.successors()
+        child_ids = [v['name'] for v in children]
         
-        # Creating list of all combinations of linking URLs
+        # Creating list of all combinations of linked URLs
         # Stored as a list of tuples
-        tuples = list(itertools.combinations(parent_ids, 2))
+        tuples = list(itertools.combinations(child_ids, 2))
         tuples = [tuple(set(i)) for i in tuples]
         
-         # Adding to dictionary of colinking URLs
-        if work_id not in coupling_dict.keys():
-            coupling_dict[work_id] = {'Co-cited by': [], 'Frequency': 0}
+        # Iterating through linked URLs combinations and adding to dictionary of colinks
+        for pair in tuples:
+            
+            # Adding to dictionary of colinks
+            if pair not in cocitation_tuples_dict.keys():
+                cocitation_tuples_dict[pair] = {'Co-cited by': [], 'Frequency': 0}
+
+            cocitation_tuples_dict[pair]['Co-cited by'].append(work_id)
+            
+            # Adding combination to count
+            cocitation_tuples_dict[pair]['Frequency'] = len(cocitation_tuples_dict[pair]['Co-cited by'])
+
+    
+    return cocitation_tuples_dict
+
+# def generate_cocitation_network(citation_network):
+    
+#     """
+#     Generates a co-citation network from a citation network.
+    
+#     Notes
+#     -----
+#     Is able to take igraph.Graph, Network, and NetworkX objects.
+#     """
+    
+#     # Converting NetworkX objects to igraph objects
+#     if (
+#             (type(citation_network) == NetworkX_Undir)
+#             or (type(citation_network) == NetworkX_Dir)
+#             or (type(citation_network) == NetworkX_Multi)
+#         ):
+#             citation_network = Graph.from_networkx(citation_network)
+    
+#     # Retrieving work IDs list
+#     ids = citation_network.vs['name']
+    
+#     # Initialising dictionary to store tuples of co-cited works
+#     cocitation_dict = {}
+    
+#     # Iterating through vertices to identify pairs of co-cited works
+#     for v in citation_network.vs:
         
-        coupling_dict[work_id]['Co-cited by'] = list(set(coupling_dict[work_id]['Co-cited by'] + tuples))
+#         # Retrieving work ID
+#         work_id = v['name']
         
-        # Counting and storing number of times selected URL is co-linked to
-        coupling_dict[work_id]['Frequency'] = len(coupling_dict[work_id]['Co-cited by'])
+#         # Creating list of IDs citing the selected work 
+#         children = v.successors()
+#         child_ids = [v['name'] for v in children]
+        
+#         # Creating list of all combinations of linking URLs
+#         # Stored as a list of tuples
+#         tuples = list(itertools.combinations(child_ids, 2))
+#         tuples = [tuple(set(i)) for i in tuples]
+        
+#          # Adding to dictionary of colinking URLs
+#         if work_id not in cocitation_dict.keys():
+#             cocitation_dict[work_id] = []
+        
+#         cocitation_dict[work_id] = list(set(coupling_dict[work_id]['Co-cited by'] + tuples))
+        
+#         # Counting and storing number of times selected URL is co-linked to
+#         coupling_dict[work_id]['Frequency'] = len(coupling_dict[work_id]['Co-cited by'])
     
     
     
-    return coupling_dict
+#     return coupling_dict
 
