@@ -733,7 +733,7 @@ def generate_cocitation_network(citation_network):
     # cocitation_graph = cocitation_graph.simplify()
 
     for v in citation_network.vs:
-        
+
         work_id = v['name']
         if work_id not in cocitation_graph.vs['name']:
               cocitation_graph.add_vertex(name=work_id)
@@ -746,57 +746,121 @@ def generate_cocitation_network(citation_network):
              
     return cocitation_graph
 
+def bibcoupling_dict(citation_network):
+    
+    """
+    Generates a dictionary representing bibliometric coupling from a citation network.
+    
+    Notes
+    -----
+    Is able to take igraph.Graph, Network, and NetworkX objects.
+    """
+    
+    # Converting NetworkX objects to igraph objects
+    if (
+            (type(citation_network) == NetworkX_Undir)
+            or (type(citation_network) == NetworkX_Dir)
+            or (type(citation_network) == NetworkX_Multi)
+        ):
+            citation_network = Graph.from_networkx(citation_network)
+    
+    # Initialising dictionary to store tuples of co-citing works
+    bc_dict = {}
+    
+    # Iterating through vertices to identify pairs of co-citing works
+    for v in citation_network.vs:
+        
+        # Retrieving work ID
+        work_id = v['name']
+        
+        # Creating list of IDs citing the selected work 
+        parents = v.predecessors()
+        p_ids = [v['name'] for v in parents]
+        
+        # Creating list of all combinations of linking URLs
+        # Stored as a list of tuples
+        tuples = list(itertools.combinations(p_ids, 2))
+        tuples = [tuple(set(i)) for i in tuples]
+
+        for t in tuples:
+
+            if t not in bc_dict.keys():
+                bc_dict[t] = {'co-cite': [], 'frequency': 0}
+            
+            bc_dict[t]['co-cite'].append(work_id)
+            bc_dict[t]['frequency'] = len(bc_dict[t]['co-cite'])
+    
+    
+    
+    return bc_dict
 
 
-# def generate_cocitation_network(citation_network):
+def generate_bibcoupling_network(citation_network):
     
-#     """
-#     Generates a co-citation network from a citation network.
+    """
+    Generates a bibliometric coupling network from a citation network.
     
-#     Notes
-#     -----
-#     Is able to take igraph.Graph, Network, and NetworkX objects.
-#     """
+    Notes
+    -----
+    Is able to take igraph.Graph, Network, and NetworkX objects.
+    """
     
-#     # Converting NetworkX objects to igraph objects
-#     if (
-#             (type(citation_network) == NetworkX_Undir)
-#             or (type(citation_network) == NetworkX_Dir)
-#             or (type(citation_network) == NetworkX_Multi)
-#         ):
-#             citation_network = Graph.from_networkx(citation_network)
+    bc_dict = bibcoupling_dict(citation_network)
     
-#     # Retrieving work IDs list
-#     ids = citation_network.vs['name']
+    v_count = len(citation_network.vs)
+    v_attr_keys = citation_network.vs.attributes()
+
+    v_attrs = {}
+    for a in v_attr_keys:
+        v_attrs[a] = citation_network.vs[a]
     
-#     # Initialising dictionary to store tuples of co-cited works
-#     cocitation_dict = {}
+    g = Graph(n=v_count, directed=False, vertex_attrs=v_attrs)
+
+    for k in bc_dict.keys():
     
-#     # Iterating through vertices to identify pairs of co-cited works
-#     for v in citation_network.vs:
+        v1_id = k[0]
+        v2_id = k[1]
+        freq = bc_dict[k]['frequency']
+        cocite = bc_dict[k]['co-cite']
+
+        if v1_id not in g.vs['name']:
+              g.add_vertex(name=v1_id)
         
-#         # Retrieving work ID
-#         work_id = v['name']
+        if v2_id not in g.vs['name']:
+              g.add_vertex(name=v2_id)
         
-#         # Creating list of IDs citing the selected work 
-#         children = v.successors()
-#         child_ids = [v['name'] for v in children]
+        v1 = g.vs.find(name=v1_id)
+        v1_index = v1.index
+
+        v2 = g.vs.find(name=v2_id)
+        v2_index = v2.index
+
+        if (g.are_connected(v1_index, v2_index) == False) and (g.are_connected(v2_index, v1_index) == False):
+             Graph.add_edges(g, 
+                                        [(v1_index, v2_index)], 
+                                        attributes={
+                                           'name': f'{v1_id} <-> {v2_id}',
+                                           'weight': freq,
+                                           'both_cite': cocite
+                                           })
         
-#         # Creating list of all combinations of linking URLs
-#         # Stored as a list of tuples
-#         tuples = list(itertools.combinations(child_ids, 2))
-#         tuples = [tuple(set(i)) for i in tuples]
-        
-#          # Adding to dictionary of colinking URLs
-#         if work_id not in cocitation_dict.keys():
-#             cocitation_dict[work_id] = []
-        
-#         cocitation_dict[work_id] = list(set(coupling_dict[work_id]['Co-cited by'] + tuples))
-        
-#         # Counting and storing number of times selected URL is co-linked to
-#         coupling_dict[work_id]['Frequency'] = len(coupling_dict[work_id]['Co-cited by'])
+        else:
+             edgelist = list(g.es.select(_between= ([v1_index], [v2_index])))
+
+             if len(edgelist) > 0:
+
+                edge = edgelist[0]
+                edge_index = edge.index
+
+                old_cociting = g.es[edge_index]['both_cite']
+                new_cociting = old_cociting + cocite
+                new_cociting = list(set(new_cociting))
+                new_freq = len(new_cociting)
+
+                g.es[edge_index]['both_cite'] = new_cociting
+                g.es[edge_index]['weight'] = new_freq
     
     
     
-#     return coupling_dict
+    return g
 
