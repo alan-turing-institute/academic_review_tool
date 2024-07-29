@@ -560,16 +560,18 @@ def search_works(
 
         iteration = 1
         for item in result: # type: ignore
+            try:
+                if limit != None:
+                    if iteration > limit:
+                        break
 
-            if limit != None:
-                if iteration > limit:
-                    break
+                items.append(item)
 
-            items.append(item)
+                iteration += 1
 
-            iteration += 1
-
-            sleep(rate_limit)
+                sleep(rate_limit)
+            except:
+                continue
     
     df = items_to_df(items)
 
