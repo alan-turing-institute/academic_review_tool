@@ -559,19 +559,25 @@ def search_works(
     if result != None:
 
         iteration = 1
-        for item in result: # type: ignore
-            try:
-                if limit != None:
-                    if iteration > limit:
-                        break
+        try:
+            for item in result: # type: ignore
+                try:
+                    if limit != None:
+                        if iteration > limit:
+                            break
 
-                items.append(item)
+                    items.append(item)
 
-                iteration += 1
+                    iteration += 1
 
-                sleep(rate_limit)
-            except:
-                continue
+                    sleep(rate_limit)
+
+                except Exception as e:
+                    print(f'Search retrieval ran into an error. {e}')
+                    continue
+                
+        except Exception as e:
+            print(f'Search retrieval ran into an error. {e}')
     
     df = items_to_df(items)
 
