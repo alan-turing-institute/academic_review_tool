@@ -2602,6 +2602,9 @@ class Review:
         funder_works_network = self.funder_works_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
         author_affils_network = self.author_affils_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
         all_entities_network = self.entities_network(format=False, update_attrs=False, add_to_networks=add_to_networks)
+        cocitation_network = self.cocitation_network(refresh_citations=False, format=False, update_attrs=False, add_citations_to_results=False, drop_duplicates=drop_duplicates, drop_empty_rows=False, add_to_networks=add_to_networks)
+        bibcoupling_network = self.bibcoupling_network(refresh_citations=False, format=False, update_attrs=False, add_citations_to_results=False, drop_duplicates=False, drop_empty_rows=False, add_to_networks=add_to_networks)
+
 
         if add_to_networks == True:
             networks = self.networks
@@ -2615,6 +2618,8 @@ class Review:
             networks.__dict__['funder_works_network'] = funder_works_network
             networks.__dict__['author_affils_network'] = author_affils_network
             networks.__dict__['all_entities_network'] = all_entities_network
+            networks.__dict__['cocitation'] = cocitation_network
+            networks.__dict__['bibcoupling'] = bibcoupling_network
 
         return networks
 
