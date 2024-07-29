@@ -683,8 +683,15 @@ def generate_cocitation_network(citation_network):
     
     
     cocitations = cocitation_dict(citation_network)
+    v_len = len(citation_network.vs)
+    v_attr_keys = citation_network.vs.attributes()
+
+    v_attrs = {}
+    for a in v_attr_keys:
+        v_attrs[a] = citation_network.vs[a]
     
-    cocitation_graph = Graph(directed=False, vertex_attrs={'name':[]}, edge_attrs={'name':[], 'weight': [], 'cocited_by': []})
+    
+    cocitation_graph = Graph(n=v_len, directed=False, vertex_attrs=v_attrs, edge_attrs={'name':[], 'weight': [], 'cocited_by': []})
 
     for k in cocitations.keys():
 
@@ -775,9 +782,9 @@ def bibcoupling_dict(citation_network):
         
         # Creating list of IDs citing the selected work 
         parents = v.predecessors()
-        p_ids = [v['name'] for v in parents]
+        p_ids = [i['name'] for i in parents]
         
-        # Creating list of all combinations of linking URLs
+        # Creating list of all combinations of citing works
         # Stored as a list of tuples
         tuples = list(itertools.combinations(p_ids, 2))
         tuples = [tuple(set(i)) for i in tuples]
