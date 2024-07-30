@@ -1393,7 +1393,8 @@ class Review:
                     subscriber=False,
                     add_to_results = False,
                     drop_empty_rows = False,
-                    drop_duplicates = False):
+                    drop_duplicates = False,
+                    format=False):
         
         df = search_scopus(tile_abs_key_auth = tile_abs_key_auth,
                             all_fields = all_fields,
@@ -1465,7 +1466,7 @@ class Review:
                             default_operator = default_operator)
 
             self.activity_log.add_activity(type='API search', activity='searched Scopus and added to results', location=['results'], database='scopus', query=query)
-            self.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
+            self.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows, update_formatting=format) # type: ignore
 
         return df
 
