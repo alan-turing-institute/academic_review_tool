@@ -1312,7 +1312,7 @@ class Review:
         
         return review
 
-    def open(file_address: str = 'request_input') # type: ignore
+    def open(file_address: str = 'request_input'): # type: ignore
 
         if file_address == 'request_input':
             file_address = input('File address: ')
