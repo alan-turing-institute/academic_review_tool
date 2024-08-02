@@ -154,6 +154,7 @@ def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str 
 
     if (('.Results' in obj_type_str)
             or ('.ActivityLog' in obj_type_str)):
+        obj_address = obj_address + '.csv'
         obj.to_csv(obj_address)
         return
 
