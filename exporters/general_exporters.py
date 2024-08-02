@@ -176,7 +176,7 @@ def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str 
             attr = obj.__dict__[key]
             attr_name = str(key).replace('A:','').replace('F:','').replace('AUTH:','')
 
-            if attr is not None:
+            if (attr is not None) and (attr_name != 'data'):
                 
                 attr_str_type = str(type(attr))
                 
