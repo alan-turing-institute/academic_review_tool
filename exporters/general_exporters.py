@@ -128,61 +128,66 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                         and ('.Affiliations' not in obj_type_str)):
         return
 
-    for key in obj.__dict__.keys():
+    if (('.Results' in obj_type_str)
+            or ('.ActivityLog' in obj_type_str)):
+        obj.to_csv(final_address)
+        return
+
+    if (('.Review' in obj_type_str)
+                        or ('.Entity' in obj_type_str)
+                        or ('.Entities' in obj_type_str)
+                        or ('.Author' in obj_type_str)
+                        or ('.Authors' in obj_type_str)
+                        or ('.Funder' in obj_type_str)
+                        or ('.Funders' in obj_type_str)
+                        or ('.Affiliation' in obj_type_str)
+                        or ('.Affiliations' in obj_type_str)):
+
+        os.mkdir(final_address)
+
+        for key in obj.__dict__.keys():
 
             attr = obj.__dict__[key]
 
             if attr is not None:
                 
                 attr_str_type = str(type(attr))
-
-                if '.Review' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
                 
-                if '.Results' in attr_str_type:
-                    address = final_address + '/Results.csv'
-                    attr.to_csv(address)
-                    continue
-                
-                if '.ActivityLog' in attr_str_type:
-                    address = final_address + '/ActivityLog.csv'
-                    attr.to_csv(address)
-                    continue
-
-                if '.Entity' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
-
-                if '.Entities' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
+                if (('.Review' in attr_str_type)
+                        or ('.Results' in attr_str_type)
+                        or ('.ActivityLog' in attr_str_type)
+                        or ('.Entity' in attr_str_type)
+                        or ('.Entities' in attr_str_type)
+                        or ('.Author' in attr_str_type)
+                        or ('.Authors' in attr_str_type)
+                        or ('.Funder' in attr_str_type)
+                        or ('.Funders' in attr_str_type)
+                        or ('.Affiliation' in attr_str_type)
+                        or ('.Affiliations' in attr_str_type)):
                     
-                if '.Author' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+                    attr.export_folder(folder_name = key, 
+                                        folder_address= final_address, 
+                                        export_str_as = export_str_as, 
+                                        export_dict_as = export_dict_as,
+                                        export_pandas_as = export_pandas_as,
+                                        export_network_as=export_network_as)
+                    
                     continue
 
-                if '.Authors' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
+                else:
 
-                if '.Funder' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
+                    if type(attr) == dict:
+                        obj_to_folder(attr, 
+                                        folder_address= final_address, 
+                                        export_str_as = export_str_as, 
+                                        export_dict_as = export_dict_as,
+                                        export_pandas_as = export_pandas_as,
+                                        export_network_as=export_network_as)
+                        continue
 
-                if '.Funders' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
-
-                if '.Affiliation' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
-
-                if '.Affiliations' in attr_str_type:
-                    attr.export_folder(folder_name = key, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
-                    continue
-
-                export_obj(obj = obj.__dict__[key], file_name = key, folder_address = final_address)
+                    else:
+                        export_obj(attr, file_name = key, folder_address = final_address)
+                        continue
             
     return
 
@@ -198,7 +203,6 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
     # If the object is None, no folder created
     if obj is None:
         return
-    
     
     # Getting folder name from user input
     if (folder_name is None) or (folder_name is np.nan) or (folder_name =='request_input'):
@@ -261,7 +265,7 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
     
     
 
-    # If the object is a dictionary, creates a folder with keys as filenames and values as files
+    # If the object is a dictionary, uses recursion to create a folder with keys as filenames and values as files
     if obj_type == dict:
         
         for key in obj.keys():
