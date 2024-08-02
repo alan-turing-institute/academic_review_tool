@@ -21,4 +21,4 @@ import pickle
             with open(file_address, 'rb') as f:
                 review = pickle.load(f)
         
-        return review
+            return review # type: ignore
