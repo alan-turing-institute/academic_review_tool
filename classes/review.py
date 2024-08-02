@@ -1282,6 +1282,8 @@ class Review:
         with open(file_address, 'wb') as f:
             pickle.dump(self, f)
 
+
+
     def save_as(self,
                 filetype = 'review',
                 file_name = 'request_input', 
@@ -1300,6 +1302,28 @@ class Review:
         if filetype == 'folder':
             self.export_folder(folder_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
+    def from_txt(file_address: str = 'request_input'): # type: ignore
+
+        if file_address == 'request_input':
+            file_address = input('File address: ')
+        
+        with open(file_address, 'rb') as f:
+            review = pickle.load(f)
+        
+        return review
+
+    def open(file_address: str = 'request_input') # type: ignore
+
+        if file_address == 'request_input':
+            file_address = input('File address: ')
+        
+        if (file_address.endswith('.txt')) or (file_address.endswith('.review')):
+            with open(file_address, 'rb') as f:
+                review = pickle.load(f)
+        
+        return review
+
+        
 
     def scrape_article(self, url = 'request_input'):
         
