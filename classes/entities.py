@@ -1,3 +1,5 @@
+from ..exporters.general_exporters import obj_to_folder
+
 import pandas as pd
 import numpy as np
 
@@ -106,6 +108,18 @@ class Entity:
         entity.add_dataframe(data)
 
         return entity
+    
+    def export_folder(self, 
+                      folder_name = None, 
+                      folder_address: str = 'request_input', 
+                      export_str_as: str = 'txt', 
+                      export_dict_as: str = 'json', 
+                      export_pandas_as: str = 'csv', 
+                      export_network_as: str = 'graphML'
+                      ):
+        
+        obj_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
+
     
 class Entities:
 
