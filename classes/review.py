@@ -1238,8 +1238,82 @@ class Review:
         
         art_class_to_folder(self, folder_name = folder_name, folder_address = folder_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
 
+    def export_txt(self, new_file = True, file_name: str = 'request_input', folder_address:str = 'request_input'):
+        
+        """
+        Exports the Case to a .txt file.
+        
+        Parameters
+        ----------
+        file_name : str
+            name of file to create. Defaults to using the object's variable name.
+        file_address : str
+            directory address to create file in. defaults to requesting for user input.
+        """
+        
+        if new_file == True:
+            
+            if file_name == 'request_input':
+                file_name = input('File name: ')
+            
+            if folder_address == 'request_input':
+                folder_address = input('Folder address: ')
+                file_address = folder_address + '/' + file_name
+            
+        if new_file == False:
+            
+            if folder_address == 'request_input':
+                folder_address = input('File path: ')
+            
+            file_address = str(folder_address)
+        
+        if str(file_address).endswith('.txt') == False:
+            file_address = str(file_address) + str('.txt')
+        
+         # self.backup()
+
+        with open(file_address, 'wb') as f:
+            pickle.dump(self, f) 
+    
+    def export_review(self, new_file = True, file_name: str = 'request_input', folder_address:str = 'request_input'):
+        
+        """
+        Exports the Case to a .txt file.
+        
+        Parameters
+        ----------
+        file_name : str
+            name of file to create. Defaults to using the object's variable name.
+        file_address : str
+            directory address to create file in. defaults to requesting for user input.
+        """
+        
+        if new_file == True:
+            
+            if file_name == 'request_input':
+                file_name = input('File name: ')
+            
+            if folder_address == 'request_input':
+                folder_address = input('Folder address: ')
+                file_address = folder_address + '/' + file_name
+            
+        if new_file == False:
+            
+            if folder_address == 'request_input':
+                folder_address = input('File path: ')
+            
+            file_address = str(folder_address)
+        
+        if str(file_address).endswith('.review') == False:
+            file_address = str(file_address) + str('.review')
+        
+         # self.backup()
+
+        with open(file_address, 'wb') as f:
+            pickle.dump(self, f)
+
     def save_as(self,
-                filetype = 'folder',
+                filetype = 'review',
                 file_name = 'request_input', 
                       folder_address: str = 'request_input', 
                       export_str_as: str = 'txt', 
@@ -1247,6 +1321,12 @@ class Review:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
+        if filetype == 'review':
+            self.export_review(new_file=True, file_name=file_name, folder_address=folder_address)
+        
+        if filetype == 'txt':
+            self.export_txt(new_file=True, file_name=file_name, folder_address=folder_address)
+
         if filetype == 'folder':
             self.export_folder(folder_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
