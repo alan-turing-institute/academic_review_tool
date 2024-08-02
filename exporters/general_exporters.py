@@ -186,7 +186,7 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
             
     return
 
-def obj_to_folder(obj, folder_name = None, folder_address: str = 'request_input', export_str_as: str = 'txt', export_dict_as: str = 'json', export_pandas_as: str = 'csv', export_network_as: str = 'graphML'):
+def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'request_input', export_str_as: str = 'txt', export_dict_as: str = 'json', export_pandas_as: str = 'csv', export_network_as: str = 'graphML'):
     
     """
     Exports objects as external folders.
@@ -201,7 +201,7 @@ def obj_to_folder(obj, folder_name = None, folder_address: str = 'request_input'
     
     
     # Getting folder name from user input
-    if (folder_name is None) or (folder_name is np.nan):
+    if (folder_name is None) or (folder_name is np.nan) or (folder_name =='request_input'):
         folder_name = input('Folder name: ')
         
 
@@ -217,7 +217,7 @@ def obj_to_folder(obj, folder_name = None, folder_address: str = 'request_input'
     # Creating folder address
     folder_name = folder_name.strip().replace('/', '_').replace(' ', '_')
     final_address = folder_address + '/' + folder_name
-    final_address = final_address.strip().replace(' ', '_')
+    final_address = final_address.strip()
     
     # Creating folder
     os.mkdir(final_address)
