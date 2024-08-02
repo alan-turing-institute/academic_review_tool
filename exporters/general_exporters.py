@@ -204,15 +204,26 @@ def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str 
                     continue
 
                 else:
-                    obj_to_folder(obj=attr,
-                                        folder_name = attr_name, 
-                                        folder_address= obj_address, 
-                                        export_str_as = export_str_as, 
-                                        export_dict_as = export_dict_as,
-                                        export_pandas_as = export_pandas_as,
-                                        export_network_as=export_network_as)
+
+                    if (type(obj) == list) and (len(obj)>0) and ((type(obj[0]) == dict) or (type(obj[0]) == str) or (type(obj[0]) == dict) or (type(obj[0]) == set)or (type(obj[0]) == tuple)):
+                        export_obj(obj, file_name = attr_name, folder_address = obj_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+                        continue
                     
-                    continue
+                    if (type(obj) == dict) and (len(obj.keys())>0) and ((type(list(obj.values())[0]) == dict) or (type(list(obj.values())[0]) == list) or (type(list(obj.values())[0]) == str) or (type(list(obj.values())[0]) == set) or (type(list(obj.values())[0]) == tuple)):
+                        export_obj(obj, file_name = attr_name, folder_address = obj_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+                        continue
+                    
+                    else:
+                    
+                        obj_to_folder(obj=attr,
+                                            folder_name = attr_name, 
+                                            folder_address= obj_address, 
+                                            export_str_as = export_str_as, 
+                                            export_dict_as = export_dict_as,
+                                            export_pandas_as = export_pandas_as,
+                                            export_network_as=export_network_as)
+                        
+                        continue
             
     return
 
