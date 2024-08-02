@@ -1238,6 +1238,19 @@ class Review:
         
         art_class_to_folder(self, folder_name = folder_name, folder_address = folder_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
 
+    def save_as(self,
+                filetype = 'folder',
+                file_name = 'request_input', 
+                      folder_address: str = 'request_input', 
+                      export_str_as: str = 'txt', 
+                      export_dict_as: str = 'json', 
+                      export_pandas_as: str = 'csv', 
+                      export_network_as: str = 'graphML'):
+        
+        if filetype == 'folder':
+            self.export_folder(folder_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
+
+
     def scrape_article(self, url = 'request_input'):
         
         if url == 'request_input':
