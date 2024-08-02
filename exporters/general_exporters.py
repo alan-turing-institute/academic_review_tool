@@ -287,7 +287,7 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
 
             index = 0
             for i in obj:
-                item_folder_name = folder_name + '_' + str(index)
+                item_folder_name = str(folder_name) + '_' + str(index)
                 item_folder_name = item_folder_name.strip().replace(' ', '_').replace('/', '_')
                 obj_to_folder(obj = i, folder_name = item_folder_name, folder_address = obj_address)
                 index += 1
@@ -306,7 +306,7 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
 
             for key in obj.keys():
                 
-                key_folder_name = folder_name + '_' + key
+                key_folder_name = str(folder_name) + '_' + str(key)
                 obj_to_folder(obj = obj[key], folder_name = key_folder_name, folder_address = obj_address)
             
         return
