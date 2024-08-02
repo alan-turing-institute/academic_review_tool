@@ -1,6 +1,6 @@
 from ..utils.basics import Iterator, results_cols
 from ..utils.cleaners import deduplicate
-from ..exporters.general_exporters import obj_to_folder
+from ..exporters.general_exporters import obj_to_folder, art_class_to_folder
 
 from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
@@ -1236,7 +1236,7 @@ class Review:
         if folder_name.endswith('_Review') == False:
             folder_name = folder_name + '_Review'
         
-        obj_to_folder(self, folder_name = folder_name, folder_address = folder_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+        art_class_to_folder(self, folder_name = folder_name, folder_address = folder_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
 
     def scrape_article(self, url = 'request_input'):
         

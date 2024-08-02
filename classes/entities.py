@@ -1,4 +1,4 @@
-from ..exporters.general_exporters import obj_to_folder
+from ..exporters.general_exporters import obj_to_folder, art_class_to_folder
 
 import pandas as pd
 import numpy as np
@@ -118,7 +118,7 @@ class Entity:
                       export_network_as: str = 'graphML'
                       ):
         
-        obj_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
+        art_class_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
     
 class Entities:
@@ -190,7 +190,7 @@ class Entities:
                       ):
         
         
-        obj_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
+        art_class_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
     def drop(self, entity_id):
 

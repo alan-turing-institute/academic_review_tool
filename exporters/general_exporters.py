@@ -111,9 +111,32 @@ def export_obj(obj, file_name = 'obj_name', folder_address: str = 'request_input
         
         return
 
-def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, export_pandas_as, export_network_as):
+def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str = 'request_input', export_str_as: str = 'txt', export_dict_as: str = 'json', export_pandas_as: str = 'csv', export_network_as: str = 'graphML'):
 
     obj_type_str = str(type(obj))
+
+    # If the object is None, no folder created
+    if obj is None:
+        return
+    
+    # Getting folder name from user input
+    if (folder_name is None) or (folder_name is np.nan) or (folder_name =='request_input'):
+        folder_name = input('Folder name: ')
+        
+
+    # If folder name is still None or is an empty string, assigns a random integer as a folder name
+    if (folder_name == '') or (folder_name == None):
+        folder_name = str(Random().randint(1000, 9999)) + '_' + str(Random().randint(1000, 9999)) + '_' + str(Random().randint(1000, 9999))
+        folder_name = str(folder_name)
+    
+     # Getting folder address from user input
+    if folder_address == 'request_input':
+        folder_address = input('Folder address: ')
+    
+    # Creating folder address
+    folder_name = folder_name.strip().replace('/', '_').replace(' ', '_')
+    obj_address = folder_address + '/' + folder_name
+    obj_address = obj_address.strip()
 
     if (('.Review' not in obj_type_str)
                         and ('.Results' not in obj_type_str)
@@ -125,12 +148,13 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                         and ('.Funder' not in obj_type_str)
                         and ('.Funders' not in obj_type_str)
                         and ('.Affiliation' not in obj_type_str)
-                        and ('.Affiliations' not in obj_type_str)):
+                        and ('.Affiliations' not in obj_type_str)
+                        and ('.Networks') not in obj_type_str):
         return
 
     if (('.Results' in obj_type_str)
             or ('.ActivityLog' in obj_type_str)):
-        obj.to_csv(final_address)
+        obj.to_csv(obj_address)
         return
 
     if (('.Review' in obj_type_str)
@@ -141,23 +165,23 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                         or ('.Funder' in obj_type_str)
                         or ('.Funders' in obj_type_str)
                         or ('.Affiliation' in obj_type_str)
-                        or ('.Affiliations' in obj_type_str)):
+                        or ('.Affiliations' in obj_type_str)
+                        or ('.Networks' in obj_type_str)):
+
+        os.mkdir(obj_address)
 
         for key in obj.__dict__.keys():
-
+            
             attr = obj.__dict__[key]
+            attr_name = str(key).replace('A:','').replace('F:','').replace('AUTH:','')
 
             if attr is not None:
                 
                 attr_str_type = str(type(attr))
                 
-                if (('.Results' in attr_str_type)
-                        or ('.ActivityLog' in attr_str_type)):
-                    file = final_address + '/' + key + '.csv'
-                    attr.to_csv(file)
-                    continue
-
                 if (('.Review' in attr_str_type)
+                        or ('.Results' in attr_str_type)
+                        or ('.ActivityLog' in attr_str_type)
                         or ('.Entity' in attr_str_type)
                         or ('.Entities' in attr_str_type)
                         or ('.Author' in attr_str_type)
@@ -165,10 +189,12 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                         or ('.Funder' in attr_str_type)
                         or ('.Funders' in attr_str_type)
                         or ('.Affiliation' in attr_str_type)
-                        or ('.Affiliations' in attr_str_type)):
+                        or ('.Affiliations' in attr_str_type)
+                        or ('.Networks' in attr_str_type)):
                     
-                    attr.export_folder(folder_name = key, 
-                                        folder_address= final_address, 
+                    art_class_to_folder(obj=attr,
+                                        folder_name = attr_name, 
+                                        folder_address= obj_address, 
                                         export_str_as = export_str_as, 
                                         export_dict_as = export_dict_as,
                                         export_pandas_as = export_pandas_as,
@@ -177,19 +203,15 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                     continue
 
                 else:
-
-                    if type(attr) == dict:
-                        obj_to_folder(attr, 
-                                        folder_address= final_address, 
+                    obj_to_folder(obj=attr,
+                                        folder_name = attr_name, 
+                                        folder_address= obj_address, 
                                         export_str_as = export_str_as, 
                                         export_dict_as = export_dict_as,
                                         export_pandas_as = export_pandas_as,
                                         export_network_as=export_network_as)
-                        continue
-
-                    else:
-                        export_obj(attr, file_name = key, folder_address = final_address)
-                        continue
+                    
+                    continue
             
     return
 
@@ -222,13 +244,11 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
     
     # Creating folder address
     folder_name = folder_name.strip().replace('/', '_').replace(' ', '_')
-    final_address = folder_address + '/' + folder_name
-    final_address = final_address.strip()
+    obj_address = folder_address + '/' + folder_name
+    obj_address = obj_address.strip()
     
-    # Creating folder
-    os.mkdir(final_address)
     
-    # If the item is an ART class, recursively creates a folder using the .export_folder() method.
+    # If the item is a custom ART class, recursively creates a folder using the art_class_to_folder() function.
     if (('.Review' in obj_type_str)
                         or ('.Results' in obj_type_str)
                         or ('.ActivityLog' in obj_type_str)
@@ -239,9 +259,10 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
                         or ('.Funder' in obj_type_str)
                         or ('.Funders' in obj_type_str)
                         or ('.Affiliation' in obj_type_str)
-                        or ('.Affiliations' in obj_type_str)):
+                        or ('.Affiliations' in obj_type_str)
+                        or ('.Networks' in obj_type_str)):
         try:
-            art_class_to_folder(obj = obj, final_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+            art_class_to_folder(obj = obj, folder_name = folder_name, folder_address = folder_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
             return
         
         # Error handling
@@ -249,19 +270,27 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
             raise e
 
     # If the item is a string, numeric, Graph, Network, Pandas series or pandas.DataFrame, creates a file
-    if (obj_type == str) or (obj_type == int) or (obj_type == float) or (obj_type == pd.Series) or (obj_type == pd.DataFrame) or (obj_type == Graph) or (obj_type == NetworkX_Undir) or (obj_type==NetworkX_Dir) or (obj_type==NetworkX_Multi) or ('Network' in obj_type_str):
+    if (obj_type == str) or (obj_type == int) or (obj_type == float) or (obj_type == pd.Series) or (obj_type == pd.DataFrame) or (obj_type == Graph) or (obj_type == NetworkX_Undir) or (obj_type==NetworkX_Dir) or (obj_type==NetworkX_Multi) or ('.Network' in obj_type_str):
         folder_name = folder_name.strip().replace(' ', '_').replace('/', '_')
-        export_obj(obj, file_name = folder_name, folder_address = final_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+        export_obj(obj, file_name = folder_name, folder_address = obj_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
         return
     
+    
+
     # If the object is iterable, creates a folder using recursion
     if (obj_type == list) or (obj_type == set) or (obj_type == tuple):
-        index = 0
-        for i in obj:
-            item_folder_name = folder_name + '_' + str(index)
-            item_folder_name = item_folder_name.strip().replace(' ', '_').replace('/', '_')
-            obj_to_folder(obj = i, folder_name = item_folder_name, folder_address = final_address)
-            index += 1
+
+        if len(obj) >0:
+
+            # Creating folder
+            os.mkdir(obj_address)
+
+            index = 0
+            for i in obj:
+                item_folder_name = folder_name + '_' + str(index)
+                item_folder_name = item_folder_name.strip().replace(' ', '_').replace('/', '_')
+                obj_to_folder(obj = i, folder_name = item_folder_name, folder_address = obj_address)
+                index += 1
         
         return
     
@@ -269,10 +298,15 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
 
     # If the object is a dictionary, uses recursion to create a folder with keys as filenames and values as files
     if obj_type == dict:
+
+        if len(obj.keys()) > 0:
         
-        for key in obj.keys():
-            
-            key_folder_name = folder_name + '_' + key
-            obj_to_folder(obj = obj[key], folder_name = key_folder_name, folder_address = final_address)
+            # Creating folder
+            os.mkdir(obj_address)
+
+            for key in obj.keys():
+                
+                key_folder_name = folder_name + '_' + key
+                obj_to_folder(obj = obj[key], folder_name = key_folder_name, folder_address = obj_address)
             
         return
