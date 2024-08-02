@@ -24,7 +24,7 @@ class Entity:
         """
 
 
-        self.details = pd.DataFrame(dtype = object)
+        self.summary = pd.DataFrame(dtype = object)
 
 
     
@@ -37,14 +37,14 @@ class Entity:
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.columns:
-            return self.details.loc[0, key]
+        if key in self.summary.columns:
+            return self.summary.loc[0, key]
 
     def get(self, key):
         return self[key]
 
     def __repr__(self) -> str:
-        return str(self.details.loc[0])
+        return str(self.summary.loc[0])
 
     def search(self, query: str = 'request_input'):
 
@@ -53,16 +53,16 @@ class Entity:
         
         query = query.strip().lower()
         
-        self_str = self.details.copy(deep=True).loc[0].astype(str).str.lower()
+        self_str = self.summary.copy(deep=True).loc[0].astype(str).str.lower()
         masked = self_str[self_str.str.contains(query)].index
         
-        return self.details.loc[0][masked]
+        return self.summary.loc[0][masked]
         
 
     def has_uri(self) -> bool:
 
-        if 'uri' in self.details.columns:
-            uri = self.details.loc[0, 'uri']
+        if 'uri' in self.summary.columns:
+            uri = self.summary.loc[0, 'uri']
 
             if (type(uri) == str) and (uri != ''):
                 return True
@@ -75,11 +75,11 @@ class Entity:
 
         if 'name' in data.keys():
             name = data['name']
-            self.details.loc[0, 'name'] = name
+            self.summary.loc[0, 'name'] = name
 
         if 'DOI' in data.keys():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
-            self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
+            self.summary.loc[0, 'uri'] = 'https://doi.org/' + uri
     
     def from_dict(data: dict): # type: ignore
 
@@ -89,7 +89,7 @@ class Entity:
         return entity
         
     def add_series(self, series: pd.Series):
-        self.details.loc[0] = series
+        self.summary.loc[0] = series
 
     def from_series(data: pd.Series): # type: ignore
         entity = Entity()
@@ -107,11 +107,6 @@ class Entity:
 
         return entity
     
-
-
-
-
-
 class Entities:
 
     """
@@ -134,10 +129,10 @@ class Entities:
         ----------
         """
 
-        self.all = pd.DataFrame(dtype = object)
+        self.summary = pd.DataFrame(dtype = object)
         
 
-        self.details = dict()
+        self.all = dict()
 
         self.data = []
         
@@ -151,57 +146,57 @@ class Entities:
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.keys():
-            return self.details[key]
-
-        if key in self.all.columns:
+        if key in self.all.keys():
             return self.all[key]
+
+        if key in self.summary.columns:
+            return self.summary[key]
         
-        if key in self.all.index:
-             return self.all.loc[key]
+        if key in self.summary.index:
+             return self.summary.loc[key]
         
         if (type(key) == int) and (key <= len(self.data)):
             return self.data[key]
     
     def __repr__(self) -> str:
 
-        string = str(self.all).replace('[','').replace(']','')
+        string = str(self.summary).replace('[','').replace(']','')
         return string
     
     def __len__(self) -> int:
-        return len(self.details.keys())
+        return len(self.all.keys())
 
     def drop(self, entity_id):
 
-        if entity_id in self.details.keys():
-            del self.details[entity_id]
+        if entity_id in self.all.keys():
+            del self.all[entity_id]
 
         id_col = None
-        if 'author_id' in self.all.columns:
+        if 'author_id' in self.summary.columns:
             id_col = 'author_id'
-        if 'funder_id' in self.all.columns:
+        if 'funder_id' in self.summary.columns:
             id_col = 'funder_id'
-        if 'affiliation_id' in self.all.columns:
+        if 'affiliation_id' in self.summary.columns:
             id_col = 'affiliation_id'
 
-        i_to_drop = self.all[self.all[id_col] == entity_id].index.to_list()
+        i_to_drop = self.summary[self.summary[id_col] == entity_id].index.to_list()
 
         if len(i_to_drop) > 0:
-            self.all.drop(labels=i_to_drop, axis=0)
+            self.summary.drop(labels=i_to_drop, axis=0)
 
 
     def merge(self, entities):
 
-        left = self.all.copy(deep=True)
-        right = entities.all.copy(deep=True)
+        left = self.summary.copy(deep=True)
+        right = entities.summary.copy(deep=True)
         
         merged = pd.concat([left, right])
 
-        self.all = merged.drop_duplicates(ignore_index=True)
+        self.summary = merged.drop_duplicates(ignore_index=True)
 
-        for i in entities.details.keys():
-            if i not in self.details.keys():
-                self.details[i] = entities.details[i]
+        for i in entities.all.keys():
+            if i not in self.all.keys():
+                self.all[i] = entities.all[i]
 
         left_data = self.data
         right_data = entities.data
@@ -233,17 +228,17 @@ class Entities:
 
     def with_crossref(self):
 
-        if 'crossref_id' in self.all.columns:
-            return self.all[~self.all['crossref_id'].isna()]
+        if 'crossref_id' in self.summary.columns:
+            return self.summary[~self.summary['crossref_id'].isna()]
         else:
-            return pd.DataFrame(index=self.all.columns, dtype=object)
+            return pd.DataFrame(index=self.summary.columns, dtype=object)
     
     def with_uri(self):
 
-        if 'uri' in self.all.columns:
-            return self.all[~self.all['uri'].isna()]
+        if 'uri' in self.summary.columns:
+            return self.summary[~self.summary['uri'].isna()]
         else:
-            return pd.DataFrame(index=self.all.columns, dtype=object)
+            return pd.DataFrame(index=self.summary.columns, dtype=object)
     
     def contains(self, query: str = 'request_input', ignore_case: bool = True) -> bool:
 
@@ -252,7 +247,7 @@ class Entities:
 
         query = query.strip()
 
-        all_str = self.all.copy(deep=True).astype(str)
+        all_str = self.summary.copy(deep=True).astype(str)
         
         if ignore_case == True:
             query = query.lower()
@@ -260,7 +255,7 @@ class Entities:
                 all_str[c] = all_str[c].str.lower()
             
 
-        cols = self.all.columns
+        cols = self.summary.columns
 
         for c in cols:
 
@@ -314,18 +309,18 @@ class Entities:
         
         query = query.strip().lower()
 
-        cols = [c for c in self.all.columns if (('_id' in c) or (c == 'uri'))]
+        cols = [c for c in self.summary.columns if (('_id' in c) or (c == 'uri'))]
 
         masked_indexes = []
         for col in cols:
-                col_str = self.all[col].copy(deep=True).astype(str).str.lower()
+                col_str = self.summary[col].copy(deep=True).astype(str).str.lower()
                 indexes = col_str[col_str.str.contains(query)].index.to_list()
                 masked_indexes = masked_indexes + indexes
         
         masked_indexes = list(set(masked_indexes))
-        all_res = self.all.loc[masked_indexes].copy(deep=True)
+        all_res = self.summary.loc[masked_indexes].copy(deep=True)
         final_indexes = all_res.astype(str).drop_duplicates().index
-        result = self.all.loc[final_indexes]
+        result = self.summary.loc[final_indexes]
 
         return result
         
@@ -357,7 +352,7 @@ class Entities:
             intersect = set.intersection(*results_list)
             indexes = list(intersect)
 
-            result = self.all.loc[indexes]
+            result = self.summary.loc[indexes]
 
             return result
             
@@ -366,19 +361,19 @@ class Entities:
         else:
             query = query.lower()
             masked_indexes = []
-            for col in self.all.columns:
-                col_str = self.all[col].copy(deep=True).astype(str).str.lower()
+            for col in self.summary.columns:
+                col_str = self.summary[col].copy(deep=True).astype(str).str.lower()
                 indexes = col_str[col_str.str.contains(query)].index.to_list()
                 masked_indexes = masked_indexes + indexes
                 
             masked_indexes = list(set(masked_indexes))
-            all_res = self.all.loc[masked_indexes].copy(deep=True)
+            all_res = self.summary.loc[masked_indexes].copy(deep=True)
 
-            if 'affiliations' in self.all.columns:
+            if 'affiliations' in self.summary.columns:
 
-                affils = self.all['affiliations']
+                affils = self.summary['affiliations']
                 
-                for i in self.all.index:
+                for i in self.summary.index:
                     
                     a = affils[i]
                     
@@ -387,15 +382,14 @@ class Entities:
                         a_res = a.search(query)
                         val = len(a_res)
                         if val > 0:
-                            series = self.all.loc[i]
+                            series = self.summary.loc[i]
                             all_res.loc[i] = series
                 
             final_indexes = all_res.astype(str).drop_duplicates().index
             
-            result = self.all.loc[final_indexes]
+            result = self.summary.loc[final_indexes]
 
         return result
-
 
 
                   

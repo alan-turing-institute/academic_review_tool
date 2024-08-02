@@ -197,44 +197,44 @@ class Author(Entity):
         
         global author_cols
 
-        self.details = pd.DataFrame(columns = author_cols,
+        self.summary = pd.DataFrame(columns = author_cols,
                                 dtype = object)
         
         
-        self.details.loc[0] = pd.Series(dtype=object)
-        self.details.loc[0, 'author_id'] = author_id
-        self.details.loc[0, 'full_name'] = full_name
-        self.details.loc[0, 'given_name'] = given_name
-        self.details.loc[0, 'family_name'] = family_name
-        self.details.loc[0, 'email'] = email
-        self.details.loc[0, 'affiliations'] = affiliations
-        self.details.loc[0, 'publications'] = publications
-        self.details.loc[0, 'orcid'] = orcid
-        self.details.loc[0, 'google_scholar'] = google_scholar
-        self.details.loc[0, 'scopus'] = scopus
-        self.details.loc[0, 'crossref'] = crossref
-        self.details.loc[0, 'other_links'] = other_links
+        self.summary.loc[0] = pd.Series(dtype=object)
+        self.summary.loc[0, 'author_id'] = author_id
+        self.summary.loc[0, 'full_name'] = full_name
+        self.summary.loc[0, 'given_name'] = given_name
+        self.summary.loc[0, 'family_name'] = family_name
+        self.summary.loc[0, 'email'] = email
+        self.summary.loc[0, 'affiliations'] = affiliations
+        self.summary.loc[0, 'publications'] = publications
+        self.summary.loc[0, 'orcid'] = orcid
+        self.summary.loc[0, 'google_scholar'] = google_scholar
+        self.summary.loc[0, 'scopus'] = scopus
+        self.summary.loc[0, 'crossref'] = crossref
+        self.summary.loc[0, 'other_links'] = other_links
 
         full_name = self.get_full_name()
-        if full_name != self.details.loc[0, 'full_name']:
-            self.details.loc[0, 'full_name'] = full_name
+        if full_name != self.summary.loc[0, 'full_name']:
+            self.summary.loc[0, 'full_name'] = full_name
 
         self.publications = Results()
 
     def generate_id(self):
 
-        author_data = self.details.loc[0]
+        author_data = self.summary.loc[0]
 
         author_id = generate_author_id(author_data) # type: ignore
         return author_id
 
     def update_id(self):
 
-        current_id = self.details.loc[0, 'author_id']
+        current_id = self.summary.loc[0, 'author_id']
         new_id = self.generate_id()
 
         if (current_id != new_id) or (current_id == None) or (current_id == 'None') or (current_id == '') or (current_id == 'A:#NA#'):
-            self.details.loc[0, 'author_id'] = new_id
+            self.summary.loc[0, 'author_id'] = new_id
         
     
     def __getitem__(self, key):
@@ -246,35 +246,35 @@ class Author(Entity):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.columns:
-            return self.details.loc[0, key]
+        if key in self.summary.columns:
+            return self.summary.loc[0, key]
         
         if key in self.publications.columns:
             return self.publications[key]
 
     def __repr__(self) -> str:
-        return str(self.details.loc[0, 'full_name'])
+        return str(self.summary.loc[0, 'full_name'])
     
     def get_full_name(self):
-        series = self.details.loc[0]
+        series = self.summary.loc[0]
         return get_full_name(series=series) # type: ignore
 
 
     def update_full_name(self):
 
             full_name = self.get_full_name()
-            self.details.loc[0, 'full_name'] = full_name
+            self.summary.loc[0, 'full_name'] = full_name
 
     def name_set(self) -> set:
 
-        given = str(self.details.loc[0, 'given_name'])
-        family = str(self.details.loc[0, 'family_name'])
+        given = str(self.summary.loc[0, 'given_name'])
+        family = str(self.summary.loc[0, 'family_name'])
 
         return set([given, family])
 
     def has_orcid(self) -> bool:
 
-        orcid = self.details.loc[0, 'orcid']
+        orcid = self.summary.loc[0, 'orcid']
 
         if (type(orcid) == str) and (orcid != ''):
             return True
@@ -283,12 +283,12 @@ class Author(Entity):
 
     def format_affiliations(self):
 
-        affils_data = self.details.loc[0, 'affiliations']
+        affils_data = self.summary.loc[0, 'affiliations']
         affiliations = format_affiliations(affils_data)
-        self.details.at[0, 'affiliations'] = affiliations
+        self.summary.at[0, 'affiliations'] = affiliations
 
     def add_series(self, series: pd.Series):
-        self.details.loc[0] = series
+        self.summary.loc[0] = series
 
     def from_series(series: pd.Series): # type: ignore
         author = Author()
@@ -307,33 +307,33 @@ class Author(Entity):
     def import_crossref(self, crossref_result: dict):
 
         if 'given' in crossref_result.keys():
-            self.details.loc[0, 'given_name'] = crossref_result['given']
+            self.summary.loc[0, 'given_name'] = crossref_result['given']
         
         if 'family' in crossref_result.keys():
-            self.details.loc[0, 'family_name'] = crossref_result['family']
+            self.summary.loc[0, 'family_name'] = crossref_result['family']
         
         if 'email' in crossref_result.keys():
-            self.details.loc[0, 'email'] = crossref_result['email']
+            self.summary.loc[0, 'email'] = crossref_result['email']
 
         if 'affiliation' in crossref_result.keys():
             if (type(crossref_result['affiliation']) == list) and (len(crossref_result['affiliation']) > 0):
-                self.details.at[0, 'affiliations'] = crossref_result['affiliation'][0]
+                self.summary.at[0, 'affiliations'] = crossref_result['affiliation'][0]
 
             else:
                 if (type(crossref_result['affiliation']) == dict) and (len(crossref_result['affiliation'].keys()) > 0):
                     key = list(crossref_result['affiliation'].keys())[0]
-                    self.details.at[0, 'affiliations'] = crossref_result['affiliation'][key]
+                    self.summary.at[0, 'affiliations'] = crossref_result['affiliation'][key]
 
         if 'ORCID' in crossref_result.keys():
-            self.details.loc[0, 'orcid'] = crossref_result['ORCID']
+            self.summary.loc[0, 'orcid'] = crossref_result['ORCID']
         
         else:
             if 'orcid' in crossref_result.keys():
-                self.details.loc[0, 'orcid'] = crossref_result['orcid']
+                self.summary.loc[0, 'orcid'] = crossref_result['orcid']
 
-        # self.details.loc[0, 'google_scholar'] = google_scholar
-        # self.details.loc[0, 'crossref'] = crossref
-        # self.details.loc[0, 'other_links'] = other_links
+        # self.summary.loc[0, 'google_scholar'] = google_scholar
+        # self.summary.loc[0, 'crossref'] = crossref
+        # self.summary.loc[0, 'other_links'] = other_links
 
         self.update_full_name()
     
@@ -356,22 +356,22 @@ class Author(Entity):
                     author_details = auth_df.loc[0]
 
                     if 'name' in cols:
-                        self.details.loc[0, 'given_name'] = author_details['name']
+                        self.summary.loc[0, 'given_name'] = author_details['name']
                     
                     if 'family name' in cols:
-                        self.details.loc[0, 'family_name'] = author_details['family name']
+                        self.summary.loc[0, 'family_name'] = author_details['family name']
                     
                     if 'emails' in cols:
-                        self.details.at[0, 'email'] = author_details['emails']
+                        self.summary.at[0, 'email'] = author_details['emails']
                     
                     if 'employment' in cols:
-                        self.details.at[0, 'affiliations'] = author_details['employment']
+                        self.summary.at[0, 'affiliations'] = author_details['employment']
                     
                     if 'works' in cols:
-                        self.details.at[0, 'publications'] = author_details['works']
+                        self.summary.at[0, 'publications'] = author_details['works']
                     
-                    self.details.loc[0, 'orcid'] = orcid_id
-                    self.details.loc[0, 'orcid'] = orcid_id
+                    self.summary.loc[0, 'orcid'] = orcid_id
+                    self.summary.loc[0, 'orcid'] = orcid_id
                     self.update_full_name()
 
                     return
@@ -392,12 +392,12 @@ class Author(Entity):
             if 'given-names' in author_details['name']:
                 given_list = list(author_details['name']['given-names'].values())
                 given = ' '.join(given_list)
-                self.details.loc[0, 'given_name'] = given
+                self.summary.loc[0, 'given_name'] = given
 
             if 'family-name' in author_details['name']:
                 family_list = list(author_details['name']['family-name'].values())
                 family = ' '.join(family_list)
-                self.details.loc[0, 'family_name'] = family
+                self.summary.loc[0, 'family_name'] = family
             
         if 'emails' in details_keys:
             emails_dict = author_details['emails']
@@ -411,7 +411,7 @@ class Author(Entity):
                             email_addr = i['email']
                             emails_list.append(email_addr)
 
-                    self.details.at[0, 'email'] = emails_list
+                    self.summary.at[0, 'email'] = emails_list
         
         if 'keywords' in details_keys:
             kws_dict = author_details['keywords']
@@ -425,7 +425,7 @@ class Author(Entity):
                             kwd = i['content']
                             kws_list.append(kwd)
 
-                    self.details.at[0, 'keywords'] = kws_list
+                    self.summary.at[0, 'keywords'] = kws_list
 
         if 'external-identifiers' in details_keys:
             ext_ids_dict = author_details['external-identifiers']
@@ -441,11 +441,11 @@ class Author(Entity):
                             url = i['external-id-url']
                             ext_ids_formatted[id_type] = {'id': value, 'url': url}
 
-                    self.details.at[0, 'keywords'] = ext_ids_formatted
+                    self.summary.at[0, 'keywords'] = ext_ids_formatted
 
         
         
-        self.details.loc[0, 'orcid'] = orcid_id
+        self.summary.loc[0, 'orcid'] = orcid_id
 
         if type(auth_res) == Orcid:
             try:
@@ -488,7 +488,7 @@ class Author(Entity):
     
     def update_from_orcid(self):
 
-        orcid = self.details.loc[0, 'orcid']
+        orcid = self.summary.loc[0, 'orcid']
 
         if (orcid != None) and (orcid != '') and (orcid != 'None'):
             
@@ -521,11 +521,11 @@ class Authors(Entities):
         super().__init__()
         
         global author_cols
-        self.all = pd.DataFrame(columns = author_cols,
+        self.summary = pd.DataFrame(columns = author_cols,
                                 dtype = object)
         
 
-        self.details = dict()
+        self.all = dict()
 
         self.data = []
         self.data.append(authors_data)
@@ -533,10 +533,10 @@ class Authors(Entities):
         if (type(authors_data) == list) and (type(authors_data[0]) == Author):
 
             for i in authors_data:
-                auth = i.details.copy(deep=True)
-                self.all = pd.concat([self.all, auth])
+                auth = i.summary.copy(deep=True)
+                self.summary = pd.concat([self.summary, auth])
 
-            self.all = self.all.reset_index().drop('index',axis=1)
+            self.summary = self.summary.reset_index().drop('index',axis=1)
 
         else:
 
@@ -548,12 +548,12 @@ class Authors(Entities):
 
                     for a in authors_data.keys():
                         
-                        index = len(self.all)
-                        auth = a.details.copy(deep=True)
-                        self.all = pd.concat([self.all, auth])
-                        self.all.loc[index, 'author_id'] = a
+                        index = len(self.summary)
+                        auth = a.summary.copy(deep=True)
+                        self.summary = pd.concat([self.summary, auth])
+                        self.summary.loc[index, 'author_id'] = a
 
-                    self.all = self.all.reset_index().drop('index',axis=1)
+                    self.summary = self.summary.reset_index().drop('index',axis=1)
                 
 
 
@@ -566,34 +566,34 @@ class Authors(Entities):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.keys():
-            return self.details[key]
-
-        if key in self.all.columns:
+        if key in self.all.keys():
             return self.all[key]
+
+        if key in self.summary.columns:
+            return self.summary[key]
         
         if (type(key) == int) and (key <= len(self.data)):
             return self.data[key]
     
     def __repr__(self) -> str:
 
-        alphabetical = self.all['full_name'].sort_values().to_list().__repr__()
+        alphabetical = self.summary['full_name'].sort_values().to_list().__repr__()
         return alphabetical
     
     def __len__(self) -> int:
-        return len(self.details.keys())
+        return len(self.all.keys())
 
     def remove_duplicates(self, drop_empty_rows = True, sync=True):
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
-        df = self.all.copy(deep=True)
+        df = self.summary.copy(deep=True)
         df['orcid'] = df['orcid'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('orcid.org/', '', regex=False).str.strip('/')
         df['google_scholar'] = df['google_scholar'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('scholar.google.com/', '', regex=False).str.replace('citations?', '', regex=False).str.replace('user=', '', regex=False).str.strip('/')
        
         df = df.sort_values(by = ['orcid', 'google_scholar', 'crossref', 'full_name']).reset_index().drop('index', axis=1)
-        self.all = deduplicate(self.all)
+        self.summary = deduplicate(self.summary)
 
         if sync == True:
             self.sync_details()
@@ -604,16 +604,16 @@ class Authors(Entities):
 
     def merge(self, authors, drop_duplicates = False, drop_empty_rows=False):
 
-        left = self.all.copy(deep=True)
-        right = authors.all.copy(deep=True)
+        left = self.summary.copy(deep=True)
+        right = authors.summary.copy(deep=True)
         
         merged = pd.concat([left, right])
 
-        self.all = merged.drop_duplicates(subset=['author_id', 'family_name', 'orcid'], ignore_index=True)
+        self.summary = merged.drop_duplicates(subset=['author_id', 'family_name', 'orcid'], ignore_index=True)
 
-        for i in authors.details.keys():
-            if i not in self.details.keys():
-                self.details[i] = authors.details[i]
+        for i in authors.all.keys():
+            if i not in self.all.keys():
+                self.all[i] = authors.all[i]
 
         left_data = self.data
         right_data = authors.data
@@ -651,12 +651,12 @@ class Authors(Entities):
 
     def update_full_names(self):
 
-        for i in self.all.index:
-            new = get_full_name(self.all.loc[i])
-            old = self.all.loc[i, 'full_name']
+        for i in self.summary.index:
+            new = get_full_name(self.summary.loc[i])
+            old = self.summary.loc[i, 'full_name']
 
             if (type(old) != str) or ((type(old) == str) and (len(old) == 0)) or (old is None) or (old == '') or (old is np.nan):
-                self.all.loc[i, 'full_name'] = new
+                self.summary.loc[i, 'full_name'] = new
         
         self.update_author_ids()
         self.sync_details()
@@ -664,29 +664,29 @@ class Authors(Entities):
     def add_author(self, author: Author, data = None, drop_duplicates = True, drop_empty_rows = False, update_from_orcid = False):
 
         if update_from_orcid == True:
-            orcid = author.details.loc[0,'orcid']
+            orcid = author.summary.loc[0,'orcid']
             if (orcid != None) and (orcid != '') and (orcid != 'None'):
                 author.update_from_orcid()
 
         author.update_id()
 
-        author_id = str(author.details.loc[0, 'author_id'])
+        author_id = str(author.summary.loc[0, 'author_id'])
 
-        if (author_id in self.details.keys()) or (author_id in self.all['author_id'].to_list()):
+        if (author_id in self.all.keys()) or (author_id in self.summary['author_id'].to_list()):
             print(f'Warning: {author_id} is already in authors')
 
-        # if author_id in self.all['author_id'].to_list():
-        #     id_count = len(self.all[self.all['author_id'].str.contains(author_id)]) # type: ignore
+        # if author_id in self.summary['author_id'].to_list():
+        #     id_count = len(self.summary[self.summary['author_id'].str.contains(author_id)]) # type: ignore
         #     author_id = author_id + f'#{id_count + 1}'
-        #     author.details.loc[0, 'author_id'] = author_id
+        #     author.summary.loc[0, 'author_id'] = author_id
 
-        self.all = pd.concat([self.all, author.details])
-        self.all = self.all.reset_index().drop('index', axis=1)
+        self.summary = pd.concat([self.summary, author.summary])
+        self.summary = self.summary.reset_index().drop('index', axis=1)
 
-        self.details[author_id] = author
+        self.all[author_id] = author
 
         if data == None:
-            data = author.details.to_dict(orient='index')
+            data = author.summary.to_dict(orient='index')
         
         self.data.append(data)
 
@@ -726,26 +726,26 @@ class Authors(Entities):
 
             return res
         
-        masked = self.all[self.all[column].apply(entity_masker)]
+        masked = self.summary[self.summary[column].apply(entity_masker)]
 
         return masked
 
     def update_author_ids(self):
 
-        for i in self.all.index:
-            author_data = self.all.loc[i]
+        for i in self.summary.index:
+            author_data = self.summary.loc[i]
             author_id = generate_author_id(author_data)
-            self.all.loc[i, 'author_id'] = author_id
+            self.summary.loc[i, 'author_id'] = author_id
 
     def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
 
-        for i in self.details.keys():
-            author = self.details[i]
+        for i in self.all.keys():
+            author = self.all[i]
             author.update_id()
-            series = author.details.loc[0]
-            all = self.all.copy(deep=True).astype(str)
+            series = author.summary.loc[0]
+            all = self.summary.copy(deep=True).astype(str)
             auth_index = all[all['author_id'] == i].index.to_list()[0]
-            self.all.loc[auth_index] = series
+            self.summary.loc[auth_index] = series
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -757,26 +757,26 @@ class Authors(Entities):
 
         self.update_author_ids()
 
-        for i in self.all.index:
+        for i in self.summary.index:
 
-            auth_data = self.all.loc[i]
+            auth_data = self.summary.loc[i]
             auth_id = auth_data['author_id']
 
             if auth_id != None:
                 auth = Author.from_series(auth_data) # type: ignore
-                self.details[auth_id] = auth
+                self.all[auth_id] = auth
 
             else:
                 auth_id = generate_author_id(auth_data)
                 auth_data['author_id'] = auth_id
                 auth = Author.from_series(auth_data) # type: ignore
-                self.details[auth_id] = auth
+                self.all[auth_id] = auth
         
-        keys = list(self.details.keys())
+        keys = list(self.all.keys())
         for key in keys:
-            auth_ids = self.all['author_id'].to_list()
+            auth_ids = self.summary['author_id'].to_list()
             if key not in auth_ids:
-                del self.details[key]
+                del self.all[key]
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -786,8 +786,8 @@ class Authors(Entities):
 
     def sync(self, drop_duplicates = False, drop_empty_rows=False):
         
-        all_len = len(self.all)
-        details_len = len(self.details)
+        all_len = len(self.summary)
+        details_len = len(self.all)
 
         if all_len > details_len:
             self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -806,13 +806,13 @@ class Authors(Entities):
 
         ignore_cols = ['author_id', 'affiliations', 'publications', 'other_links']
 
-        df = self.all.copy(deep=True)
+        df = self.summary.copy(deep=True)
         df['full_name'] = df['full_name'].replace('no_name_given', None)
         df = df.dropna(axis=0, how='all')
         drop_cols = [c for c in df.columns if c not in ignore_cols]
         df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
 
-        self.all = df
+        self.summary = df
         self.sync_details()
 
         return self
@@ -822,28 +822,28 @@ class Authors(Entities):
         if drop_empty_rows == True:
             self.drop_empty_rows()
 
-        affils = self.all['affiliations'].apply(func=format_affiliations) # type: ignore
-        self.all['affiliations'] = affils
+        affils = self.summary['affiliations'].apply(func=format_affiliations) # type: ignore
+        self.summary['affiliations'] = affils
         self.sync_details()
 
     def update_from_orcid(self, drop_duplicates = False, drop_empty_rows=False):
 
         self.sync()
 
-        author_ids = self.details.keys()
+        author_ids = self.all.keys()
 
         for a in author_ids:
 
-            self.details[a].update_from_orcid()
-            details = self.details[a].details.loc[0]
+            self.all[a].update_from_orcid()
+            details = self.all[a].summary.loc[0]
             
-            df_index = self.all[self.all['author_id'] == a].index.to_list()[0]
-            self.all.loc[df_index] = details
+            df_index = self.summary[self.summary['author_id'] == a].index.to_list()[0]
+            self.summary.loc[df_index] = details
 
             new_id = details['author_id']
             if new_id != a:
-                self.details[new_id] = self.details[a]
-                del self.details[a]
+                self.all[new_id] = self.all[a]
+                del self.all[a]
         
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -872,7 +872,7 @@ class Authors(Entities):
         return authors
 
     def with_orcid(self):
-        return self.all[~self.all['orcid'].isna()]
+        return self.summary[~self.summary['orcid'].isna()]
 
     def import_crossref(self, crossref_result: list, drop_duplicates = False, drop_empty_rows=False):
 
@@ -938,7 +938,7 @@ class Authors(Entities):
             authors_df.loc[i, 'given_name'] = given
             authors_df.loc[i, 'family_name'] = family
 
-        self.all = pd.concat([self.all, authors_df])
+        self.summary = pd.concat([self.summary, authors_df])
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -960,9 +960,9 @@ class Authors(Entities):
         self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         output = {}
-        for auth_id in self.details.keys():
-            auth = self.details[auth_id]
-            affiliation = auth.details.loc[0, 'affiliations']
+        for auth_id in self.all.keys():
+            auth = self.all[auth_id]
+            affiliation = auth.summary.loc[0, 'affiliations']
             output[auth_id] = affiliation
         
         return output
@@ -976,7 +976,7 @@ class Authors(Entities):
 
         if add_to_authors == True:
 
-            self.all = pd.concat([self.all, res])
+            self.summary = pd.concat([self.summary, res])
             self.update_full_names()
             self.drop_empty_rows()
         

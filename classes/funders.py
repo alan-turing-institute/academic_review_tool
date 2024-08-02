@@ -129,7 +129,7 @@ class Funder(Entity):
             tokens = [i.strip() for i in tokens]
         
 
-        self.details = pd.DataFrame(columns = [
+        self.summary = pd.DataFrame(columns = [
                                 'funder_id',
                                 'name',
                                 'alt_names',
@@ -145,18 +145,18 @@ class Funder(Entity):
                                 dtype = object)
         
         
-        self.details.loc[0] = pd.Series(dtype=object)
-        self.details.loc[0, 'funder_id'] = funder_id
-        self.details.loc[0, 'name'] = name
-        self.details.at[0, 'alt_names'] = alt_names
-        self.details.loc[0, 'location'] = location
-        self.details.loc[0, 'email'] = email
-        self.details.loc[0, 'uri'] = uri
-        self.details.loc[0, 'crossref_id'] = crossref_id
-        self.details.loc[0, 'work_count'] = work_count   
-        self.details.at[0, 'tokens'] = tokens
-        self.details.loc[0, 'website'] = website
-        self.details.at[0, 'other_links'] = other_links
+        self.summary.loc[0] = pd.Series(dtype=object)
+        self.summary.loc[0, 'funder_id'] = funder_id
+        self.summary.loc[0, 'name'] = name
+        self.summary.at[0, 'alt_names'] = alt_names
+        self.summary.loc[0, 'location'] = location
+        self.summary.loc[0, 'email'] = email
+        self.summary.loc[0, 'uri'] = uri
+        self.summary.loc[0, 'crossref_id'] = crossref_id
+        self.summary.loc[0, 'work_count'] = work_count   
+        self.summary.at[0, 'tokens'] = tokens
+        self.summary.loc[0, 'website'] = website
+        self.summary.at[0, 'other_links'] = other_links
 
         # self.publications = Results()
 
@@ -167,18 +167,18 @@ class Funder(Entity):
 
     def generate_id(self):
 
-        funder_data = self.details.loc[0]
+        funder_data = self.summary.loc[0]
 
         funder_id = generate_funder_id(funder_data) # type: ignore
         return funder_id
 
     def update_id(self):
 
-        current_id = self.details.loc[0, 'funder_id']
+        current_id = self.summary.loc[0, 'funder_id']
 
         if (current_id == None) or (current_id == 'None') or (current_id == '') or (current_id == 'F:000'):
             auth_id = self.generate_id()
-            self.details.loc[0, 'funder_id'] = auth_id
+            self.summary.loc[0, 'funder_id'] = auth_id
         
     
     def __getitem__(self, key):
@@ -190,19 +190,19 @@ class Funder(Entity):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.columns:
-            return self.details.loc[0, key]
+        if key in self.summary.columns:
+            return self.summary.loc[0, key]
         
         # if key in self.publications.columns:
         #     return self.publications[key]
 
     def __repr__(self) -> str:
         
-        return str(self.details.loc[0, 'name'])
+        return str(self.summary.loc[0, 'name'])
 
     def has_uri(self) -> bool:
 
-        uri = self.details.loc[0, 'uri']
+        uri = self.summary.loc[0, 'uri']
 
         if (type(uri) == str) and (uri != ''):
             return True
@@ -213,11 +213,11 @@ class Funder(Entity):
 
         if 'name' in data.keys():
             name = data['name']
-            self.details.loc[0, 'name'] = name
+            self.summary.loc[0, 'name'] = name
 
-        if 'DOI' in data.keys():
-            uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
-            self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
+        if 'doi' in data.keys():
+            uri = data['doi'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
+            self.summary.loc[0, 'uri'] = 'https://doi.org/' + uri
     
     def from_dict(data: dict, use_api=False): # type: ignore
 
@@ -230,7 +230,7 @@ class Funder(Entity):
         return funder
         
     def add_series(self, series: pd.Series):
-        self.details.loc[0] = series
+        self.summary.loc[0] = series
 
     def from_series(data: pd.Series): # type: ignore
         funder = Funder()
@@ -253,51 +253,51 @@ class Funder(Entity):
         if 'name' in crossref_result.index:
             name = crossref_result['name']
         else:
-            name = self.details.loc[0, 'name']
+            name = self.summary.loc[0, 'name']
 
         if 'alt-names' in crossref_result.index:
             alt_names = crossref_result['alt-names']
         else:
-            alt_names = self.details.loc[0, 'alt_names']
+            alt_names = self.summary.loc[0, 'alt_names']
 
         if 'location' in crossref_result.index:
             location = crossref_result['location']
         else:
-            location = self.details.loc[0, 'location']
+            location = self.summary.loc[0, 'location']
 
         if 'email' in crossref_result.index:
             email = crossref_result['email']
         else:
-            email = self.details.loc[0, 'email']
+            email = self.summary.loc[0, 'email']
 
         if 'uri' in crossref_result.index:
             uri  =crossref_result['uri']
         else:
-            uri = self.details.loc[0, 'uri']
+            uri = self.summary.loc[0, 'uri']
 
         if 'id' in crossref_result.index:
             crossref_id = crossref_result['id']
         else:
-            crossref_id = self.details.loc[0, 'crossref_id']
+            crossref_id = self.summary.loc[0, 'crossref_id']
 
         if 'work-count' in crossref_result.index:
             work_count = crossref_result['work-count']
         else:
-            work_count = self.details.loc[0, 'work_count']
+            work_count = self.summary.loc[0, 'work_count']
 
         if 'tokens' in crossref_result.index:
             tokens = crossref_result['tokens']
         else:
-            tokens = self.details.loc[0, 'tokens']
+            tokens = self.summary.loc[0, 'tokens']
         
-        self.details.loc[0, 'name'] = name
-        self.details.loc[0, 'alt_names'] = alt_names
-        self.details.loc[0, 'location'] = location
-        self.details.loc[0, 'email'] = email
-        self.details.loc[0, 'uri'] = uri
-        self.details.loc[0, 'crossref_id'] = crossref_id
-        self.details.loc[0, 'work_count'] = work_count
-        self.details.loc[0, 'tokens'] = tokens
+        self.summary.loc[0, 'name'] = name
+        self.summary.loc[0, 'alt_names'] = alt_names
+        self.summary.loc[0, 'location'] = location
+        self.summary.loc[0, 'email'] = email
+        self.summary.loc[0, 'uri'] = uri
+        self.summary.loc[0, 'crossref_id'] = crossref_id
+        self.summary.loc[0, 'work_count'] = work_count
+        self.summary.loc[0, 'tokens'] = tokens
     
     def from_crossref_result(crossref_result: pd.Series): # type: ignore
 
@@ -332,9 +332,9 @@ class Funder(Entity):
 
     def update_from_crossref(self, timeout = 60):
 
-        uid = self.details.loc[0,'crossref_id']
+        uid = self.summary.loc[0,'crossref_id']
         if uid == None:
-            uid = self.details.loc[0,'uri']
+            uid = self.summary.loc[0,'uri']
             if uid == None:
                 uid = ''
 
@@ -344,9 +344,9 @@ class Funder(Entity):
 
     def update_from_uri(self, timeout = 60):
 
-        uid = self.details.loc[0,'uri']
+        uid = self.summary.loc[0,'uri']
         if uid == None:
-            uid = self.details.loc[0,'crossref']
+            uid = self.summary.loc[0,'crossref']
             if uid == None:
                 uid = ''
 
@@ -361,7 +361,7 @@ class Funder(Entity):
                      editor: str = None, # type: ignore
                      entry_type: str = None, # type: ignore
                      published_date: str = None, # type: ignore
-                     DOI: str = None, # type: ignore
+                     doi: str = None, # type: ignore
                      publisher_name: str = None,# type: ignore
                     source: str = None, # type: ignore
                     link: str = None, # type: ignore
@@ -373,9 +373,9 @@ class Funder(Entity):
                     timeout: int = 60, 
                     add_to_publications = False) -> pd.DataFrame:
         
-        uid = self.details.loc[0, 'crossref_id']
+        uid = self.summary.loc[0, 'crossref_id']
         if (uid == None) or (uid == ''):
-            uid = self.details.loc[0, 'uri']
+            uid = self.summary.loc[0, 'uri']
             if (uid == None) or (uid == ''):
                 uid = ''
         
@@ -389,7 +389,7 @@ class Funder(Entity):
                                      editor=editor,
                                      entry_type=entry_type,
                                      published_date=published_date,
-                                     DOI=DOI,
+                                     doi=doi,
                                      publisher_name=publisher_name,
                                      source=source,
                                      link=link,
@@ -430,7 +430,7 @@ class Funders(Entities):
 
         super().__init__()
 
-        self.all = pd.DataFrame(columns = 
+        self.summary = pd.DataFrame(columns = 
                                 ['funder_id',
                                 'name',
                                 'alt_names',
@@ -446,7 +446,7 @@ class Funders(Entities):
                                 dtype = object)
         
 
-        self.details = dict()
+        self.all = dict()
 
         self.data = []
         self.data.append(funders_data)
@@ -454,10 +454,10 @@ class Funders(Entities):
         if (type(funders_data) == list) and (type(funders_data[0]) == Funder):
 
             for i in funders_data:
-                fu = i.details.copy(deep=True)
-                self.all = pd.concat([self.all, fu])
+                fu = i.summary.copy(deep=True)
+                self.summary = pd.concat([self.summary, fu])
 
-            self.all = self.all.reset_index().drop('index',axis=1)
+            self.summary = self.summary.reset_index().drop('index',axis=1)
 
         else:
 
@@ -469,12 +469,12 @@ class Funders(Entities):
 
                     for f in funders_data.keys():
                         
-                        index = len(self.all)
-                        fu = f.details.copy(deep=True)
-                        self.all = pd.concat([self.all, fu])
-                        self.all.loc[index, 'funder_id'] = f
+                        index = len(self.summary)
+                        fu = f.summary.copy(deep=True)
+                        self.summary = pd.concat([self.summary, fu])
+                        self.summary.loc[index, 'funder_id'] = f
 
-                    self.all = self.all.reset_index().drop('index',axis=1)
+                    self.summary = self.summary.reset_index().drop('index',axis=1)
                 
         self.update_ids()
 
@@ -487,35 +487,35 @@ class Funders(Entities):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.keys():
-            return self.details[key]
-
-        if key in self.all.columns:
+        if key in self.all.keys():
             return self.all[key]
+
+        if key in self.summary.columns:
+            return self.summary[key]
         
         if (type(key) == int) and (key <= len(self.data)):
             return self.data[key]
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['name'].sort_values().to_list()).replace('[','').replace(']','')
+        alphabetical = str(self.summary['name'].sort_values().to_list()).replace('[','').replace(']','')
         return alphabetical
     
     def __len__(self) -> int:
-        return len(self.details.keys())
+        return len(self.all.keys())
 
     def merge(self, funders, drop_empty_rows = True, drop_duplicates = True):
 
-        left = self.all.copy(deep=True)
-        right = funders.all.copy(deep=True)
+        left = self.summary.copy(deep=True)
+        right = funders.summary.copy(deep=True)
         
         merged = pd.concat([left, right])
 
-        self.all = merged.drop_duplicates(subset=['funder_id', 'name', 'crossref_id'], ignore_index=True)
+        self.summary = merged.drop_duplicates(subset=['funder_id', 'name', 'crossref_id'], ignore_index=True)
 
-        for i in funders.details.keys():
-            if i not in self.details.keys():
-                self.details[i] = funders.details[i]
+        for i in funders.all.keys():
+            if i not in self.all.keys():
+                self.all[i] = funders.all[i]
 
         left_data = self.data
         right_data = funders.data
@@ -592,20 +592,20 @@ class Funders(Entities):
 
         funder.update_id()
 
-        funder_id = str(funder.details.loc[0, 'funder_id'])
+        funder_id = str(funder.summary.loc[0, 'funder_id'])
 
-        # if funder_id in self.all['funder_id'].to_list():
-        #     id_count = len(self.all[self.all['funder_id'].str.contains(funder_id)]) # type: ignore
+        # if funder_id in self.summary['funder_id'].to_list():
+        #     id_count = len(self.summary[self.summary['funder_id'].str.contains(funder_id)]) # type: ignore
         #     funder_id = funder_id + f'#{id_count + 1}'
-        #     funder.details.loc[0, 'funder_id'] = funder_id
+        #     funder.summary.loc[0, 'funder_id'] = funder_id
 
-        self.all = pd.concat([self.all, funder.details])
-        self.all = self.all.reset_index().drop('index', axis=1)
+        self.summary = pd.concat([self.summary, funder.summary])
+        self.summary = self.summary.reset_index().drop('index', axis=1)
 
-        self.details[funder_id] = funder
+        self.all[funder_id] = funder
 
         if data is None:
-            data = funder.details.to_dict(orient='index')
+            data = funder.summary.to_dict(orient='index')
         
         self.data.append(data)
 
@@ -634,13 +634,13 @@ class Funders(Entities):
 
         ignore_cols = ['funder_id', 'alt_names', 'publications', 'tokens', 'other_links']
 
-        df = self.all.copy(deep=True)
+        df = self.summary.copy(deep=True)
         df['name'] = df['name'].replace('no_name_given', None)
         df = df.dropna(axis=0, how='all')
         drop_cols = [c for c in df.columns if c not in ignore_cols]
         df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
 
-        self.all = df
+        self.summary = df
 
         return self
 
@@ -649,11 +649,11 @@ class Funders(Entities):
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
-        df = self.all.copy(deep=True)
+        df = self.summary.copy(deep=True)
         df['uri'] = df['uri'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('wwww.', '', regex=False).str.replace('dx.', '', regex=False).str.replace('doi.org/', '', regex=False).str.strip('/')
         
         df = df.sort_values(by = ['uri', 'crossref_id', 'website', 'name']).reset_index().drop('index', axis=1)
-        self.all = deduplicate(self.all)
+        self.summary = deduplicate(self.summary)
 
         if sync == True:
             self.sync_details(drop_duplicates=False, drop_empty_rows=False)
@@ -662,17 +662,17 @@ class Funders(Entities):
 
     def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
 
-        for i in self.details.keys():
-            funder = self.details[i]
+        for i in self.all.keys():
+            funder = self.all[i]
             funder.update_id()
-            series = funder.details.copy(deep=True).loc[0]
-            all = self.all.copy(deep=True).astype(str)
+            series = funder.summary.copy(deep=True).loc[0]
+            all = self.summary.copy(deep=True).astype(str)
             indexes = all[all['funder_id'] == i].index.to_list()
             if len(indexes) > 0:
                 auth_index = indexes[0]
-                all_copy = self.all.copy(deep=True)
+                all_copy = self.summary.copy(deep=True)
                 all_copy.loc[auth_index] = series
-                self.all = all_copy
+                self.summary = all_copy
         
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -690,26 +690,26 @@ class Funders(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-        for i in self.all.index:
+        for i in self.summary.index:
 
-            f_data = self.all.loc[i]
+            f_data = self.summary.loc[i]
             f_id = f_data['funder_id']
 
             if f_id != None:
                 f = Funder.from_series(f_data) # type: ignore
-                self.details[f_id] = f
+                self.all[f_id] = f
 
             else:
                 f_id = generate_funder_id(f_data)
                 f_data['funder_id'] = f_id
                 f = Funder.from_series(f_data) # type: ignore
-                self.details[f_id] = f
+                self.all[f_id] = f
         
-        keys = list(self.details.keys())
+        keys = list(self.all.keys())
         for key in keys:
-            f_ids = self.all['funder_id'].to_list()
+            f_ids = self.summary['funder_id'].to_list()
             if key not in f_ids:
-                del self.details[key]
+                del self.all[key]
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -726,8 +726,8 @@ class Funders(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-        all_len = len(self.all)
-        details_len = len(self.details)
+        all_len = len(self.summary)
+        details_len = len(self.all)
 
         if all_len > details_len:
             self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -746,49 +746,49 @@ class Funders(Entities):
         if sync == True:
             self.sync()
 
-        for i in self.all.index:
-            all_copy = self.all.copy(deep=True)
+        for i in self.summary.index:
+            all_copy = self.summary.copy(deep=True)
             data = all_copy.loc[i]
             old_id = all_copy.loc[i, 'funder_id']
             new_id = generate_funder_id(data)
 
-            # if new_id in self.all['funder_id'].to_list():
-            #     df_copy = self.all.copy(deep=True)
+            # if new_id in self.summary['funder_id'].to_list():
+            #     df_copy = self.summary.copy(deep=True)
             #     df_copy = df_copy.astype(str)
             #     id_count = len(df_copy[df_copy['funder_id'].str.contains(new_id)]) # type: ignore
             #     new_id = new_id + f'#{id_count + 1}'
 
-            all_copy2 = self.all.copy(deep=True)
+            all_copy2 = self.summary.copy(deep=True)
             all_copy2.loc[i, 'funder_id'] = new_id
-            self.all = all_copy2
+            self.summary = all_copy2
 
-            if old_id in self.details.keys():
-                self.details[new_id] = self.details[old_id]
-                self.details[new_id].details.loc[0, 'funder_id'] = new_id
-                del self.details[old_id]
+            if old_id in self.all.keys():
+                self.all[new_id] = self.all[old_id]
+                self.all[new_id].summary.loc[0, 'funder_id'] = new_id
+                del self.all[old_id]
 
             else:
                 funder = Funder.from_series(data) # type: ignore
-                funder.details.loc[0, 'funder_id'] = new_id
-                self.details[new_id] = funder
+                funder.summary.loc[0, 'funder_id'] = new_id
+                self.all[new_id] = funder
 
 
     def update_from_crossref(self, drop_duplicates = False, drop_empty_rows=False):
 
-        funder_ids = self.details.keys()
+        funder_ids = self.all.keys()
 
         for a in funder_ids:
 
-            self.details[a].update_from_crossref()
-            details = self.details[a].details.loc[0]
+            self.all[a].update_from_crossref()
+            details = self.all[a].summary.loc[0]
             
-            df_index = self.all[self.all['funder_id'] == a].index.to_list()[0]
-            self.all.loc[df_index] = details
+            df_index = self.summary[self.summary['funder_id'] == a].index.to_list()[0]
+            self.summary.loc[df_index] = details
 
             new_id = details['funder_id']
             if new_id != a:
-                self.details[new_id] = self.details[a]
-                del self.details[a]
+                self.all[new_id] = self.all[a]
+                del self.all[a]
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -824,10 +824,10 @@ class Funders(Entities):
         return funders
 
     def with_crossref(self):
-        return self.all[~self.all['crossref_id'].isna()]
+        return self.summary[~self.summary['crossref_id'].isna()]
     
     def with_uri(self):
-        return self.all[~self.all['uri'].isna()]
+        return self.summary[~self.summary['uri'].isna()]
 
     def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False):
 
@@ -865,7 +865,7 @@ class Funders(Entities):
                      editor: str = None, # type: ignore
                      entry_type: str = None, # type: ignore
                      published_date: str = None, # type: ignore
-                     DOI: str = None, # type: ignore
+                     doi: str = None, # type: ignore
                      publisher_name: str = None,# type: ignore
                     source: str = None, # type: ignore
                     link: str = None, # type: ignore
@@ -877,8 +877,8 @@ class Funders(Entities):
                     timeout: int = 60, 
                     add_to_publications = False) -> pd.DataFrame:
         
-        if (funder_id != None) and (funder_id in self.details.keys()):
-            funder = self.details[funder_id]
+        if (funder_id != None) and (funder_id in self.all.keys()):
+            funder = self.all[funder_id]
             result = funder.search_works(
                                      bibliographic=bibliographic, 
                                      title=title, author=author, 
@@ -886,7 +886,7 @@ class Funders(Entities):
                                      editor=editor,
                                      entry_type=entry_type,
                                      published_date=published_date,
-                                     DOI=DOI,
+                                     doi=doi,
                                      publisher_name=publisher_name,
                                      source=source,
                                      link=link,
@@ -902,26 +902,26 @@ class Funders(Entities):
         else:
             if index != None:
     
-                uid = self.all.loc[index, 'crossref_id']
+                uid = self.summary.loc[index, 'crossref_id']
                 if (uid==None) or (uid == ''):
-                    uid = self.all.loc[index, 'uri']
+                    uid = self.summary.loc[index, 'uri']
                     if (uid==None) or (uid == ''):
                         uid = ''
 
-                funder_id = self.all.loc[index, 'funder_id'] # type: ignore
+                funder_id = self.summary.loc[index, 'funder_id'] # type: ignore
 
                 uid = str(uid)
             
             else:
                 if crossref_id != None:
-                    index = self.all[self.all['crossref_id'] == crossref_id].index.to_list()[0]
-                    funder_id = self.all.loc[index, 'funder_id'] # type: ignore
+                    index = self.summary[self.summary['crossref_id'] == crossref_id].index.to_list()[0]
+                    funder_id = self.summary.loc[index, 'funder_id'] # type: ignore
                     uid = str(crossref_id)
                     
                 else:
                     if uri != None:
-                        index = self.all[self.all['uri'] == uri].index.to_list()[0]
-                        funder_id = self.all.loc[index, 'funder_id'] # type: ignore
+                        index = self.summary[self.summary['uri'] == uri].index.to_list()[0]
+                        funder_id = self.summary.loc[index, 'funder_id'] # type: ignore
                         uid = str(uri)
                         
 
@@ -932,7 +932,7 @@ class Funders(Entities):
                                      editor=editor,
                                      entry_type=entry_type,
                                      published_date=published_date,
-                                     DOI=DOI,
+                                     doi=doi,
                                      publisher_name=publisher_name,
                                      source=source,
                                      link=link,
@@ -945,7 +945,7 @@ class Funders(Entities):
                                      )
         
             if add_to_publications == True:
-                self.details[funder_id].publications.add_dataframe(result)
+                self.all[funder_id].publications.add_dataframe(result)
         
         return result
 

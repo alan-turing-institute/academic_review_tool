@@ -294,7 +294,7 @@ class Review:
         Defines how Reviews are represented in string form.
         """
         
-        output = f'\n\n{"-"*(13+len(self.properties.review_name))}\nReview name: {self.properties.review_name}\n{"-"*(13+len(self.properties.review_name))}\n\nProperties:\n-----------\n{self.properties}\n\nDescription:\n------------\n\n{self.description}\n\nResults:\n--------\n\n{self.results}\n\nAuthors:\n--------\n\n{self.authors.all.head(10)}\n\nFunders:\n--------\n\n{self.funders.all.head(10)}\n\n'
+        output = f'\n\n{"-"*(13+len(self.properties.review_name))}\nReview name: {self.properties.review_name}\n{"-"*(13+len(self.properties.review_name))}\n\nProperties:\n-----------\n{self.properties}\n\nDescription:\n------------\n\n{self.description}\n\nResults:\n--------\n\n{self.results}\n\nAuthors:\n--------\n\n{self.authors.summary.head(10)}\n\nFunders:\n--------\n\n{self.funders.summary.head(10)}\n\n'
         
         return output
             
@@ -318,14 +318,14 @@ class Review:
         if key in self.results['work_id'].to_list():
             return self.results.get(key)
         
-        if key in self.authors.details.keys():
+        if key in self.authors.all.keys():
             return self.authors[key]
         
         if key in self.results.columns.to_list():
             return self.results[key]
         
-        if key in self.authors.all.columns.to_list():
-            return self.authors.all[key]
+        if key in self.authors.summary.columns.to_list():
+            return self.authors.summary[key]
 
     def __setitem__(self, index, data):
         
@@ -519,7 +519,7 @@ class Review:
     def format_affiliations(self):
         self.authors.format_affiliations()
 
-        affils_data = self.authors.all['affiliations'].to_list()
+        affils_data = self.authors.summary['affiliations'].to_list()
 
         for i in affils_data:
 
@@ -581,7 +581,7 @@ class Review:
 
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-        auths_data = self.authors.all[['author_id', 'orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']]
+        auths_data = self.authors.summary[['author_id', 'orcid', 'google_scholar', 'crossref', 'scopus', 'full_name']]
         auths_data = auths_data.dropna(axis=1, how='all')
 
         global results_cols
@@ -620,24 +620,24 @@ class Review:
             # author_pubs_deduplicated3 = author_pubs.loc[deduplicated3]
 
             results = Results.from_dataframe(author_pubs_deduplicated) # type: ignore
-            self.authors.details[author_id].publications = results
+            self.authors.all[author_id].publications = results
             
             pubs_dict = {}
             for work in results.index:
                 key = results.loc[work, 'work_id']
                 pubs_dict[key] = results.loc[work, 'title']
             
-            if 'publications' not in self.authors.all.columns:
-                self.authors.all['publications'] = pd.Series(dtype=object)
+            if 'publications' not in self.authors.summary.columns:
+                self.authors.summary['publications'] = pd.Series(dtype=object)
 
-            self.authors.all.at[i, 'publications'] = pubs_dict
-            self.authors.details[author_id].affiliations = self.authors.details[author_id].details.loc[0, 'affiliations']
+            self.authors.summary.at[i, 'publications'] = pubs_dict
+            self.authors.all[author_id].affiliations = self.authors.all[author_id].details.loc[0, 'affiliations']
         
     def update_funder_attrs(self, ignore_case: bool = True):
 
         self.funders.sync_all()
 
-        f_data = self.funders.all[['funder_id', 'uri', 'crossref_id', 'website','name']]
+        f_data = self.funders.summary[['funder_id', 'uri', 'crossref_id', 'website','name']]
         f_data = f_data.dropna(axis=1, how='all')
 
         global results_cols
@@ -683,17 +683,17 @@ class Review:
                 key = results.loc[work, 'work_id']
                 pubs_dict[key] = results.loc[work, 'title']
 
-            self.funders.details[f_id].publications = results
-            if 'publications' not in self.funders.all.columns:
-                self.funders.all['publications'] = pd.Series(dtype=object)
-            self.funders.all.at[i, 'publications'] = pubs_dict
+            self.funders.all[f_id].publications = results
+            if 'publications' not in self.funders.summary.columns:
+                self.funders.summary['publications'] = pd.Series(dtype=object)
+            self.funders.summary.at[i, 'publications'] = pubs_dict
 
     def update_affiliation_attrs(self, update_authors: bool = True, ignore_case: bool = True):
         
         if update_authors == True:
             self.update_author_attrs(ignore_case=ignore_case)
 
-        affils_data = self.affiliations.all[['affiliation_id', 'name', 'uri', 'website']]
+        affils_data = self.affiliations.summary[['affiliation_id', 'name', 'uri', 'website']]
         affils_data = affils_data.dropna(axis=1, how='all')
 
         global results_cols
@@ -708,7 +708,7 @@ class Review:
             affil_auths = self.authors.mask_entities(column='affiliations', query=affil_id, ignore_case=ignore_case)
 
             if (affil_id != None) and (affil_id != '') and (affil_id != 'None'):
-                self.affiliations.details[affil_id].authors = affil_auths
+                self.affiliations.all[affil_id].authors = affil_auths
 
             affil_pubs = pd.DataFrame(columns=results_cols, dtype=object)
             for c in affils_data.columns:
@@ -741,11 +741,11 @@ class Review:
                 key = results.loc[work, 'work_id']
                 pubs_dict[key] = results.loc[work, 'title']
 
-            self.affiliations.details[affil_id].publications = results
+            self.affiliations.all[affil_id].publications = results
             
-            if 'publications' not in self.affiliations.all.columns:
-                self.affiliations.all['publications'] = pd.Series(dtype=object)
-            self.affiliations.all.at[i, 'publications'] = pubs_dict
+            if 'publications' not in self.affiliations.summary.columns:
+                self.affiliations.summary['publications'] = pd.Series(dtype=object)
+            self.affiliations.summary.at[i, 'publications'] = pubs_dict
                 
     def update_entity_attrs(self, ignore_case: bool = True):
         
@@ -761,10 +761,10 @@ class Review:
         if update_attrs == True:
             self.update_author_attrs(ignore_case=ignore_case, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
-        auth_ids = self.authors.details.keys()
+        auth_ids = self.authors.all.keys()
         output = {}
 
-        cols = Authors().all.columns.to_list()
+        cols = Authors().summary.columns.to_list()
 
         for a in auth_ids:
 
@@ -777,7 +777,7 @@ class Review:
 
                 work_coauthors = auth_pubs.loc[i, 'authors']
                 if type(work_coauthors) == Authors:
-                    work_coauthors = work_coauthors.all
+                    work_coauthors = work_coauthors.summary
                 if (type(work_coauthors) == pd.DataFrame) or (type(work_coauthors) == pd.Series):
                     all_coauthors = pd.concat([all_coauthors, work_coauthors])
             
@@ -798,7 +798,7 @@ class Review:
             output[a] = all_coauthors
 
             if add_to_authors == True:
-                self.authors.details[a].coauthors = all_coauthors
+                self.authors.all[a].coauthors = all_coauthors
 
         return output
 
@@ -810,10 +810,10 @@ class Review:
         if update_attrs == True:
             self.update_funder_attrs(ignore_case=ignore_case)
         
-        f_ids = self.funders.details.keys()
+        f_ids = self.funders.all.keys()
         output = {}
 
-        cols = Funders().all.columns.to_list()
+        cols = Funders().summary.columns.to_list()
 
         for f in f_ids:
 
@@ -826,7 +826,7 @@ class Review:
 
                 work_cofunders = f_pubs.loc[i, 'funder']
                 if type(work_cofunders) == Funders:
-                    work_cofunders = work_cofunders.all
+                    work_cofunders = work_cofunders.summary
                 if (type(work_cofunders) == pd.DataFrame) or (type(work_cofunders) == pd.Series):
                     all_cofunders = pd.concat([all_cofunders, work_cofunders])
             
@@ -847,7 +847,7 @@ class Review:
             output[f] = all_cofunders
 
             if add_to_funders == True:
-                self.funders.details[f].cofunders = all_cofunders
+                self.funders.all[f].cofunders = all_cofunders
 
         return output
  
@@ -858,19 +858,19 @@ class Review:
         new_res_len = len(self.results)
         res_diff = new_res_len - orig_res_len
 
-        orig_auths_len = len(self.authors.all)
+        orig_auths_len = len(self.authors.summary)
         self.authors.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
-        new_auths_len = len(self.authors.all)
+        new_auths_len = len(self.authors.summary)
         auths_diff = new_auths_len - orig_auths_len
 
-        orig_funders_len = len(self.funders.all)
+        orig_funders_len = len(self.funders.summary)
         self.funders.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
-        new_funders_len = len(self.funders.all)
+        new_funders_len = len(self.funders.summary)
         funders_diff = new_funders_len - orig_funders_len
 
-        orig_affils_len = len(self.affiliations.all)
+        orig_affils_len = len(self.affiliations.summary)
         self.affiliations.remove_duplicates(drop_empty_rows=drop_empty_rows, sync=True)
-        new_affils_len = len(self.affiliations.all)
+        new_affils_len = len(self.affiliations.summary)
         affils_diff = new_affils_len - orig_affils_len
 
         changes = {'results': res_diff,
@@ -899,9 +899,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff = new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
@@ -924,9 +924,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff = new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
@@ -944,9 +944,9 @@ class Review:
 
         orcid_len = len(self.authors.with_orcid())
 
-        old_auths_len = len(self.authors.all)
+        old_auths_len = len(self.authors.summary)
         self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
-        new_auths_len = len(self.authors.all)
+        new_auths_len = len(self.authors.summary)
         len_diff = new_auths_len - old_auths_len
 
         changes = {'authors': {'orcid_updated': orcid_len, 'count': len_diff}}
@@ -1003,9 +1003,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff = new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
@@ -1048,9 +1048,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff =  new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             changes = {'results': res_diff,
@@ -1611,9 +1611,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff =  new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             drop_changes = {'results': res_diff,
@@ -1657,9 +1657,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff =  new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             drop_changes = {'results': res_diff,
@@ -1699,9 +1699,9 @@ class Review:
             new_res_len = len(self.results)
             res_diff =  new_res_len - orig_res_len
 
-            orig_auths_len = len(self.authors.all)
+            orig_auths_len = len(self.authors.summary)
             self.authors.drop_empty_rows() # type: ignore
-            new_auths_len = len(self.authors.all)
+            new_auths_len = len(self.authors.summary)
             auths_diff = new_auths_len - orig_auths_len
 
             drop_changes = {'results': res_diff,
@@ -2152,7 +2152,7 @@ class Review:
 
         output = {}
 
-        auths = self.authors.all.copy(deep=True)
+        auths = self.authors.summary.copy(deep=True)
 
         for i in auths.index:
             data = auths.loc[i]
@@ -2178,7 +2178,7 @@ class Review:
 
             if type(funders) == Funders:
                 funders.update_ids()
-                funders = funders.all
+                funders = funders.summary
 
             output[work_id] = funders
 
@@ -2209,7 +2209,7 @@ class Review:
 
             if (auth_id is not None) and (auth_id != ''):
 
-                auth_keys = list(self.authors.details.keys())
+                auth_keys = list(self.authors.all.keys())
 
                 if auth_id not in auth_keys:
                     keys_series = pd.Series(auth_keys)
@@ -2224,7 +2224,7 @@ class Review:
                     else:
                         continue
 
-                auth_obj = self.authors.details[auth_id]
+                auth_obj = self.authors.all[auth_id]
                 if 'publications' in auth_obj.__dict__.keys():
                     pubs = auth_obj.publications
                 else:
@@ -2268,7 +2268,7 @@ class Review:
 
             if (f_id is not None) and (f_id != ''):
 
-                f_keys = list(self.funders.details.keys())
+                f_keys = list(self.funders.all.keys())
                 
                 if f_id not in f_keys:
                     keys_series = pd.Series(f_keys)
@@ -2283,7 +2283,7 @@ class Review:
                     else:
                         continue
 
-                funder_obj = self.funders.details[f_id]
+                funder_obj = self.funders.all[f_id]
                 pubs = funder_obj.publications
                 details = funder_obj.details
 

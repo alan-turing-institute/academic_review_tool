@@ -145,7 +145,7 @@ class Affiliation(Entity):
             other_links = [i.strip() for i in other_links]
         
 
-        self.details = pd.DataFrame(columns = [
+        self.summary = pd.DataFrame(columns = [
                                 'affiliation_id',
                                 'name',
                                 'location',
@@ -159,16 +159,16 @@ class Affiliation(Entity):
                                 dtype = object)
         
         
-        self.details.loc[0] = pd.Series(dtype=object)
-        self.details.loc[0, 'affiliation_id'] = affiliation_id
-        self.details.loc[0, 'name'] = name
-        self.details.loc[0, 'location'] = location
-        self.details.loc[0, 'address'] = address
-        self.details.loc[0, 'email'] = email
-        self.details.loc[0, 'uri'] = uri
-        self.details.loc[0, 'crossref_id'] = crossref_id
-        self.details.loc[0, 'website'] = website
-        self.details.at[0, 'other_links'] = other_links
+        self.summary.loc[0] = pd.Series(dtype=object)
+        self.summary.loc[0, 'affiliation_id'] = affiliation_id
+        self.summary.loc[0, 'name'] = name
+        self.summary.loc[0, 'location'] = location
+        self.summary.loc[0, 'address'] = address
+        self.summary.loc[0, 'email'] = email
+        self.summary.loc[0, 'uri'] = uri
+        self.summary.loc[0, 'crossref_id'] = crossref_id
+        self.summary.loc[0, 'website'] = website
+        self.summary.at[0, 'other_links'] = other_links
 
         if use_api == True:
             
@@ -193,30 +193,30 @@ class Affiliation(Entity):
                 loc = None
             
             if loc != None:
-                self.details.loc[0, 'address'] = loc.address
+                self.summary.loc[0, 'address'] = loc.address
 
-                if self.details.loc[0, 'name'] == None:
-                    self.details.loc[0, 'name'] = loc.name
+                if self.summary.loc[0, 'name'] == None:
+                    self.summary.loc[0, 'name'] = loc.name
                 
-                if self.details.loc[0, 'location'] == None:
-                    self.details.loc[0, 'location'] = loc.display_name
+                if self.summary.loc[0, 'location'] == None:
+                    self.summary.loc[0, 'location'] = loc.display_name
 
         self.update_id()
 
     def generate_id(self):
 
-        affiliation_data = self.details.loc[0]
+        affiliation_data = self.summary.loc[0]
 
         affiliation_id = generate_affiliation_id(affiliation_data) # type: ignore
         return affiliation_id
 
     def update_id(self):
 
-        current_id = str(self.details.loc[0, 'affiliation_id'])
+        current_id = str(self.summary.loc[0, 'affiliation_id'])
 
         if (current_id == None) or (current_id == 'None') or (current_id == '') or (current_id == 'AFFIL:000') or ('no_name_given' in current_id):
             auth_id = self.generate_id()
-            self.details.loc[0, 'affiliation_id'] = auth_id
+            self.summary.loc[0, 'affiliation_id'] = auth_id
         
     
     def __getitem__(self, key):
@@ -228,16 +228,16 @@ class Affiliation(Entity):
         if key in self.__dict__.keys():
             return self.__dict__[key]
 
-        if key in self.details.columns:
-            return self.details.loc[0, key]
+        if key in self.summary.columns:
+            return self.summary.loc[0, key]
 
     def __repr__(self) -> str:
         
-        return str(self.details.loc[0, 'name'])
+        return str(self.summary.loc[0, 'name'])
 
     def has_uri(self) -> bool:
 
-        uri = self.details.loc[0, 'uri']
+        uri = self.summary.loc[0, 'uri']
 
         if (type(uri) == str) and (uri != ''):
             return True
@@ -248,39 +248,39 @@ class Affiliation(Entity):
 
         if 'name' in data.keys():
             name = data['name']
-            self.details.loc[0, 'name'] = name
+            self.summary.loc[0, 'name'] = name
         
         if 'location' in data.keys():
             location = data['location']
-            self.details.loc[0, 'location'] = location
+            self.summary.loc[0, 'location'] = location
 
         if 'address' in data.keys():
             address = data['address']
-            self.details.loc[0, 'address'] = address
+            self.summary.loc[0, 'address'] = address
         
         if 'crossref_id' in data.keys():
             crossref_id = data['crossref_id']
-            self.details.loc[0, 'crossref_id'] = crossref_id
+            self.summary.loc[0, 'crossref_id'] = crossref_id
 
         if 'DOI' in data.keys():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
-            self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
+            self.summary.loc[0, 'uri'] = 'https://doi.org/' + uri
         else:
             if 'uri' in data.keys():
                 uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
-                self.details.loc[0, 'uri'] = 'https://doi.org/' + uri
+                self.summary.loc[0, 'uri'] = 'https://doi.org/' + uri
 
         if 'url' in data.keys():
             website = data['url']
-            self.details.loc[0, 'website'] = website
+            self.summary.loc[0, 'website'] = website
         else:
             if 'link' in data.keys():
                 website = data['link']
-                self.details.loc[0, 'website'] = website
+                self.summary.loc[0, 'website'] = website
             else:
                 if 'website' in data.keys():
                     website = data['website']
-                    self.details.loc[0, 'website'] = website
+                    self.summary.loc[0, 'website'] = website
 
     def from_dict(data: dict, use_api=False): # type: ignore
 
@@ -346,7 +346,7 @@ class Affiliation(Entity):
         return affiliation
         
     def add_series(self, series: pd.Series):
-        self.details.loc[0] = series
+        self.summary.loc[0] = series
 
     def from_series(data: pd.Series): # type: ignore
         affiliation = Affiliation()
@@ -369,33 +369,33 @@ class Affiliation(Entity):
         if 'name' in crossref_result.index:
             name = crossref_result['name']
         else:
-            name = self.details.loc[0, 'name']
+            name = self.summary.loc[0, 'name']
 
         if 'location' in crossref_result.index:
             location = crossref_result['location']
         else:
-            location = self.details.loc[0, 'location']
+            location = self.summary.loc[0, 'location']
 
         if 'email' in crossref_result.index:
             email = crossref_result['email']
         else:
-            email = self.details.loc[0, 'email']
+            email = self.summary.loc[0, 'email']
 
         if 'uri' in crossref_result.index:
             uri  =crossref_result['uri']
         else:
-            uri = self.details.loc[0, 'uri']
+            uri = self.summary.loc[0, 'uri']
 
         if 'id' in crossref_result.index:
             crossref_id = crossref_result['id']
         else:
-            crossref_id = self.details.loc[0, 'crossref_id']
+            crossref_id = self.summary.loc[0, 'crossref_id']
         
-        self.details.loc[0, 'name'] = name
-        self.details.loc[0, 'location'] = location
-        self.details.loc[0, 'email'] = email
-        self.details.loc[0, 'uri'] = uri
-        self.details.loc[0, 'crossref_id'] = crossref_id
+        self.summary.loc[0, 'name'] = name
+        self.summary.loc[0, 'location'] = location
+        self.summary.loc[0, 'email'] = email
+        self.summary.loc[0, 'uri'] = uri
+        self.summary.loc[0, 'crossref_id'] = crossref_id
 
     def from_crossref_result(crossref_result: pd.Series, use_api: bool = False): # type: ignore
         
@@ -453,18 +453,18 @@ class Affiliation(Entity):
     
     def update_address(self):
         
-        if self.details.loc[0, 'name'] != None:
-            name = str(self.details.loc[0, 'name']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace(',',' ').replace('  ',' ').strip()
+        if self.summary.loc[0, 'name'] != None:
+            name = str(self.summary.loc[0, 'name']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace(',',' ').replace('  ',' ').strip()
         else:
             name = ''
         
-        if self.details.loc[0, 'location'] != None:
-            location = str(self.details.loc[0, 'location']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace('  ',' ').strip()
+        if self.summary.loc[0, 'location'] != None:
+            location = str(self.summary.loc[0, 'location']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace('  ',' ').strip()
         else:
             location = ''
 
-        if self.details.loc[0, 'address'] != None:
-            address = str(self.details.loc[0, 'address']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace('  ',' ').strip()
+        if self.summary.loc[0, 'address'] != None:
+            address = str(self.summary.loc[0, 'address']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace('  ',' ').strip()
         else:
             address = ''
 
@@ -483,20 +483,20 @@ class Affiliation(Entity):
             
         if loc != None:
                 
-                self.details.loc[0, 'address'] = loc.address
+                self.summary.loc[0, 'address'] = loc.address
 
-                if self.details.loc[0, 'name'] == None:
-                    self.details.loc[0, 'name'] = loc.name
+                if self.summary.loc[0, 'name'] == None:
+                    self.summary.loc[0, 'name'] = loc.name
                 
-                if self.details.loc[0, 'location'] == None:
-                    self.details.loc[0, 'location'] = loc.display_name
+                if self.summary.loc[0, 'location'] == None:
+                    self.summary.loc[0, 'location'] = loc.display_name
 
 
     def update_from_crossref(self, timeout = 60):
 
-        uid = self.details.loc[0,'crossref_id']
+        uid = self.summary.loc[0,'crossref_id']
         if uid == None:
-            uid = self.details.loc[0,'uri']
+            uid = self.summary.loc[0,'uri']
             if uid == None:
                 uid = ''
 
@@ -506,9 +506,9 @@ class Affiliation(Entity):
 
     def update_from_uri(self, timeout = 60):
 
-        uid = self.details.loc[0, 'uri']
+        uid = self.summary.loc[0, 'uri']
         if uid == None:
-            uid = self.details.loc[0, 'crossref']
+            uid = self.summary.loc[0, 'crossref']
             if uid == None:
                 uid = ''
 
@@ -540,7 +540,7 @@ class Affiliations(Entities):
 
         super().__init__()
 
-        self.all = pd.DataFrame(columns = 
+        self.summary = pd.DataFrame(columns = 
                                 [
                                 'affiliation_id',
                                 'name',
@@ -555,7 +555,7 @@ class Affiliations(Entities):
                                 dtype = object)
         
 
-        self.details = dict()
+        self.all = dict()
 
         self.data = []
 
@@ -564,12 +564,12 @@ class Affiliations(Entities):
         if (type(affiliations_data) == list) and (type(affiliations_data[0]) == Affiliation):
 
             for a in affiliations_data:
-                affil_details = a.details.copy(deep=True)
+                affil_details = a.summary.copy(deep=True)
                 affil_id = affil_details.loc[0, 'affiliation_id']
-                self.all = pd.concat([self.all, affil_details])
-                self.details[affil_id] = a
+                self.summary = pd.concat([self.summary, affil_details])
+                self.all[affil_id] = a
 
-            self.all = self.all.reset_index().drop('index',axis=1)
+            self.summary = self.summary.reset_index().drop('index',axis=1)
 
         else:
 
@@ -577,12 +577,12 @@ class Affiliations(Entities):
 
                 for i in affiliations_data:
                     a = Affiliation.from_dict(i) # type: ignore
-                    affil_id = a.details.loc[0, 'affiliation_id']
-                    affil_details = a.details.copy(deep=True)
-                    self.all = pd.concat([self.all, affil_details])
-                    self.details[affil_id] = a
+                    affil_id = a.summary.loc[0, 'affiliation_id']
+                    affil_details = a.summary.copy(deep=True)
+                    self.summary = pd.concat([self.summary, affil_details])
+                    self.all[affil_id] = a
 
-                self.all = self.all.reset_index().drop('index',axis=1)
+                self.summary = self.summary.reset_index().drop('index',axis=1)
 
             else:
 
@@ -593,12 +593,12 @@ class Affiliations(Entities):
                     if type(values[0]) == Affiliation:
 
                         for a in affiliations_data.keys():
-                            affil_id = a.details.loc[0, 'affiliation_id']
-                            affil_details = a.details.copy(deep=True)
-                            self.all = pd.concat([self.all, affil_details])
-                            self.details[affil_id] = a
+                            affil_id = a.summary.loc[0, 'affiliation_id']
+                            affil_details = a.summary.copy(deep=True)
+                            self.summary = pd.concat([self.summary, affil_details])
+                            self.all[affil_id] = a
 
-                        self.all = self.all.reset_index().drop('index',axis=1)
+                        self.summary = self.summary.reset_index().drop('index',axis=1)
                 
         self.update_ids()
 
@@ -611,34 +611,34 @@ class Affiliations(Entities):
         if key in self.__dict__.keys():
             return self.__dict__[key]
         
-        if key in self.details.keys():
-            return self.details[key]
-
-        if key in self.all.columns:
+        if key in self.all.keys():
             return self.all[key]
+
+        if key in self.summary.columns:
+            return self.summary[key]
         
         if (type(key) == int) and (key <= len(self.data)):
             return self.data[key]
     
     def __repr__(self) -> str:
 
-        alphabetical = str(self.all['name'].sort_values().to_list()).replace('[','').replace(']','')
+        alphabetical = str(self.summary['name'].sort_values().to_list()).replace('[','').replace(']','')
         return alphabetical
     
     def __len__(self) -> int:
-        return len(self.details.keys())
+        return len(self.all.keys())
 
     def drop_empty_rows(self):
 
         ignore_cols = ['affiliation_id', 'address', 'email', 'other_links']
 
-        df = self.all.copy(deep=True)
+        df = self.summary.copy(deep=True)
         df['name'] = df['name'].replace('no_name_given', None)
         df = df.dropna(axis=0, how='all')
         drop_cols = [c for c in df.columns if c not in ignore_cols]
         df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
 
-        self.all = df
+        self.summary = df
 
         return self
     
@@ -647,11 +647,11 @@ class Affiliations(Entities):
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
-        df = self.all.copy(deep=True)
+        df = self.summary.copy(deep=True)
         df['uri'] = df['uri'].str.replace('http://', '', regex=False).str.replace('https://', '', regex=False).str.replace('wwww.', '', regex=False).str.replace('dx.', '', regex=False).str.replace('doi.org/', '', regex=False).str.strip('/')
         
         df = df.sort_values(by = ['uri', 'crossref_id', 'website', 'name', 'location', 'address']).reset_index().drop('index', axis=1)
-        self.all = deduplicate(self.all)
+        self.summary = deduplicate(self.summary)
 
         if sync == True:
             self.sync_details(drop_duplicates=False, drop_empty_rows=False)
@@ -661,17 +661,17 @@ class Affiliations(Entities):
 
     def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
 
-        for i in self.details.keys():
-            affil = self.details[i]
+        for i in self.all.keys():
+            affil = self.all[i]
             affil.update_id()
-            series = affil.details.copy(deep=True).loc[0]
-            all = self.all.copy(deep=True).astype(str)
+            series = affil.summary.copy(deep=True).loc[0]
+            all = self.summary.copy(deep=True).astype(str)
             indexes = all[all['affiliation_id'] == i].index.to_list()
             if len(indexes) > 0:
                 affil_index = indexes[0]
-                all_copy = self.all.copy(deep=True)
+                all_copy = self.summary.copy(deep=True)
                 all_copy.loc[affil_index] = series
-                self.all = all_copy
+                self.summary = all_copy
         
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -689,26 +689,26 @@ class Affiliations(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-        for i in self.all.index:
+        for i in self.summary.index:
 
-            a_data = self.all.loc[i]
+            a_data = self.summary.loc[i]
             a_id = a_data['affiliation_id']
 
             if a_id != None:
                 a = Affiliation.from_series(a_data) # type: ignore
-                self.details[a_id] = a
+                self.all[a_id] = a
 
             else:
                 a_id = generate_affiliation_id(a_data)
                 a_data['affiliation_id'] = a_id
                 a = Affiliation.from_series(a_data) # type: ignore
-                self.details[a_id] = a
+                self.all[a_id] = a
         
-        keys = list(self.details.keys())
+        keys = list(self.all.keys())
         for key in keys:
-            a_ids = self.all['affiliation_id'].to_list()
+            a_ids = self.summary['affiliation_id'].to_list()
             if key not in a_ids:
-                del self.details[key]
+                del self.all[key]
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -725,8 +725,8 @@ class Affiliations(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-        all_len = len(self.all)
-        details_len = len(self.details)
+        all_len = len(self.summary)
+        details_len = len(self.all)
 
         if all_len > details_len:
             self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -743,16 +743,16 @@ class Affiliations(Entities):
 
     def merge(self, affiliations, drop_duplicates = True, drop_empty_rows=True):
 
-        left = self.all.copy(deep=True)
-        right = affiliations.all.copy(deep=True)
+        left = self.summary.copy(deep=True)
+        right = affiliations.summary.copy(deep=True)
         
         merged = pd.concat([left, right])
 
-        self.all = merged.drop_duplicates(subset=['affiliation_id', 'name', 'location'], ignore_index=True)
+        self.summary = merged.drop_duplicates(subset=['affiliation_id', 'name', 'location'], ignore_index=True)
 
-        for i in affiliations.details.keys():
-            if i not in self.details.keys():
-                self.details[i] = affiliations.details[i]
+        for i in affiliations.all.keys():
+            if i not in self.all.keys():
+                self.all[i] = affiliations.all[i]
 
         left_data = self.data
         right_data = affiliations.data
@@ -822,21 +822,21 @@ class Affiliations(Entities):
 
         affiliation.update_id()
 
-        affiliation_id = str(affiliation.details.loc[0, 'affiliation_id'])
+        affiliation_id = str(affiliation.summary.loc[0, 'affiliation_id'])
 
-        # if affiliation_id in self.all['affiliation_id'].to_list():
-        #     all_copy = self.all.copy(deep=True).astype(str)
+        # if affiliation_id in self.summary['affiliation_id'].to_list():
+        #     all_copy = self.summary.copy(deep=True).astype(str)
         #     id_count = len(all_copy[all_copy['affiliation_id'].str.contains(affiliation_id)]) # type: ignore
         #     affiliation_id = affiliation_id + f'#{id_count + 1}'
-        #     affiliation.details.loc[0, 'affiliation_id'] = affiliation_id
+        #     affiliation.summary.loc[0, 'affiliation_id'] = affiliation_id
 
-        self.all = pd.concat([self.all, affiliation.details])
-        self.all = self.all.reset_index().drop('index', axis=1)
+        self.summary = pd.concat([self.summary, affiliation.summary])
+        self.summary = self.summary.reset_index().drop('index', axis=1)
 
-        self.details[affiliation_id] = affiliation
+        self.all[affiliation_id] = affiliation
 
         if data is None:
-            data = affiliation.details.to_dict(orient='index')
+            data = affiliation.summary.to_dict(orient='index')
         
         self.data.append(data)
 
@@ -876,29 +876,29 @@ class Affiliations(Entities):
         if sync == True:
             self.sync()
 
-        for i in self.all.index:
+        for i in self.summary.index:
             
-            data = self.all.loc[i].copy(deep=True)
-            old_id = self.all.loc[i, 'affiliation_id']
+            data = self.summary.loc[i].copy(deep=True)
+            old_id = self.summary.loc[i, 'affiliation_id']
             new_id = generate_affiliation_id(data)
             new_id = str(new_id)
 
-            # if new_id in self.all['affiliation_id'].to_list():
-            #     df_copy = self.all.copy(deep=True)
+            # if new_id in self.summary['affiliation_id'].to_list():
+            #     df_copy = self.summary.copy(deep=True)
             #     df_copy = df_copy.astype(str)
             #     id_count = len(df_copy[df_copy['affiliation_id'].str.contains(new_id)])
             #     new_id = new_id + f'#{id_count + 1}'
 
-            self.all.at[i, 'affiliation_id'] = new_id
-            if old_id in self.details.keys():
-                self.details[new_id] = self.details[old_id]
-                self.details[new_id].details.loc[0, 'affiliation_id'] = new_id
-                del self.details[old_id]
+            self.summary.at[i, 'affiliation_id'] = new_id
+            if old_id in self.all.keys():
+                self.all[new_id] = self.all[old_id]
+                self.all[new_id].summary.loc[0, 'affiliation_id'] = new_id
+                del self.all[old_id]
 
             else:
                 affiliation = Affiliation.from_series(data) # type: ignore
-                affiliation.details.loc[0, 'affiliation_id'] = new_id
-                self.details[new_id] = affiliation
+                affiliation.summary.loc[0, 'affiliation_id'] = new_id
+                self.all[new_id] = affiliation
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -911,39 +911,39 @@ class Affiliations(Entities):
         if sync == True:
             self.sync(drop_duplicates=drop_duplicates,drop_empty_rows=drop_empty_rows)
 
-        affiliation_ids = self.details.keys()
+        affiliation_ids = self.all.keys()
 
         for a in affiliation_ids:
 
-            self.details[a].update_address()
-            details = self.details[a].details.loc[0]
+            self.all[a].update_address()
+            details = self.all[a].summary.loc[0]
             
-            df_index = self.all[self.all['affiliation_id'] == a].index.to_list()[0]
-            self.all.loc[df_index] = details
+            df_index = self.summary[self.summary['affiliation_id'] == a].index.to_list()[0]
+            self.summary.loc[df_index] = details
 
             new_id = details['affiliation_id']
             if new_id != a:
-                self.details[new_id] = self.details[a]
-                del self.details[a]
+                self.all[new_id] = self.all[a]
+                del self.all[a]
 
         self.update_ids()
 
     def update_from_crossref(self, drop_duplicates = False, drop_empty_rows=False):
 
-        affiliation_ids = self.details.keys()
+        affiliation_ids = self.all.keys()
 
         for a in affiliation_ids:
 
-            self.details[a].update_from_crossref()
-            details = self.details[a].details.loc[0]
+            self.all[a].update_from_crossref()
+            details = self.all[a].summary.loc[0]
             
-            df_index = self.all[self.all['affiliation_id'] == a].index.to_list()[0]
-            self.all.loc[df_index] = details
+            df_index = self.summary[self.summary['affiliation_id'] == a].index.to_list()[0]
+            self.summary.loc[df_index] = details
 
             new_id = details['affiliation_id']
             if new_id != a:
-                self.details[new_id] = self.details[a]
-                del self.details[a]
+                self.all[new_id] = self.all[a]
+                del self.all[a]
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -978,10 +978,10 @@ class Affiliations(Entities):
         return affiliations
 
     def with_crossref(self):
-        return self.all[~self.all['crossref_id'].isna()]
+        return self.summary[~self.summary['crossref_id'].isna()]
     
     def with_uri(self):
-        return self.all[~self.all['uri'].isna()]
+        return self.summary[~self.summary['uri'].isna()]
 
     def from_list(affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
         affiliations = Affiliations()
