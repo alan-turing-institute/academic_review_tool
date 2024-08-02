@@ -269,10 +269,10 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
         except Exception as e:
             raise e
 
-    # If the item is a string, numeric, Graph, Network, Pandas series or pandas.DataFrame, creates a file
+    # If the item is a string, numeric, Graph, Network, Pandas series or pandas.DataFrame, creates a file rather than a folder
     if (obj_type == str) or (obj_type == int) or (obj_type == float) or (obj_type == pd.Series) or (obj_type == pd.DataFrame) or (obj_type == Graph) or (obj_type == NetworkX_Undir) or (obj_type==NetworkX_Dir) or (obj_type==NetworkX_Multi) or ('.Network' in obj_type_str):
         folder_name = folder_name.strip().replace(' ', '_').replace('/', '_')
-        export_obj(obj, file_name = folder_name, folder_address = obj_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
+        export_obj(obj, file_name = folder_name, folder_address = folder_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
         return
     
     
