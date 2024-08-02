@@ -134,8 +134,8 @@ def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str 
         folder_address = input('Folder address: ')
     
     # Creating folder address
-    folder_name = folder_name.strip().replace('/', '_').replace(' ', '_')
-    obj_address = folder_address + '/' + folder_name
+    folder_name = folder_name.strip().replace('/', '_').replace(' ', '_').replace('A:','').replace('F:','').replace('AUTH:','').strip()
+    obj_address = str(folder_address) + '/' + str(folder_name)
     obj_address = obj_address.strip()
 
     if (('.Review' not in obj_type_str)
@@ -244,7 +244,7 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
     
     # Creating folder address
     folder_name = folder_name.strip().replace('/', '_').replace(' ', '_')
-    obj_address = folder_address + '/' + folder_name
+    obj_address = str(folder_address) + '/' + str(folder_name)
     obj_address = obj_address.strip()
     
     
