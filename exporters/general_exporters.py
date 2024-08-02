@@ -151,9 +151,13 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                 
                 attr_str_type = str(type(attr))
                 
+                if (('.Results' in attr_str_type)
+                        or ('.ActivityLog' in attr_str_type)):
+                    file = final_address + '/' + key + '.csv'
+                    attr.to_csv(file)
+                    continue
+
                 if (('.Review' in attr_str_type)
-                        or ('.Results' in attr_str_type)
-                        or ('.ActivityLog' in attr_str_type)
                         or ('.Entity' in attr_str_type)
                         or ('.Entities' in attr_str_type)
                         or ('.Author' in attr_str_type)
