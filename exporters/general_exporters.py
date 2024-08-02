@@ -209,7 +209,7 @@ def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str 
                         export_obj(obj, file_name = attr_name, folder_address = obj_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
                         continue
                     
-                    if (type(obj) == dict) and (len(obj.keys())>0) and ((type(list(obj.values())[0]) == dict) or (type(list(obj.values())[0]) == list) or (type(list(obj.values())[0]) == str) or (type(list(obj.values())[0]) == set) or (type(list(obj.values())[0]) == tuple)):
+                    if (type(obj) == dict) and (len(obj.values())>0) and ((type(list(obj.values())[0]) == dict) or (type(list(obj.values())[0]) == list) or (type(list(obj.values())[0]) == str) or (type(list(obj.values())[0]) == set) or (type(list(obj.values())[0]) == tuple)):
                         export_obj(obj, file_name = attr_name, folder_address = obj_address, export_str_as = export_str_as, export_dict_as = export_dict_as, export_pandas_as = export_pandas_as, export_network_as = export_network_as)
                         continue
                     
