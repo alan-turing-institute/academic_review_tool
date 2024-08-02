@@ -143,8 +143,6 @@ def art_class_to_folder(obj, final_address, export_str_as, export_dict_as, expor
                         or ('.Affiliation' in obj_type_str)
                         or ('.Affiliations' in obj_type_str)):
 
-        os.mkdir(final_address)
-
         for key in obj.__dict__.keys():
 
             attr = obj.__dict__[key]
