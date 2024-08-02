@@ -110,7 +110,7 @@ class Entity:
         return entity
     
     def export_folder(self, 
-                      folder_name = None, 
+                      folder_name = 'request_input', 
                       folder_address: str = 'request_input', 
                       export_str_as: str = 'txt', 
                       export_dict_as: str = 'json', 
@@ -179,6 +179,17 @@ class Entities:
     
     def __len__(self) -> int:
         return len(self.all.keys())
+
+    def export_folder(self, 
+                      folder_name = 'request_input', 
+                      folder_address: str = 'request_input', 
+                      export_str_as: str = 'txt', 
+                      export_dict_as: str = 'json', 
+                      export_pandas_as: str = 'csv', 
+                      export_network_as: str = 'graphML'
+                      ):
+        
+        obj_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
     def drop(self, entity_id):
 
