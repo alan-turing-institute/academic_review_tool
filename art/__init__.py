@@ -20,5 +20,5 @@ import pickle
         if (file_address.endswith('.txt')) or (file_address.endswith('.review')):
             with open(file_address, 'rb') as f:
                 review = pickle.load(f)
-        
-            return review # type: ignore
+
+        return review #type: ignore
