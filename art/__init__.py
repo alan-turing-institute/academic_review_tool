@@ -12,7 +12,7 @@ from .classes.citation_crawler import academic_scraper as scrape
 
 import pickle
 
- def open_file(file_address: str = 'request_input'): # type: ignore
+def open_file(file_address: str = 'request_input'): # type: ignore
 
         if file_address == 'request_input':
             file_address = input('File address: ')
@@ -21,4 +21,4 @@ import pickle
             with open(file_address, 'rb') as f:
                 review = pickle.load(f)
 
-        return review #type: ignore
+        return review
