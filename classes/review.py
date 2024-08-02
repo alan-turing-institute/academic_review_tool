@@ -1182,33 +1182,6 @@ class Review:
 
         return output
 
-    def export_txt(self, file_name = 'request_input', file_address = 'request_input'):
-        
-        """
-        Exports the Review to a .txt file.
-        
-        Parameters
-        ----------
-        file_name : str
-            name of file to create. Defaults to using the object's variable name.
-        file_address : str
-            directory address to create file in. defaults to requesting for user input.
-        """
-        
-        if file_name == 'request_input':
-            file_name = input('File name: ')
-            
-        if file_address == 'request_input':
-            file_address = input('File address: ')
-            
-        file_address = file_address + '/' + file_name
-
-        if file_address.endswith('.Review') == False:
-            file_address = file_address + '.Review'
-
-        with open(file_address, 'wb') as f:
-            pickle.dump(self, f) 
-    
     def export_folder(self, folder_name = 'request_input', folder_address = 'request_input', export_str_as = 'txt', export_dict_as = 'json', export_pandas_as = 'csv', export_network_as = 'graphML'):
         
         """
@@ -1241,7 +1214,7 @@ class Review:
     def export_txt(self, new_file = True, file_name: str = 'request_input', folder_address:str = 'request_input'):
         
         """
-        Exports the Case to a .txt file.
+        Exports the Review to a pickled .txt file.
         
         Parameters
         ----------
@@ -1269,8 +1242,6 @@ class Review:
         
         if str(file_address).endswith('.txt') == False:
             file_address = str(file_address) + str('.txt')
-        
-         # self.backup()
 
         with open(file_address, 'wb') as f:
             pickle.dump(self, f) 
@@ -1278,7 +1249,7 @@ class Review:
     def export_review(self, new_file = True, file_name: str = 'request_input', folder_address:str = 'request_input'):
         
         """
-        Exports the Case to a .txt file.
+        Exports the Review to a pickled text file with a custom suffix (.review).
         
         Parameters
         ----------
@@ -1307,7 +1278,6 @@ class Review:
         if str(file_address).endswith('.review') == False:
             file_address = str(file_address) + str('.review')
         
-         # self.backup()
 
         with open(file_address, 'wb') as f:
             pickle.dump(self, f)
