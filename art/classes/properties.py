@@ -52,8 +52,11 @@ class Properties:
         self.last_backup = None
         self.file_location = file_location
 
-        file_type = Path(file_location).suffix
-        self.file_type = file_type
+        if file_location is not None:
+            file_type = Path(file_location).suffix
+            self.file_type = file_type
+        else:
+            self.file_type = None
     
     def __iter__(self):
         
@@ -113,4 +116,8 @@ class Properties:
         """
 
         file_path = self.file_location
-        self.file_type = Path(file_path).suffix
+
+        if file_path is not None:
+            self.file_type = Path(file_path).suffix
+        else:
+            self.file_type = None
