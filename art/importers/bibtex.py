@@ -52,6 +52,9 @@ def import_bibtex(file_path = 'request_input'):
         if 'publisher' in field_keys:
             df.loc[index, 'publisher'] = fields['publisher']
         
+        if 'pmid' in field_keys:
+            df.loc[index, 'pubmed_id'] = fields['pmid']
+
         if 'issn' in field_keys:
             df.loc[index, 'issn'] = fields['issn']
         
