@@ -81,6 +81,7 @@ def import_bibtex(file_path = 'request_input'):
                 auths_list.append(full_name)
 
             df.at[index, 'authors'] = auths_list
+            df.at[index, 'authors_data'] = auths_list
         
         index += 1
 
