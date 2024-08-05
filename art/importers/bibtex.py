@@ -28,6 +28,9 @@ def import_bibtex(file_path = 'request_input'):
         if 'title' in field_keys:
             df.loc[index, 'title'] = fields['title']
         
+        if 'year' in field_keys:
+            df.loc[index, 'date'] = fields['year']
+        
         if 'url' in field_keys:
             df.loc[index, 'link'] = fields['url']
         
