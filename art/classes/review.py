@@ -1012,7 +1012,7 @@ class Review:
         review = Review(file_location=file_path)
         review.import_bibtex(file_path=file_path, update_formatting=update_formatting, update_entities=update_entities)
 
-        return 
+        return review
 
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
