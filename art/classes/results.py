@@ -575,7 +575,7 @@ class Results(pd.DataFrame):
 
         bib = self.to_bibtex()
 
-        filepath = folder_path + '/' + file_name
+        filepath = folder_path + '/' + file_name + '.bib'
 
         bib_bytes = bytes(bib, "utf-8").decode("unicode_escape")
 
@@ -596,7 +596,7 @@ class Results(pd.DataFrame):
 
         yaml = self.to_yaml()
 
-        filepath = folder_path + '/' + file_name
+        filepath = folder_path + '/' + file_name + '.yaml'
 
         yaml_bytes = bytes(yaml, "utf-8").decode("unicode_escape")
 
