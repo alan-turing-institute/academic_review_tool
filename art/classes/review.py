@@ -25,6 +25,7 @@ from .citation_crawler import citation_crawler, academic_scraper
 
 import copy
 import pickle
+from pathlib import Path
 
 import pandas as pd
 import numpy as np
@@ -1372,14 +1373,128 @@ class Review:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
-        if filetype == 'review':
+        if file_name == 'request_input':
+            file_name = input('File name: ')
+        
+        if folder_address == 'request_input':
+            folder_address = input('Folder path: ')
+
+        if (filetype == 'review') or (filetype == '.review'):
+
+            full_path = folder_address + '/' + file_name + '.review'
+            path_obj = Path(full_path)
+            
+            if path_obj.exists() == True:
+                warning_res = input(f'Warning: a file named {file_name}.review already exists in this location. Do you want to overwrite it? [Y]/N: ')
+
+                if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
+                    return
+
             self.export_review(new_file=True, file_name=file_name, folder_address=folder_address)
         
-        if filetype == 'txt':
+        if (filetype == 'txt') or (filetype == '.txt'):
+
+            full_path = folder_address + '/' + file_name + '.txt'
+            path_obj = Path(full_path)
+            
+            if path_obj.exists() == True:
+                warning_res = input(f'Warning: a file named {file_name}.txt already exists in this location. Do you want to overwrite it? [Y]/N: ')
+
+                if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
+                    return
+                
             self.export_txt(new_file=True, file_name=file_name, folder_address=folder_address)
+        
+        if (filetype == 'bib') or (filetype=='.bib'):
+
+            full_path = folder_address + '/' + file_name + '.bib'
+            path_obj = Path(full_path)
+            
+            if path_obj.exists() == True:
+                warning_res = input(f'Warning: a file named {file_name}.txt already exists in this location. Do you want to overwrite it? [Y]/N: ')
+
+                if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
+                    return
+                
+            self.export_bib(file_name=file_name, folder_address=folder_address)
+        
+        if (filetype == 'yaml') or (filetype=='.yaml'):
+
+            full_path = folder_address + '/' + file_name + '.yaml'
+            path_obj = Path(full_path)
+            
+            if path_obj.exists() == True:
+                warning_res = input(f'Warning: a file named {file_name}.txt already exists in this location. Do you want to overwrite it? [Y]/N: ')
+
+                if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
+                    return
+                
+            self.export_yaml(file_name=file_name, folder_address=folder_address)
 
         if filetype == 'folder':
+
+            full_path = folder_address + '/' + file_name
+            path_obj = Path(full_path)
+            
+            if path_obj.exists() == True:
+                warning_res = input(f'Warning: a folder named {file_name} already exists in this location. Do you want to overwrite it? [Y]/N: ')
+
+                if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
+                    return
+
             self.export_folder(folder_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
+
+    def save(self, 
+             export_str_as: str = 'txt', 
+                      export_dict_as: str = 'json', 
+                      export_pandas_as: str = 'csv', 
+                      export_network_as: str = 'graphML'):
+        
+        file_path = self.properties.file_location
+
+        if (file_path is None) or (file_path == ''):
+
+            file_name = input('File name: ')
+            folder_address = input('Folder path: ')
+            filetype = input('File type: ')
+
+            self.save_as(filetype=filetype, file_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
+            return
+
+        if (type(file_path) == str) or (type(file_path) == Path):
+
+            file_type = Path(file_path).suffix
+
+            if (file_type is not None) and (file_type !=''):
+
+                if file_type == '.review':
+                    self.export_review(new_file=False, file_name=None, folder_address=file_path)
+                    return
+
+                if file_type == '.txt':
+                    self.export_txt(new_file=False, file_name=None, folder_address=file_path)
+                    return
+                
+                if file_type == '.bib':
+
+                    path_obj = Path(file_path)
+                    file_name = path_obj.name
+                    folder_path = str(path_obj.parent)
+
+                    self.export_bibtex(file_name=file_name, folder_path=folder_path)
+                    return
+                
+                if file_type == '.yaml':
+
+                    path_obj = Path(file_path)
+                    file_name = path_obj.name
+                    folder_path = str(path_obj.parent)
+
+                    self.export_yaml(file_name=file_name, folder_path=folder_path)
+                    return
+
+
+
 
     def import_txt(self, file_path: str = 'request_input'):
 
@@ -1427,7 +1542,7 @@ class Review:
         
         return review
 
-        
+    
 
     def scrape_article(self, url = 'request_input'):
         
