@@ -970,7 +970,7 @@ class Review:
         orig_len = len(self.results)
         self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
         new_len = len(self.results)
-        len_diff = orig_len - new_len
+        len_diff = new_len - orig_len
 
         changes = {'results': len_diff}
         self.activity_log.add_activity(type='data merge', activity='added dataframe to results', location=['results'], changes_dict=changes)
@@ -995,11 +995,14 @@ class Review:
         return self
 
     def import_bibtex(self, file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+        
+        if file_path == 'request_input':
+            file_path = input('File path: ')
 
         orig_len = len(self.results)
         self.results.import_bibtex(file_path=file_path)
         new_len = len(self.results)
-        len_diff = orig_len - new_len
+        len_diff = new_len - orig_len
 
         changes = {'results': len_diff}
         self.activity_log.add_activity(type='data import', activity='imported .bib file to results', location=['results'], changes_dict=changes)
@@ -1009,6 +1012,9 @@ class Review:
     
     def from_bibtex(file_path = 'request_input', update_formatting: bool = False, update_entities = False):
 
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         review = Review(file_location=file_path)
         review.import_bibtex(file_path=file_path, update_formatting=update_formatting, update_entities=update_entities)
 
@@ -1016,10 +1022,13 @@ class Review:
 
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         orig_len = len(self.results)
         self.results.import_excel(file_path, sheet_name) # type: ignore
         new_len = len(self.results)
-        len_diff = orig_len - new_len
+        len_diff = new_len - orig_len
 
         changes = {'results': len_diff}
         self.activity_log.add_activity(type='data import', activity='imported Excel file to results', location=['results'], changes_dict=changes)
@@ -1053,6 +1062,9 @@ class Review:
         return self
     
     def from_excel(file_path = 'request_input', sheet_name = None, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+        
+        if file_path == 'request_input':
+            file_path = input('File path: ')
 
         review = Review(file_location=file_path)
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
@@ -1064,10 +1076,13 @@ class Review:
 
     def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         orig_len = len(self.results)
         self.results.import_csv(file_path) # type: ignore
         new_len = len(self.results)
-        len_diff = orig_len - new_len
+        len_diff = new_len - orig_len
 
         changes = {'results': len_diff}
         self.activity_log.add_activity(type='data import', activity='imported CSV file to results', location=['results'], changes_dict=changes)
@@ -1102,6 +1117,9 @@ class Review:
     
     def from_csv(file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         review = Review(file_location=file_path)
         review.results = Results.from_csv(file_path) # type: ignore
         if update_formatting == True:
@@ -1112,7 +1130,10 @@ class Review:
         return review
 
     def import_json(self, file_path = 'request_input', update_formatting: bool = True):
-        self.update_properties()
+
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         self.results.import_json(file_path) # type: ignore
 
         if update_formatting == True:
@@ -1120,10 +1141,14 @@ class Review:
         
         self.properties.file_location = file_path
         self.properties.update_file_type()
+        self.update_properties()
 
         return self
     
     def from_json(file_path = 'request_input'): # type: ignore
+
+        if file_path == 'request_input':
+            file_path = input('File path: ')
 
         review = Review(file_location=file_path)
         review.import_json(file_path = file_path) # type: ignore
@@ -1132,7 +1157,9 @@ class Review:
     
     def import_file(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
 
-        self.update_properties()
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         self.results.import_file(file_path, sheet_name) # type: ignore
 
         if update_formatting == True:
@@ -1147,9 +1174,13 @@ class Review:
 
         self.properties.file_location = file_path
         self.properties.update_file_type()
+        self.update_properties()
 
     def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         review = Review(file_location=file_path)
         review.results = Results.from_file(file_path, sheet_name) # type: ignore
         review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
@@ -1158,6 +1189,9 @@ class Review:
 
     def import_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True):
         
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+
         old_len = len(self.results)
         self.results.import_jstor(file_path = file_path, drop_empty_rows=drop_empty_rows,drop_duplicates=drop_duplicates, update_work_ids=update_work_ids) # type: ignore
         new_len = len(self.results)
@@ -1183,6 +1217,9 @@ class Review:
 
     def from_jstor(file_path: str = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
 
+        if file_path == 'request_input':
+            file_path = input('File path: ')
+        
         review = Review(file_location=file_path)
         review.import_jstor(file_path=file_path, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates, update_work_ids=update_work_ids, format_citations=format_citations, format_authors = format_authors, format_funders = format_funders, format_affiliations=format_affiliations)
 
@@ -1324,7 +1361,6 @@ class Review:
 
         with open(file_address, 'wb') as f:
             pickle.dump(self, f)
-
 
 
     def save_as(self,
