@@ -1540,6 +1540,8 @@ class Review:
         if (file_path.endswith('.txt')) or (file_path.endswith('.review')):
             with open(file_path, 'rb') as f:
                 review = pickle.load(f)
+                review.properties.file_location = file_path
+                review.properties.update_file_type()
                 return review
 
     
