@@ -1417,7 +1417,7 @@ class Review:
                 if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
                     return
                 
-            self.export_bibtex(file_name=file_name, folder_address=folder_address)
+            self.export_bibtex(file_name=file_name, folder_path=folder_address)
         
         if (filetype == 'yaml') or (filetype=='.yaml'):
 
@@ -1430,7 +1430,7 @@ class Review:
                 if (warning_res.lower() == 'n') or (warning_res.lower() == 'no'):
                     return
                 
-            self.export_yaml(file_name=file_name, folder_address=folder_address)
+            self.export_yaml(file_name=file_name, folder_path=folder_address)
 
         if filetype == 'folder':
 
