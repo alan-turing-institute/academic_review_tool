@@ -189,7 +189,7 @@ def format_authors(self):
 
 Results.format_authors = format_authors # type: ignore
     
-def add_citations_to_results(self, add_work_ids = False, update_from_doi = False, drop_duplicates = True, drop_empty_rows = True):
+def add_citations_to_results(self, add_work_ids = False, update_from_doi = False, drop_duplicates = False, drop_empty_rows = True):
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -565,7 +565,7 @@ class Review:
     def format_citations(self, add_work_ids = False, update_from_doi = False, verbose=True):
         self.results.format_citations(add_work_ids = add_work_ids, update_from_doi=update_from_doi, verbose=verbose) # type: ignore
 
-    def format_authors(self, drop_duplicates = True, drop_empty_rows=True):
+    def format_authors(self, drop_duplicates = False, drop_empty_rows=True):
 
         self.results.format_authors() # type: ignore
 
@@ -588,7 +588,7 @@ class Review:
         
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
     
-    def update_author_attrs(self, ignore_case: bool = True, drop_duplicates = True, drop_empty_rows=True):
+    def update_author_attrs(self, ignore_case: bool = True, drop_duplicates = False, drop_empty_rows=True):
 
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -764,7 +764,7 @@ class Review:
         self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
         self.update_funder_attrs(ignore_case=ignore_case)
 
-    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True, drop_duplicates = True, drop_empty_rows=True):
+    def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True, drop_duplicates = False, drop_empty_rows=True):
 
         if format == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -892,7 +892,7 @@ class Review:
         self.activity_log.add_activity(type='data cleaning', activity='deduplication', location = ['results', 'authors', 'funders', 'affiliations'], changes_dict=changes)
 
 
-    def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True, verbose=False):
+    def format(self, update_entities = False, drop_duplicates = False, drop_empty_rows=True, verbose=False):
 
         self.format_funders()
         self.format_citations(verbose=verbose)
@@ -923,7 +923,7 @@ class Review:
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
 
-    def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows = True):
+    def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = False, drop_empty_rows = True):
         
         self.results.add_citations_to_results(drop_duplicates = drop_duplicates, drop_empty_rows = drop_empty_rows) # type: ignore
 
@@ -950,7 +950,7 @@ class Review:
         if update_formatting == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-    def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = True, drop_empty_rows=True):
+    def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = False, drop_empty_rows=True):
 
         orcid_len = len(self.authors.with_orcid())
 
@@ -1583,7 +1583,7 @@ class Review:
         self.activity_log.add_activity(type='web scraping', activity='scraped Google Scholar search and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
     
-    def scrape(self, url = 'request_input', add_to_results=True, drop_empty_rows = True, drop_duplicates = True):
+    def scrape(self, url = 'request_input', add_to_results=True, drop_empty_rows = True, drop_duplicates = False):
 
         if url == 'request_input':
             url = input('URL: ')
@@ -2359,7 +2359,7 @@ class Review:
                     rate_limit: float = 0.05,
                     timeout: int = 60,
                     add_to_results = True,
-                    drop_duplicates = True,
+                    drop_duplicates = False,
                     drop_empty_rows = True
                     ):
     
@@ -2495,7 +2495,7 @@ class Review:
     def coauthors_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
@@ -2560,7 +2560,7 @@ class Review:
     def cofunders_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
@@ -2739,7 +2739,7 @@ class Review:
     def author_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
@@ -2772,7 +2772,7 @@ class Review:
     def funder_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
@@ -2804,7 +2804,7 @@ class Review:
     def author_affils_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
@@ -2834,7 +2834,7 @@ class Review:
     def entities_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
@@ -2880,7 +2880,7 @@ class Review:
     def all_networks(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = True,
+                                drop_duplicates = False,
                                 drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_citations_to_results: bool = True,
