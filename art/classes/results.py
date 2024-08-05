@@ -614,14 +614,12 @@ class Results(pd.DataFrame):
     def import_bibtex(self, file_path = 'request_input'):
 
         df = import_bibtex(file_path = file_path)
-
         self.add_dataframe(dataframe=df, drop_duplicates=False, drop_empty_rows=False)
     
     def from_bibtex(file_path = 'request_input'):
 
-        df = import_bibtex(file_path = file_path)
         results = Results()
-        results.add_dataframe(dataframe=df, drop_duplicates=False, drop_empty_rows=False)
+        results.import_bibtex(file_path=file_path)
 
         return results
 
