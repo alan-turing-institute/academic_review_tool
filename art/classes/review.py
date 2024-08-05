@@ -386,6 +386,18 @@ class Review:
         
         return output_dict
     
+    def to_bibtex(self):
+        return self.results.to_bibtex()
+    
+    def to_yaml(self):
+        return self.results.to_yaml()
+    
+    def export_bibtex(self, file_name = 'request_input', folder_path= 'request_input'):
+        return self.results.export_bibtex(file_name=file_name, folder_path=folder_path)
+
+    def export_yaml(self, file_name = 'request_input', folder_path= 'request_input'):
+        return self.results.export_yaml(file_name=file_name, folder_path=folder_path)
+
     def copy(self):
         
         """

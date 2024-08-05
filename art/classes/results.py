@@ -426,15 +426,13 @@ class Results(pd.DataFrame):
             
             row = self.loc[i].copy(deep=True).dropna()
 
-
-
             if 'type' in row.index:
                 entry_type = row['type']
             else:
                 entry_type = 'misc'
             
             if 'title' in row.index:
-                title = row['title']
+                title = str(row['title'])
             else:
                 title = ''
             
@@ -451,6 +449,8 @@ class Results(pd.DataFrame):
             
             if type(authors) == list:
                 authors_str = ', '.join(authors)
+            else:
+                authors_str = ''
             
             if 'date' in row.index:
                 year = str(row['date'])
@@ -485,7 +485,7 @@ class Results(pd.DataFrame):
             if 'work_id' in row.index:
                 key = row['work_id']
             else:
-                key = title.lower() + '_' + authors[:10].lower() + '_' + year.lower()
+                key = str(title).lower() + '_' + str(authors_str)[:10].lower() + '_' + str(year).lower()
 
             entry_list = []
 
@@ -561,7 +561,48 @@ class Results(pd.DataFrame):
     def to_yaml(self):
         bib_data = self.to_pybtex()
         return bib_data.to_string('yaml')
+    
+    def export_bibtex(self, file_name = 'request_input', folder_path = 'request_input'):
 
+        if file_name == 'request_input':
+            file_name = input('File name: ')
+        
+        if folder_path == 'request_input':
+            folder_path = input('Folder path: ')
+        
+        if Path(folder_path).exists() == False:
+            raise ValueError('Folder does not exist')
+
+        bib = self.to_bibtex()
+
+        filepath = folder_path + '/' + file_name
+
+        bib_bytes = bytes(bib, "utf-8").decode("unicode_escape")
+
+        with open(filepath, 'w') as file:
+            file.write(bib_bytes)
+    
+
+    def export_yaml(self, file_name = 'request_input', folder_path = 'request_input'):
+
+        if file_name == 'request_input':
+            file_name = input('File name: ')
+        
+        if folder_path == 'request_input':
+            folder_path = input('Folder path: ')
+        
+        if Path(folder_path).exists() == False:
+            raise ValueError('Folder does not exist')
+
+        yaml = self.to_yaml()
+
+        filepath = folder_path + '/' + file_name
+
+        yaml_bytes = bytes(yaml, "utf-8").decode("unicode_escape")
+
+        with open(filepath, 'w') as file:
+            file.write(yaml_bytes)
+        
     def clear_rows(self):
 
         results = Results()
