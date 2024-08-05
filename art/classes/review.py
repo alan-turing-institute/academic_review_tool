@@ -998,6 +998,24 @@ class Review:
         
         return self
 
+    def import_bibtex(self, file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+
+        orig_len = len(self.results)
+        self.results.import_bibtex(file_path=file_path)
+        new_len = len(self.results)
+        len_diff = orig_len - new_len
+
+        changes = {'results': len_diff}
+        self.activity_log.add_activity(type='data import', activity='imported .bib file to results', location=['results'], changes_dict=changes)
+
+    
+    def from_bibtex(file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+
+        review = Review()
+        review.import_bibtex(file_path=file_path, update_formatting=update_formatting, update_entities=update_entities)
+
+        return 
+
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
         orig_len = len(self.results)
