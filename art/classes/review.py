@@ -1347,7 +1347,8 @@ class Review:
             
             if folder_address == 'request_input':
                 folder_address = input('Folder address: ')
-                file_address = folder_address + '/' + file_name
+            
+            file_address = folder_address + '/' + file_name
             
         if new_file == False:
             
