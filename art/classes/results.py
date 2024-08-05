@@ -2,6 +2,7 @@ from ..utils.basics import results_cols
 from ..utils.cleaners import strip_list_str, deduplicate
 from ..importers.pdf import read_pdf_to_table
 from ..importers.jstor import import_jstor
+from ..importers.bibtex import import_bibtex
 from ..importers.crossref import lookup_doi, lookup_dois
 from ..datasets import stopwords
 
@@ -609,6 +610,21 @@ class Results(pd.DataFrame):
         self.__dict__.update(results.__dict__)
 
         return self
+
+    def import_bibtex(self, file_path = 'request_input'):
+
+        df = import_bibtex(file_path = file_path)
+
+        self.add_dataframe(dataframe=df, drop_duplicates=False, drop_empty_rows=False)
+    
+    def from_bibtex(file_path = 'request_input'):
+
+        df = import_bibtex(file_path = file_path)
+        results = Results()
+        results.add_dataframe(dataframe=df, drop_duplicates=False, drop_empty_rows=False)
+
+        return results
+
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
 
