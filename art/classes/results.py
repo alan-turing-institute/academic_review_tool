@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from nltk.tokenize import word_tokenize # type: ignore
+from pybtex.database import BibliographyData, Entry #type: ignore
 
 def generate_work_id(work_data: pd.Series):
 
@@ -416,6 +417,150 @@ class Results(pd.DataFrame):
             results_table.drop_empty_rows()
 
         return results_table
+
+    def to_pybtex(self):
+
+        res_dict = {}
+
+        for i in self.index:
+            
+            row = self.loc[i].copy(deep=True).dropna()
+
+
+
+            if 'type' in row.index:
+                entry_type = row['type']
+            else:
+                entry_type = 'misc'
+            
+            if 'title' in row.index:
+                title = row['title']
+            else:
+                title = ''
+            
+            if 'authors' in row.index:
+                authors = row['authors']
+            else:
+                authors = ''
+            
+            if ('__dict__' in authors.__dir__()) and ('summary' in authors.__dict__.keys()):
+                if (type(authors.summary) == pd.DataFrame) and ('full_name' in authors.summary.columns):
+                    authors_str = ', '.join(authors.summary['full_name'].to_list())
+                else:
+                    authors_str = ''
+            
+            if type(authors) == list:
+                authors_str = ', '.join(authors)
+            
+            if 'date' in row.index:
+                year = str(row['date'])
+            else:
+                year = ''
+            
+            if 'keywords' in row.index:
+                keywords = ', '.join(row['keywords'])
+            else:
+                keywords = ''
+
+            if 'doi' in row.index:
+                doi = str(row['doi'])
+            else:
+                doi = ''
+            
+            if 'publisher' in row.index:
+                publisher = str(row['publisher'])
+            else:
+                publisher = ''
+            
+            if 'link' in row.index:
+                link = str(row['link'])
+            else:
+                link = ''
+            
+            if 'isbn' in row.index:
+                isbn = str(row['isbn'])
+            else:
+                isbn = ''
+
+            if 'work_id' in row.index:
+                key = row['work_id']
+            else:
+                key = title.lower() + '_' + authors[:10].lower() + '_' + year.lower()
+
+            entry_list = []
+
+            if (authors_str is not None) and (authors_str != '') and (type(authors_str) == str):
+                authors_tuple = ('author', authors_str)
+                entry_list.append(authors_tuple)
+            
+            if (title is not None) and (title != '') and (type(title) == str):
+                title_tuple = ('title', title)
+                entry_list.append(title_tuple)
+            
+            if (year is not None) and (year != '') and (type(year) == str):
+                year_tuple = ('year', year)
+                entry_list.append(year_tuple)
+            
+            if (doi is not None) and (doi != '') and (type(doi) == str):
+                doi_tuple = ('doi', doi)
+                entry_list.append(doi_tuple)
+            
+            if (publisher is not None) and (publisher != '') and (type(publisher) == str):
+                publisher_tuple = ('publisher', publisher)
+                entry_list.append(publisher_tuple)
+            
+            if (link is not None) and (link != '') and (type(link) == str):
+                link_tuple = ('url', link)
+                entry_list.append(link_tuple)
+            
+            if (isbn is not None) and (isbn != '') and (type(isbn) == str):
+                isbn_tuple = ('isbn', isbn)
+                entry_list.append(isbn_tuple)
+            
+            if (keywords is not None) and (keywords != '') and (type(keywords) == str):
+                keywords_tuple = ('keywords', keywords)
+                entry_list.append(keywords_tuple)
+            
+            if 'article' in entry_type:
+
+                entry_type = 'article'
+
+                if 'source' in row.index:
+                    journal = row['source']
+                    if (journal is not None) and (journal != '') and (type(journal) == str):
+                        journal_tuple = ('journal', journal)
+                        entry_list.append(journal_tuple)
+
+            if ('book' in entry_type) and ('chapter' in entry_type):
+
+                entry_type = 'incollection'
+
+                if 'source' in row.index:
+                    booktitle = row['source']
+                    if (booktitle is not None) and (booktitle != '') and (type(booktitle) == str):
+                        booktitle_tuple = ('journal', booktitle)
+                        entry_list.append(booktitle_tuple)
+            
+            if 'book' in entry_type:
+                entry_type = 'book'
+
+            entry = Entry(entry_type, entry_list)
+            res_dict[key] = entry
+        
+        bib_data = BibliographyData(res_dict)
+
+        return bib_data
+
+
+
+    def to_bibtex(self):
+
+        bib_data = self.to_pybtex()
+        return bib_data.to_string('bibtex')
+    
+    def to_yaml(self):
+        bib_data = self.to_pybtex()
+        return bib_data.to_string('yaml')
 
     def clear_rows(self):
 
