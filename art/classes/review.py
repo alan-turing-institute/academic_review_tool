@@ -242,7 +242,7 @@ class Review:
     activity_log = ActivityLog()
     description = ''
 
-    def __init__(self, review_name = None, file_location = None, file_type = None):
+    def __init__(self, review_name = None, file_location = None):
         
         """
         Initialises a Review instance.
@@ -253,14 +253,12 @@ class Review:
             the Review's name. Defaults to requesting from user input.
         file_location : str
             file location associated with Review.
-        file_type : str
-            file type associated with Review file(s).
         """
         
         if review_name == 'request_input':
             review_name = input('Review name: ')
 
-        self.properties = Properties(review_name = review_name, file_location = file_location, file_type = file_type)
+        self.properties = Properties(review_name = review_name, file_location = file_location)
         self.results = Results()
         self.authors = Authors()
         self.funders = Funders()
@@ -892,7 +890,6 @@ class Review:
 
         self.activity_log.add_activity(type='data cleaning', activity='deduplication', location = ['results', 'authors', 'funders', 'affiliations'], changes_dict=changes)
 
-        
 
     def format(self, update_entities = False, drop_duplicates = True, drop_empty_rows=True, verbose=False):
 
@@ -968,7 +965,6 @@ class Review:
         if update_formatting == True:
             self.format()
         
-
     def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = True):
 
         orig_len = len(self.results)
@@ -1007,11 +1003,13 @@ class Review:
 
         changes = {'results': len_diff}
         self.activity_log.add_activity(type='data import', activity='imported .bib file to results', location=['results'], changes_dict=changes)
-
+        
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
     
     def from_bibtex(file_path = 'request_input', update_formatting: bool = False, update_entities = False):
 
-        review = Review()
+        review = Review(file_location=file_path)
         review.import_bibtex(file_path=file_path, update_formatting=update_formatting, update_entities=update_entities)
 
         return 
@@ -1049,11 +1047,14 @@ class Review:
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
+
         return self
     
     def from_excel(file_path = 'request_input', sheet_name = None, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
-        review = Review()
+        review = Review(file_location=file_path)
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
         review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -1094,11 +1095,14 @@ class Review:
         if update_formatting == True:
             self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
+
         return self
     
     def from_csv(file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
-        review = Review()
+        review = Review(file_location=file_path)
         review.results = Results.from_csv(file_path) # type: ignore
         if update_formatting == True:
             review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1114,11 +1118,14 @@ class Review:
         if update_formatting == True:
             self.format()
         
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
+
         return self
     
     def from_json(file_path = 'request_input'): # type: ignore
 
-        review = Review()
+        review = Review(file_location=file_path)
         review.import_json(file_path = file_path) # type: ignore
 
         return review
@@ -1137,10 +1144,13 @@ class Review:
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows = drop_empty_rows)
-    
+
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
+
     def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
-        review = Review()
+        review = Review(file_location=file_path)
         review.results = Results.from_file(file_path, sheet_name) # type: ignore
         review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
@@ -1154,7 +1164,7 @@ class Review:
 
         len_diff = new_len - old_len
         changes = {'results': len_diff}
-        self.activity_log.add_activity(type='data import', activity='imported JSTOR JSON file to results', location=['results'], changes_dict=changes)
+        self.activity_log.add_activity(type='data import', activity='imported JSTOR .json file to results', location=['results'], changes_dict=changes)
 
         if format_citations == True:
             self.format_citations()
@@ -1167,10 +1177,13 @@ class Review:
         
         if format_affiliations == True:
             self.format_affiliations()
-    
+
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
+
     def from_jstor(file_path: str = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
 
-        review = Review()
+        review = Review(file_location=file_path)
         review.import_jstor(file_path=file_path, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates, update_work_ids=update_work_ids, format_citations=format_citations, format_authors = format_authors, format_funders = format_funders, format_affiliations=format_affiliations)
 
         return review
@@ -1332,23 +1345,48 @@ class Review:
         if filetype == 'folder':
             self.export_folder(folder_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
-    def from_txt(file_address: str = 'request_input'): # type: ignore
+    def import_txt(self, file_path: str = 'request_input'):
 
-        if file_address == 'request_input':
-            file_address = input('File address: ')
+        if file_path == 'request_input':
+            file_path = input('File address: ')
         
-        with open(file_address, 'rb') as f:
+        with open(file_path, 'rb') as f:
             review = pickle.load(f)
         
+        results = review.results.copy(deep=True)
+        authors = review.authors
+        funders = review.funders
+        affils = review.affiliations
+
+        self.results.add_dataframe(results)
+        self.authors.merge(authors=authors)
+        self.funders.merge(funders=funders)
+        self.affiliations.merge(affiliations=affils)
+
+        self.properties.file_location = file_path
+        self.properties.update_file_type()
+
+
+    def from_txt(file_path: str = 'request_input'): # type: ignore
+
+        if file_path == 'request_input':
+            file_path = input('File address: ')
+        
+        with open(file_path, 'rb') as f:
+            review = pickle.load(f)
+        
+        review.properties.file_location = file_path
+        review.properties.update_file_type()
+
         return review
 
-    def open(file_address: str = 'request_input'): # type: ignore
+    def open(file_path: str = 'request_input'): # type: ignore
 
-        if file_address == 'request_input':
-            file_address = input('File address: ')
+        if file_path == 'request_input':
+            file_path = input('File address: ')
         
-        if (file_address.endswith('.txt')) or (file_address.endswith('.review')):
-            with open(file_address, 'rb') as f:
+        if (file_path.endswith('.txt')) or (file_path.endswith('.review')):
+            with open(file_path, 'rb') as f:
                 review = pickle.load(f)
         
         return review

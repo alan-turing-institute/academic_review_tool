@@ -1,6 +1,7 @@
 
 from ..utils.basics import Iterator
 from datetime import datetime
+from pathlib import Path
 
 class Properties:
     
@@ -30,7 +31,7 @@ class Properties:
         size of the object in memory in bytes.
     """
     
-    def __init__(self, review_name = None, file_location = None, file_type = None):
+    def __init__(self, review_name = None, file_location = None):
         
         """
         Initialises Properties instance.
@@ -50,6 +51,8 @@ class Properties:
         self.last_changed_at = self.created_at
         self.last_backup = None
         self.file_location = file_location
+
+        file_type = Path(file_location).suffix
         self.file_type = file_type
     
     def __iter__(self):
@@ -103,3 +106,11 @@ class Properties:
         
         self.last_changed_at = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
+    def update_file_type(self):
+
+        """
+        Updates the file_type attribute to the current file_location string's suffix.
+        """
+
+        file_path = self.file_location
+        self.file_type = Path(file_path).suffix
