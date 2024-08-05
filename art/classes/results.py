@@ -254,7 +254,7 @@ class Results(pd.DataFrame):
                 pass
         return work_id
 
-    def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = True, drop_duplicates = True, update_work_ids = True):
+    def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = True, drop_duplicates = False, update_work_ids = True):
         
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
@@ -287,7 +287,7 @@ class Results(pd.DataFrame):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-    def add_doi(self, doi: str = 'request_input', drop_empty_rows = True, drop_duplicates = True, timeout: int = 60):
+    def add_doi(self, doi: str = 'request_input', drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
         df = lookup_doi(doi=doi, timeout=timeout)
         self.add_dataframe(dataframe=df)
 
@@ -303,7 +303,7 @@ class Results(pd.DataFrame):
         df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
         self.add_dataframe(dataframe=df, drop_empty_rows = True)
 
-    def correct_dois(self, drop_duplicates = True):
+    def correct_dois(self, drop_duplicates = False):
 
         no_doi = self[self['doi'].isna()]
         has_link = no_doi[~no_doi['link'].isna()]
@@ -335,7 +335,7 @@ class Results(pd.DataFrame):
             self.remove_duplicates(drop_empty_rows=False)
 
 
-    def update_from_doi(self, index, drop_empty_rows = True, drop_duplicates = True, timeout: int = 60):
+    def update_from_doi(self, index, drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
         
         try:
             old_series = self.loc[index]
@@ -363,7 +363,7 @@ class Results(pd.DataFrame):
             self.drop_empty_rows()
         
 
-    def update_from_dois(self, drop_empty_rows = True, drop_duplicates = True, timeout: int = 60):
+    def update_from_dois(self, drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
 
         self.correct_dois(drop_duplicates=False)
 
@@ -401,7 +401,7 @@ class Results(pd.DataFrame):
     def to_dataframe(self):
         return self.copy(deep=True)
     
-    def from_dataframe(dataframe, drop_empty_rows = False, drop_duplicates = True): # type: ignore
+    def from_dataframe(dataframe, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
         dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
         results_table = Results(index = dataframe.index)

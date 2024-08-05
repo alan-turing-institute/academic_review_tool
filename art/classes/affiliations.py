@@ -741,7 +741,7 @@ class Affiliations(Entities):
                 return
 
 
-    def merge(self, affiliations, drop_duplicates = True, drop_empty_rows=True):
+    def merge(self, affiliations, drop_duplicates = False, drop_empty_rows=True):
 
         left = self.summary.copy(deep=True)
         right = affiliations.summary.copy(deep=True)
@@ -1007,7 +1007,7 @@ class Affiliations(Entities):
 
         return affiliations
 
-def format_affiliations(affiliation_data, use_api = False, drop_duplicates = True, drop_empty_rows=True):
+def format_affiliations(affiliation_data, use_api = False, drop_duplicates = False, drop_empty_rows=True):
         
         result = Affiliations()
 

@@ -504,7 +504,7 @@ class Funders(Entities):
     def __len__(self) -> int:
         return len(self.all.keys())
 
-    def merge(self, funders, drop_empty_rows = True, drop_duplicates = True):
+    def merge(self, funders, drop_empty_rows = True, drop_duplicates = False):
 
         left = self.summary.copy(deep=True)
         right = funders.summary.copy(deep=True)

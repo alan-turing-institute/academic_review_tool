@@ -661,7 +661,7 @@ class Authors(Entities):
         self.update_author_ids()
         self.sync_details()
 
-    def add_author(self, author: Author, data = None, drop_duplicates = True, drop_empty_rows = False, update_from_orcid = False):
+    def add_author(self, author: Author, data = None, drop_duplicates = False, drop_empty_rows = False, update_from_orcid = False):
 
         if update_from_orcid == True:
             orcid = author.summary.loc[0,'orcid']
@@ -697,7 +697,7 @@ class Authors(Entities):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
 
-    def add_authors_list(self, authors_list: list, drop_duplicates = True, drop_empty_rows = False):
+    def add_authors_list(self, authors_list: list, drop_duplicates = False, drop_empty_rows = False):
         
         for i in authors_list:
             if type(i) == Author:
