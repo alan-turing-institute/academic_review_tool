@@ -57,7 +57,7 @@ with open(f'{here}/languages/language_names.json', 'r') as file:
     language_names = json.load(file)
     file.close()
 
-with open(f'{here}languages/languages_en.json', 'r') as file:
+with open(f'{here}/languages/languages_en.json', 'r') as file:
     languages_en = json.load(file)
     file.close()
 
