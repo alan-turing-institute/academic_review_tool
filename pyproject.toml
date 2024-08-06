@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "The Academic Review Tool (ART) is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale."
 readme = "README.md"
 authors = [ 
-        {name = "Jamie Hancock, email = "academic_review_tool@outlook.com"},
+        {name = "Jamie Hancock", email = "academic_review_tool@outlook.com"},
         ]
 license = { file = "LICENSE" }
 classifiers = [
