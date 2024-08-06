@@ -3,6 +3,8 @@
 from typing import List, Dict
 import math
 from os import stat_result
+import os
+import sys
 
 results_cols = [
                             'work_id',
@@ -46,6 +48,12 @@ results_cols = [
                             'link'
                                 ]
 
+
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+def enablePrint():
+    sys.stdout = sys.__stdout__
 
 class Iterator:
     
