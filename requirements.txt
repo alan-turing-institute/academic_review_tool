@@ -27,4 +27,4 @@ wayback>=0.4.3
 selenium>=4.18.1
 selectolax>=0.3.17
 pybtex>=0.24.0
-git+https://github.com/clarivate/wosstarter_python_client.git
+@ https://github.com/clarivate/wosstarter_python_client.git
