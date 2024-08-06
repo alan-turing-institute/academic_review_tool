@@ -7,13 +7,16 @@ name = "academic-review-tool"
 version = "1.0.0"
 description = "The Academic Review Tool (ART) is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale."
 readme = "README.md"
-authors = [{ name = "Jamie Hancock, email = "academic_review_tool@outlook.com" }]
+authors = [ 
+        {name = "Jamie Hancock, email = "academic_review_tool@outlook.com"},
+        ]
 license = { file = "LICENSE" }
 classifiers = [
     "License :: GNU General Public License v3.0",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-]
+            ]
+
 keywords = ["literature review", "academic", "bibliometrics", "crossref", "scopus", "web of science"]
 dependencies = [
     "beautifulsoup4>=4.11.1", 
