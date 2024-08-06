@@ -1,4 +1,4 @@
-from ..utils.basics import results_cols
+from ..utils.basics import results_cols, blockPrint, enablePrint
 
 import pandas as pd
 import numpy as np
@@ -6,8 +6,10 @@ import numpy as np
 api_key = 'e015290bc75d27a1814cde5c468523e7'
 
 import pybliometrics # type: ignore
-    
+
+blockPrint()
 pybliometrics.scopus.create_config(keys = [api_key])
+enablePrint()
 
 from pybliometrics.scopus import AbstractRetrieval, ScopusSearch # type: ignore
 
