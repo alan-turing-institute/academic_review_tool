@@ -126,7 +126,7 @@ def parse_pdf_text(input_data):
             if lines[i] not in new_lines:
                 new_lines.append(lines[i])
 
-    new_lines = pd.Series(new_lines).str.replace(' \.', '.').str.replace(' ;', ';').str.replace(' :', ':').str.replace(' ,', ',').str.strip().to_list()
+    new_lines = pd.Series(new_lines).str.replace(' \\.', '.').str.replace(' ;', ';').str.replace(' :', ':').str.replace(' ,', ',').str.strip().to_list()
     
 
     text = ' '.join(new_lines[1:]).replace('<p>', '\n').replace('  ', '')
