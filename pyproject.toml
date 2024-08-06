@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "academic-review-tool"
+version = "1.0.0"
+description = "The Academic Review Tool (ART) is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale."
+readme = "README.md"
+authors = [{ name = "Real Python", email = "info@realpython.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: GNU General Public License v3.0",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["literature review", "academic", "bibliometrics", "crossref", "scopus"]
+dependencies = { file = "requirements.txt" }
+
+
+requires-python = ">=3.9"
+
+
+[project.urls]
+Homepage = "https://github.com/alan-turing-institute/academic_review_tool"
+
+[project.scripts]
+realpython = "art.__init__:main"
