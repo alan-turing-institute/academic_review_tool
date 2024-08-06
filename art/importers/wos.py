@@ -7,12 +7,12 @@ from pprint import pprint
 import pandas as pd
 import numpy as np
 
-import metaknowledge as mk
+# import metaknowledge as mk
 
-import clarivate.wos_starter.client as wos_client # type: ignore
-from clarivate.wos_starter.client.rest import ApiException # type: ignore
-from clarivate.wos_starter.client.models.documents_list import DocumentsList # type: ignore
-from clarivate.wos_starter.client.models.journals_list import JournalsList # type: ignore
+from ..wosstarter_python_client.clarivate.wos_starter import client as wos_client
+from ..wosstarter_python_client.clarivate.wos_starter.client.rest import ApiException
+from ..wosstarter_python_client.clarivate.wos_starter.client.models.documents_list import DocumentsList # type: ignore
+from ..wosstarter_python_client.clarivate.wos_starter.client.models.journals_list import JournalsList # type: ignore
 
 configuration = wos_client.Configuration(
     host = "http://api.clarivate.com/apis/wos-starter/v1"
@@ -20,16 +20,16 @@ configuration = wos_client.Configuration(
 
 configuration.api_key['ClarivateApiKeyAuth'] = '7a6bd360df2d18446f24bc26c85ab72fdbe4091f'
 
-def import_wos(file_path: str = 'request_input'):
+# def import_wos(file_path: str = 'request_input'):
 
-    if file_path == 'request_input':
-        file_path = input('File path: ')
+#     if file_path == 'request_input':
+#         file_path = input('File path: ')
     
-    file_path = file_path.strip()
+#     file_path = file_path.strip()
 
-    RC = mk.RecordCollection(file_path)
+#     RC = mk.RecordCollection(file_path)
 
-    return RC
+#     return RC
 
 def extract_source(source_dict):
 
