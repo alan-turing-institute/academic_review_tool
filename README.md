@@ -41,6 +41,13 @@ The tool is object-oriented. It leverages Pandas, Numpy, iGraph, and other stand
 
 ART can read and write your results to a large variety of file types (e.g. .xlsx, .csv, .txt, .json, .graphML).
 
+## Installation
+
+To install using PyPi, run the following code in your command interface:
+```bash
+pip install academic-review-tool
+```
+
 ## Beginners Guide
 
 

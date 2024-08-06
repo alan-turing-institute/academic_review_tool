@@ -8,7 +8,7 @@ Corpus extracted from names_dataset module + NLTK module. Stored locally for eff
 import json
 from pathlib import Path
 
-here = Path(__file__).parent
+here = str(Path(__file__).parent)
 
 with open(f'{here}/names/all_personal_names.txt', 'r') as file:
     all_personal_names = file.read()
