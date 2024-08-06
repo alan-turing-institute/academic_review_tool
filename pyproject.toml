@@ -44,8 +44,7 @@ dependencies = [
     "trafilatura>=1.6.3", 
     "wayback>=0.4.3", 
     "selenium>=4.18.1", 
-    "selectolax>=0.3.17",
-    "pip @ git+https://github.com/clarivate/wosstarter_python_client.git"
+    "selectolax>=0.3.17"
     ]
 
 
