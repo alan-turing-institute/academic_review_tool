@@ -12,7 +12,7 @@ import copy
 import requests
 import numpy as np
 import pandas as pd
-from pypdf import PdfFileReader, PdfReader, PdfWriter
+from pypdf import PdfReader
 from nltk.tokenize import word_tokenize, sent_tokenize
 
 
