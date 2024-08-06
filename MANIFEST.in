@@ -1,0 +1,17 @@
+# MANIFEST.in
+
+include art/datasets/cities/*.txt
+include art/datasets/cities/*.json
+include art/datasets/countries/*.txt
+include art/datasets/countries/*.json
+include art/datasets/languages/*.txt
+include art/datasets/languages/*.json
+include art/datasets/names/*.txt
+include art/datasets/names/*.json
+include art/datasets/stopwords/*.txt
+include art/datasets/stopwords/*.json
+include art/art/wosstarter_python_client_master/*
+include requirements.txt
+global-exclude art/__pycache__/*
+global-exclude art/*/__pycache__/*
+global-exclude art/*/*/__pycache__/*
