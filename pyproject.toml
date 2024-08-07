@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "academic_review_tool"
-version = "1.0.6"
+version = "1.0.7"
 description = "The Academic Review Tool (ART) is a package for performing academic reviews and bibliometric analyses in Python. It offers capabilities for discovering, retrieving, and analysing academic literature at scale."
 readme = "README.md"
 authors = [ 
@@ -34,7 +34,8 @@ dependencies = [
     "PyPDF2>=3.0.1", 
     "python-docx>=1.1.0", 
     "python-igraph>=0.10.6", 
-    "python-Levenshtein>=0.25.0", 
+    "python-Levenshtein>=0.25.0",
+    "pybliometrics",
     "igraph>=0.10.6", 
     "Levenshtein>=0.25.0", 
     "requests", 
