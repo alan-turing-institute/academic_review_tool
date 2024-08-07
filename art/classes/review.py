@@ -6,7 +6,7 @@ from ..importers.pdf import read_pdf_to_table
 from ..importers.crossref import search_works, lookup_doi, lookup_dois, lookup_journal, lookup_journals, search_journals, get_journal_entries, search_journal_entries, lookup_funder, lookup_funders, search_funders, get_funder_works, search_funder_works
 from ..importers.crossref import query_builder as crossref_query_builder
 from ..importers.scopus import query_builder as scopus_query_builder, search as search_scopus, lookup as lookup_scopus
-from ..importers.wos import search as search_wos, query_builder as wos_query_builder
+# from ..importers.wos import search as search_wos, query_builder as wos_query_builder
 from ..importers.search import search as api_search
 
 from ..internet.scrapers import scrape_article, scrape_doi, scrape_google_scholar, scrape_google_scholar_search
@@ -1778,92 +1778,92 @@ class Review:
 
         return df
 
-    def search_wos(self,
-                   all_fields = None,
-            title = None,
-            year = None,
-            author = None,
-            author_identifier = None,
-            affiliation = None,
-            doctype = None,
-            doi = None,
-            issn = None,
-            isbn = None,
-            pubmed_id = None,
-            source_title = None,
-            volume = None,
-            page = None,
-            issue = None,
-            topics = None,
-            default_operator = 'AND',
-           database: str = 'WOK',
-           limit: int = 10,
-           page_limit: int = 1,
-           sort_field: str = 'RS+D',
-           modified_time_span = None,
-           tc_modified_time_span = None,
-           detail = None, 
-           add_to_results = False,
-           drop_duplicates = False,
-           drop_empty_rows = False
-           ):
+    # def search_wos(self,
+    #                all_fields = None,
+    #         title = None,
+    #         year = None,
+    #         author = None,
+    #         author_identifier = None,
+    #         affiliation = None,
+    #         doctype = None,
+    #         doi = None,
+    #         issn = None,
+    #         isbn = None,
+    #         pubmed_id = None,
+    #         source_title = None,
+    #         volume = None,
+    #         page = None,
+    #         issue = None,
+    #         topics = None,
+    #         default_operator = 'AND',
+    #        database: str = 'WOK',
+    #        limit: int = 10,
+    #        page_limit: int = 1,
+    #        sort_field: str = 'RS+D',
+    #        modified_time_span = None,
+    #        tc_modified_time_span = None,
+    #        detail = None, 
+    #        add_to_results = False,
+    #        drop_duplicates = False,
+    #        drop_empty_rows = False
+    #        ):
         
-        df = search_wos(
-            all_fields = all_fields,
-            title = title,
-            year = year,
-            author = author,
-            author_identifier = author_identifier,
-            affiliation = affiliation,
-            doctype = doctype,
-            doi = doi,
-            issn = issn,
-            isbn = isbn,
-            pubmed_id = pubmed_id,
-            source_title = source_title,
-            volume = volume,
-            page = page,
-            issue = issue,
-            topics = topics,
-            default_operator = default_operator,
-           database = database,
-           limit = limit,
-           page_limit = page_limit,
-           sort_field = sort_field,
-           modified_time_span = modified_time_span,
-           tc_modified_time_span = tc_modified_time_span,
-           detail = detail
-           )
+    #     df = search_wos(
+    #         all_fields = all_fields,
+    #         title = title,
+    #         year = year,
+    #         author = author,
+    #         author_identifier = author_identifier,
+    #         affiliation = affiliation,
+    #         doctype = doctype,
+    #         doi = doi,
+    #         issn = issn,
+    #         isbn = isbn,
+    #         pubmed_id = pubmed_id,
+    #         source_title = source_title,
+    #         volume = volume,
+    #         page = page,
+    #         issue = issue,
+    #         topics = topics,
+    #         default_operator = default_operator,
+    #        database = database,
+    #        limit = limit,
+    #        page_limit = page_limit,
+    #        sort_field = sort_field,
+    #        modified_time_span = modified_time_span,
+    #        tc_modified_time_span = tc_modified_time_span,
+    #        detail = detail
+    #        )
         
-        for c in df.columns:
-                if c not in self.results.columns:
-                    df = df.drop(c, axis=1)
+    #     for c in df.columns:
+    #             if c not in self.results.columns:
+    #                 df = df.drop(c, axis=1)
 
-        if add_to_results == True:
+    #     if add_to_results == True:
             
-            query = wos_query_builder(all_fields = all_fields,
-                                        title = title,
-                                        year = year,
-                                        author = author,
-                                        author_identifier = author_identifier,
-                                        affiliation = affiliation,
-                                        doctype = doctype,
-                                        doi = doi,
-                                        issn = issn,
-                                        isbn = isbn,
-                                        pubmed_id = pubmed_id,
-                                        source_title = source_title,
-                                        volume = volume,
-                                        page = page,
-                                        issue = issue,
-                                        topics = topics,
-                                        default_operator = default_operator)
+    #         query = wos_query_builder(all_fields = all_fields,
+    #                                     title = title,
+    #                                     year = year,
+    #                                     author = author,
+    #                                     author_identifier = author_identifier,
+    #                                     affiliation = affiliation,
+    #                                     doctype = doctype,
+    #                                     doi = doi,
+    #                                     issn = issn,
+    #                                     isbn = isbn,
+    #                                     pubmed_id = pubmed_id,
+    #                                     source_title = source_title,
+    #                                     volume = volume,
+    #                                     page = page,
+    #                                     issue = issue,
+    #                                     topics = topics,
+    #                                     default_operator = default_operator)
 
-            self.activity_log.add_activity(type='API search', activity='searched World of Science and added to results', location=['results'], database=database, query=query)
-            self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
+    #         self.activity_log.add_activity(type='API search', activity='searched World of Science and added to results', location=['results'], database=database, query=query)
+    #         self.results.add_dataframe(dataframe=df, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows) # type: ignore
 
 
-        return df
+    #     return df
 
     def lookup_doi(self, doi = 'request_input', timeout = 60):
         return lookup_doi(doi=doi, timeout=timeout)
@@ -2221,7 +2221,7 @@ class Review:
                     timeout = 60,
                     crossref = True,
                     scopus = True,
-                    wos = True, 
+                    wos = False, 
                     add_to_results = False):
         
         df = api_search(default_query = default_query,

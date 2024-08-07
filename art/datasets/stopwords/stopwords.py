@@ -4,11 +4,11 @@ import pandas as pd
 
 # Importing Stopwords corpus as an NLTK text
 try:
-    from nltk.corpus import stopwords as nltk_stopwords
+    from nltk.corpus import stopwords as nltk_stopwords # type: ignore
     nltk_stopwords.words()
 except:
     download('stopwords')
-    from nltk.corpus import stopwords as nltk_stopwords
+    from nltk.corpus import stopwords as nltk_stopwords # type: ignore
     
 nltk_stopwords = list(nltk_stopwords.words())
 
