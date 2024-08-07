@@ -11,7 +11,7 @@ except:
     
 nltk_stopwords = list(nltk_stopwords.words())
 
-with open('/Users/jhancock/Documents/Tool_dev/Investigative_data_analyser/Development/Current/idea/datasets/stopwords/en_stopwords.txt', 'r') as file:
+with open('/Users/jhancock/Documents/Tool_dev/Investigative_data_analyser/Development/Current/idea/datasets/stopwords/en_stopwords.txt', 'r', encoding='ascii') as file:
     en_stopwords = file.read()
     file.close()
 en_stopwords = en_stopwords.replace("'", "").split(', ')
@@ -19,7 +19,7 @@ en_stopwords = en_stopwords.replace("'", "").split(', ')
 en_stopwords_lower = pd.Series(en_stopwords).str.lower().to_list()
 en_stopwords = list(set(en_stopwords_lower + en_stopwords))
 
-with open('/Users/jhancock/Documents/Tool_dev/Investigative_data_analyser/Development/Current/idea/datasets/stopwords/html_stopwords.txt', 'r') as file:
+with open('/Users/jhancock/Documents/Tool_dev/Investigative_data_analyser/Development/Current/idea/datasets/stopwords/html_stopwords.txt', 'r', encoding='utf-8') as file:
     html_stopwords = file.read()
     file.close()
 html_stopwords = html_stopwords.replace("'", "").split(', ')
