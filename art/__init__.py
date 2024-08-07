@@ -36,7 +36,7 @@ from .importers.crossref import search_works as search_crossref
 from .importers.scopus import search as search_scopus, lookup as lookup_scopus
 from .importers.orcid import lookup_orcid, search as search_orcid
 from .importers.search import search as api_search
-from .importers import pdf, orcid, crossref, scopus, jstor, wos
+# from .importers import pdf, orcid, crossref, scopus, jstor, wos
 from .classes import Results, References, Author, Authors, Funder, Funders, Affiliation, Affiliations, Review
 from .classes.networks import Network, Networks
 from .classes.citation_crawler import academic_scraper as scrape

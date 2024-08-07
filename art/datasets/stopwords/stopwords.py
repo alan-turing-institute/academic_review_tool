@@ -1,5 +1,5 @@
 from pathlib import Path
-from nltk import download
+from nltk import download # type: ignore
 import pandas as pd
 
 # Importing Stopwords corpus as an NLTK text
