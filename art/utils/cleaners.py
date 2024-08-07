@@ -14,7 +14,10 @@ import requests
 # import requests_html <-- raising an error
 # from requests_html import HTML
 
+import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize # type: ignore
+
+nltk.download('punkt')
 
 def join_list_by_colon(item):
     
