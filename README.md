@@ -1,7 +1,3 @@
----
-title: 'Academic Review Tool (ART)'
----
-
 Academic Review Tool (ART)
 ===
 
