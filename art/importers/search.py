@@ -1,5 +1,5 @@
 from .scopus import search as search_scopus
-from .wos import search as search_wos
+# from .wos import search as search_wos
 from .crossref import search_works as search_crossref
 from .orcid import search as search_orcid
 
@@ -107,41 +107,41 @@ def search(default_query = None,
             print(f'Encountered Scopus search error: {e}')
             pass
     
-    if wos == True:
+    # if wos == True:
 
-        if (all_fields is None) and (default_query is not None):
-            all_fields_updated = default_query
-        else:
-            all_fields_updated = all_fields
+        # if (all_fields is None) and (default_query is not None):
+        #     all_fields_updated = default_query
+        # else:
+        #     all_fields_updated = all_fields
 
-        try:
-            wos_result = search_wos(
-                all_fields = all_fields_updated,
-                title = title,
-                year = year,
-                author = author,
-                author_identifier = author_identifier,
-                affiliation = affiliation,
-                doctype = entry_type,
-                doi = doi,
-                issn = issn,
-                isbn = isbn,
-                pubmed_id = pubmed_id,
-                source_title = source_title,
-                volume = volume,
-                page = page,
-                issue = issue,
-                topics = topics,
-                default_operator = default_operator,
-                limit = limit_per_api)
+        # try:
+        #     wos_result = search_wos(
+        #         all_fields = all_fields_updated,
+        #         title = title,
+        #         year = year,
+        #         author = author,
+        #         author_identifier = author_identifier,
+        #         affiliation = affiliation,
+        #         doctype = entry_type,
+        #         doi = doi,
+        #         issn = issn,
+        #         isbn = isbn,
+        #         pubmed_id = pubmed_id,
+        #         source_title = source_title,
+        #         volume = volume,
+        #         page = page,
+        #         issue = issue,
+        #         topics = topics,
+        #         default_operator = default_operator,
+        #         limit = limit_per_api)
 
-            wos_result['repository'] = 'WOK'
+        #     wos_result['repository'] = 'WOK'
 
-            df = pd.concat([df, wos_result])
-            df = df.reset_index().drop('index',axis=1)
-        except Exception as e:
-            print(f'Encountered Web of Science search error: {e}')
-            pass
+        #     df = pd.concat([df, wos_result])
+        #     df = df.reset_index().drop('index',axis=1)
+        # except Exception as e:
+        #     print(f'Encountered Web of Science search error: {e}')
+        #     pass
     
     if orcid == True:
 

@@ -31,7 +31,7 @@ def generate_work_id(work_data: pd.Series):
             
             else:
                 if '.Authors' in auths_type_str:
-                    work_data['authors'] = work_data['authors'].all['full_name'].sort_values().to_list()
+                    work_data['authors'] = work_data['authors'].summary['full_name'].sort_values().to_list()
             
 
         work_data = work_data.astype(str).str.lower()

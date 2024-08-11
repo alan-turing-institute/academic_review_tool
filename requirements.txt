@@ -16,6 +16,8 @@ PyPDF2>=3.0.1
 python-docx>=1.1.0
 python-igraph>=0.10.6
 python-Levenshtein>=0.25.0
+pybliometrics>=4.1
+pybtex
 igraph>=0.10.6
 Levenshtein>=0.25.0
 requests

@@ -1,7 +1,3 @@
----
-title: 'Academic Review Tool (ART)'
----
-
 Academic Review Tool (ART)
 ===
 
@@ -40,6 +36,13 @@ ART uses the following APIs:
 The tool is object-oriented. It leverages Pandas, Numpy, iGraph, and other standard Python libraries for ease of use. 
 
 ART can read and write your results to a large variety of file types (e.g. .xlsx, .csv, .txt, .json, .graphML).
+
+## Installation
+
+To install using PyPi, run the following code in your command interface:
+```bash
+pip install academic-review-tool
+```
 
 ## Beginners Guide
 

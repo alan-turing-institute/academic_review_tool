@@ -8,60 +8,60 @@ Corpus extracted from names_dataset module + NLTK module. Stored locally for eff
 import json
 from pathlib import Path
 
-here = Path(__file__).parent
+here = str(Path(__file__).parent)
 
-with open(f'{here}/names/all_personal_names.txt', 'r') as file:
+with open(f'{here}/names/all_personal_names.txt', 'r', encoding='utf-8') as file:
     all_personal_names = file.read()
     file.close()
 all_personal_names = all_personal_names.replace("'", "").split(', ')
 
-with open(f'{here}/names/first_names.txt', 'r') as file:
+with open(f'{here}/names/first_names.txt', 'r', encoding='utf-8') as file:
     first_names = file.read()
     file.close()
 first_names = first_names.replace("'", "").split(', ')
 
-with open(f'{here}/names/last_names.txt', 'r') as file:
+with open(f'{here}/names/last_names.txt', 'r', encoding='utf-8') as file:
     last_names = file.read()
     file.close()
 last_names = last_names.replace("'", "").split(', ')
 
-with open(f'{here}/names/nltk_names.txt', 'r') as file:
+with open(f'{here}/names/nltk_names.txt', 'r', encoding='ascii') as file:
     nltk_names = file.read()
     file.close()
 nltk_names = nltk_names.replace("'", "").split(', ')
 
 # Corpus extracted from country_list module. Stored locally for efficiency.
 
-with open(f'{here}/countries/countries_all.txt', 'r') as file:
+with open(f'{here}/countries/countries_all.txt', 'r', encoding='utf-8') as file:
     countries_all = file.read()
     file.close()
 countries_all = countries_all.replace("'", "").split(', ')
 
-with open(f'{here}/countries/country_names.json', 'r') as file:
+with open(f'{here}/countries/country_names.json', 'r', encoding='utf-8') as file:
     country_names = json.load(file)
     file.close()
 
 # Corpus extracted from geonamescache module. Stored locally for efficiency.
-with open(f'{here}/cities/cities_all.txt', 'r') as file:
+with open(f'{here}/cities/cities_all.txt', 'r', encoding='utf-8') as file:
     cities_all = file.read()
     file.close()
 cities_all = cities_all.replace("'", "").split(', ')
 
-with open(f'{here}/cities/cities_en.json', 'r') as file:
+with open(f'{here}/cities/cities_en.json', 'r', encoding='ascii') as file:
     cities_en = json.load(file)
     file.close()
 
 # Corpus extracted from language_data and langcodes modules. Stored locally for efficiency.
 
-with open(f'{here}/languages/language_names.json', 'r') as file:
+with open(f'{here}/languages/language_names.json', 'r', encoding='ascii') as file:
     language_names = json.load(file)
     file.close()
 
-with open(f'{here}/languages/languages_en.json', 'r') as file:
+with open(f'{here}/languages/languages_en.json', 'r', encoding='ascii') as file:
     languages_en = json.load(file)
     file.close()
 
-with open(f'{here}/languages/language_codes.txt', 'r') as file:
+with open(f'{here}/languages/language_codes.txt', 'r', encoding='ascii') as file:
     language_codes = file.read()
     file.close()
 
