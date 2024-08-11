@@ -35,6 +35,21 @@ from igraph import Graph # type: ignore
 
 def add_pdf(self, path = 'request_input'):
         
+        """
+        Imports a PDF file using a filepath and adds to the Results dataframe.
+        
+        Parameters
+        ----------
+        path : str
+            filepath for PDF. Requests input if none passed explicitly.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
+
+
         if path == 'request_input':
             path = input('Path to PDF (URL or filepath): ')
 
@@ -56,6 +71,20 @@ Results.add_pdf = add_pdf # type: ignore
 
 def add_row(self, data):
 
+        """
+        Adds inputted data as a row to Results dataframe.
+        
+        Parameters
+        ----------
+        data : pandas.Series
+            data to add to Results.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
+
         if type(data) != pd.Series:
             raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
 
@@ -70,7 +99,6 @@ def add_row(self, data):
         work_id = generate_work_id(data)
         work_id = self.get_unique_id(work_id, index)
         data['work_id'] = work_id
-
         
         self.loc[index] = data
         self.format_authors()
@@ -79,6 +107,28 @@ Results.add_row = add_row # type: ignore
 
 def add_dataframe(self,  dataframe: pd.DataFrame, drop_duplicates = False, drop_empty_rows = False, update_work_ids = True, format_authors = False):
         
+        """
+        Merges inputted dataframe with Results dataframe.
+        
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            dataframe to add to Results.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_work_ids : bool
+            whether to update results work ID's.
+        format_authors : bool
+            whether to format author data.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
+
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
 
@@ -116,16 +166,39 @@ def add_dataframe(self,  dataframe: pd.DataFrame, drop_duplicates = False, drop_
 Results.add_dataframe = add_dataframe # type: ignore
 
 def has_formatted_citations(self):
+        
+        """
+        Returns all results entries which contain properly formatted citations.
+        """
+
         return self[self['citations'].apply(is_formatted_reference)]
 
 Results.has_formatted_citations = has_formatted_citations # type: ignore
 
 def lacks_formatted_citations(self):
+        
+        """
+        Returns all results entries which lack properly formatted citations.
+        """
+
         return self[~self['citations'].apply(is_formatted_reference)]
 
 Results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
 
 def format_citations(self, add_work_ids = False, update_from_doi = False, verbose = True):
+        
+        """
+        Formats all results entries' citations data as References objects.
+        
+        Parameters
+        ----------
+        add_work_ids : bool
+            whether to add new work ID's to results entries.
+        update_from_doi : bool
+            whether to update results data from DOI's.
+        verbose : bool
+            whether to print dialogue during formatting.
+        """
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
@@ -175,6 +248,10 @@ Results.format_citations = format_citations # type: ignore
 
 def format_authors(self):
 
+        """
+        Formats all results entries' authors data as Authors objects.
+        """
+
         if len(self[self['authors_data'].isna()]) < len(self['authors_data']):
             authors_data = self['authors_data']
         
@@ -190,6 +267,26 @@ def format_authors(self):
 Results.format_authors = format_authors # type: ignore
     
 def add_citations_to_results(self, add_work_ids = False, update_from_doi = False, drop_duplicates = False, drop_empty_rows = True):
+
+        """
+        Formats all results entries' citations and adds them to the Results object.
+        
+        Parameters
+        ----------
+        add_work_ids : bool
+            whether to add work ID's to newly added results entries. Defaults to False.
+        update_from_doi : bool
+            whether to update results data from DOI's. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove duplicate rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -309,6 +406,11 @@ class Review:
         
         """
         Retrieves Review contents or results using an index/key.
+
+        Returns
+        -------
+        item : object
+            item associated with the inputted key.
         """
         
         if key in self.__dict__.keys():
@@ -349,18 +451,37 @@ class Review:
         
         """
         Returns the Review's attributes as a list.
+
+        Returns
+        -------
+        contents : list
+            the names of the Review object's attributes.
         """
         
         return self.__dict__.keys()
     
     def __len__(self):
 
+        """
+        Returns the number of entries in the Results table.
+
+        Returns
+        -------
+        result : int
+            the number of results entries contained in the Results dataframe.
+        """    
+        
         return len(self.results)
     
     def count_results(self):
         
         """
         Returns the number of entries in the Results table.
+
+        Returns
+        -------
+        result : int
+            the number of results entries contained in the Results dataframe.
         """
         
         return len(self.results)
@@ -369,6 +490,11 @@ class Review:
         
         """
         Returns the Review as a list.
+
+        Returns
+        -------
+        result : list
+            Review object formatted as a list.
         """
         
         return [i for i in self]
@@ -377,6 +503,11 @@ class Review:
         
         """
         Returns the Review as a dictionary.  Excludes the Review's 'properties' attribute.
+
+        Returns
+        -------
+        output_dict : dict
+            Review object formatted as a dictionary.
         """
         
         output_dict = {}
@@ -386,37 +517,94 @@ class Review:
         return output_dict
     
     def to_bibtex(self):
+        
+        """
+        Returns an object containing Results data in bibtex format.
+        """
+
         return self.results.to_bibtex()
     
     def to_yaml(self):
+
+        """
+        Returns an object containing Results data in .yaml format.
+        """
+
         return self.results.to_yaml()
     
     def export_bibtex(self, file_name = 'request_input', folder_path= 'request_input'):
+
+        """
+        Exports Results data as a .bib file.
+        
+        Parameters
+        ----------
+        file_name : str
+            name for export file. Defaults to requesting from user input.
+        folder_path : str
+            directory path for folder to export to. Defaults to requesting from user input.
+        """
+
         return self.results.export_bibtex(file_name=file_name, folder_path=folder_path)
 
     def export_yaml(self, file_name = 'request_input', folder_path= 'request_input'):
+
+        """
+        Exports Results data as a .yaml file.
+        
+        Parameters
+        ----------
+        file_name : str
+            name for export file. Defaults to requesting from user input.
+        folder_path : str
+            directory path for folder to export to. Defaults to requesting from user input.
+        """
+
         return self.results.export_yaml(file_name=file_name, folder_path=folder_path)
 
     def copy(self):
         
         """
-        Returns the a copy of the Review.
+        Returns the a copy of the Review object.
         """
         
         return copy.deepcopy(self)
     
-    def get_result(self, row_position, column_position = None):
+    def get_result(self, index_position, column_position = None):
         
         """
-        Returns a result when given its attribute name.
+        Returns a result when given its index position, with an option for specifying column position. 
+        Equivalent to pandas.DataFrame.loc[...]
+
+        Parameters
+        ----------
+        index_position : int
+            index position of result entry to return from Results dataframe.
+        column_position : object
+            name of column of datapoint to return from Results dataframe.
+        
+        Returns
+        -------
+        result : object
+            the selected object.
         """
         
         if column_position == None:
-            return self.results.loc[row_position]
+            return self.results.loc[index_position]
         else:
-            return self.results.loc[row_position, column_position]
+            return self.results.loc[index_position, column_position]
     
     def get_affiliations_dict(self):
+
+        """
+        Returns the all affiliations associated with Authors objects as a dictionary.
+
+        Returns
+        -------
+        result : Affiliations
+            Affiliations associated with Authors objects.
+        """
+
         return self.authors.affiliations()
 
     def get_name_str(self):
@@ -440,6 +628,22 @@ class Review:
     
     def add_pdf(self, path = 'request_input', update_formatting: bool = True):
         
+        """
+        Reads a PDF and adds its data to the Results dataframe.
+
+        Parameters
+        ----------
+        path : str
+            file path for PDF to read. Defaults to request from user input.
+        update_formatting : bool
+            whether to format the added data (e.g., citations, authors, funders, and affiliations)
+        
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         old_res_len = len(self.results)
         self.results.add_pdf(path) # type: ignore
         new_res_len = len(self.results)
@@ -453,11 +657,18 @@ class Review:
 
         self.update_properties()
 
+        return self
+
     def varstr(self):
         
         """
         Returns the Review's name as a string. Defaults to using its variable name; falls back to using its name property.
         
+        Returns
+        -------
+        string : str
+            the Review's name as a string.
+
         Notes
         -----
             * Searches global environment dictionary for objects sharing Review's ID. Returns key if found.
@@ -483,11 +694,54 @@ class Review:
             
         return string
     
-    def to_dataframe(self):
-        return self.results.to_dataframe() # type: ignore
+    def to_dataframe(self, attribute: str = 'results'):
+
+        """
+        Returns one of the Review's datasets as a Pandas DataFrame. Defaults to returning the Results dataset.
+        
+        Parameters
+        ----------
+        attribute : str
+            the name of the Review dataset to return.
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            the dataset as a pandas dataframe.
+        """
+
+        df = pd.DataFrame(dtype=object)
+
+        if attribute.lower() == 'results':
+            df = self.results.to_dataframe() # type: ignore
+        
+        if attribute.lower() == 'authors':
+            df = self.authors.to_dataframe() # type: ignore
+        
+        if attribute.lower() == 'funders':
+            df = self.funders.to_dataframe() # type: ignore
+        
+        if (attribute.lower() == 'affiliations') or (attribute.lower() == 'affils'):
+            df = self.affiliations.to_dataframe() # type: ignore
+
+        return df
 
     def from_dataframe(dataframe: pd.DataFrame): # type: ignore
         
+        """
+        Creates a Review object from a Pandas DataFrame.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to use.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
         review.format() # type: ignore
@@ -495,6 +749,10 @@ class Review:
         return review
 
     def format_funders(self):
+
+        """
+        Formats results entries' funders data into Funders objects and stores in Review's Funders attribute.
+        """
 
         self.results.format_funders() # type: ignore
 
@@ -528,6 +786,11 @@ class Review:
                     continue
 
     def format_affiliations(self):
+
+        """
+        Formats authors' affiliations data into Affiliations objects and stores in Review's Affiliations attribute.
+        """
+
         self.authors.format_affiliations()
 
         affils_data = self.authors.summary['affiliations'].to_list()
@@ -563,9 +826,30 @@ class Review:
                     continue
 
     def format_citations(self, add_work_ids = False, update_from_doi = False, verbose=True):
+
+        """
+        Formats results entries' citations data into References objects.
+
+        Parameters
+        ----------
+        add_work_ids : bool
+            whether to add work ID's to References entries.
+        """
+
         self.results.format_citations(add_work_ids = add_work_ids, update_from_doi=update_from_doi, verbose=verbose) # type: ignore
 
     def format_authors(self, drop_duplicates = False, drop_empty_rows=True):
+
+        """
+        Formats results entries' authors data into Authors objects and stores in Review's Authors attribute.
+
+        Parameters
+        ----------
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         self.results.format_authors() # type: ignore
 
@@ -589,6 +873,19 @@ class Review:
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
     
     def update_author_attrs(self, ignore_case: bool = True, drop_duplicates = False, drop_empty_rows=True):
+
+        """
+        Formats authors entries, identifies their publications, and stores these.
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -646,6 +943,15 @@ class Review:
         
     def update_funder_attrs(self, ignore_case: bool = True):
 
+        """
+        Formats funders entries, identifies their publications, and stores these.
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        """
+
         self.funders.sync_all()
 
         f_data = self.funders.summary[['funder_id', 'uri', 'crossref_id', 'website','name']]
@@ -701,6 +1007,15 @@ class Review:
 
     def update_affiliation_attrs(self, update_authors: bool = True, ignore_case: bool = True):
         
+        """
+        Formats affiliations entries, identifies their publications, and stores these.
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        """
+
         if update_authors == True:
             self.update_author_attrs(ignore_case=ignore_case)
 
@@ -760,11 +1075,46 @@ class Review:
                 
     def update_entity_attrs(self, ignore_case: bool = True):
         
+        """
+        Formats authors, funders, and affiliations entries; identifies their publications; and stores these
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        """
+
         self.update_author_attrs(ignore_case=ignore_case)
         self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
         self.update_funder_attrs(ignore_case=ignore_case)
 
     def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True, drop_duplicates = False, drop_empty_rows=True):
+        
+        """
+        Returns a dictionary of co-authors.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author attributes.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_authors : bool
+            whether to store the dict of co-authors in the Review's Authors attribute.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+
+        Returns
+        -------
+        output : dict
+            a dictionary containing co-authors. 
+                * Keys: author IDs
+                * Values: co-authors
+        """
 
         if format == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -815,6 +1165,32 @@ class Review:
 
     def get_cofunders(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_funders: bool = True):
 
+        """
+        Returns a dictionary of co-funders.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update funder attributes.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_funders : bool
+            whether to store the dict of co-funders in the Review's Funders attribute.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+
+        Returns
+        -------
+        output : dict
+            a dictionary containing co-funders. 
+                * Keys: funder IDs
+                * Values: co-funders
+        """
+
         if format == True:
             self.format()
         
@@ -864,6 +1240,17 @@ class Review:
  
     def remove_duplicates(self, drop_empty_rows=True, use_api=False):
 
+        """
+        Removes duplicate data entries from results, authors, funders, and affiliations datasets.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        use_api : bool
+            whether to update data using CrossRef, Orcid, and other APIs.
+        """
+
         orig_res_len = len(self.results)
         self.results.remove_duplicates(drop_empty_rows=drop_empty_rows, update_from_api=use_api) # type: ignore
         new_res_len = len(self.results)
@@ -893,6 +1280,21 @@ class Review:
 
 
     def format(self, update_entities = False, drop_duplicates = False, drop_empty_rows=True, verbose=False):
+
+        """
+        Parses and formats all datasets (i.e., results, authors, funders and affiliations).
+
+        Parameters
+        ----------
+        update_attrs : bool
+            whether to update entity attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        verbose : bool
+            whether to print formatting dialogue.
+        """
 
         self.format_funders()
         self.format_citations(verbose=verbose)
@@ -925,6 +1327,19 @@ class Review:
 
     def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = False, drop_empty_rows = True):
         
+        """
+        Formats all results entries' citations and adds them to the Review's Results attribute.
+        
+        Parameters
+        ----------
+        update_formatting : bool
+            whether to format results, authors, funders, and affiliations data.
+        drop_empty_rows : bool
+            whether to remove duplicate rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        """
+
         self.results.add_citations_to_results(drop_duplicates = drop_duplicates, drop_empty_rows = drop_empty_rows) # type: ignore
 
         if drop_empty_rows == True:
@@ -952,6 +1367,19 @@ class Review:
 
     def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = False, drop_empty_rows=True):
 
+        """
+        Updates Authors data using the Orcid API.
+
+        Parameters
+        ----------
+        update_formatting : bool
+            whether to format results, authors, funders, and affiliations data.
+        drop_empty_rows : bool
+            whether to remove duplicate rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        """
+
         orcid_len = len(self.authors.with_orcid())
 
         old_auths_len = len(self.authors.summary)
@@ -967,6 +1395,28 @@ class Review:
             self.format()
         
     def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = True):
+
+        """
+        Merges inputted dataframe with Review's Results dataset.
+        
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            dataframe to add to Results.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_work_ids : bool
+            whether to update results entries' work ID's.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
 
         orig_len = len(self.results)
         self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
@@ -995,8 +1445,25 @@ class Review:
         
         return self
 
-    def import_bibtex(self, file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+    def import_bibtex(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = False, update_entities = False):
         
+        """
+        Reads a .bib file and adds its data to Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1010,19 +1477,74 @@ class Review:
         
         self.properties.file_location = file_path
         self.properties.update_file_type()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
+
+        if update_formatting == True:
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+        
+        if update_entities == True: 
+            self.update_entity_attrs()
     
-    def from_bibtex(file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+    def from_bibtex(file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = False, update_entities = False):
+
+        """
+        Reads .bib file and returns a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
 
         review = Review(file_location=file_path)
-        review.import_bibtex(file_path=file_path, update_formatting=update_formatting, update_entities=update_entities)
+        review.import_bibtex(file_path=file_path, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_formatting=update_formatting, update_entities=update_entities)
 
         return review
 
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Reads an .xlsx file and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1062,14 +1584,40 @@ class Review:
 
         return self
     
-    def from_excel(file_path = 'request_input', sheet_name = None, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+    def from_excel(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
+        """
+        Reads an .xlsx file and returns as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_entities : bool
+            whether to update entity attributes.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
         review = Review(file_location=file_path)
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
-        review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        if update_formatting == True:
+            review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         review.activity_log.add_activity(type='data import', activity='created Review from imported Excel file', location=['results', 'authors', 'funders', 'affiliations'])
         
@@ -1077,6 +1625,28 @@ class Review:
 
     def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Reads a .csv file and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1118,11 +1688,34 @@ class Review:
     
     def from_csv(file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
+        """
+        Reads a .csv file and returns as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
         review = Review(file_location=file_path)
         review.results = Results.from_csv(file_path) # type: ignore
+
         if update_formatting == True:
             review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -1131,6 +1724,22 @@ class Review:
         return review
 
     def import_json(self, file_path = 'request_input', update_formatting: bool = True):
+
+        """
+        Reads a .json file and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -1148,6 +1757,20 @@ class Review:
     
     def from_json(file_path = 'request_input'): # type: ignore
 
+        """
+        Reads a .json file and returns as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1157,6 +1780,36 @@ class Review:
         return review
     
     def import_file(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
+        
+        """
+        Reads a file, determines its file type, and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of an Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Notes
+        -----
+        Can read:
+            * .xlsx
+            * .csv
+            * .json
+            * .bib
+            * .yaml
+            * .txt
+            * .review
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -1179,6 +1832,41 @@ class Review:
 
     def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
+        """
+        Reads a file, determines its file type, and returns its data as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of an Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+        
+        Returns
+        -------
+        review : Review
+            a Review object.
+
+        Notes
+        -----
+        Can read:
+            * .xlsx
+            * .csv
+            * .json
+            * .bib
+            * .yaml
+            * .txt
+            * .review
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1190,6 +1878,34 @@ class Review:
 
     def import_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True):
         
+        """
+        Reads a file outputted by JSTOR's Constellate portal and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.    
+        
+        Notes
+        -----
+        Can read:
+            * .csv
+            * .json
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1217,6 +1933,29 @@ class Review:
         self.properties.update_file_type()
 
     def from_jstor(file_path: str = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
+
+        """
+        Reads a file outputted by JSTOR's Constellate portal and returns its data as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Notes
+        -----
+        Can read:
+            * .csv
+            * .json
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
