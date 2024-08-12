@@ -2466,24 +2466,89 @@ class Review:
 
     def scrape_article(self, url = 'request_input'):
         
+        """
+        Scrapes article data from a given URL and adds to Results.
+
+        Parameters
+        ----------
+        url : str
+            url of article to scrape. Defaults to requesting from user input.
+        
+        Notes
+        -----
+        This function is capable of scraping:
+            * Frontiers
+            * ArXiv
+            * Springer
+            * Nature
+            * IEEE
+            * PubMed
+            * PMC
+            * SSRN
+            * HeinOnline
+            * MDPI
+            * ACM
+            * Project Muse
+            * Proquest
+            * JSTOR
+            * Google Scholar
+        """
+
         if url == 'request_input':
             url = input('URL: ')
 
         df = scrape_article(url)
-        self.activity_log.add_activity(type='web scraping', activity='scraped URL and added to results', location=['results'], url=url)
+        self.activity_log.add_activity(type='web scraping', activity=f'scraped {url} and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_doi(self, doi = 'request_input'):
         
+        """
+        Scrapes article data from a given DOI and adds to Results.
+
+        Parameters
+        ----------
+        doi : str
+            DOI of article to scrape. Defaults to requesting from user input.
+        
+        Notes
+        -----
+        This function is capable of scraping:
+            * Frontiers
+            * ArXiv
+            * Springer
+            * Nature
+            * IEEE
+            * PubMed
+            * PMC
+            * SSRN
+            * HeinOnline
+            * MDPI
+            * ACM
+            * Project Muse
+            * Proquest
+            * JSTOR
+            * Google Scholar
+        """
+
         if doi == 'request_input':
             doi = input('doi or URL: ')
 
         df = scrape_doi(doi)
         url = f'https://doi.org/{doi}'
-        self.activity_log.add_activity(type='web scraping', activity='scraped DOI and added to results', location=['results'], url=url)
+        self.activity_log.add_activity(type='web scraping', activity=f'scraped {url} and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_google_scholar(self, url = 'request_input'):
+
+        """
+        Scrapes article data from a given Google Scholar page and adds to Results.
+
+        Parameters
+        ----------
+        url : str
+            url of Google Scholar page to scrape. Defaults to requesting from user input.
+        """
 
         if url == 'request_input':
             url = input('URL: ')
@@ -2494,6 +2559,15 @@ class Review:
     
     def scrape_google_scholar_search(self, url = 'request_input'):
 
+        """
+        Scrapes article data from a given Google Scholar search and adds to Results. 
+
+        Parameters
+        ----------
+        url : str
+            url of Google Scholar search to scrape. Defaults to requesting from user input.
+        """
+
         if url == 'request_input':
             url = input('URL: ')
 
@@ -2502,6 +2576,21 @@ class Review:
         self.results.add_dataframe(df) # type: ignore
     
     def scrape(self, url = 'request_input', add_to_results=True, drop_empty_rows = True, drop_duplicates = False):
+
+        """
+        Scrapes website data from a given URL. 
+
+        Parameters
+        ----------
+        url : str
+            url to scrape. Defaults to requesting from user input.
+        add_to_results : bool
+            whether to add scraped data to Results.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         if url == 'request_input':
             url = input('URL: ')
@@ -2535,11 +2624,55 @@ class Review:
                 select: list = None, # type: ignore
                 sample: int = None, # type: ignore
                 limit: int = None, # type: ignore
-                rate_limit: float = 0.1,
+                rate_limit: float = 0.05,
                 timeout = 60,
                 add_to_results = False
                 ) -> pd.DataFrame:
         
+        """
+        Searches CrossRef API and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            how long to wait for results before raising an error.
+        add_to_results : bool
+            whether to add search results to Review.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        df : Pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         df = search_works(bibliographic = bibliographic,
                 title = title,
                 author = author,
@@ -2622,6 +2755,91 @@ class Review:
                     drop_duplicates = False,
                     format=False):
         
+        """
+        Searches Scopus API and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        tile_abs_key_auth : str
+            a combined search. Searches for titles, abstracts, keywords, and author names. Defaults to None.
+        all_fields : str
+            searches all fields. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        year : str
+            searches for matching publication years. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_identifier : str
+            searches for Scopus author IDs. Defaults to None.
+        affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        publisher : str
+            searches for publisher names containing string. Defaults to None.
+        funder : str
+            searches for funder names containing string. Defaults to None.
+        abstract : str
+            searches for abstracts containing string. Defaults to None.
+        keywords : str
+            searches for matching keywords. Defaults to None.
+        doctype : str
+            searches for types of entries containing string. Defaults to None.
+        doi : str
+            searches for matching DOIs. Defaults to None.
+        issn : str
+            searches for matching ISSNs. Defaults to None.
+        isbn : str
+            searches for matching ISBNs. Defaults to None.
+        pubmed_id : str
+            searches for matching PubMed IDs (PMIDs). Defaults to None.
+        source_title : str
+            searches for source titles (e.g. journals, books) containing string. Defaults to None.
+        volume : str
+            searches for journal entries with matching volume numbers. Defaults to None.
+        page : str
+            searches for entries with matching page numbers. Defaults to None.
+        volume : str
+            searches for journal entries with matching issue numbers. Defaults to None.
+        language : str
+            searches for entries by language Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        language : str
+            searches for entries with citations that contain matching strings. Defaults to None.
+        default_operator : str
+            the default Boolean operator to build the search. Defaults to 'AND"
+        add_to_results : bool
+            whether to add search results to Review.
+        drop_duplicates : bool
+            whether to remove duplicated rows when adding to results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data when adding to results.
+        format : bool
+            whether to format results, authors, funders, and affiliations data when adding to results.
+        refresh : bool 
+        view : bool 
+        verbose : bool 
+        download : bool 
+        integrity_fields : None
+        integrity_action : str
+        subscriber : bool
+        
+        Returns
+        -------
+        df : Pandas.DataFrame
+            results from CrossRef API search.
+        
+        Options
+        -------
+        Options for default_operator:
+            * 'AND'
+            * 'AND NOT'
+            * 'NOT'
+            * 'OR'
+        """
+
         df = search_scopus(tile_abs_key_auth = tile_abs_key_auth,
                             all_fields = all_fields,
                             title = title,
@@ -2784,6 +3002,23 @@ class Review:
     #     return df
 
     def lookup_doi(self, doi = 'request_input', timeout = 60):
+
+        """
+        Looks up DOI using the CrossRef API.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            how long to wait for results before raising an error.
+
+        Returns
+        -------
+        df : Pandas.DataFrame
+            results from DOI lookup on CrossRef API.
+        """
+
         return lookup_doi(doi=doi, timeout=timeout)
     
     def lookup_scopus(self, 
@@ -2795,6 +3030,32 @@ class Review:
                       drop_duplicates = False,
                       drop_empty_rows = False
                       ):
+
+        """
+        Looks up work ID using the Scopus API.
+
+        Parameters
+        ----------
+        uid : str
+            Scopus ID, DOI, ISBN, ISSN, or Pubmed ID (PMID) to look up. Defaults to requesting from user input.
+        refresh : bool
+            whether to refresh the Scopus session.
+        view : str
+            sets the amount of detail returned. Defaults to 'META'.
+        add_to_results : bool
+            whether to add results to Review.
+        drop_duplicates : bool
+            whether to remove duplicated rows when adding to results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data when adding to results.
+        id_type : None
+
+
+        Returns
+        -------
+        df : Pandas.DataFrame
+            results from DOI lookup on CrossRef API.
+        """
 
         if uid == 'request_input':
             uid = input('ID: ')
@@ -2818,6 +3079,30 @@ class Review:
 
     def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Looks up DOI using the CrossRef API and adds to Review's results dataset.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            how long to wait for results before raising an error.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         old_len = len(self.results)
         self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
         new_len = len(self.results)
@@ -2854,16 +3139,85 @@ class Review:
 
     def from_doi(doi: str = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
+        """
+        Looks up DOI using the CrossRef API and returns as a Review object.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            how long to wait for results before raising an error.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         review = Review()
         review.add_doi(doi = doi, timeout = timeout, update_formatting = update_formatting, update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return review
 
-    def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+    def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.05, timeout = 60):
+
+        """
+        Looks up a list of DOIs using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            how long to wait for results before raising an error.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+
+        Returns
+        -------
+        result : Pandas.DataFrame
+            result of DOI lookups.
+        """
+
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
-    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
+    def add_dois(self, dois_list: list = [], rate_limit: float = 0.05, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Looks up a list of DOIs using the CrossRef API and adds to Review's results dataset.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            how long to wait for results before raising an error.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         old_len = len(self.results)
         self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
         new_len = len(self.results)
@@ -2899,7 +3253,33 @@ class Review:
 
         return self
     
-    def from_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+    def from_dois(dois_list: list = [], rate_limit: float = 0.05, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+
+        """
+        Looks up a list of DOIs using the CrossRef API and returns as a Review object.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            how long to wait for results before raising an error.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
 
         review = Review()
         review.add_dois(dois_list = dois_list, rate_limit=rate_limit, timeout = timeout, update_formatting = update_formatting, update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -2951,10 +3331,10 @@ class Review:
     def lookup_journal(self, issn = 'request_input', timeout = 60):
         return lookup_journal(issn = issn, timeout = timeout)
     
-    def lookup_journals(self, issns_list: list = [], rate_limit: float = 0.1, timeout: int = 60):
+    def lookup_journals(self, issns_list: list = [], rate_limit: float = 0.05, timeout: int = 60):
         return lookup_journals(issns_list = issns_list, rate_limit = rate_limit, timeout = timeout)
     
-    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60): # type: ignore
+    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.05, timeout = 60): # type: ignore
         return search_journals(*args, limit = limit, rate_limit=rate_limit, timeout = timeout)
     
     def get_journal_entries(self,
@@ -2963,7 +3343,7 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout = 60):
         
         return get_journal_entries(issn = issn, filter = filter, select = select, sample = sample, limit = limit, rate_limit = rate_limit, timeout = timeout)
@@ -2987,7 +3367,7 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout: int = 60,
                         add_to_results: bool = False) -> pd.DataFrame:
         
@@ -3025,10 +3405,10 @@ class Review:
     def lookup_funder(self, funder_id = 'request_input', timeout = 60):
         return lookup_funder(funder_id = funder_id, timeout = timeout)
     
-    def lookup_funders(self, funder_ids: list = [], rate_limit: float = 0.1, timeout = 60):
+    def lookup_funders(self, funder_ids: list = [], rate_limit: float = 0.05, timeout = 60):
         return lookup_funders(funder_ids=funder_ids, rate_limit=rate_limit, timeout = timeout)
     
-    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60): # type: ignore
+    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.05, timeout = 60): # type: ignore
         return search_funders(*args, limit=limit, rate_limit=rate_limit, timeout=timeout)
     
     def get_funder_works(self,
@@ -3037,7 +3417,7 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout: int = 60,
                         add_to_results: bool = False):
         
@@ -3067,7 +3447,7 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout: int = 60,
                         add_to_results: bool = False):
     
@@ -3286,9 +3666,9 @@ class Review:
         
         The crawler iterates through queue of works; extracts their citations; runs checks to validate each reference;
         based on these, selects a source to retrieve data from: 
-            (a) if has a valid doi: Crossref API.
-            (b) if no valid doi: bespoke web scraping for specific academic websites.
-            (c) else if a link is present: general web scraping.
+        * if has a valid doi: Crossref API.
+        * if no valid doi: bespoke web scraping for specific academic websites.
+        * else if a link is present: general web scraping.
         
         Retrieves data and adds the entries to the dataframe. 
 
