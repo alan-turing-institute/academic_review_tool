@@ -1966,9 +1966,56 @@ class Review:
         return review
 
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
+        
+        """
+        Searches a given field in the Results dataset for a string.
+
+        Parameters
+        ----------
+        field : str
+            name of field to search. Defaults to requesting from user input.
+        any_kwds : str or list
+            one or more keywords to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        all_kwds : str or list
+            one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
+        not_kwds : str or list
+            one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
+        case_sensitive : bool
+            whether to pay attention to the case of string data. Defaults to False.
+        output : str
+            the type of object to return. Defaults to Results.
+
+        Returns
+        -------
+        output : Results or Pandas.DataFrame
+            search results.
+        """
+        
         return self.results.search_field(field = field, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
 
     def search(self, any_kwds = 'request_input', all_kwds = None, not_kwds = None, fields = 'all', case_sensitive = False):
+
+        """
+        Searches for a string throughout Review.
+
+        Parameters
+        ----------
+        any_kwds : str or list
+            one or more keywords to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        all_kwds : str or list
+            one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
+        not_kwds : str or list
+            one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
+        field : str or list
+            names of one or fields to search. Defaults to 'all'.
+        case_sensitive : bool
+            whether to pay attention to the case of string data. Defaults to False.
+
+        Returns
+        -------
+        output : Pandas.DataFrame
+            search results.
+        """
 
         combined_query = str(any_kwds)
         if all_kwds is not None:
@@ -2010,7 +2057,7 @@ class Review:
         Parameters
         ----------
         folder_name : str 
-            name of folder to create. Defaults to using the object's variable name.
+            name of folder to create. Defaults to requesting from user input.
         folder_address : str 
             directory address to create folder in. defaults to requesting for user input.
         export_str_as : str 
@@ -2021,6 +2068,25 @@ class Review:
             file type for exporting Pandas objects. Defaults to 'csv'.
         export_network_as : str 
             file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
         """
         
         if folder_name == 'request_input':
@@ -2039,7 +2105,7 @@ class Review:
         Parameters
         ----------
         file_name : str
-            name of file to create. Defaults to using the object's variable name.
+            name of file to create. Defaults to requesting from user input.
         file_address : str
             directory address to create file in. defaults to requesting for user input.
         """
@@ -2074,7 +2140,7 @@ class Review:
         Parameters
         ----------
         file_name : str
-            name of file to create. Defaults to using the object's variable name.
+            name of file to create. Defaults to requesting from user input.
         file_address : str
             directory address to create file in. defaults to requesting for user input.
         """
@@ -2113,6 +2179,48 @@ class Review:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
+        """
+        Saves the Review to a new file with an inputted name at a specified location.
+        
+        Parameters
+        ----------
+        filetype : str
+            type of file to save. Defaults to 'review'.
+        file_name : str
+            name of file to create. Defaults to requesting from user input.
+        folder_address : str 
+            directory address of folder to create file in. defaults to requesting from user input.
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        filetype:
+            * txt or
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
+
         if file_name == 'request_input':
             file_name = input('File name: ')
         
@@ -2190,6 +2298,40 @@ class Review:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
+        """
+        Saves the Review to the filepath stored in its Properties attribute.
+        
+        Parameters
+        ----------
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
+
         file_path = self.properties.file_location
 
         if (file_path is None) or (file_path == ''):
@@ -2238,6 +2380,15 @@ class Review:
 
     def import_txt(self, file_path: str = 'request_input'):
 
+        """
+        Imports data from a pickled .txt file and adds to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of .txt file to import.
+        """
+
         if file_path == 'request_input':
             file_path = input('File address: ')
         
@@ -2260,6 +2411,20 @@ class Review:
 
     def from_txt(file_path: str = 'request_input'): # type: ignore
 
+        """
+        Imports a Review from a pickled .txt file.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of .txt file to import.
+        
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File address: ')
         
@@ -2272,6 +2437,20 @@ class Review:
         return review
 
     def open(file_path: str = 'request_input'): # type: ignore
+
+        """
+        Imports a Review from a .review or .txt file.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of .txt file to import.
+        
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
 
         if file_path == 'request_input':
             file_path = input('File address: ')

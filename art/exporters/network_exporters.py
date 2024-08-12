@@ -107,6 +107,8 @@ def export_network(network: Graph, file_name: str = 'request_input', folder_addr
         ):
             network = Graph.from_networkx(network)
         
+        file_type = file_type.strip('.')
+    
         # Writing GraphML file by default or if selected
         if (file_type == None) or (file_type == '') or (file_type.lower() == 'graphml'):
 
