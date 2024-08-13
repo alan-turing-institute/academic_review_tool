@@ -86,7 +86,7 @@ def add_row(self, data):
         """
 
         if type(data) != pd.Series:
-            raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
+            raise TypeError(f'Results must be a pandas.Series, not {type(data)}')
 
         data.index = data.index.astype(str).str.lower().str.replace(' ', '_')
         if len(data) != len(self.columns):
@@ -130,7 +130,7 @@ def add_dataframe(self,  dataframe: pd.DataFrame, drop_duplicates = False, drop_
         """
 
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
-            raise TypeError(f'Results must be a Pandas.Series or pandas.DataFrame, not {type(dataframe)}')
+            raise TypeError(f'Results must be a pandas.Series or pandas.DataFrame, not {type(dataframe)}')
 
         dataframe = dataframe.reset_index().drop('index', axis=1)
         dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
@@ -3995,6 +3995,29 @@ class Review:
 
     def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format = True, update_from_doi = False):
 
+        """
+        Crawls outward from results' citations to identify new results *only using data already stored in the Review*.
+
+        Parameters
+        ----------
+        max_depth : int
+            the maximum crawl depth the crawler will reach before stopping. 
+            Defaults to 3.
+        processing_limit : int
+            the maximum number of results the crawler will process before stopping. Defaults to 1000.
+        format : bool
+            whether to format results, authors, funders, and affiliations data. Defaults to True.
+        update_from_doi : bool
+            whether to use the CrossRef API to update entries that have DOIs associated.
+        
+        Notes
+        -----
+        Operational details:
+            * crawl type: utilises a breadth-first crawl.
+            * crawl depth: the number of iterations the crawler performs. For each iteration, all results from the previous iteration are loaded as seeds to crawl from.
+            * operation: for each iteration, the crawler takes all citations in the current dataset and -- if they have not been crawled already -- adds any citations data they contain to the results.
+        """
+
         iteration = 1
         processed_indexes = []
         original_len = len(self.results)
@@ -4066,8 +4089,8 @@ class Review:
     def crawl_citations(
                     self,
                     use_api: bool = True,
-                    crawl_limit: int = 5, 
-                    depth_limit: int = 2,
+                    crawl_limit: int = 1000, 
+                    depth_limit: int = 3,
                     be_polite: bool = True,
                     rate_limit: float = 0.05,
                     timeout: int = 60,
@@ -4077,7 +4100,7 @@ class Review:
                     ):
     
         """
-        Crawls a Result's object's entries, their citations, and so on.
+        Crawls all Results entries' citations to find new results. Returns a Pandas DataFrame.
         
         The crawler iterates through queue of works; extracts their citations; runs checks to validate each reference;
         based on these, selects a source to retrieve data from: 
@@ -4085,19 +4108,29 @@ class Review:
         * if no valid doi: bespoke web scraping for specific academic websites.
         * else if a link is present: general web scraping.
         
-        Retrieves data and adds the entries to the dataframe. 
-
-        Iterates through each set of added entries.
-        
         Parameters
-        ---------- 
-        
-        
-        
+        ----------
+        use_api : bool
+            whether to lookup entries and update their data using APIs. Required for the crawler to find new and add new data. Defaults to True.
+        depth_limit : int
+            the maximum crawl depth the crawler will reach before stopping. Defaults to 3.
+        crawl_limit : int
+            the maximum number of results the crawler will process before stopping. Defaults to 1000.
+        be_polite : bool
+            whether to respect websites' crawler permissions, as set out by their robots.txt files.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on API servers. Defaults to 0.05 seconds.
+        timeout : int
+            how long in seconds to wait for results before raising an error. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+
         Returns
         -------
-        result : object 
-            an object containing the results of a crawl.
+        result : pandas.DataFrame 
+            the crawl results.
         """
 
         result = self.results.crawl_citations(
@@ -4132,27 +4165,37 @@ class Review:
             self.results.add_dataframe(df) # type: ignore
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-        
         return result
 
-    def citations_dict(self, strip_ids = False):
+    def citations_dict(self) -> dict:
         
+        """
+        Returns a dictionary containing Results entries and their citations. 
+            * Keys: work_id
+            * Values: References object containing citations
+        """
+
         output = {}
 
         for i in self.results.index:
             data = self.results.loc[i]
             work_id = data['work_id']
-            work_id_stripped = work_id.split('#')[0].strip()
             citations = data['citations']
 
             if type(citations) == References:
                 citations.update_work_ids()
 
-            output[work_id_stripped] = citations
+            output[work_id] = citations
 
         return output
 
     def author_works_dict(self) -> dict:
+
+        """
+        Returns a dictionary containing Results entries and their associated authors. 
+            * Keys: work_id
+            * Values: authors data as a list or dictionary
+        """
 
         output = {}
 
@@ -4170,6 +4213,12 @@ class Review:
         return output
 
     def author_affiliations_dict(self) -> dict:
+
+        """
+        Returns a dictionary containing Author entries and their associated affiliations. 
+            * Keys: author_id
+            * Values: affiliations data as a list or dictionary
+        """
 
         output = {}
 
@@ -4189,6 +4238,12 @@ class Review:
         return output
 
     def funder_works_dict(self) -> dict:
+
+        """
+        Returns a dictionary containing Results entries and their associated funders. 
+            * Keys: work_id
+            * Values: funders data as a list or dictionary
+        """
 
         output = {}
 
@@ -4213,6 +4268,30 @@ class Review:
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
+
+        """
+        Generates a network representing co-authorship relationships.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing co-authorship relationships.
+        """
 
         if drop_empty_rows == True:
             self.authors.drop_empty_rows()
@@ -4273,11 +4352,31 @@ class Review:
     def cofunders_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = False,
-                                drop_empty_rows = True,
+                                # drop_duplicates = False,
+                                # drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
+
+        """
+        Generates a network representing co-funder relationships.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update funder attributes.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing co-funder relationships.
+        """
 
         co_funders = self.get_cofunders(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
 
@@ -4333,6 +4432,30 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a network representing citations between publications.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing citations.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
         
@@ -4381,6 +4504,34 @@ class Review:
                             add_citations_to_results=True,
                             add_to_networks: bool = True):
 
+        """
+        Generates a network representing instances of co-citations between publications.
+
+        Parameters
+        ----------
+        refresh_citations : bool
+            whether to re-generate the underlying citations network. Defaults to False.
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_citations_to_results : bool
+            whether to add Results entries' citations as Results entries. Defaults to True.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing co-citation relationships.
+        """
+
         if refresh_citations == True:
 
             citation_network = self.citation_network(format=format,
@@ -4410,6 +4561,8 @@ class Review:
         if add_to_networks == True:
             self.activity_log.add_activity(type='network generation', activity=f'generated co-citations network and added to networks', location=['networks'])
             self.networks.__dict__['cocitations'] = network
+        
+        return network
 
     def bibcoupling_network(self, 
                            refresh_citations = False,
@@ -4420,6 +4573,34 @@ class Review:
                             add_citations_to_results=True,
                             add_to_networks: bool = True):
         
+        """
+        Generates a network representing bibliometric coupling between publications.
+
+        Parameters
+        ----------
+        refresh_citations : bool
+            whether to re-generate the underlying citations network. Defaults to False.
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_citations_to_results : bool
+            whether to add Results entries' citations as Results entries. Defaults to True.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing bibliometric coupling.
+        """
+
         if refresh_citations == True:
 
             citation_network = self.citation_network(format=format,
@@ -4449,6 +4630,8 @@ class Review:
             self.activity_log.add_activity(type='network generation', activity=f'generated bibliometric coupling network and added to networks', location=['networks'])
             self.networks.__dict__['bibcoupling'] = network
 
+        return network
+
     def author_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
@@ -4457,6 +4640,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a bipartite network representing relationships between authors and publications.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between authors and publications.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
             self.authors.drop_empty_rows() # type: ignore
@@ -4490,6 +4695,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a bipartite network representing relationships between funders and publications.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between funders and publications.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
         
@@ -4522,6 +4749,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a bipartite network representing relationships between authors and affiliate organisations.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between authors and and affiliate organisations.
+        """
+
         if drop_empty_rows == True:
             self.authors.drop_empty_rows()
         
@@ -4552,6 +4801,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates an n-partite network representing relationships between publications, authors, funders, and affiliate organisations.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between publications, authors, funders, and affiliate organisations.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
             self.authors.drop_empty_rows() # type: ignore
@@ -4600,6 +4871,43 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Networks:
         
+        """
+        Generates all available networks:
+            * Citations
+            * Co-citations
+            * Bibliometric coupling
+            * Co-authors
+            * Co-funders
+            * Author-works (bipartite)
+            * Funder-works (bipartite)
+            * Author-affiliations (bipartite)
+            * Works, authors, funders and affiliations (n-partite)
+
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_citations_to_results : bool
+            whether to add Results entries' citations as Results entries. Defaults to True.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        networks : Networks
+            a Networks object containing all available networks.
+        """
+
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
             self.authors.drop_empty_rows() # type: ignore
