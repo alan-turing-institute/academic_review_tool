@@ -324,7 +324,7 @@ Results.add_citations_to_results = add_citations_to_results # type: ignore
 class Review:
     
     """
-    This is a Review object. It stores the data from academic reviews.
+    This is a Review object. It stores data from academic reviews.
     
     Parameters
     ----------
@@ -334,6 +334,23 @@ class Review:
         file location associated with Review.
     file_type : str
         file type associated with Review file(s).
+    
+    Attributes
+    ----------
+    properties : Properties
+        metadata associated with this Review object.
+    results : Results
+        data on publications.
+    authors : Authors
+        data on authors.
+    funders : Funders
+        data on funders.
+    affiliations : Affiliations
+        data on authors' affiliate organisations.
+    networks : Networks
+        network objects derived from Review data.
+    activity_log : ActivityLog
+        metadata logging changes to the Review, including: additions, deletions, crawling, and searches.
     """
 
     results = Results()
