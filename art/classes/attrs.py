@@ -171,7 +171,7 @@ class Attr:
 class AttrSet(Attr):
 
     """
-    This is a collection of Attrs.
+    This is a collection of Attr objects.
 
     Notes
     -----

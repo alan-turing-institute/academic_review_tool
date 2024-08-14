@@ -404,7 +404,7 @@ class Review:
     def __repr__(self):
         
         """
-        Defines how Reviews are represented in string form.
+        Defines how Review objects are represented in string form.
         """
         
         output = f'\n\n{"-"*(13+len(self.properties.review_name))}\nReview name: {self.properties.review_name}\n{"-"*(13+len(self.properties.review_name))}\n\nProperties:\n-----------\n{self.properties}\n\nDescription:\n------------\n\n{self.description}\n\nResults:\n--------\n\n{self.results}\n\nAuthors:\n--------\n\n{self.authors.summary.head(10)}\n\nFunders:\n--------\n\n{self.funders.summary.head(10)}\n\n'
