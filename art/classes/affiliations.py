@@ -654,7 +654,7 @@ class Affiliations(Entities):
         self.summary = deduplicate(self.summary)
 
         if sync == True:
-            self.sync_details(drop_duplicates=False, drop_empty_rows=False)
+            self.sync_summary(drop_duplicates=False, drop_empty_rows=False)
 
         return self
 
@@ -679,7 +679,7 @@ class Affiliations(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-    def sync_details(self, drop_duplicates = False, drop_empty_rows=False):
+    def sync_summary(self, drop_duplicates = False, drop_empty_rows=False):
 
         self.update_ids(sync=False)
 
@@ -729,14 +729,14 @@ class Affiliations(Entities):
         details_len = len(self.all)
 
         if all_len > details_len:
-            self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+            self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
             return
         else:
             if details_len > all_len:
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
             else:
-                self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
 

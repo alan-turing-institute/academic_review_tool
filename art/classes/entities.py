@@ -125,7 +125,7 @@ class Entity:
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
             self.summary.loc[0, 'uri'] = 'https://doi.org/' + uri
     
-    def from_dict(data: dict) -> Entity: # type: ignore
+    def from_dict(data: dict): # type: ignore
 
         """
         Takes a dictionary and returns an Entity.
@@ -159,7 +159,7 @@ class Entity:
 
         self.summary.loc[0] = series
 
-    def from_series(data: pd.Series) -> Entity: # type: ignore
+    def from_series(data: pd.Series): # type: ignore
 
         """
         Takes a Pandas Series and returns an Entity.
@@ -187,7 +187,7 @@ class Entity:
 
         Parameters
         ----------
-        series : pandas.DataFrame
+        dataframe : pandas.DataFrame
             a Pandas DataFrame with columns that match the names of columns in the Entity's summary dataframe.
         """
 
@@ -222,7 +222,7 @@ class Entity:
                       export_dict_as: str = 'json', 
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'
-                      ):
+                     ):
         
         """
         Exports the Entity object's contents to a folder.
@@ -347,7 +347,7 @@ class Entities:
                       export_dict_as: str = 'json', 
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'
-                      ):
+                     ):
         
         """
         Exports the Entities collection to a folder.

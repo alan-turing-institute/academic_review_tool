@@ -27,7 +27,21 @@ author_cols = ['author_id',
                                 'other_ids'
                                 ]
 
-def get_full_name(series: pd.Series):
+def get_full_name(series: pd.Series) -> str:
+
+            """
+            Takes a Pandas Series containing author details and returns the author's name data as a string in full name ({given_name} {family_name}") format.
+
+            Parameters
+            ----------
+            series : pandas.Series
+                a series containing author data
+
+            Returns
+            -------
+            result : str
+                a full name.
+            """
 
             given = series.loc['given_name']
             family = series.loc['family_name']
@@ -60,7 +74,21 @@ def get_full_name(series: pd.Series):
 
             return result
 
-def generate_author_id(author_data: pd.Series):
+def generate_author_id(author_data: pd.Series) -> str:
+
+        """
+            Takes a Pandas Series containing author details and returns a unique identifier code.
+
+            Parameters
+            ----------
+            author_data : pandas.Series
+                a series containing author data
+
+            Returns
+            -------
+            author_id : str
+                an author ID.
+        """
 
         author_data = author_data.copy(deep=True).dropna().astype(str).str.lower()
 
@@ -153,10 +181,37 @@ class Author(Entity):
     
     Parameters
     ----------
-    
+    author_id : str
+        a unique identifier assigned to the author. Defaults to None.
+    full_name : str
+        the author's name in full name ("{given_name} {family_name}") format. Defaults to None.
+    given_name : str
+        the author's given name or first name. Defaults to None.
+    family_name : str
+        the author's family name or last name. Defaults to None.
+    email : str
+        the author's email address. Defaults to None.
+    affiliations : list or dict or Affiliations
+        data on the author's organisational affiliations. May be a list, dict, or Affiliations object. Defaults to None.
+    publications : list or dict or pandas.DataFrame or Results
+        data on the author's publications. May be a list, dict, Pandas DataFrame or Results object. Defaults to None.
+    orcid : str
+        an Orcid identifier assigned to the author. Defaults to None.
+    google_scholar : str
+        a Google Scholar identifier assigned to the author. Defaults to None.
+    scopus : str
+        an Scopus identifier assigned to the author. Defaults to None.
+    crossref : str
+        an CrossRef identifier assigned to the author. Defaults to None.
+    other_links : str or list
+        any other links associated with the author. Defaults to None.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Author's data.
+    publications : Results
+        a Results dataframe containing data on the Author's publications.
     """
 
     def __init__(self,
@@ -179,6 +234,30 @@ class Author(Entity):
         
         Parameters
         ----------
+        author_id : str
+            a unique identifier assigned to the author. Defaults to None.
+        full_name : str
+            the author's full name formatted as "{given_name} {family_name}". Defaults to None.
+        given_name : str
+            the author's given name or first name. Defaults to None.
+        family_name : str
+            the author's family name or last name. Defaults to None.
+        email : str
+            the author's email address. Defaults to None.
+        affiliations : list or dict or Affiliations
+            data on the author's organisational affiliations. May be a list, dict, or Affiliations object. Defaults to None.
+        publications : list or dict or pandas.DataFrame or Results
+            data on the author's publications. May be a list, dict, Pandas DataFrame or Results object. Defaults to None.
+        orcid : str
+            an Orcid identifier assigned to the author. Defaults to None.
+        google_scholar : str
+            a Google Scholar identifier assigned to the author. Defaults to None.
+        scopus : str
+            an Scopus identifier assigned to the author. Defaults to None.
+        crossref : str
+            an CrossRef identifier assigned to the author. Defaults to None.
+        other_links : str or list
+            any other links associated with the author. Defaults to None.
         """
 
         super().__init__()
@@ -215,13 +294,22 @@ class Author(Entity):
         self.summary.loc[0, 'crossref'] = crossref
         self.summary.loc[0, 'other_links'] = other_links
 
-        full_name = self.get_full_name()
+        full_name = self.full_name()
         if full_name != self.summary.loc[0, 'full_name']:
             self.summary.loc[0, 'full_name'] = full_name
 
         self.publications = Results()
 
     def generate_id(self):
+
+        """
+        Returns a unique identifier based on the Author's data.
+
+        Returns
+        -------
+        author_id : str
+            an author identifier.
+        """
 
         author_data = self.summary.loc[0]
 
@@ -230,6 +318,10 @@ class Author(Entity):
 
     def update_id(self):
 
+        """
+        Replaces the Author's existing unique identifier with a newly generated unique identifier based on the Author's data.
+        """
+
         current_id = self.summary.loc[0, 'author_id']
         new_id = self.generate_id()
 
@@ -237,10 +329,20 @@ class Author(Entity):
             self.summary.loc[0, 'author_id'] = new_id
         
     
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> object:
         
         """
-        Retrieves Author attribute using a key.
+        Retrieves an Author attribute or datapoint using a key. The key may be an attribute name, dataframe index position, or dataframe column name.
+
+        Parameters
+        ----------
+        key : object
+            an attribute name, dataframe index position, or dataframe column name.
+        
+        Returns
+        -------
+        value : object
+            an object associated with the inputted key.
         """
         
         if key in self.__dict__.keys():
@@ -253,19 +355,42 @@ class Author(Entity):
             return self.publications[key]
 
     def __repr__(self) -> str:
+
+        """
+        Defines how Author objects are represented in string form.
+        """
+
         return str(self.summary.loc[0, 'full_name'])
     
-    def get_full_name(self):
+    def full_name(self) -> str:
+
+        """
+        Returns the author's name data as a string in full name ("{given_name} {family_name}") format.
+
+        Returns
+        -------
+        result : str
+            the Author's name data in full name ("{given_name} {family_name}") format.
+        """
+
         series = self.summary.loc[0]
         return get_full_name(series=series) # type: ignore
 
 
     def update_full_name(self):
 
-            full_name = self.get_full_name()
+            """
+            Updates the Author's full name entry using the current Author data.
+            """
+
+            full_name = self.full_name()
             self.summary.loc[0, 'full_name'] = full_name
 
     def name_set(self) -> set:
+
+        """
+        Returns the Author's given name and family name as a set.
+        """
 
         given = str(self.summary.loc[0, 'given_name'])
         family = str(self.summary.loc[0, 'family_name'])
@@ -273,6 +398,10 @@ class Author(Entity):
         return set([given, family])
 
     def has_orcid(self) -> bool:
+
+        """
+        Returns True if the Author has an Orcid ID associated.
+        """
 
         orcid = self.summary.loc[0, 'orcid']
 
@@ -283,28 +412,86 @@ class Author(Entity):
 
     def format_affiliations(self):
 
+        """
+        Formats the Author's affiliations data as an Affiliations object.
+        """
+
         affils_data = self.summary.loc[0, 'affiliations']
         affiliations = format_affiliations(affils_data)
         self.summary.at[0, 'affiliations'] = affiliations
 
     def add_series(self, series: pd.Series):
+
+        """
+        Adds a Pandas Series object to the Author's summary data.
+        """
+
         self.summary.loc[0] = series
 
-    def from_series(series: pd.Series): # type: ignore
+    def from_series(series: pd.Series) -> Author: # type: ignore
+
+        """
+        Takes a Pandas Series and returns an Author object.
+
+        Parameters
+        ----------
+        series : pandas.Series
+            a Pandas Series with indices that match the names of columns in the Author summary dataframe.
+
+        Returns
+        -------
+        author : Author
+            an Author object.
+        """
+
         author = Author()
         author.add_series(series)
         return author
     
     def add_dataframe(self, dataframe: pd.DataFrame):
+
+        """
+        Adds data from a Pandas DataFrame to the Author object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Author's summary dataframe.
+        """
+
         series = dataframe.loc[0]
         self.add_series(series) # type: ignore
 
     def from_dataframe(dataframe: pd.DataFrame): # type: ignore
+
+        """
+        Takes a Pandas DataFrame and returns an Author.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Author's summary dataframe.
+
+        Returns
+        -------
+        author : Author
+            an Author object.
+        """
+
         author = Author()
         author.add_dataframe(dataframe)
         return author
 
     def import_crossref(self, crossref_result: dict):
+
+        """
+        Reads a CrossRef API result formatted as a dictionary and adds its data to the Author object.
+
+        Parameters
+        ----------
+        crossref_result : dict
+            CrossRef API result formatted as a dictionary.
+        """
 
         if 'given' in crossref_result.keys():
             self.summary.loc[0, 'given_name'] = crossref_result['given']
@@ -596,7 +783,7 @@ class Authors(Entities):
         self.summary = deduplicate(self.summary)
 
         if sync == True:
-            self.sync_details()
+            self.sync_summary()
 
         return self
         
@@ -659,7 +846,7 @@ class Authors(Entities):
                 self.summary.loc[i, 'full_name'] = new
         
         self.update_author_ids()
-        self.sync_details()
+        self.sync_summary()
 
     def add_author(self, author: Author, data = None, drop_duplicates = False, drop_empty_rows = False, update_from_orcid = False):
 
@@ -753,7 +940,7 @@ class Authors(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-    def sync_details(self, drop_duplicates = False, drop_empty_rows=False):
+    def sync_summary(self, drop_duplicates = False, drop_empty_rows=False):
 
         self.update_author_ids()
 
@@ -790,14 +977,14 @@ class Authors(Entities):
         details_len = len(self.all)
 
         if all_len > details_len:
-            self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+            self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
             return
         else:
             if details_len > all_len:
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
             else:
-                self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
 
@@ -813,7 +1000,7 @@ class Authors(Entities):
         df = df.dropna(axis=0, how='all', subset=drop_cols).reset_index().drop('index', axis=1)
 
         self.summary = df
-        self.sync_details()
+        self.sync_summary()
 
         return self
 
@@ -824,7 +1011,7 @@ class Authors(Entities):
 
         affils = self.summary['affiliations'].apply(func=format_affiliations) # type: ignore
         self.summary['affiliations'] = affils
-        self.sync_details()
+        self.sync_summary()
 
     def update_from_orcid(self, drop_duplicates = False, drop_empty_rows=False):
 
@@ -946,7 +1133,7 @@ class Authors(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-        self.sync_details(drop_duplicates=False, drop_empty_rows=False)
+        self.sync_summary(drop_duplicates=False, drop_empty_rows=False)
 
     def from_wos(wos_result, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
@@ -957,7 +1144,7 @@ class Authors(Entities):
 
     def affiliations(self, drop_duplicates = False, drop_empty_rows=False):
 
-        self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+        self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         output = {}
         for auth_id in self.all.keys():
