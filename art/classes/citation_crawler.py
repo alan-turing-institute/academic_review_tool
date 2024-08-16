@@ -4,6 +4,7 @@ from ..internet.scrapers import get_final_url, scrape_url, scrape_article, can_s
 from ..internet.crawlers import check_crawl_permission
 
 from ..internet.crawlers import correct_seed_errors as correct_seed_url_errors
+from .authors import format_authors
 from .references import extract_references
 
 import queue
