@@ -4150,15 +4150,6 @@ class Review:
             the crawl results.
         """
 
-        result = self.results.crawl_citations(
-                                            use_api = use_api,
-                                            crawl_limit = crawl_limit, 
-                                            depth_limit = depth_limit,
-                                            be_polite = be_polite,
-                                            rate_limit = rate_limit,
-                                            timeout = timeout,
-                                            add_to_results = add_to_results
-                                            ) # type: ignore
         
         self.format_citations()
 
