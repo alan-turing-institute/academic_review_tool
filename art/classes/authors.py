@@ -428,7 +428,7 @@ class Author(Entity):
 
         self.summary.loc[0] = series
 
-    def from_series(series: pd.Series) -> Author: # type: ignore
+    def from_series(series: pd.Series): # type: ignore
 
         """
         Takes a Pandas Series and returns an Author object.
