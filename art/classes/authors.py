@@ -526,6 +526,15 @@ class Author(Entity):
     
     def import_orcid(self, orcid_id: str):
 
+        """
+        Looks up an author record in the ORCID API using an ORCID author ID. If one is found, adds its data to the Author object.
+
+        Parameters
+        ----------
+        orcid_id : str
+            ORCID author ID.
+        """
+
         try:
             auth_res = get_author(orcid_id)
             auth_record = auth_res.record()
@@ -659,6 +668,20 @@ class Author(Entity):
 
     def from_crossref(crossref_result: dict): # type: ignore
 
+        """
+        Reads a CrossRef API result formatted as a dictionary and returns as an Author object.
+
+        Parameters
+        ----------
+        crossref_result : dict
+            CrossRef API result formatted as a dictionary.
+        
+        Returns
+        -------
+        author : Author
+            an Author object.
+        """
+
         author = Author()
         author.import_crossref(crossref_result)
         author.update_full_name()
@@ -666,6 +689,20 @@ class Author(Entity):
         return author
     
     def from_orcid(orcid_id: str): # type: ignore
+
+        """
+        Looks up an author record in the ORCID API using an ORCID author ID. If one is found, returns as an Author object.
+
+        Parameters
+        ----------
+        orcid_id : str
+            ORCID author ID.
+
+        Returns
+        -------
+        author : Author
+            an Author object.
+        """
 
         author = Author()
         author.import_orcid(orcid_id)
@@ -675,11 +712,16 @@ class Author(Entity):
     
     def update_from_orcid(self):
 
+        """
+        Looks up Author's ORCID author ID. If one is found, uses to update the Author object.
+        """
+
         orcid = self.summary.loc[0, 'orcid']
 
         if (orcid != None) and (orcid != '') and (orcid != 'None'):
             
             orcid = str(orcid).replace('https://', '').replace('http://', '').replace('orcid.org/', '')
+            self.summary.loc[0, 'orcid'] = orcid
 
             self.import_orcid(orcid_id = orcid)
 
@@ -690,10 +732,17 @@ class Authors(Entities):
     
     Parameters
     ----------
-    
+    authors_data : list or dict
+            Optional: an iterable of authors data. Data on individual authors must be formatted as a dictionary.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Authors collection's data.
+    all : dict
+        a dictionary storing formatted Author objects.
+    data : list
+        a list of any unformatted data associated with Author objects in the collection.
     """
 
     def __init__(self, authors_data = None):
@@ -703,6 +752,9 @@ class Authors(Entities):
         
         Parameters
         ----------
+        authors_data : list or dict
+            Optional: an iterable of authors data. Data on individual authors must be formatted as a dictionary.
+
         """
 
         super().__init__()
@@ -711,11 +763,7 @@ class Authors(Entities):
         self.summary = pd.DataFrame(columns = author_cols,
                                 dtype = object)
         
-
-        self.all = dict()
-
-        self.data = []
-        self.data.append(authors_data)
+        self.data = authors_data
 
         if (type(authors_data) == list) and (type(authors_data[0]) == Author):
 
@@ -764,13 +812,43 @@ class Authors(Entities):
     
     def __repr__(self) -> str:
 
+        """
+        Defines how Authors objects are represented in string form.
+        """
+
         alphabetical = self.summary['full_name'].sort_values().to_list().__repr__()
         return alphabetical
     
     def __len__(self) -> int:
+
+        """
+        Returns the number of Authors in the Authors collection. Uses the number of Author objects stored in the Authors.all dictionary.
+
+        Returns
+        -------
+        result : int
+            the number of Author objects contained in the Authors.all dictionary.
+        """
+
         return len(self.all.keys())
 
     def remove_duplicates(self, drop_empty_rows = True, sync=True):
+
+        """
+        Removes duplicate Author entries.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        sync : bool
+            whether to synchronise the Authors.summary dataframe with the Authors.all dictionary. Defaults to True.
+        
+        Returns
+        -------
+        self : Authors
+            an Authors object.
+        """
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -791,6 +869,23 @@ class Authors(Entities):
 
     def merge(self, authors, drop_duplicates = False, drop_empty_rows=False):
 
+        """
+        Merges the Authors collection with another Authors collection.
+
+        Parameters
+        ----------
+        authors : Authors
+            the Authors collection to merge with.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        
+        Returns
+        -------
+        self : Authors
+            the merged Authors collection.
+        """
         left = self.summary.copy(deep=True)
         right = authors.summary.copy(deep=True)
         
@@ -838,6 +933,10 @@ class Authors(Entities):
 
     def update_full_names(self):
 
+        """
+        Checks all Author entries for name data and uses this to update the 'full_name' field.
+        """
+
         for i in self.summary.index:
             new = get_full_name(self.summary.loc[i])
             old = self.summary.loc[i, 'full_name']
@@ -849,6 +948,23 @@ class Authors(Entities):
         self.sync_summary()
 
     def add_author(self, author: Author, data = None, drop_duplicates = False, drop_empty_rows = False, update_from_orcid = False):
+
+        """
+        Adds an Author or author data to the Authors collection.
+
+        Parameters
+        ----------
+        author : Author
+            an Author object to add.
+        data : dict
+            Optional: a dictionary containing author data. Dictionary keys must match the names of columns in the Authors.summary dataframe.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        update_from_orcid : bool
+            whether to update the Author data using the ORCID API (if an ORCID ID is present). Defaults to False.
+        """
 
         if update_from_orcid == True:
             orcid = author.summary.loc[0,'orcid']
@@ -886,6 +1002,19 @@ class Authors(Entities):
 
     def add_authors_list(self, authors_list: list, drop_duplicates = False, drop_empty_rows = False):
         
+        """
+        Adds a list containing Author objects to the Authors collection.
+
+        Parameters
+        ----------
+        authors_list : list[Author]
+            a list of Author objects.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         for i in authors_list:
             if type(i) == Author:
                 self.add_author(author = i, drop_duplicates=False)

@@ -284,9 +284,6 @@ class Entities:
         
         """
         Initialises Entities instance.
-        
-        Parameters
-        ----------
         """
 
         self.summary = pd.DataFrame(dtype = object)
