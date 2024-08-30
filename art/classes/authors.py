@@ -765,7 +765,7 @@ class Authors(Entities):
         
         self.data = authors_data
 
-        if (type(authors_data) == list) and (type(authors_data[0]) == Author):
+        if (type(authors_data) == list) and (len(authors_data)>0) and (type(authors_data[0]) == Author):
 
             for i in authors_data:
                 auth = i.summary.copy(deep=True)
