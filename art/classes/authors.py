@@ -1027,6 +1027,24 @@ class Authors(Entities):
 
     def mask_entities(self, column, query: str = 'request_input', ignore_case: bool = True):
 
+        """
+        Selects rows in Authors.summary dataframe with affiliations and funders that contain a query string.
+
+        Parameters
+        ----------
+        column : str
+            name of column to mask.
+        query : str
+            a string to check for. Defaults to requesting from user input.
+        ignore_case : bool
+            whether to ignore the case of string data. Defaults to True.
+
+        Returns
+        -------
+        masked : pandas.DataFrame
+            selected rows from the Authors.summary dataframe.
+        """
+
         if query == 'request_input':
             query = input('Search query').strip()
 
@@ -1047,13 +1065,30 @@ class Authors(Entities):
         return masked
 
     def update_author_ids(self):
+        
+        """
+        Updates author IDs for all rows in the Authors.summary dataframe.
+        """
 
         for i in self.summary.index:
             author_data = self.summary.loc[i]
             author_id = generate_author_id(author_data)
             self.summary.loc[i, 'author_id'] = author_id
+        
+
 
     def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
+        
+        """
+        Updates the Authors.summary dataframe using the Author objects in the Authors.all dictionary.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in self.all.keys():
             author = self.all[i]
@@ -1070,6 +1105,17 @@ class Authors(Entities):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def sync_summary(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Updates all Author objects in the Authors.all dictionary using the Authors.summary dataframe.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         self.update_author_ids()
 
@@ -1102,6 +1148,17 @@ class Authors(Entities):
 
     def sync(self, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Synchronises the Authors.summary dataframe with the Author objects in the Authors.all dictionary.
+        
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         all_len = len(self.summary)
         details_len = len(self.all)
 
@@ -1120,6 +1177,15 @@ class Authors(Entities):
 
     def drop_empty_rows(self):
 
+        """
+        Drops rows that contain no data from Authors.summary dataframe.
+
+        Returns
+        -------
+        self : Authors
+            an Authors object.
+        """
+
         ignore_cols = ['author_id', 'affiliations', 'publications', 'other_links']
 
         df = self.summary.copy(deep=True)
@@ -1135,6 +1201,15 @@ class Authors(Entities):
 
     def format_affiliations(self, drop_empty_rows=False):
 
+        """
+        Formats authors' affiliations data as Affiliations objects and stores in Review's Affiliations attribute.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        """
+
         if drop_empty_rows == True:
             self.drop_empty_rows()
 
@@ -1143,6 +1218,17 @@ class Authors(Entities):
         self.sync_summary()
 
     def update_from_orcid(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Looks up all Authors ORCID author IDs and, if found, uses to update the Authors collection.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         self.sync()
 
@@ -1169,6 +1255,19 @@ class Authors(Entities):
 
     def import_orcid_ids(self, orcid_ids: list, drop_duplicates = False, drop_empty_rows=False):
 
+        """
+        Looks up a list of ORCID author IDs using the ORCID API and adds any data found to the Authors collection.
+
+        Parameters
+        ----------
+        orcid_ids : list[str]
+            list containing ORCID author IDs.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         for i in orcid_ids:
 
             auth = Author.from_orcid(i) # type: ignore
@@ -1182,15 +1281,51 @@ class Authors(Entities):
 
     def from_orcid_ids(orcid_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
+        """
+        Looks up a list of ORCID author IDs using the ORCID API and returns all data found as an Authors object.
+
+        Parameters
+        ----------
+        orcid_ids : list[str]
+            list containing ORCID author IDs.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+
+        Returns
+        -------
+        authors : Authors
+            an Authors object.
+        """
+
         authors = Authors()
         authors.import_orcid_ids(orcid_ids, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
         return authors
 
-    def with_orcid(self):
+    def has_orcid(self):
+
+        """
+        Returns all rows in Authors.summary which contain ORCID IDs.
+        """
+
         return self.summary[~self.summary['orcid'].isna()]
 
     def import_crossref(self, crossref_result: list, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Reads a list of CrossRef API results and adds the data to the Authors collection.
+
+        Parameters
+        ----------
+        crossref_result : list
+            list of CrossRef API results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in crossref_result:
 
@@ -1205,6 +1340,24 @@ class Authors(Entities):
     
     def from_crossref(crossref_result: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
+        """
+        Reads a list of CrossRef API results and returns as an Authors object.
+
+        Parameters
+        ----------
+        crossref_result : list
+            list of CrossRef API results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+
+        Returns
+        -------
+        authors : Authors
+            an Authors object.
+        """
+
         authors = Authors()
         authors.import_crossref(crossref_result, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -1212,6 +1365,19 @@ class Authors(Entities):
     
     def import_wos(self, wos_result, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Reads a Web of Science API result and adds the data to the Authors collection.
+
+        Parameters
+        ----------
+        wos_result : list or dict
+            list of Web of Science API results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         authors_data = []
 
         if type(wos_result) == list:
@@ -1266,12 +1432,36 @@ class Authors(Entities):
 
     def from_wos(wos_result, drop_duplicates = False, drop_empty_rows=False): # type: ignore
 
+        """
+        Reads a Web of Science API result and returns as an Authors collection.
+
+        Parameters
+        ----------
+        wos_result : list or dict
+            list of Web of Science API results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        
+        Returns
+        -------
+        authors : Authors
+            an Authors object.
+        """
+
         authors = Authors()
         authors.import_wos(wos_result=wos_result, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return authors
 
-    def affiliations(self, drop_duplicates = False, drop_empty_rows=False):
+    def affiliations(self, drop_duplicates = False, drop_empty_rows=False) -> dict:
+
+        """
+        Returns a dictionary containing authors and their associated affiliations.
+            * Keys: author IDs
+            * Values: Affiliations objects
+        """
 
         self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
         
@@ -1284,6 +1474,23 @@ class Authors(Entities):
         return output
     
     def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
+
+        """
+        Searches for author records using the Orcid API.
+
+        Parameters
+        ----------
+        query : str
+            query to search. Allows for keywords and Boolean logic.
+        add_to_authors : bool
+            whether to add results to the Authors collection.
+        
+        Returns
+        -------
+        result : pandas.DataFrame
+            search result.
+        """
+
 
         res = search_orcid(query=query)
         res = res.rename(columns={'credit-name': 'full_name', 'given-names': 'given_name', 'family-name': 'family_name', 'family-names': 'family_name', 'institution-name': 'affiliations', 'orcid-id': 'orcid'}) # type: ignore
@@ -1300,6 +1507,19 @@ class Authors(Entities):
 
 def format_authors(author_data, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Formats a collection of author data as an Authors object.
+
+        Parameters
+        ----------
+        author_data : object
+            a collection of author data.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         result = Authors()
 
         if (author_data == None) or (author_data == ''):

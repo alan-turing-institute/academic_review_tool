@@ -805,7 +805,7 @@ class Review:
     def format_affiliations(self):
 
         """
-        Formats authors' affiliations data into Affiliations objects and stores in Review's Affiliations attribute.
+        Formats authors' affiliations data as Affiliations objects and stores in Review's Affiliations attribute.
         """
 
         self.authors.format_affiliations()
