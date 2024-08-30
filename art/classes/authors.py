@@ -745,7 +745,7 @@ class Authors(Entities):
         a list of any unformatted data associated with Author objects in the collection.
     """
 
-    def __init__(self, authors_data = None):
+    def __init__(self, authors_data = []):
         
         """
         Initialises Authors instance.
