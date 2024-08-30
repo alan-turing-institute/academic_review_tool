@@ -1,7 +1,7 @@
 """Functions for parsing, cleaning, and normalising data."""
 
 # Importing packages
-
+from .basics import blockPrint, enablePrint
 from ..datasets import stopwords, html_stopwords 
 
 from typing import List, Dict, Tuple
@@ -17,7 +17,9 @@ import requests
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize # type: ignore
 
+blockPrint()
 nltk.download('punkt')
+enablePrint()
 
 def join_list_by_colon(item):
     

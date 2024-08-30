@@ -728,7 +728,7 @@ class Author(Entity):
 class Authors(Entities):
 
     """
-    This is an Authors object. It contains a collection of Authors objects and compiles data about them.
+    This is an Authors object. It contains a collection of Authors objects and a summary of data about them.
     
     Parameters
     ----------
