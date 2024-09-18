@@ -17,6 +17,20 @@ from nltk.tokenize import word_tokenize # type: ignore
 from pybtex.database import BibliographyData, Entry #type: ignore
 
 def generate_work_id(work_data: pd.Series):
+    
+        """
+            Takes a Pandas Series containing details about a published work and returns a unique identifier code (work ID).
+
+            Parameters
+            ----------
+            work_data : pandas.Series
+                a series containing data on a published work.
+
+            Returns
+            -------
+            work_id : str
+                a work ID.
+        """
 
         work_data = work_data.copy(deep=True).dropna()
 
@@ -108,18 +122,99 @@ def generate_work_id(work_data: pd.Series):
 
         return work_id
 
-
 class Results(pd.DataFrame):
 
     """
-    This is a Results object. It is a modified Pandas Dataframe object designed to store the results of an academic review.
+    This is a Results DataFrame. It is a modified Pandas Dataframe object designed to store the results of an academic review.
     
     Parameters
     ----------
-    
-    
+    dataframe : pandas.DataFrame
+        a Pandas DataFrame to convert to a Results DataFrame. Defaults to None.
+    index : list
+        list of indices for Results DataFrame. Defaults to an empty list.
+
     Attributes
     ----------
+    T : pandas.DataFrame
+    _AXIS_LEN : int
+    _AXIS_ORDERS : list
+    _AXIS_TO_AXIS_NUMBER : dict
+    _HANDLED_TYPES : tuple
+    __annotations__ : dict
+    __array_priority__ : int
+    _attrs : dict
+    _constructor : type
+    _constructor_sliced : type
+    _hidden_attrs : frozenset
+    _info_axis : pandas.Index
+    _info_axis_name : str
+    _info_axis_number : int
+    _internal_names : set
+    _is_homogeneous_type : bool
+    _is_mixed_type : bool
+    _is_view : bool
+    _item_cache : dict
+    _metadata : list
+    _series : dict
+    _stat_axis : pandas.Index
+    _stat_axis_name : str
+    _stat_axis_number : int
+    _typ : str
+    _values : numpy.ndarray
+    attrs : dict
+    axes : list
+    columns : pandas.Index
+    dtypes : pandas.Series
+    empty : bool
+    flags : pandas.Flags
+    index : pandas.Index
+    ndim : int
+    shape : tuple
+    size : numpy.int64
+    values : numpy.ndarray
+
+    Columns
+    -------
+    * **work_id**: a unique identifier assigned to each result.
+    * **title**: the result's title.
+    * **authors**: any authors associated with the result.
+    * **date**: any date(s) or year(s) associated with the result.
+    * **source**: the name of the journal, conference, book, website, or other publication in which the result is contained (if any).
+    * **type**: result type (e.g. article, chapter, book, website).
+    * **editors**:  any authors associated with the result.
+    * **publisher**: the name of the result's publisher (if any).
+    * **publisher_location**: any locations or addresses associated with the result's publisher.
+    * **funder**:  any funders associated with the result.
+    * **keywords**:  any keywords associated with the result.
+    * **abstract**: the result's abstract (if available).
+    * **description**: the result's abstract (if available).
+    * **extract**: the result's extract (if available).
+    * **full_text**: the result's full text (if available).
+    * **access_type**: the result's access type (e.g. open access, restricted access)
+    * **authors_data**: unformatted data on any authors associated with the result.
+    * **author_count**: the number of authors associated with the result.
+    * **author_affiliations**: any affiliations associated with the result's authors.
+    * **editors_data**: unformatted data on any editors associated with the result.
+    * **citations**: any citations/references/links associated with the result.
+    * **citation_count**: the number of citations/references/links associated with the result.
+    * **citations_data**: unformatted data on any citations/references/links associated with the result.
+    * **cited_by**: a list of publications that cite/reference/link to the result.
+    * **cited_by_count**: the number of publications that cite/reference/link to the result.
+    * **cited_by_data**: unformatted data on publications that cite/reference/link to the result.
+    * **recommendations**: data on recommended publications associated with the result.
+    * **crossref_score**: a bibliometric score assigned by CrossRef (if available).
+    * **repository**: the repository from which the result was retrieved (if available).
+    * **language**: the language(s) of the result.
+    * **doi**: the Digital Object Identifier (DOI) assigned to the result.
+    * **isbn**: the International Standard Book Number (ISBN) assigned to the result.
+    * **issn**: the International Standard Serial Number (ISSN) assigned to the result or its source.
+    * **pii**: any Publisher Item Identifiers (PII) assigned to the result.
+    * **scopus_id**: the Scopus identifier assigned to the result.
+    * **wos_id**: the Web of Science (WoS) identifier assigned to the result.
+    * **pubmed_id**: the PubMed Identifier (PMID) assigned to the result.
+    * **other_ids**: any other identifiers assigned to the result.
+    * **link**: a URL or other link to the result.
     """
 
     def __init__(self, dataframe = None, index = []):
@@ -129,6 +224,10 @@ class Results(pd.DataFrame):
         
         Parameters
         ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to convert to a Results DataFrame. Defaults to None.
+        index : list
+            list of indices for Results DataFrame. Defaults to an empty list.
         """
 
         if dataframe is None:
@@ -148,6 +247,11 @@ class Results(pd.DataFrame):
 
     def drop_empty_rows(self):
 
+        """
+        Drops rows that contain no data.
+        """
+
+
         ignore_cols = ['work_id', 'authors', 'funder', 'citations']
 
         df = self.dropna(axis=0, how='all')
@@ -160,10 +264,23 @@ class Results(pd.DataFrame):
 
         return self
 
+    def remove_duplicates(self, drop_empty_rows = True, use_api = False):
 
+        """
+        Removes duplicate results.
 
-
-    def remove_duplicates(self, drop_empty_rows = True, update_from_api = False):
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        use_api : bool
+            whether to update the results data using all available APIs. Defaults to False.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -173,7 +290,7 @@ class Results(pd.DataFrame):
         df = deduplicate(self)
         results = Results.from_dataframe(dataframe = df, drop_duplicates=False)
 
-        if update_from_api == True:
+        if use_api == True:
             results.update_from_dois()
         
         results.update_work_ids()
@@ -185,9 +302,11 @@ class Results(pd.DataFrame):
 
         return self
 
-        
-
     def get(self, work_id: str):
+
+        """
+        Retrieves result using a work ID.
+        """
 
         indexes = self[self['work_id'] == work_id].index.to_list()
         if len(indexes) > 0:
@@ -198,6 +317,15 @@ class Results(pd.DataFrame):
 
     def add_pdf(self, path = 'request_input'):
         
+        """
+        Reads a PDF file from a file path or URL and adds its data to the Results DataFrame.
+
+        Parameters
+        ----------
+        path : str
+            a filepath or URL that directs to a PDF file. Defaults to requesting from user input.
+        """
+
         if path == 'request_input':
             path = input('Path to PDF (URL or filepath): ')
 
@@ -213,7 +341,18 @@ class Results(pd.DataFrame):
 
         return self
     
-    def add_row(self, data, drop_duplicates=True):
+    def add_row(self, data: pd.Series, drop_duplicates: bool = True):
+
+        """
+        Adds a Pandas Series to the Results DataFrame as a new row.
+
+        Parameters
+        ----------
+        data : pandas.Series
+            a row to add.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to True.
+        """
 
         if type(data) != pd.Series:
             raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
@@ -238,6 +377,10 @@ class Results(pd.DataFrame):
         
     def get_unique_id(self, work_id, index):
 
+        """
+        Checks whether work ID is used more than once in the Results DataFrame. If yes, returns a unique ID.
+        """
+
         if (type(work_id) == str) and (work_id != ''):
             try:
                 work_id = str(work_id.split('#')[0])
@@ -256,6 +399,21 @@ class Results(pd.DataFrame):
 
     def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = True, drop_duplicates = False, update_work_ids = True):
         
+        """
+        Adds a Pandas DataFrame to the Results DataFrame.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to add to the Results DataFrame.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        update_work_ids : bool
+            whether to update results entries' work IDs. Defaults to True.
+        """
+
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
 
@@ -288,6 +446,23 @@ class Results(pd.DataFrame):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def add_doi(self, doi: str = 'request_input', drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
+
+        """
+        Looks up a DOI using the CrossRef API and adds to the Results DataFrame.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
+
+
         df = lookup_doi(doi=doi, timeout=timeout)
         self.add_dataframe(dataframe=df)
 
@@ -297,13 +472,36 @@ class Results(pd.DataFrame):
         if drop_empty_rows == True:
             self.drop_empty_rows()
 
+    def add_dois(self, dois_list: list = [], drop_empty_rows = True, rate_limit: float = 0.05, timeout = 60):
 
+        """
+        Looks up a list of DOIs using the CrossRef API and adds to Results DataFrame.
 
-    def add_dois(self, dois_list: list = [], drop_empty_rows = True, rate_limit: float = 0.1, timeout = 60):
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
+
         df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
-        self.add_dataframe(dataframe=df, drop_empty_rows = True)
+        self.add_dataframe(dataframe=df, drop_empty_rows = drop_empty_rows)
 
     def correct_dois(self, drop_duplicates = False):
+
+        """
+        Checks all entries in Results DataFrame for correctly formatted DOIs. If none is found, checks whether URL contains a valid DOI and, if so, uses this. Additionally, strips existing DOIs of unnecessary strings.
+
+        Parameters
+        ----------
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        """
 
         no_doi = self[self['doi'].isna()]
         has_link = no_doi[~no_doi['link'].isna()]
@@ -319,11 +517,24 @@ class Results(pd.DataFrame):
 
     def generate_work_ids(self):
 
+        """
+        Assigns a unique identifier (work ID) for each published work in the Results DataFrame.
+        """
+
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
             self.loc[i, 'work_id'] = work_id
 
     def update_work_ids(self, drop_duplicates = False):
+
+        """
+        Checks each published work in the Results DataFrame to ensure the work ID is up-to-date. If not, generates and assigns a new work ID.
+
+        Parameters
+        ----------
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to True.
+        """
 
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
@@ -333,7 +544,6 @@ class Results(pd.DataFrame):
         
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=False)
-
 
     def update_from_doi(self, index, drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
         
@@ -362,7 +572,6 @@ class Results(pd.DataFrame):
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
-
     def update_from_dois(self, drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
 
         self.correct_dois(drop_duplicates=False)
@@ -552,8 +761,6 @@ class Results(pd.DataFrame):
 
         return bib_data
 
-
-
     def to_bibtex(self):
 
         bib_data = self.to_pybtex()
@@ -583,7 +790,6 @@ class Results(pd.DataFrame):
         with open(filepath, 'w') as file:
             file.write(bib_bytes)
     
-
     def export_yaml(self, file_name = 'request_input', folder_path = 'request_input'):
 
         if file_name == 'request_input':
@@ -622,7 +828,6 @@ class Results(pd.DataFrame):
         results.import_bibtex(file_path=file_path)
 
         return results
-
 
     def import_excel(self, file_path = 'request_input', sheet_name = None):
 
