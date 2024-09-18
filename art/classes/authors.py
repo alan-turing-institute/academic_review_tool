@@ -400,7 +400,7 @@ class Author(Entity):
     def has_orcid(self) -> bool:
 
         """
-        Returns True if the Author has an Orcid ID associated.
+        Returns True if the Author has an Orcid ID associated. Else, returns False.
         """
 
         orcid = self.summary.loc[0, 'orcid']
@@ -465,7 +465,7 @@ class Author(Entity):
     def from_dataframe(dataframe: pd.DataFrame): # type: ignore
 
         """
-        Takes a Pandas DataFrame and returns an Author.
+        Takes a Pandas DataFrame and returns an Author object.
 
         Parameters
         ----------
@@ -728,7 +728,7 @@ class Author(Entity):
 class Authors(Entities):
 
     """
-    This is an Authors object. It contains a collection of Authors objects and a summary of data about them.
+    This is an Authors object. It contains a collection of Author objects and a summary of data about them.
     
     Parameters
     ----------
@@ -822,7 +822,7 @@ class Authors(Entities):
     def __len__(self) -> int:
 
         """
-        Returns the number of Authors in the Authors collection. Uses the number of Author objects stored in the Authors.all dictionary.
+        Returns the number of Author objects in the Authors collection. Uses the number of Author objects stored in the Authors.all dictionary.
 
         Returns
         -------
@@ -886,6 +886,7 @@ class Authors(Entities):
         self : Authors
             the merged Authors collection.
         """
+
         left = self.summary.copy(deep=True)
         right = authors.summary.copy(deep=True)
         
@@ -1508,12 +1509,12 @@ class Authors(Entities):
 def format_authors(author_data, drop_duplicates = False, drop_empty_rows=False):
         
         """
-        Formats a collection of author data as an Authors object.
+        Formats a collection of authors data as an Authors object.
 
         Parameters
         ----------
         author_data : object
-            a collection of author data.
+            a collection of authors data.
         drop_empty_rows : bool
             whether to remove rows which do not contain any data. Defaults to False.
         drop_duplicates : bool

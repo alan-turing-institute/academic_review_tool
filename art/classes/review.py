@@ -2684,7 +2684,7 @@ class Review:
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         add_to_results : bool
             whether to add search results to Review.
         filter : dict
@@ -3034,7 +3034,7 @@ class Review:
         doi : str
             DOI to look up. Defaults to requesting from user input.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
 
         Returns
         -------
@@ -3110,7 +3110,7 @@ class Review:
         doi : str
             DOI to look up. Defaults to requesting from user input.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         drop_duplicates : bool
             whether to remove duplicated rows.
         drop_empty_rows : bool
@@ -3170,7 +3170,7 @@ class Review:
         doi : str
             DOI to look up. Defaults to requesting from user input.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         drop_duplicates : bool
             whether to remove duplicated rows.
         drop_empty_rows : bool
@@ -3201,7 +3201,7 @@ class Review:
         dois_list : list
             list of DOIs to look up. Defaults to an empty list.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
 
@@ -3223,7 +3223,7 @@ class Review:
         dois_list : list
             list of DOIs to look up. Defaults to an empty list.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         drop_duplicates : bool
@@ -3286,7 +3286,7 @@ class Review:
         dois_list : list
             list of DOIs to look up. Defaults to an empty list.
         timeout : int
-            how long in seconds to wait for results before raising an error. Defaults to 60 seconds.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         drop_duplicates : bool
@@ -3317,7 +3317,7 @@ class Review:
         Parameters
         ----------
         timeout : int
-            how long in seconds to wait for results before raising an error. Defaults to 60 seconds.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         drop_duplicates : bool
             whether to remove duplicated rows.
         drop_empty_rows : bool
@@ -3405,7 +3405,7 @@ class Review:
         issn : str
             ISSN to look up. Defaults to requesting from user input.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
 
         Returns
         -------
@@ -3425,7 +3425,7 @@ class Review:
         issns_list : str
             list of ISSNs to look up. Defaults to an empty list.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
 
         Returns
         -------
@@ -3449,7 +3449,7 @@ class Review:
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         
         Returns
         -------
@@ -3482,7 +3482,7 @@ class Review:
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         add_to_results : bool
             whether to add results to Review.
         filter : dict
@@ -3559,7 +3559,7 @@ class Review:
             rate_limit : float
                 time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
             timeout : int
-                how long in seconds to wait for results before raising an error.
+                maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
             add_to_results : bool
                 whether to add search results to Review.
             filter : dict
@@ -3612,7 +3612,7 @@ class Review:
         funder_id : str
             CrossRef Funder ID to look up. Defaults to requesting from user input.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
 
         Returns
         -------
@@ -3632,7 +3632,7 @@ class Review:
         funder_ids : list
             list of CrossRef Funder IDs to look up. Defaults to an empty list.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
 
@@ -3658,7 +3658,7 @@ class Review:
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         
         Returns
         -------
@@ -3692,7 +3692,7 @@ class Review:
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         add_to_results : bool
             whether to add results to Review.
         filter : dict
@@ -3774,7 +3774,7 @@ class Review:
         rate_limit : float
             time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
         timeout : int
-            how long in seconds to wait for results before raising an error.
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         add_to_results : bool
             whether to add search results to Review.
         filter : dict
@@ -3938,7 +3938,7 @@ class Review:
         rate_limit : float
             CrossRef only: time delay in seconds per result. Used to limit impact on API servers. Defaults to 0.05 seconds.
         timeout : int
-            CrossRef only: how long in seconds to wait for results before raising an error. Defaults to 60 seconds.
+            CrossRef only: maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         crossref : bool
             whether to search using the CrossRef API.
         scopus : bool
