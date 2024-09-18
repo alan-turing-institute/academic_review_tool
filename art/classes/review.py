@@ -22,7 +22,6 @@ from .authors import Author, Authors, format_authors as orig_format_authors
 from .networks import Network, Networks
 from .citation_crawler import citation_crawler, academic_scraper
 
-
 import copy
 import pickle
 from pathlib import Path
@@ -1397,7 +1396,7 @@ class Review:
             whether to remove rows which do not contain any data. Defaults to False.
         """
 
-        orcid_len = len(self.authors.with_orcid())
+        orcid_len = len(self.authors.has_orcid())
 
         old_auths_len = len(self.authors.summary)
         self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)

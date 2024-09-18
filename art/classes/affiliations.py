@@ -13,6 +13,20 @@ from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_affiliation_id(affiliation_data: pd.Series):
 
+        """
+            Takes a Pandas Series containing affiliation details and returns a unique identifier code (affiliation ID).
+
+            Parameters
+            ----------
+            affiliation_data : pandas.Series
+                a series containing affiliation data.
+
+            Returns
+            -------
+            affiliation_id : str
+                an affiliation ID.
+        """
+
         affiliation_data = affiliation_data.copy(deep=True).dropna().astype(str).str.lower()
 
         affiliation_id = 'AFFIL:'
@@ -82,14 +96,37 @@ def generate_affiliation_id(affiliation_data: pd.Series):
 class Affiliation(Entity):
 
     """
-    This is a Affiliation object. It is designed to store data about an organisation that an author is affiliated with.
+        This is a Affiliation object. It is designed to store data about an organisation that an author is affiliated with.
     
-    Parameters
-    ----------
+        Parameters
+        ----------
+        affiliation_id : str
+            a unique identifier assigned to the affiliation. Defaults to None.
+        name : str
+            the affiliation's name. Defaults to None.
+        location : str
+            a street address associted with the affiliation. Defaults to None.
+        location : str
+            an place name associted with the affiliation. Defaults to None.
+        email : str
+            the affiliation's email address. Defaults to None.
+        uri : str
+            a DOI or other unique identifier assigned to the affiliation. Defaults to None.
+        crossref_id : str
+            a CrossRef identifier assigned to the affiliation. Defaults to None.
+        website : str
+            the affiliation's website. Defaults to None
+        other_links : str or list
+            any other links associated with the affiliation. Defaults to None.
+        use_api : bool
+            whether to update affiliation data using APIs (e.g. CrossRef). Defaults to None.
     
-    
-    Attributes
-    ----------
+        Attributes
+        ----------
+        summary : pandas.DataFrame
+            a dataframe summarising the Funder's data.
+        publications : Results
+            a Results dataframe containing data on the Funder's publications.
     """
 
     def __init__(self,
@@ -106,10 +143,30 @@ class Affiliation(Entity):
                  ):
         
         """
-        Initialises affiliation instance.
+        Initialises an Affiliation instance.
         
         Parameters
         ----------
+        affiliation_id : str
+            a unique identifier assigned to the affiliation. Defaults to None.
+        name : str
+            the affiliation's name. Defaults to None.
+        location : str
+            a street address associted with the affiliation. Defaults to None.
+        location : str
+            an place name associted with the affiliation. Defaults to None.
+        email : str
+            the affiliation's email address. Defaults to None.
+        uri : str
+            a DOI or other unique identifier assigned to the affiliation. Defaults to None.
+        crossref_id : str
+            a CrossRef identifier assigned to the affiliation. Defaults to None.
+        website : str
+            the affiliation's website. Defaults to None
+        other_links : str or list
+            any other links associated with the affiliation. Defaults to None.
+        use_api : bool
+            whether to update affiliation data using APIs (e.g. CrossRef). Defaults to None.
         """
 
         super().__init__()
@@ -205,12 +262,25 @@ class Affiliation(Entity):
 
     def generate_id(self):
 
+        """
+        Returns a unique identifier (affiliation ID) based on the Affiliation's data.
+
+        Returns
+        -------
+        affiliation_id : str
+            an affiliation ID.
+        """
+
         affiliation_data = self.summary.loc[0]
 
         affiliation_id = generate_affiliation_id(affiliation_data) # type: ignore
         return affiliation_id
 
     def update_id(self):
+
+        """
+        Replaces the Affiliation's existing unique identifier with a newly generated unique identifier based on the Affiliation's data.
+        """
 
         current_id = str(self.summary.loc[0, 'affiliation_id'])
 
@@ -222,7 +292,17 @@ class Affiliation(Entity):
     def __getitem__(self, key):
         
         """
-        Retrieves affiliation attribute using a key.
+        Retrieves an Affiliation attribute or datapoint using a key. The key may be an attribute name, dataframe index position, or dataframe column name.
+
+        Parameters
+        ----------
+        key : object
+            an attribute name, dataframe index position, or dataframe column name.
+        
+        Returns
+        -------
+        value : object
+            an object associated with the inputted key.
         """
         
         if key in self.__dict__.keys():
@@ -233,9 +313,17 @@ class Affiliation(Entity):
 
     def __repr__(self) -> str:
         
+        """
+        Defines how Affiliation objects are represented in string form.
+        """
+
         return str(self.summary.loc[0, 'name'])
 
     def has_uri(self) -> bool:
+        
+        """
+        Returns True if the Affilation has a URI associated. Else, returns False.
+        """
 
         uri = self.summary.loc[0, 'uri']
 
@@ -245,6 +333,10 @@ class Affiliation(Entity):
             return False
 
     def add_dict(self, data: dict):
+
+        """
+        Adds a dictionary of affiliation data to the Affiliation's summary dataframe.
+        """
 
         if 'name' in data.keys():
             name = data['name']
@@ -283,6 +375,22 @@ class Affiliation(Entity):
                     self.summary.loc[0, 'website'] = website
 
     def from_dict(data: dict, use_api=False): # type: ignore
+
+        """
+        Takes a dictionary of affiliation data and returns an Affiliation object.
+
+        Parameters
+        ----------
+        data : dict
+            a dictionary of affiliation data. The dictionary must contain at least one of the following keys: 'name', 'location', 'address', 'email', 'crossref_id', 'DOI', 'URL'.
+        use_api : bool
+            whether to update affiliation data using APIs (e.g. CrossRef). Defaults to None.
+
+        Returns
+        -------
+        affiliation : Affiliation
+            an Affiliation object.
+        """
 
         if 'name' in data.keys():
             name = data['name']
@@ -346,19 +454,64 @@ class Affiliation(Entity):
         return affiliation
         
     def add_series(self, series: pd.Series):
+
+        """
+        Adds a Pandas Series object to the Affiliation's summary dataframe.
+        """
+
         self.summary.loc[0] = series
 
     def from_series(data: pd.Series): # type: ignore
+
+        """
+        Takes a Pandas Series and returns an Affiliation object.
+
+        Parameters
+        ----------
+        data : pandas.Series
+            a Pandas Series with indices that match the names of columns in the Affiliation's summary dataframe.
+
+        Returns
+        -------
+        affiliation : Affiliation
+            a Affiliation object.
+        """
+
         affiliation = Affiliation()
         affiliation.add_series(data)
 
         return affiliation
 
     def add_dataframe(self, dataframe: pd.DataFrame):
+
+        """
+        Adds data from a Pandas DataFrame to the Affiliation object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Affiliation's summary dataframe.
+        """
+
         series = dataframe.loc[0]
         self.add_series(series) # type: ignore
 
     def from_dataframe(data: pd.DataFrame): # type: ignore
+
+        """
+        Takes a Pandas DataFrame and returns an Affiliation object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Affiliation object's summary dataframe.
+
+        Returns
+        -------
+        affiliation : Affiliation
+            a Affiliation object.
+        """
+
         affiliation = Affiliation()
         affiliation.add_dataframe(data)
 
@@ -366,6 +519,15 @@ class Affiliation(Entity):
 
     def import_crossref_result(self, crossref_result: pd.Series):
         
+        """
+        Reads a CrossRef API result formatted as a pandas.Series and adds its data to the Affiliation object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Series
+            CrossRef API result.
+        """
+
         if 'name' in crossref_result.index:
             name = crossref_result['name']
         else:
@@ -399,6 +561,20 @@ class Affiliation(Entity):
 
     def from_crossref_result(crossref_result: pd.Series, use_api: bool = False): # type: ignore
         
+        """
+        Reads a CrossRef API result formatted as a pandas.Series and returns as an Affiliation object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Series.
+            CrossRef API result.
+        
+        Returns
+        -------
+        affiliation : Affiliation
+            an Affiliation object.
+        """
+
         if 'name' in crossref_result.index:
             name = crossref_result['name']
         else:
@@ -430,21 +606,78 @@ class Affiliation(Entity):
 
     def import_crossref(self, crossref_id: str, timeout = 60):
 
+        """
+        Looks up a CrossRef affiliation ID and adds the result to the Affiliation object.
+
+        Parameters
+        ----------
+        crossref_id : str
+            CrossRef funder ID.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
+
         res = lookup_funder(crossref_id, timeout)
         self.import_crossref_result(res.loc[0]) # type: ignore
 
     def from_crossref(crossref_id: str, use_api=True, timeout = 60): # type: ignore
+
+        """
+        Looks up a CrossRef affiliation ID and returns the result as a Affiliation object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Series.
+            CrossRef API result.
+        timeout : int
+            maximum time to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        
+        Returns
+        -------
+        affiliation : Affiliation
+            an Affiliation object.
+        """
+
         res = lookup_funder(crossref_id, timeout)
         affiliation = Affiliation.from_crossref_result(crossref_result=res, use_api=use_api) # type: ignore
 
         return affiliation
     
     def import_uri(self, uri: int, timeout = 60):
+
+        """
+        Looks up an affiliation URI using the CrossRef API and adds the result to the Affiliation object.
+
+        Parameters
+        ----------
+        uri : str
+            affiliation URI.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
+
         uri_str = str(uri)
         res = lookup_funder(uri_str, timeout)
         self.import_crossref_result(res.loc[0]) # type: ignore
 
     def from_uri(uri: int, use_api=True, timeout = 60): # type: ignore
+
+        """
+        Looks up an affiliation URI using the CrossRef API and returns the result as an Affiliation object.
+
+        Parameters
+        ----------
+        uri : str
+            affiliation URI.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        affiliation : Affiliation
+            a Affiliation object.
+        """
+
         uri_str = str(uri)
         res = lookup_funder(uri_str, timeout)
         affiliation = Affiliation.from_crossref_result(crossref_result=res, use_api=use_api) # type: ignore
@@ -453,6 +686,10 @@ class Affiliation(Entity):
     
     def update_address(self):
         
+        """
+        Updates the Affiliation's street address by looking up its name, location, and/or existing address data using geopy.
+        """
+
         if self.summary.loc[0, 'name'] != None:
             name = str(self.summary.loc[0, 'name']).strip().replace('{','').replace('}','').replace('[','').replace(']','').replace(',',' ').replace('  ',' ').strip()
         else:
@@ -491,8 +728,16 @@ class Affiliation(Entity):
                 if self.summary.loc[0, 'location'] == None:
                     self.summary.loc[0, 'location'] = loc.display_name
 
-
     def update_from_crossref(self, timeout = 60):
+
+        """
+        Looks up the Affiliation's CrossRef ID. If one is found, uses to update the Affiliation object.
+
+        Parameters
+        ----------
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
 
         uid = self.summary.loc[0,'crossref_id']
         if uid == None:
@@ -505,6 +750,15 @@ class Affiliation(Entity):
             self.import_crossref_result(res.loc[0]) # type: ignore
 
     def update_from_uri(self, timeout = 60):
+
+        """
+        Looks up the Affiliation's URI using the CrossRef API. If one is found, uses to update the Affiliation object.
+
+        Parameters
+        ----------
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
 
         uid = self.summary.loc[0, 'uri']
         if uid == None:
@@ -519,14 +773,21 @@ class Affiliation(Entity):
 class Affiliations(Entities):
 
     """
-    This is a Affiliations object. It contains a collection of Affiliations objects and compiles data about them.
+    This is an Affiliations object. It contains a collection of Affiliation objects and a summary of data about them.
     
     Parameters
     ----------
-    
+    affiliations_data : list or dict
+        Optional: an iterable of affiliations data. Data on individual affiliations must be formatted as dictionaries.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Affiliations collection's data.
+    all : dict
+        a dictionary storing formatted Affiliation objects.
+    data : list
+        a list of any unformatted data associated with Affiliation objects in the collection.
     """
 
     def __init__(self, affiliations_data = None):
@@ -536,6 +797,8 @@ class Affiliations(Entities):
         
         Parameters
         ----------
+        affiliations_data : list or dict
+            Optional: an iterable of affiliations data. Data on individual affiliations must be formatted as dictionaries.
         """
 
         super().__init__()
@@ -605,7 +868,7 @@ class Affiliations(Entities):
     def __getitem__(self, key):
         
         """
-        Retrieves affiliations attribute using a key.
+        Retrieves Affiliations attribute using a key.
         """
         
         if key in self.__dict__.keys():
@@ -622,13 +885,36 @@ class Affiliations(Entities):
     
     def __repr__(self) -> str:
 
+        """
+        Defines how Affiliations objects are represented in string form.
+        """
+
         alphabetical = str(self.summary['name'].sort_values().to_list()).replace('[','').replace(']','')
         return alphabetical
     
     def __len__(self) -> int:
+
+        """
+        Returns the number of Affiliation objects in the Affiliations collection. Counts the number of Affiliation objects stored in the Affiliations.all dictionary.
+
+        Returns
+        -------
+        result : int
+            the number of Affiliation objects contained in the Affiliations.all dictionary.
+        """
+
         return len(self.all.keys())
 
     def drop_empty_rows(self):
+
+        """
+        Drops rows that contain no data from Affiliations.summary dataframe.
+
+        Returns
+        -------
+        self : Affiliations
+            an Affiliations object.
+        """
 
         ignore_cols = ['affiliation_id', 'address', 'email', 'other_links']
 
@@ -644,6 +930,22 @@ class Affiliations(Entities):
     
     def remove_duplicates(self, drop_empty_rows = True, sync = False):
 
+        """
+        Removes duplicate Affiliation entries from the Affiliations collection.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        sync : bool
+            whether to synchronise the Affiliations.summary dataframe with the Affiliations.all dictionary. Defaults to False.
+        
+        Returns
+        -------
+        self : Affiliations
+            an Affiliations object.
+        """
+
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
@@ -658,8 +960,18 @@ class Affiliations(Entities):
 
         return self
 
-
     def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Updates the Affiliations.summary dataframe using the Affiliation objects in the Affiliations.all dictionary.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in self.all.keys():
             affil = self.all[i]
@@ -680,6 +992,17 @@ class Affiliations(Entities):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def sync_summary(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Updates all Affiliation objects in the Affiliations.all dictionary using the Affiliations.summary dataframe.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         self.update_ids(sync=False)
 
@@ -716,9 +1039,19 @@ class Affiliations(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-
     def sync(self, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Synchronises the Affiliations.summary dataframe with the Affiliation objects in the Affiliations.all dictionary.
+        
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         if drop_empty_rows == True:
             self.drop_empty_rows()
 
@@ -740,8 +1073,25 @@ class Affiliations(Entities):
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
 
-
     def merge(self, affiliations, drop_duplicates = False, drop_empty_rows=True):
+
+        """
+        Merges the Affiliations collection with another Affiliations collection.
+
+        Parameters
+        ----------
+        affiliations : Affiliations
+            the Affiliations collection to merge with.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        
+        Returns
+        -------
+        self : Affiliations
+            the merged Affiliations collection.
+        """
 
         left = self.summary.copy(deep=True)
         right = affiliations.summary.copy(deep=True)
@@ -790,8 +1140,28 @@ class Affiliations(Entities):
 
         return self
 
-
     def add_affiliation(self, affiliation: Affiliation =  None, name: str = None, uri: str = None, crossref_id: int = None, data = None, use_api = True, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        """
+        Adds an Affiliation or affiliation data to the Affiliations collection.
+
+        Parameters
+        ----------
+        affiliation : Affiliation
+            an Affiliation object to add.
+        uri : str
+            a URI identifier to look up. Defaults to None.
+        crossref_id : str
+            a CrossRef ID to look up. Defaults to None.
+        data : dict
+            Optional: a dictionary containing affiliation data. Dictionary keys must match the names of columns in the Affiliations.summary dataframe.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        use_api : bool
+            whether to update the Affiliation data using the CrossRef API. Defaults to False.
+        """
 
         if type(affiliation) == str:
 
@@ -848,9 +1218,23 @@ class Affiliations(Entities):
 
         self.update_ids()
 
-
-    def add_list(self, affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False):
+    def add_affiliations_list(self, affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Adds a list of Affiliation objects to the Affiliations collection.
+
+        Parameters
+        ----------
+        affiliations_list : list[Affiliation]
+            a list of Affiliation objects.
+        use_api : bool
+            whether to update the Affiliations data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         for i in affiliations_list:
             if type(i) == Affiliation:
                 self.add_affiliation(affiliation = i, use_api=use_api)
@@ -872,6 +1256,19 @@ class Affiliations(Entities):
         self.update_ids()
 
     def update_ids(self, sync=False, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Updates affiliation IDs for all rows in the Affiliations.summary dataframe.
+
+        Parameters
+        ----------
+        sync : bool
+            whether to synchronise the Affiliations.summary dataframe with the Affiliation objects in the Affiliations.all dictionary. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         if sync == True:
             self.sync()
@@ -908,6 +1305,19 @@ class Affiliations(Entities):
 
     def update_addresses(self, sync=True, drop_duplicates = False, drop_empty_rows=False):
 
+        """
+        Updates all Affiliations' street addresses by looking up their names, locations, and/or existing addresses data using geopy.
+
+        Parameters
+        ----------
+        sync : bool
+            whether to synchronise the Affiliations.summary dataframe with the Affiliation objects in the Affiliations.all dictionary. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         if sync == True:
             self.sync(drop_duplicates=drop_duplicates,drop_empty_rows=drop_empty_rows)
 
@@ -929,6 +1339,17 @@ class Affiliations(Entities):
         self.update_ids()
 
     def update_from_crossref(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Looks up all Affiliations' CrossRef IDs and/or URIs using the CrossRef API. If found, uses to update the Affiliations collection.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         affiliation_ids = self.all.keys()
 
@@ -953,8 +1374,20 @@ class Affiliations(Entities):
 
         self.update_ids()
 
-
     def import_crossref_ids(self, crossref_ids: list, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Looks up a list of affiliations' CrossRef IDs and/or URIs using the CrossRef API. Adds any data found to the Affiliations collection.
+
+        Parameters
+        ----------
+        crossref_ids : list[str]
+            list containing affiliations' CrossRef IDs.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in crossref_ids:
 
@@ -969,27 +1402,90 @@ class Affiliations(Entities):
 
         self.update_ids()
 
-
     def from_crossref_ids(crossref_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        """
+        Looks up a list of affiliations' CrossRef IDs and/or URIs using the CrossRef API. Returns all data found as an Affiliations object.
+
+        Parameters
+        ----------
+        crossref_ids : list[str]
+            list containing affiliations' CrossRef IDs.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+
+        Returns
+        -------
+        funders : Funders
+            a Funders object.
+        """
 
         affiliations = Affiliations()
         affiliations.import_crossref_ids(crossref_ids, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates)
 
         return affiliations
 
-    def with_crossref(self):
+    def has_crossref(self):
+
+        """
+        Returns all rows in Affiliations.summary which contain CrossRef IDs.
+        """
+
         return self.summary[~self.summary['crossref_id'].isna()]
     
-    def with_uri(self):
+    def has_uri(self):
+
+        """
+        Returns all rows in Affiliations.summary which contain URIs.
+        """
+
         return self.summary[~self.summary['uri'].isna()]
 
-    def from_list(affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+    def from_affiliations_list(affiliations_list: list, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        """
+        Reads a list of Affiliation objects and returns as an Affiliations object.
+
+        Parameters
+        ----------
+        affiliations_list : list[Affiliation]
+            a list of Affiliation objects.
+        use_api : bool
+            whether to update the Affiliations data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        
+        Returns
+        -------
+        affiliations : Affiliations
+            an Affiliations object.
+        """
+
         affiliations = Affiliations()
-        affiliations.add_list(affiliations_list, use_api=use_api, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+        affiliations.add_affiliations_list(affiliations_list, use_api=use_api, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return affiliations
     
     def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Reads a pandas.DataFrame containing CrossRef API results and adds the data to the Affiliations collection.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Dataframe
+            CrossRef API results.
+        use_api : bool
+            whether to update the Affiliations data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in crossref_result.index:
             
@@ -999,8 +1495,27 @@ class Affiliations(Entities):
 
         self.update_ids()
 
-
     def from_crossref_result(crossref_result: pd.DataFrame, use_api: bool = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        """
+        Reads a pandas.DataFrame containing CrossRef API results and returns as a Affiliations object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Dataframe
+            CrossRef API results.
+        use_api : bool
+            whether to update the Funders data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+
+        Returns
+        -------
+        affiliations : Affiliations
+            a Affiliations object.
+        """
 
         affiliations = Affiliations()
         affiliations.import_crossref_result(crossref_result, use_api=use_api, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1009,6 +1524,21 @@ class Affiliations(Entities):
 
 def format_affiliations(affiliation_data, use_api = False, drop_duplicates = False, drop_empty_rows=True):
         
+        """
+        Formats a collection of affiliations data as an Affiliations object.
+
+        Parameters
+        ----------
+        affiliation_data : object
+            a collection of affiliations data.
+        use_api : bool
+            whether to update the Affiliations data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         result = Affiliations()
 
         affil_type = type(affiliation_data)
@@ -1074,7 +1604,7 @@ def format_affiliations(affiliation_data, use_api = False, drop_duplicates = Fal
 
         if (affil_type == list) and (len(affiliation_data) > 0) and (type(affiliation_data[0]) == Affiliation):
             result = Affiliations()
-            result.add_list(affiliation_data)
+            result.add_affiliations_list(affiliation_data)
             if drop_empty_rows == True:
                 result.drop_empty_rows()
             if drop_duplicates == True:
