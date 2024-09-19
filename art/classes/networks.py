@@ -1,4 +1,5 @@
 
+from networkx import degree
 from ..networks.network_functions import colinks_in, colinks_out
 
 from ..exporters.network_exporters import export_network, export_network_to_kumu
@@ -494,34 +495,56 @@ class Network(Graph):
             return weighted_density
 
     
-    def weighted_degrees_dataframe(self):
+    def weighted_degrees(self):
 
         """Returns the network's weighted degrees distribution as a dataframe."""
         
         # Checks if network is directed
-
+        isdir = self.is_directed()
         
         # Checks if network is weighted
 
         if 'weight' not in self.es.attributes():
-            degrees_dataframe = self.degrees().rename(columns={'total_degree':'weighted_total_degree', 'in_degree': 'weighted_in_degree', 'out_degree': 'weighted_out_degree'})
+
+            degrees_dataframe = self.degrees()
+
+            if isdir == False:
+                degrees_dataframe = degrees_dataframe.rename(columns={'degree':'weighted_degree'})
+            else:
+                degrees_dataframe = degrees_dataframe.rename(columns={'total_degree':'weighted_total_degree', 'in_degree': 'weighted_in_degree', 'out_degree': 'weighted_out_degree'})
+
             return degrees_dataframe
     
         else:
+            if isdir == False:
+                cols = ['vertex', 'weighted_degree']
+                directions = {'all': 'weighted_total_degree'}
+            else:
+                cols = ['vertex', 'weighted_total_degree', 'weighted_in_degree', 'weighted_out_degree']
+                directions = {'all': 'weighted_total_degree', 'in': 'weighted_in_degree', 'out': 'weighted_out_degree'}
 
-            degrees_dataframe = pd.DataFrame(columns = ['vertex', 'weighted_degree'])
+            degrees_dataframe = pd.DataFrame(columns = cols)
 
             index = 0
             for vertex in self.vs:
                 weighted_degree = 0
-                incident_edges = (Network.incident(self, vertex))
-                for edge in incident_edges:
-                    weight = self.es[edge]['weight']
-                    weighted_degree += weight
-                degrees_dataframe.loc[index] = [vertex['name'], weighted_degree]            
+                if 'name' in vertex.attributes().keys():
+                    degrees_dataframe.loc[index, 'vertex'] = vertex['name']
+                else:
+                    degrees_dataframe.loc[index, 'vertex'] = vertex.index
+                for d in directions.keys():
+                    colname = directions[d]
+                    incident_edges = (Network.incident(self, vertex, mode=d))
+                    for edge in incident_edges:
+                        weight = self.es[edge]['weight']
+                        weighted_degree += weight
+                    degrees_dataframe.loc[index, colname] = weighted_degree          
                 index += 1
 
-            degrees_dataframe = degrees_dataframe.sort_values('weighted_degree', ascending=False)
+            if isdir == False:
+                degrees_dataframe = degrees_dataframe.sort_values('weighted_degree', ascending=False)
+            else:
+                degrees_dataframe = degrees_dataframe.sort_values('weighted_total_degree', ascending=False)
 
             return degrees_dataframe
 
@@ -532,7 +555,7 @@ class Network(Graph):
         Returns frequency statistics for the weighted degree distribution.
         """
         
-        df = self.weighted_degrees_dataframe()
+        df = self.weighted_degrees()
 
         if df is not None:
             return df['weighted_degree'].describe()
@@ -545,7 +568,7 @@ class Network(Graph):
         """
         
         if weighted == True:
-            degrees_frame = self.weighted_degrees_dataframe(direction = direction)
+            degrees_frame = self.weighted_degrees(direction = direction)
             freq_table = degrees_frame['weighted_degree'].value_counts()
             dist_frame = pd.DataFrame({'weighted_degree':freq_table.index, 'counts':freq_table.values})
 
@@ -575,7 +598,7 @@ class Network(Graph):
             degrees.index.name = 'vertex'
         
         try:
-            weighted_degrees = self.weighted_degrees_dataframe().set_index('vertex').sort_index()
+            weighted_degrees = self.weighted_degrees().set_index('vertex').sort_index()
         except:
             weighted_degrees = pd.DataFrame()
             weighted_degrees.index.name = 'vertex'
@@ -670,7 +693,7 @@ class Network(Graph):
         if vertex_name == 'request_input':
             vertex_name = input('Vertex name: ')
 
-        df = self.weighted_degrees_dataframe(direction = direction)
+        df = self.weighted_degrees(direction = direction)
         masked = df[df['vertex'] == vertex_name]
         degree = int(masked['weighted_degree']) # type: ignore
 
