@@ -237,7 +237,11 @@ class Network(Graph):
 
         betweenness = Network.betweenness(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, betweenness[index]]
             index += 1
         
@@ -274,7 +278,11 @@ class Network(Graph):
 
             eigencentrality = Network.eigenvector_centrality(self)
             index = 0
-            for item in self.vs['name']:
+            for v in self.vs:
+                if 'name' in v.attributes().keys():
+                    item = v['name']
+                else:
+                    item = v.index
                 df.loc[index] = [item, eigencentrality[index]]
                 index += 1
             
@@ -307,7 +315,11 @@ class Network(Graph):
 
         authority_scores = Network.authority_score(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, authority_scores[index]]
             index += 1
         
@@ -340,7 +352,11 @@ class Network(Graph):
 
         hub_scores = Network.hub_score(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, hub_scores[index]]
             index += 1
         
@@ -373,7 +389,11 @@ class Network(Graph):
 
         coreness = Network.coreness(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, coreness[index]]
             index += 1
         
@@ -582,7 +602,7 @@ class Network(Graph):
         if weighted == True:
             degrees_frame = self.weighted_degrees()
         else:
-            degrees_frame = self.degrees(direction = direction)
+            degrees_frame = self.degrees()
 
         cols = degrees_frame.columns.to_list()
         cols.remove('vertex')
@@ -603,7 +623,7 @@ class Network(Graph):
     def all_centralities(self, sort_by = ['weighted_degree','degree', 'betweenness','eigencentrality','authority_score','hub_score']):
 
         """
-        Calculates all centrality measures for network. Returns as a dataframe.
+        Calculates all centrality measures for network. Returns as a Pandas Dataframe.
         """
         
         is_directed = self.is_directed()
