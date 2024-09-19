@@ -1464,7 +1464,7 @@ class Review:
     def import_bibtex(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = False, update_entities = False):
         
         """
-        Reads a .bib file and adds its data to Review object.
+        Reads a Bibtex (.bib) bibliography file and adds its data to Review object.
 
         Parameters
         ----------
@@ -1538,7 +1538,7 @@ class Review:
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
         """
-        Reads an .xlsx file and adds its data to the Review object.
+        Reads an Excel (.xlsx) file and adds its data to the Review object.
 
         Parameters
         ----------
@@ -1603,7 +1603,7 @@ class Review:
     def from_excel(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
         """
-        Reads an .xlsx file and returns as a Review object.
+        Reads an Excel (.xlsx) file and returns as a Review object.
 
         Parameters
         ----------
@@ -1642,7 +1642,7 @@ class Review:
     def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
         """
-        Reads a .csv file and adds its data to the Review object.
+        Reads a CSV (.csv) file and adds its data to the Review object.
 
         Parameters
         ----------
@@ -1705,7 +1705,7 @@ class Review:
     def from_csv(file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
         """
-        Reads a .csv file and returns as a Review object.
+        Reads a CSV (.csv) file and returns as a Review object.
 
         Parameters
         ----------
@@ -1742,7 +1742,7 @@ class Review:
     def import_json(self, file_path = 'request_input', update_formatting: bool = True):
 
         """
-        Reads a .json file and adds its data to the Review object.
+        Reads a JSON (.json) file and adds its data to the Review object.
 
         Parameters
         ----------
@@ -1774,7 +1774,7 @@ class Review:
     def from_json(file_path = 'request_input'): # type: ignore
 
         """
-        Reads a .json file and returns as a Review object.
+        Reads a JSON (.json) file and returns as a Review object.
 
         Parameters
         ----------
@@ -2022,7 +2022,7 @@ class Review:
             one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
         not_kwds : str or list
             one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
-        field : str or list
+        fields : str or list
             names of one or fields to search. Defaults to 'all'.
         case_sensitive : bool
             whether to pay attention to the case of string data. Defaults to False.
