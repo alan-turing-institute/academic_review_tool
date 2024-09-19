@@ -16,7 +16,7 @@ from .properties import Properties
 from .affiliations import Affiliation, Affiliations, format_affiliations
 from .funders import Funders, format_funders
 from .results import Results, Funder, generate_work_id
-from .references import References, is_formatted_reference, extract_references
+from .references import References, is_formatted_reference, format_references
 from .activitylog import ActivityLog
 from .authors import Author, Authors, format_authors as orig_format_authors
 from .networks import Network, Networks
@@ -220,7 +220,7 @@ def format_citations(self, add_work_ids = False, update_from_doi = False, verbos
             indices = unformatted.index
             processing_count = 0
             for i in indices:
-                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
+                refs = format_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
                 refs_count  = None
 
                 if 'refs_count' in refs.__dict__.keys():

@@ -5,7 +5,7 @@ from ..internet.crawlers import check_crawl_permission
 
 from ..internet.crawlers import correct_seed_errors as correct_seed_url_errors
 from .authors import format_authors
-from .references import extract_references
+from .references import format_references
 
 import queue
 import time
@@ -338,7 +338,7 @@ def citation_crawler_engine(
 
 
         # Formatting entry citations data
-        refs = extract_references(entry['citations_data'], add_work_ids = True, update_from_doi = False)
+        refs = format_references(entry['citations_data'], add_work_ids = True, update_from_doi = False)
         entry.at['citations'] = refs
 
         # Formatting entry authors data
