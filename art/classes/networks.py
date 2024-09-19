@@ -195,13 +195,16 @@ class Network(Graph):
     def degree_stats(self):
 
         """
-        Returns frequency statistics for the network's degree distributions.
+        Returns frequency statistics for the network's degree distributions in a Pandas DataFrame.
         """
         
-        df = self.degrees_dataframe()
+        deg_df = self.degrees_dataframe()
 
-        if df is not None:
-            return df['total_degree'].describe()
+        if deg_df is not None:
+            stats_df = pd.DataFrame(columns=['total_degree', 'in_degree', 'out_degree'])
+            for c in stats_df.columns:
+                stats_df[c] = deg_df[c].describe()
+            return stats_df
         else:
             return None
     
