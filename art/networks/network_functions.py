@@ -627,7 +627,15 @@ def generate_funder_works_network(funder_works_dict: dict) -> Graph:
     return g
 
 def cocitation_dict(citation_network) -> dict:
-     
+    
+    """
+    Generates a dictionary representing co-citations from a citation network.
+    
+    Notes
+    -----
+    Is able to take igraph.Graph, Network, and NetworkX objects.
+    """
+
     # Converting NetworkX objects to igraph objects
     if (
             (type(citation_network) == NetworkX_Undir)
