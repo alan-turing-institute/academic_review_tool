@@ -166,7 +166,7 @@ class Network(Graph):
 
         return 'weight' in self.es.attributes()
 
-    def degrees_dataframe(self):
+    def degrees(self):
         
         """
         Returns the network's degree distributions as a dataframe.
@@ -208,17 +208,19 @@ class Network(Graph):
         return degrees_dataframe
 
     
-    def degree_stats(self):
+    def degrees_stats(self):
 
         """
         Returns frequency statistics for the network's degree distributions in a Pandas DataFrame.
         """
         
-        deg_df = self.degrees_dataframe()
+        deg_df = self.degrees()
 
         if deg_df is not None:
-            stats_df = pd.DataFrame(columns=['total_degree', 'in_degree', 'out_degree'])
-            for c in stats_df.columns:
+            cols = deg_df.columns.to_list()
+            cols.remove('vertex')
+            stats_df = pd.DataFrame(columns=cols)
+            for c in cols:
                 stats_df[c] = deg_df[c].describe()
             return stats_df
         else:
@@ -502,7 +504,7 @@ class Network(Graph):
         # Checks if network is weighted
 
         if 'weight' not in self.es.attributes():
-            degrees_dataframe = self.degrees_dataframe().rename(columns={'total_degree':'weighted_total_degree', 'in_degree': 'weighted_in_degree', 'out_degree': 'weighted_out_degree'})
+            degrees_dataframe = self.degrees().rename(columns={'total_degree':'weighted_total_degree', 'in_degree': 'weighted_in_degree', 'out_degree': 'weighted_out_degree'})
             return degrees_dataframe
     
         else:
@@ -550,7 +552,7 @@ class Network(Graph):
             return dist_frame
 
         else:
-            degrees_frame = self.degrees_dataframe(direction = direction)
+            degrees_frame = self.degrees(direction = direction)
             freq_table = degrees_frame['degree'].value_counts()
             dist_frame = pd.DataFrame({'degree':freq_table.index, 'counts':freq_table.values})
 
@@ -567,7 +569,7 @@ class Network(Graph):
         is_directed = self.is_directed()
         
         try:
-            degrees = self.degrees_dataframe().set_index('vertex').sort_index()
+            degrees = self.degrees().set_index('vertex').sort_index()
         except:
             degrees = pd.DataFrame()
             degrees.index.name = 'vertex'
