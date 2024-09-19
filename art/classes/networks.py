@@ -497,7 +497,7 @@ class Network(Graph):
     
     def weighted_degrees(self):
 
-        """Returns the network's weighted degrees distribution as a dataframe."""
+        """Returns the network's weighted degree distributions as a Pandas Dataframe."""
         
         # Checks if network is directed
         isdir = self.is_directed()
@@ -546,40 +546,57 @@ class Network(Graph):
             else:
                 degrees_dataframe = degrees_dataframe.sort_values('weighted_total_degree', ascending=False)
 
+            degrees_dataframe.index.name = 'vertex_id'
+
             return degrees_dataframe
 
         
     def weighted_degrees_stats(self):
 
         """
-        Returns frequency statistics for the weighted degree distribution.
+        Returns frequency statistics for the weighted degree distributions as a Pandas DataFrame.
         """
-        
+
         df = self.weighted_degrees()
 
         if df is not None:
-            return df['weighted_degree'].describe()
+            cols = df.columns.to_list()
+            cols.remove('vertex')
+            stats_df = pd.DataFrame(columns=cols)
+            for c in cols:
+                stats_df[c] = df[c].describe()
+            return stats_df
+        else:
+            return None
 
         
-    def degrees_dist(self, weighted = False, direction = 'all'):
+    def degree_distributions(self, weighted = False, direction = 'all'):
 
         """
-        Returns either the weighted or unweighted degrees distribution as a dataframe.
+        Returns either the weighted or unweighted degree distributions as a Pandas Dataframe.
         """
-        
+
+        isdir = self.is_directed()
+        directions = {'all': 'weighted_total_degree', 'in': 'weighted_in_degree', 'out': 'weighted_out_degree'}
+
         if weighted == True:
-            degrees_frame = self.weighted_degrees(direction = direction)
-            freq_table = degrees_frame['weighted_degree'].value_counts()
-            dist_frame = pd.DataFrame({'weighted_degree':freq_table.index, 'counts':freq_table.values})
-
-            return dist_frame
-
+            degrees_frame = self.weighted_degrees()
         else:
             degrees_frame = self.degrees(direction = direction)
-            freq_table = degrees_frame['degree'].value_counts()
-            dist_frame = pd.DataFrame({'degree':freq_table.index, 'counts':freq_table.values})
 
-            return dist_frame
+        cols = degrees_frame.columns.to_list()
+        cols.remove('vertex')
+
+        if isdir == False:
+            col = cols[0]
+        else:
+            col = directions[direction]
+        
+        freq_table = degrees_frame[col].value_counts()
+
+
+        dist_frame = pd.DataFrame({col:freq_table.index, 'frequency':freq_table.values}).sort_values(col, ascending=False)
+        return dist_frame
             
     
 
