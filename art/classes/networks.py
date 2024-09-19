@@ -518,7 +518,7 @@ class Network(Graph):
         else:
             if isdir == False:
                 cols = ['vertex', 'weighted_degree']
-                directions = {'all': 'weighted_total_degree'}
+                directions = {'all': 'weighted_degree'}
             else:
                 cols = ['vertex', 'weighted_total_degree', 'weighted_in_degree', 'weighted_out_degree']
                 directions = {'all': 'weighted_total_degree', 'in': 'weighted_in_degree', 'out': 'weighted_out_degree'}
