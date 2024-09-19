@@ -172,10 +172,17 @@ class Network(Graph):
         Returns the network's degree distributions as a dataframe.
         """
         
-        degrees_dataframe = pd.DataFrame(columns = ['vertex', 'total_degree', 'in_degree', 'out_degree'])
-        total_degrees = Network.degree(self, mode = 'all')
-        in_degrees = Network.degree(self, mode = 'in')
-        out_degrees = Network.degree(self, mode = 'out')
+        isdir = self.is_directed()
+
+        if isdir == False:
+            degrees_dataframe = pd.DataFrame(columns = ['vertex', 'degree'])
+            total_degrees = Network.degree(self, mode = 'all')
+        else:
+
+            degrees_dataframe = pd.DataFrame(columns = ['vertex', 'total_degree', 'in_degree', 'out_degree'])
+            total_degrees = Network.degree(self, mode = 'all')
+            in_degrees = Network.degree(self, mode = 'in')
+            out_degrees = Network.degree(self, mode = 'out')
 
         index = 0
         for v in self.vs:
@@ -183,11 +190,20 @@ class Network(Graph):
                 item = v['name']
             else:
                 item = v.index
-            degrees_dataframe.loc[index] = [item, total_degrees[index], in_degrees[index], out_degrees[index]]
+            
+            degrees_dataframe.loc[index, 'vertex'] = item
+
+            if isdir == False:
+                degrees_dataframe.loc[index, 'degree'] = total_degrees[index]
+                degrees_dataframe = degrees_dataframe.sort_values('degree', ascending=False)
+            else:
+                degrees_dataframe.loc[index, 'total_degree'] = total_degrees[index]
+                degrees_dataframe.loc[index, 'in_degree'] = in_degrees[index]
+                degrees_dataframe.loc[index, 'out_degree'] = out_degrees[index]
+                degrees_dataframe = degrees_dataframe.sort_values('total_degree', ascending=False)
             index += 1
         
         degrees_dataframe.index.name = 'vertex_id'
-        degrees_dataframe = degrees_dataframe.sort_values('total_degree', ascending=False)
 
         return degrees_dataframe
 
@@ -380,7 +396,18 @@ class Network(Graph):
 
     def community_detection(self, algorithm='fastgreedy'):
         
-        """Identifies communities in the network. Gives the option of using different algorithms."""
+        """Identifies communities in the network. Gives the option of using different algorithms.
+        
+        Parameters
+        ----------
+        algorithm : str
+            name of community detection algorithm. Options: 
+            1. betweenness
+            2. fastgreedy
+            3. eigenvector
+            4. spinglass
+            5. walktrap
+        """
 
         if (algorithm == None) or (algorithm == ''):
             algorithm = input('Algorithm must be specified. Options: 1. betweenness, 2. fastgreedy, 3. eigenvector, 4. spinglass, 5. walktrap.:')
@@ -465,20 +492,19 @@ class Network(Graph):
             return weighted_density
 
     
-    def weighted_degrees_dataframe(self, direction = 'all'):
+    def weighted_degrees_dataframe(self):
 
         """Returns the network's weighted degrees distribution as a dataframe."""
         
+        # Checks if network is directed
+
         
         # Checks if network is weighted
 
         if 'weight' not in self.es.attributes():
-            degrees_dataframe = self.degrees_dataframe(direction = direction)
-            degrees_dataframe['weighted_degree'] = degrees_dataframe['degree']
-            degrees_dataframe = degrees_dataframe.drop('degree', axis = 1)
+            degrees_dataframe = self.degrees_dataframe().rename(columns={'total_degree':'weighted_total_degree', 'in_degree': 'weighted_in_degree', 'out_degree': 'weighted_out_degree'})
             return degrees_dataframe
-            
-
+    
         else:
 
             degrees_dataframe = pd.DataFrame(columns = ['vertex', 'weighted_degree'])
@@ -498,13 +524,13 @@ class Network(Graph):
             return degrees_dataframe
 
         
-    def weighted_degrees_stats(self, direction = 'all'):
+    def weighted_degrees_stats(self):
 
         """
         Returns frequency statistics for the weighted degree distribution.
         """
         
-        df = self.weighted_degrees_dataframe(direction = direction)
+        df = self.weighted_degrees_dataframe()
 
         if df is not None:
             return df['weighted_degree'].describe()
