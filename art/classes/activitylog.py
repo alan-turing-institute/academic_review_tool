@@ -8,21 +8,22 @@ class ActivityLog(pd.DataFrame):
     """
     This is an ActivityLog object. It is a modified Pandas Dataframe object designed to store metadata about an academic review.
     
-    Parameters
-    ----------
-    
-    
-    Attributes
-    ----------
+    Columns
+    -------
+    * **timestamp**: date-time the activity occurred.
+    * **type**: type of activity.
+    * **activity**: details of activity.
+    * **location**: location in Review that activity occurred.
+    * **database**: name of database/repository accessed (if relevant).
+    * **url**: web address accessed (if relevant).
+    * **query**: search query used (if relevant).
+    * **changes**: number of changes made to the Review results.
     """
 
     def __init__(self):
         
         """
         Initialises ActivityLog instance.
-        
-        Parameters
-        ----------
         """
 
 
@@ -43,6 +44,27 @@ class ActivityLog(pd.DataFrame):
     
 
     def add_activity(self, type: str, activity: str, location: list, database = None, query = None, url = None, changes_dict = None):
+
+        """
+        Adds a new activity to the ActivityLog DataFrame.
+
+        Parameters
+        ----------
+        type : str
+            type of activity.
+        activity : str
+            details of activity.
+        location : str
+            name of location in Review that activity occurred.
+        database : str
+            name of database/repository accessed (if relevant). Defaults to None.
+        query : str
+            search query used (if relevant). Defaults to None.
+        url : str
+            web address accessed (if relevant). Defaults to None.
+        changes_dict : dict
+            dictionary of changes made to Review. Defaults to None.
+        """
 
         new_index = len(self)
         self.loc[new_index, 'timestamp'] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")

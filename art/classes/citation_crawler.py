@@ -13,8 +13,11 @@ import time
 import pandas as pd
 import numpy as np
 
-
 def crawler_scrape_url(url) -> pd.DataFrame:
+
+    """
+    Core functionality for the citation crawler's web scraper. Takes a URL and returns a Pandas DataFrame.
+    """
 
     scrape_res = scrape_url(url=url)
 
@@ -111,6 +114,10 @@ def crawler_scrape_url(url) -> pd.DataFrame:
 
 def citation_crawler_site_test(url: str):
 
+    """
+    Checks whether the citation crawler can crawl a given URL. Returns True if yes; False if no.
+    """
+
     global can_scrape
 
     for i in can_scrape:
@@ -120,6 +127,22 @@ def citation_crawler_site_test(url: str):
     return False
 
 def academic_scraper(url, be_polite = False):
+
+    """
+    Bespoke web scraper for academic repository websites.
+
+    Parameters
+    ----------
+    url : str
+        a URL to scrape.
+    be_polite : bool
+        whether to follow respect scraping permissions contained in websites' robots.txt files.
+    
+    Returns
+    -------
+    res_df : pandas.DataFrame
+        a Pandas DataFrame containing scraped web data.
+    """
 
     # Checking if URL is bad. If True, tries to correct it.
     url = correct_seed_url_errors(url)
@@ -160,6 +183,22 @@ def academic_scraper(url, be_polite = False):
 
 def citation_crawler_scraper(entry: pd.Series, be_polite = True):
     
+    """
+    Bespoke web scraper for use by citation crawler.
+
+    Parameters
+    ----------
+    entry : pandas.Series
+        citation crawler entry.
+    be_polite : bool
+        whether to follow respect scraping permissions contained in websites' robots.txt files.
+    
+    Returns
+    -------
+    entry : pandas.Series
+        citation crawler entry.
+    """
+
     url = entry['link']
 
     res_df = academic_scraper(url=url, be_polite=be_polite)
@@ -172,6 +211,24 @@ def citation_crawler_scraper(entry: pd.Series, be_polite = True):
     return entry
         
 def citation_crawler_doi_retriver(entry: pd.Series, be_polite = True, timeout = 60):
+
+    """
+    Takes citation crawler entry. If it contains a DOI, looks up the record using the CrossRef API. If not, scrapes the URL.
+
+    Parameters
+    ----------
+    entry : pandas.Series
+        citation crawler entry.
+    be_polite : bool
+        whether to follow respect scraping permissions contained in websites' robots.txt files.
+    timeout : int
+        maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+    
+    Returns
+    -------
+    entry : pandas.Series
+        citation crawler entry.
+    """
 
     doi = entry['doi']
     link = entry['link']
@@ -221,6 +278,24 @@ def citation_crawler_doi_retriver(entry: pd.Series, be_polite = True, timeout = 
 
 def update_citation_crawler_data(entry: pd.Series, be_polite = True, timeout = 60):
 
+    """
+    Takes citation crawler entry and updates the data using the CrossRef API if a record is available.
+
+    Parameters
+    ----------
+    entry : pandas.Series
+        citation crawler entry.
+    be_polite : bool
+        whether to follow respect scraping permissions contained in websites' robots.txt files.
+    timeout : int
+        maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+    
+    Returns
+    -------
+    entry : pandas.Series
+        citation crawler entry.
+    """
+
     doi = entry['doi']
     link = entry['link']
 
@@ -266,32 +341,27 @@ def citation_crawler_engine(
     
     Parameters
     ---------- 
-    urls : queue 
-        ordered queue of URLs to be crawled.
-    required_keywords : list 
-        list of keywords which sites must contain to be crawled.
-    excluded_keywords : list 
-        list of keywords which sites must *not* contain to be crawled.
-    excluded_url_terms : list 
-        list of strings; link will be ignored if it contains any string in list.
-    case_sensitive : bool 
-        whether or not to ignore string characters' case.
+    to_crawl : queue 
+        records to crawl.
+    data : pandas.DataFrame
+        a dataframe of data gathered by the crawler.
+    use_api : bool
+        whether to lookup entries and update their data using APIs. Required for the crawler to find new and add new data. Defaults to True.
     crawl_limit : int 
         how many URLs the crawler should visit before it stops.
-    ignore_urls : list 
-        list of URLs to ignore.
-    ignore_domains : list 
-        list of domains to ignore.
+    depth_limit : int
+        maximum number of crawler iterations to perform.
     be_polite : bool 
         whether to respect websites' permissions for crawlers.
-    full : bool 
-        whether to run a full scrape on each site. This takes longer.
-    
+    rate_limit : float
+        time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+    timeout : int
+        maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
     
     Returns
     -------
-    output_dict : dict 
-        a dictionary containing results from each crawled site.
+    data : pandas.DataFrame 
+        a Pandas DataFrame containing results from the crawl.
     """
     
     # Intiailising variables to store the pages already visited
@@ -411,34 +481,25 @@ def citation_crawler(
         
         Parameters
         ---------- 
-        seeds : str or list 
-            one or more URLs from which to crawl.
+        data : pandas.DataFrame
+            a dataframe of data gathered by the crawler.
+        use_api : bool
+            whether to lookup entries and update their data using APIs. Required for the crawler to find new and add new data. Defaults to True.
         crawl_limit : int 
-            how many URLs the crawler should visit before it stops.
-        excluded_url_terms : list 
-            list of strings; link will be ignored if it contains any string in list.
-        required_keywords : list 
-            list of keywords which sites must contain to be crawled.
-        excluded_keywords : list 
-            list of keywords which sites must *not* contain to be crawled.
-        case_sensitive : bool 
-            whether or not to ignore string characters' case.
-        ignore_urls : list 
-            list of URLs to ignore.
-        ignore_domains : list 
-            list of domains to ignore.
+            how many records the crawler should visit before it stops.
+        depth_limit : int
+            maximum number of crawler iterations to perform.
         be_polite : bool 
-            whether respect websites' permissions for crawlers.
-        full : bool 
-            whether to run a full scrape on each site. This takes longer.
-        output_as : str 
-            the format to output results in. Defaults to a pandas.DataFrame.
-        
+            whether to respect websites' permissions for crawlers.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
         
         Returns
         -------
-        result : pd.DataFrame 
-            an object containing the results of a crawl.
+        output : pd.DataFrame 
+            an object containing the results from the crawl.
         """
 
         # See https://www.zenrows.com/blog/web-crawler-python#transitioning-to-a-real-world-web-crawler
