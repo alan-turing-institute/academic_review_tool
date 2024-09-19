@@ -620,7 +620,7 @@ class Network(Graph):
             
     
 
-    def all_centralities(self, sort_by = ['weighted_degree','degree', 'betweenness','eigencentrality','authority_score','hub_score']):
+    def all_centralities(self):
 
         """
         Calculates all centrality measures for network. Returns as a Pandas Dataframe.
@@ -676,7 +676,9 @@ class Network(Graph):
                                             hubs)
         
         if is_directed == True:
-            sort_by = ['weighted_degree','degree', 'betweenness','authority_score','hub_score']
+            sort_by = ['weighted_total_degree', 'total_degree', 'betweenness']
+        else:
+            sort_by = ['weighted_degree', 'degree', 'betweenness', 'eigencentrality', 'authority_score','hub_score']
             
         return combined.sort_values(sort_by, ascending=False)
 
