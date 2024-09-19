@@ -2,7 +2,6 @@
 
 from typing import List, Dict, Tuple
 import json
-import copy
 import igraph as ig # type: ignore
 from igraph import Graph # type: ignore
 from networkx.classes import Graph as NetworkX_Undir, DiGraph as NetworkX_Dir, MultiGraph as NetworkX_Multi # type: ignore

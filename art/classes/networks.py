@@ -113,6 +113,10 @@ class Network(Graph):
 
     def __repr__(self):
 
+        """
+        Defines how Network objects are represented in string form.
+        """
+
         if self.is_directed() == True:
             dir = 'Directed'
         else:
@@ -155,38 +159,45 @@ class Network(Graph):
         return output
     
     def is_weighted(self) -> bool:
+
+        """
+        Checks whether edges have a 'weight' attribute. Returns True if yes; False if no.
+        """
+
         return 'weight' in self.es.attributes()
 
-    def degrees_dataframe(self, direction = 'all'):
+    def degrees_dataframe(self):
         
         """
-        Returns the network's degree distribution as a dataframe.
+        Returns the network's degree distributions as a dataframe.
         """
         
-        degrees_dataframe = pd.DataFrame(columns = ['vertex', 'degree'])
-        degrees = Network.degree(self, mode = direction)
+        degrees_dataframe = pd.DataFrame(columns = ['vertex', 'total_degree', 'in_degree', 'out_degree'])
+        total_degrees = Network.degree(self, mode = 'all')
+        in_degrees = Network.degree(self, mode = 'in')
+        out_degrees = Network.degree(self, mode = 'out')
 
         index = 0
         for item in self.vs['name']:
-            degrees_dataframe.loc[index] = [item, degrees[index]]
+            degrees_dataframe.loc[index] = [item, total_degrees[index], in_degrees[index], out_degrees[index]]
             index += 1
         
         degrees_dataframe.index.name = 'vertex_id'
-        degrees_dataframe = degrees_dataframe.sort_values('degree', ascending=False)
+        degrees_dataframe = degrees_dataframe.sort_values('total_degree', ascending=False)
 
         return degrees_dataframe
 
     
-    def degree_stats(self, direction = 'all'):
+    def degree_stats(self):
 
         """
-        Returns frequency statistics for the network's degree distribution.
+        Returns frequency statistics for the network's degree distributions.
         """
         
-        df = self.degrees_dataframe(direction = direction)
+        df = self.degrees_dataframe()
 
         if df is not None:
-            return df['degree'].describe()
+            return df['total_degree'].describe()
         else:
             return None
     
