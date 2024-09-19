@@ -178,7 +178,11 @@ class Network(Graph):
         out_degrees = Network.degree(self, mode = 'out')
 
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             degrees_dataframe.loc[index] = [item, total_degrees[index], in_degrees[index], out_degrees[index]]
             index += 1
         
