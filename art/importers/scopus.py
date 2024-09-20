@@ -13,8 +13,11 @@ enablePrint()
 
 from pybliometrics.scopus import AbstractRetrieval, ScopusSearch # type: ignore
 
-
 def operator_logic(default_operator: str, string: str):
+
+    """
+    Takes Scopus API search string, detects the logical operator used, and separates the operator and string. Returns a tuple.
+    """
 
     string = string.replace('NOT ', 'AND NOT ').replace('AND AND NOT ', 'AND NOT ')
 
@@ -67,6 +70,68 @@ def query_builder(default_operator = 'AND',
                     tile_abs_key_auth = None
                     ):
     
+    """
+    Takes queries for specific search fields and returns a string which is formatted for input into the Scopus API.
+    
+    Parameters
+    ----------
+        default_operator : str
+            default logical operator to build search. Defaults to 'AND'.
+        tile_abs_key_auth : str
+            a combined search. Searches for titles, abstracts, keywords, and author names. Defaults to None.
+        all_fields : str
+            searches all fields. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        year : str
+            searches for matching publication years. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_identifier : str
+            searches for Scopus author IDs. Defaults to None.
+        affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        publisher : str
+            searches for publisher names containing string. Defaults to None.
+        funder : str
+            searches for funder names containing string. Defaults to None.
+        abstract : str
+            searches for abstracts containing string. Defaults to None.
+        keywords : str
+            searches for matching keywords. Defaults to None.
+        doctype : str
+            searches for types of entries containing string. Defaults to None.
+        doi : str
+            searches for matching DOIs. Defaults to None.
+        issn : str
+            searches for matching ISSNs. Defaults to None.
+        isbn : str
+            searches for matching ISBNs. Defaults to None.
+        pubmed_id : str
+            searches for matching PubMed IDs (PMIDs). Defaults to None.
+        source_title : str
+            searches for source titles (e.g. journals, books) containing string. Defaults to None.
+        volume : str
+            searches for journal entries with matching volume numbers. Defaults to None.
+        page : str
+            searches for entries with matching page numbers. Defaults to None.
+        issue : str
+            searches for journal entries with matching issue numbers. Defaults to None.
+        language : str
+            searches for entries by language Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        references : str
+            searches for entries with citations that contain matching strings. Defaults to None.
+    
+    Returns
+    -------
+        query : str
+            a query formatted for input into the Scopus API.
+    """
+
     query = ''
     
     if (all_fields is not None) and (type(all_fields) == str): # type: ignore
@@ -175,7 +240,6 @@ def query_builder(default_operator = 'AND',
     
     return query
        
-
 def search(tile_abs_key_auth = None,
                     all_fields = None,
                     title = None,
@@ -201,14 +265,91 @@ def search(tile_abs_key_auth = None,
                     link = None,
                     references = None,
                     default_operator = 'AND',
-           refresh=True, 
-           view=None, 
-           verbose=False, 
-           download=True, 
-           integrity_fields=None, 
-           integrity_action='raise', 
-           subscriber=False):
+                    refresh=True, 
+                    view=None, 
+                    verbose=False, 
+                    download=True, 
+                    integrity_fields=None, 
+                    integrity_action='raise', 
+                    subscriber=False):
     
+    """
+        Searches Scopus API and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        tile_abs_key_auth : str
+            a combined search. Searches for titles, abstracts, keywords, and author names. Defaults to None.
+        all_fields : str
+            searches all fields. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        year : str
+            searches for matching publication years. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_identifier : str
+            searches for Scopus author IDs. Defaults to None.
+        affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        publisher : str
+            searches for publisher names containing string. Defaults to None.
+        funder : str
+            searches for funder names containing string. Defaults to None.
+        abstract : str
+            searches for abstracts containing string. Defaults to None.
+        keywords : str
+            searches for matching keywords. Defaults to None.
+        doctype : str
+            searches for types of entries containing string. Defaults to None.
+        doi : str
+            searches for matching DOIs. Defaults to None.
+        issn : str
+            searches for matching ISSNs. Defaults to None.
+        isbn : str
+            searches for matching ISBNs. Defaults to None.
+        pubmed_id : str
+            searches for matching PubMed IDs (PMIDs). Defaults to None.
+        source_title : str
+            searches for source titles (e.g. journals, books) containing string. Defaults to None.
+        volume : str
+            searches for journal entries with matching volume numbers. Defaults to None.
+        page : str
+            searches for entries with matching page numbers. Defaults to None.
+        issue : str
+            searches for journal entries with matching issue numbers. Defaults to None.
+        language : str
+            searches for entries by language Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        references : str
+            searches for entries with citations that contain matching strings. Defaults to None.
+        default_operator : str
+            the default Boolean operator to build the search. Defaults to 'AND'.
+        refresh : bool 
+        view : bool 
+        verbose : bool 
+        download : bool 
+        integrity_fields : None
+        integrity_action : str
+        subscriber : bool
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from Scopus API search.
+        
+        Options
+        -------
+        Options for default_operator:
+            * 'AND'
+            * 'AND NOT'
+            * 'NOT'
+            * 'OR'
+    """
+
     query = query_builder(default_operator = default_operator,
                     all_fields = all_fields,
                     title = title,
@@ -285,6 +426,31 @@ def lookup(uid: str = 'request_input',
            refresh = False,
            view = 'META',
            id_type = None):
+
+    """
+        Looks up publication using the Scopus API.
+
+        Parameters
+        ----------
+        uid : str
+            Scopus ID, DOI, ISBN, ISSN, or Pubmed ID (PMID) to look up. Defaults to requesting from user input.
+        refresh : bool
+            whether to refresh the Scopus session.
+        view : str
+            sets the amount of detail returned. Defaults to 'META'.
+        add_to_results : bool
+            whether to add results to Review.
+        drop_duplicates : bool
+            whether to remove duplicated rows when adding to results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data when adding to results.
+        id_type : None
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from publication lookup on Scopus API.
+    """
 
     if uid == 'request_input':
         uid = input('ID: ')

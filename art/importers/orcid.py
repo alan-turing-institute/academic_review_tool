@@ -23,6 +23,20 @@ public_access_token = orcid_auth.get_public_access_token()
 
 def lookup_orcid(orcid_id = 'request_input'):
 
+    """
+    Looks up an ORCID ID and returns a Pandas DataFrame of potential matches.
+
+    Parameters
+    ----------
+    orcid_id : str
+        an ORCID ID to look up. Defaults to requesting from user input.
+    
+    Results
+    -------
+    df : pandas.DataFrame
+        a Pandas DataFrame of potential matches in the ORCID database.
+    """
+
     if orcid_id == 'request_input':
         orcid_id = input('ORCID ID: ')
     
@@ -43,6 +57,10 @@ def lookup_orcid(orcid_id = 'request_input'):
 
 def get_author(orcid_id = 'request_input'):
 
+    """
+    Retrieves an ORCID account using an ORCID ID. Returns a Pyorcid Orcid object.
+    """
+
     if orcid_id == 'request_input':
         orcid_id = input('ORCID ID: ')
     
@@ -52,6 +70,22 @@ def get_author(orcid_id = 'request_input'):
     return orcid
 
 def get_author_works(orcid_id = 'request_input', output = 'dataframe'):
+
+    """
+    Retrieves data on an ORCID profile's listed works.
+
+    Parameters
+    ----------
+    orcid_id : str
+        an ORCID ID to look up. Defaults to requesting from user input.
+    output : str
+        the type of object to return. Defaults to 'dataframe' (a Pandas DataFrame).
+    
+    Returns
+    -------
+    works_list : pandas.DataFrame or list or tuple
+        an object containing data on the ORCID profile's listed works.
+    """
 
     if orcid_id == 'request_input':
         orcid_id = input('ORCID ID: ')
@@ -73,6 +107,26 @@ def get_author_works(orcid_id = 'request_input', output = 'dataframe'):
         return pd.DataFrame(works_list)
 
 def search(query: str = 'request_input', start: int = 0, limit: int = 1000, output: str = 'dataframe'):
+
+    """
+        Searches for author records using the Orcid API.
+
+        Parameters
+        ----------
+        query : str
+            query to search. Allows for keywords and Boolean logic.
+        start : int
+            index position of first result to return. Defaults to 0.
+        limit : int
+            the maximum number of results returned. Defaults to 1000.
+        output : str
+            the type of object to return. Defaults to 'dataframe' (a Pandas DataFrame).
+
+        Returns
+        -------
+        results_list : pandas.DataFrame or list or tuple
+            an object containing search results.
+    """
 
     if query == 'request_input':
         query = input('Search query: ')
@@ -115,11 +169,6 @@ def search(query: str = 'request_input', start: int = 0, limit: int = 1000, outp
     
     if (output == pd.DataFrame) or (output.lower().strip() == 'dataframe'):
         return pd.DataFrame(results_list)
-
-
-
-    
-
 
 def save_summary(self: Orcid, file_name: str = 'request_input', file_path: str = 'request_input'):
 

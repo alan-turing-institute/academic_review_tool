@@ -15,7 +15,24 @@ from docx import Document # type: ignore
 def export_obj(obj, file_name = 'obj_name', folder_address: str = 'request_input', export_str_as: str = 'txt', export_dict_as: str = 'json', export_pandas_as: str = 'csv', export_network_as: str = 'graphML'):
     
     """
-    Exports objects to external files based on their type.
+    Exports objects to external files based on their type. Detects the object's type and selects a corresponding file type.
+
+    Parameters
+    ----------
+    obj : object
+        the object to export.
+    file_name : str
+        name for export file. Defaults to requesting from user input.
+    folder_address : str
+        directory path for folder to export to. Defaults to requesting from user input.
+    export_str_as : str
+        file type for saving string objects. Defaults to 'txt', i.e. a .txt file.
+    export_dict_as : str
+        file type for saving dictionary objects. Defaults to 'json', i.e. a JSON file.
+    export_pandas_as : str
+        file type for saving Pandas objects (e.g. Series and DataFrames). Defaults to 'csv', i.e. a CSV file.
+    export_network_as : str
+        file type for saving network and graph objects (e.g. Network, iGraph Graph, NetworkX). Defaults to 'graphML'.
     """
     
     # Checking object type
@@ -112,6 +129,27 @@ def export_obj(obj, file_name = 'obj_name', folder_address: str = 'request_input
         return
 
 def art_class_to_folder(obj, folder_name = 'request_input', folder_address: str = 'request_input', export_str_as: str = 'txt', export_dict_as: str = 'json', export_pandas_as: str = 'csv', export_network_as: str = 'graphML'):
+
+    """
+    Specialised function to export ART classes to external folders. Detects the object's type and selects a corresponding file type.
+
+    Parameters
+    ----------
+    obj : object
+        the object to export.
+    folder_name : str
+        name for export folder. Defaults to requesting from user input.
+    folder_address : str
+        directory path for folder to export to. Defaults to requesting from user input.
+    export_str_as : str
+        file type for saving string objects. Defaults to 'txt', i.e. a .txt file.
+    export_dict_as : str
+        file type for saving dictionary objects. Defaults to 'json', i.e. a JSON file.
+    export_pandas_as : str
+        file type for saving Pandas objects (e.g. Series and DataFrames). Defaults to 'csv', i.e. a CSV file.
+    export_network_as : str
+        file type for saving network and graph objects (e.g. Network, iGraph Graph, NetworkX). Defaults to 'graphML'.
+    """
 
     obj_type_str = str(type(obj))
 
@@ -231,6 +269,23 @@ def obj_to_folder(obj, folder_name = 'request_input', folder_address: str = 'req
     
     """
     Exports objects as external folders.
+
+    Parameters
+    ----------
+    obj : object
+        the object to export.
+    folder_name : str
+        name for export folder. Defaults to requesting from user input.
+    folder_address : str
+        directory path for folder to export to. Defaults to requesting from user input.
+    export_str_as : str
+        file type for saving string objects. Defaults to 'txt', i.e. a .txt file.
+    export_dict_as : str
+        file type for saving dictionary objects. Defaults to 'json', i.e. a JSON file.
+    export_pandas_as : str
+        file type for saving Pandas objects (e.g. Series and DataFrames). Defaults to 'csv', i.e. a CSV file.
+    export_network_as : str
+        file type for saving network and graph objects (e.g. Network, iGraph Graph, NetworkX). Defaults to 'graphML'.
     """
     
     obj_type = type(obj)

@@ -2851,7 +2851,7 @@ class Review:
         Returns
         -------
         df : pandas.DataFrame
-            results from CrossRef API search.
+            results from Scopus API search.
         
         Options
         -------
@@ -3054,7 +3054,7 @@ class Review:
                       ):
 
         """
-        Looks up work ID using the Scopus API.
+        Looks up publication using the Scopus API.
 
         Parameters
         ----------
@@ -3076,7 +3076,7 @@ class Review:
         Returns
         -------
         df : pandas.DataFrame
-            results from DOI lookup on CrossRef API.
+            results from publication lookup on Scopus API.
         """
 
         if uid == 'request_input':

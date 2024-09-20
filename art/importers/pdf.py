@@ -15,7 +15,6 @@ import pandas as pd
 from pypdf import PdfReader
 from nltk.tokenize import word_tokenize, sent_tokenize
 
-
 def pdf_to_dict(file_path = None):
     
     """
@@ -51,7 +50,6 @@ def pdf_to_dict(file_path = None):
                   'full_text': full_text}
     
     return output_dict
-
 
 def pdf_url_to_dict(url = None):
     
@@ -94,9 +92,12 @@ def pdf_url_to_dict(url = None):
     
     return output_dict
 
-
 def parse_pdf_text(input_data):
     
+    """
+    Parses text from PDF reader result.
+    """
+
     if type(input_data) == str:
         text = input_data
     else:
@@ -148,9 +149,12 @@ def parse_pdf_text(input_data):
     
     return output
 
-
 def parse_pdf_doi(input_data):
     
+    """
+    Parses DOI from PDF reader result.
+    """
+
     if type(input_data) == str:
         text = input_data
         metadata = {}
@@ -196,7 +200,6 @@ def parse_pdf_doi(input_data):
             
             return text_split[0]
     
-
 def parse_pdf_links(input_data):
     
     """
@@ -241,11 +244,10 @@ def parse_pdf_links(input_data):
             
     return result
     
-
 def parse_pdf_authors(input_data):
     
     """
-    Identifies author details from PDF reader result.
+    Parses author details from PDF reader result.
     """
     
     # Checking type of input data and defining variables for parsing
@@ -413,8 +415,6 @@ def parse_pdf_date(pdf_dict):
 
         return date
 
-        
-
 def parse_pdf_title(input_data):
     
     """
@@ -517,9 +517,12 @@ def parse_pdf_title(input_data):
             
         return output
                 
-
 def parse_pdf_reader_dict(pdf_dict):
     
+    """
+    Parses dictionaries outputted by the PDF reader. Returns a dictionary containing parsed and formatted data.
+    """
+
     try:
         pdf_dict['title'] = parse_pdf_title(pdf_dict)
     except:
@@ -548,14 +551,14 @@ def parse_pdf_reader_dict(pdf_dict):
     try:
         pdf_dict['text'] = parse_pdf_text(pdf_dict)
     except:
-        pdf_dict['text'] = Nonee
+        pdf_dict['text'] = None
     
     return pdf_dict
 
 def read_pdf(file_path: str = None) -> dict:
     
     """
-    Loads and parses PDF file. Returns a dictionary of data.
+    Reads and parses PDF file. Returns a dictionary of parsed and formatted data.
     """
     
     # Retrieving PDF date
@@ -567,7 +570,6 @@ def read_pdf(file_path: str = None) -> dict:
     
     return output
     
-
 def read_pdf_url(url = None):
     
     """
@@ -585,6 +587,10 @@ def read_pdf_url(url = None):
 
 def select_pdf_reader(file_path):
 
+    """
+    Detects whether a file path directs to a valid internal address or URL, and reads the PDF using the appropriate reader function.
+    """
+
     path = Path(file_path)
 
     if path.exists() == True:
@@ -595,6 +601,10 @@ def select_pdf_reader(file_path):
 
 def gen_pdf_id(pdf_dict):
      
+    """
+    Generates a unique identifier from a PDF reader result.
+    """
+    
     if (pdf_dict['title'] != None) and (pdf_dict['title'] != ''):
           pdf_id = pdf_dict['title'].replace(' ', '').replace('/', '').replace('.', '').replace('?', '').replace('-', '').replace('_', '').replace('!', '').lower().strip()
           rand_int = (random.randint(0,9)*len(pdf_id))+(random.randint(0,9)+len(pdf_id))
@@ -614,10 +624,12 @@ def gen_pdf_id(pdf_dict):
     
     return pdf_id
 
-          
-
 def read_pdf_to_table(file_path = None):
     
+    """
+    Reads and parses PDF file. Returns a Pandas DataFrame of parsed and formatted data.
+    """
+
     if file_path == None:
         file_path = input('File path: ')
     

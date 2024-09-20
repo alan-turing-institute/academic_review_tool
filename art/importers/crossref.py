@@ -90,9 +90,13 @@ filters = ['alternative_id',
     'updates'
     ]
 
-my_etiquette = Etiquette('Academic Review Tool (ART)', '0.01', 'https://github.com/alan-turing-institute/academic_review_tool', 'academic_review_tool@outlook.com')
+my_etiquette = Etiquette('Academic Review Tool (ART)', '1.10-beta', 'https://github.com/alan-turing-institute/academic_review_tool', 'academic_review_tool@outlook.com')
 
 def items_to_df(items: list) -> pd.DataFrame:
+
+    """
+    Takes list containing items from CrossRef API call and returns as a Pandas DataFrame.
+    """
 
     global results_cols
     df = pd.DataFrame(columns = results_cols)
@@ -221,6 +225,22 @@ def items_to_df(items: list) -> pd.DataFrame:
 
 def reference_to_df(reference: dict, update_from_doi = False) -> pd.DataFrame:
 
+    """
+    Takes reference (i.e. citation) dictionary from CrossRef API result and returns as a Pandas DataFrame.
+
+    Parameters
+    ----------
+    reference : dict
+        a dictionary containing data on a reference associated with a CrossRef API result.
+    update_from_doi : bool
+        whether to update the reference data using the CrossRef API. Defaults to False.
+    
+    Returns
+    -------
+    df : pandas.DataFrame
+        the reference formatted as a Pandas DataFrame.
+    """
+
     keys = list(reference.keys())
 
     df_data = {}
@@ -319,8 +339,23 @@ def reference_to_df(reference: dict, update_from_doi = False) -> pd.DataFrame:
 
     return df
 
-
 def references_to_df(references_list: list, update_from_doi = False) -> pd.DataFrame:
+
+    """
+    Takes a list of references (i.e. citations) from a CrossRef API result and returns as a Pandas DataFrame.
+
+    Parameters
+    ----------
+    references : list
+        a list containing data on references associated with a CrossRef API result.
+    update_from_doi : bool
+        whether to update the reference data using the CrossRef API. Defaults to False.
+    
+    Returns
+    -------
+    df : pandas.DataFrame
+        the reference formatted as a Pandas DataFrame.
+    """
 
     df = pd.DataFrame(columns = results_cols, dtype=object)
 
@@ -338,8 +373,11 @@ def references_to_df(references_list: list, update_from_doi = False) -> pd.DataF
 
     return df
 
-
 def operator_logic(default_operator: str, string: str):
+
+    """
+    Takes CrossRef API search string, detects the logical operator used, and separates the operator and string. Returns a tuple.
+    """
 
     operator = default_operator
 
@@ -363,7 +401,6 @@ def operator_logic(default_operator: str, string: str):
 
     return (operator, string_stripped)
 
-
 def query_builder(default_operator = 'AND',
                   bibliographic: str = None, # type: ignore
                     title: str = None, # type: ignore
@@ -380,6 +417,46 @@ def query_builder(default_operator = 'AND',
                     link: str = None, # type: ignore
                     ):
     
+    """
+    Takes queries for specific search fields and returns a string which is formatted for input into the CrossRef API.
+
+    Parameters
+    ----------
+        default_operator : str
+            default logical operator to build search. Defaults to 'AND'.
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+    
+    Returns
+    -------
+        query : str
+            a query formatted for input into the CrossRef API. 
+    """
+
     query = ''
     
     if (bibliographic is not None) and (type(bibliographic) == str): # type: ignore
@@ -446,7 +523,6 @@ def query_builder(default_operator = 'AND',
     
     return query
    
-
 def search_works(
                 bibliographic = None, # type: ignore
                 title: str = None, # type: ignore
@@ -468,6 +544,54 @@ def search_works(
                 rate_limit: float = 0.05,
                 timeout = 60
                 ) -> pd.DataFrame:
+
+    """
+        Searches CrossRef API for published works. Returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from CrossRef API search.
+    """
 
     if bibliographic == None:
         bibliographic = ''
@@ -585,6 +709,22 @@ def search_works(
 
 def lookup_doi(doi = 'request_input', timeout = 60):
 
+    """
+        Looks up DOI using the CrossRef API.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from DOI lookup on CrossRef API.
+    """
+
     if doi == 'request_input':
         doi = input('doi: ')
 
@@ -601,6 +741,24 @@ def lookup_doi(doi = 'request_input', timeout = 60):
 
 def lookup_dois(dois_list: list = [], rate_limit: float = 0.05, timeout = 60):
 
+    """
+        Looks up a list of DOIs using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            result of DOI lookups.
+    """
+
     items = []
 
     global my_etiquette
@@ -616,6 +774,22 @@ def lookup_dois(dois_list: list = [], rate_limit: float = 0.05, timeout = 60):
 
 def lookup_journal(issn = 'request_input', timeout = 60):
 
+    """
+        Looks up a journal by its ISSN using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        issn : str
+            ISSN to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            journal records.
+    """
+
     if issn == 'request_input':
         issn = input('Journal issn: ')
 
@@ -626,6 +800,22 @@ def lookup_journal(issn = 'request_input', timeout = 60):
     return pd.DataFrame.from_dict(result, orient='index').T
 
 def lookup_journals(issns_list: list = [], rate_limit: float = 0.05, timeout = 60):
+
+    """
+        Looks up a list of journal ISSNs using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        issns_list : str
+            list of ISSNs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        output : pandas.DataFrame
+            journal records.
+    """
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout)
@@ -641,6 +831,26 @@ def lookup_journals(issns_list: list = [], rate_limit: float = 0.05, timeout = 6
     return output
 
 def search_journals(*args, limit: int = 1000, rate_limit: float = 0.05, timeout = 60):
+
+    """
+        Searches CrossRef API for journal records and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        *args
+            search fields.
+        limit : int
+            optional: set a limit to the number of results returned. Defaults to 1000.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        
+        Returns
+        -------
+        results : pandas.DataFrame
+            results from CrossRef API search.
+    """
 
     global my_etiquette
     journals = Journals(etiquette=my_etiquette, timeout=timeout).query(*args)
@@ -674,6 +884,30 @@ def get_journal_entries(issn = 'request_input',
                         limit: int = 20,
                         rate_limit: float = 0.05,
                         timeout = 60):
+
+    """
+        Looks up a journal using the CrossRef API and returns associated entries as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        issn : str
+            ISSN to look up. Defaults to requesting from user input.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        filter : dict
+        select : list
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            journal entry records.
+    """
 
     if issn == 'request_input':
         issn = input('Journal issn: ')
@@ -749,6 +983,55 @@ def search_journal_entries(issn = 'request_input',
                         rate_limit: float = 0.05,
                         timeout = 60):
     
+    """
+            Searches for journal entries and articles associated with an ISSN using the CrossRef API.
+
+            Parameters
+            ----------
+            issn : str
+                ISSN to look up. Defaults to requesting from user input.
+            bibliographic : str
+                a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+            title : str
+                searches for titles containing string. Defaults to None.
+            author : str
+                searches for authors containing string. Defaults to None.
+            author_affiliation : str
+                searches for author affiliations containing string. Defaults to None.
+            editor : str
+                searches for editor names containing string. Defaults to None.
+            entry_type : str
+                searches for types of entries containing string. Defaults to None.
+            published_date : str
+                searches for matching publication dates. Defaults to None.
+            doi : str
+                searches for matching DOIs.
+            issn : str
+                searches for matching ISSNs.
+            publisher_name : str
+                searches for publisher names containing string. Defaults to None.
+            funder_name : str
+                searches for funder names containing string. Defaults to None.
+            source : str
+                searches for sources (e.g. journals, books) containing string. Defaults to None.
+            link : str
+                searches for entry links containing string. Defaults to None.
+            sample : int
+                optional: select which results to return.
+            limit : int
+                optional: set a limit to the number of results returned.
+            rate_limit : float
+                time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+            timeout : int
+                maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+            filter : dict
+            select : list
+            
+            Returns
+            -------
+            df : pandas.DataFrame
+                results from CrossRef API search.
+    """
 
     if issn == 'request_input':
         issn = input('Journal issn: ')
@@ -841,6 +1124,22 @@ def search_journal_entries(issn = 'request_input',
 
 def lookup_funder(funder_id = 'request_input', timeout = 60):
 
+    """
+        Looks up a funder using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        funder_id : str
+            CrossRef Funder ID to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        output : pandas.DataFrame
+            funder records.
+    """
+
     if funder_id == 'request_input':
         funder_id = input('Funder ID: ')
 
@@ -866,6 +1165,24 @@ def lookup_funder(funder_id = 'request_input', timeout = 60):
     return output
 
 def lookup_funders(funder_ids: list = [], rate_limit: float = 0.05, timeout = 60):
+
+    """
+        Looks up a list of funders using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        funder_ids : list
+            list of CrossRef Funder IDs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+
+        Returns
+        -------
+        output : pandas.DataFrame
+            funder records.
+    """
 
     global my_etiquette
     funders = Funders(etiquette=my_etiquette, timeout=timeout)
@@ -899,6 +1216,26 @@ def lookup_funders(funder_ids: list = [], rate_limit: float = 0.05, timeout = 60
     return output
 
 def search_funders(*args, limit: int = 1000, rate_limit: float = 0.05, timeout = 60):
+
+    """
+        Searches CrossRef API for funder records and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        *args
+            search fields.
+        limit : int
+            optional: set a limit to the number of results returned. Defaults to 1000.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        
+        Returns
+        -------
+        output : pandas.DataFrame
+            results from CrossRef API search.
+    """
 
     global my_etiquette
     funders = Funders(etiquette=my_etiquette, timeout=timeout).query(*args)
@@ -947,6 +1284,30 @@ def get_funder_works(funder_id = 'request_input',
                         limit: int = 1000,
                         rate_limit: float = 0.05,
                         timeout = 60):
+
+    """
+        Looks up a funder using the CrossRef API and returns associated publications as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        funder_id : str
+            CrossRef Funder ID to look up. Defaults to requesting from user input.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        filter : dict
+        select : list
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            publication records.
+    """
 
     if funder_id == 'request_input':
         funder_id = input('Funder ID: ')
@@ -1025,6 +1386,55 @@ def search_funder_works(funder_id = 'request_input',
                         rate_limit: float = 0.05,
                         timeout = 60):
     
+    """
+        Searches for publications associated with a funder using the CrossRef API.
+
+        Parameters
+        ----------
+        funder_id : str
+            CrossRef Funder ID to look up. Defaults to requesting from user input.
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from CrossRef API search.
+        """
 
     if funder_id == 'request_input':
         funder_id = input('Funder ID: ')
