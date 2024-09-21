@@ -63,7 +63,6 @@ def is_external_link(source_url: str = 'request_input', linked_url: str = 'reque
     # Checking if link is external
     return is_external(source_url, linked_url, ignore_suffix=ignore_suffix)
 
-
 def fetch_feed_urls(url: str = 'request_input') -> list:
     
     """
@@ -132,7 +131,7 @@ def fetch_url_rules(url = 'request_input'):
     
     Returns
     -------
-    result : object
+    result : RobotFileParser
         Robots.txt ruleset.
     """
     
@@ -290,7 +289,8 @@ def crawl_site(url: str = 'request_input', max_seen_urls: int = 10, max_known_ur
 
 def correct_link_errors(url: str, source_domain = None) -> str:
     
-    """Checks for errors in a link and corrects them. Returns a corrected link as a string.
+    """
+    Checks for errors in a link and corrects them. Returns a corrected link as a string.
     
     Parameters
     ---------- 
@@ -302,7 +302,8 @@ def correct_link_errors(url: str, source_domain = None) -> str:
     Returns
     -------
     url : str 
-        a corrected URL."""
+        a corrected URL.
+    """
     
     # Source domain defaults to None. Changing this to an empty string for type handling.
     if source_domain == None:
@@ -522,7 +523,6 @@ def excluded_term_test(current_url: str, excluded_url_terms: list, case_sensitiv
             if (term in url_check) == True:
                 return True
         
-
 def required_keywords_test(text, required_keywords, case_sensitive):
     
     """
@@ -843,7 +843,6 @@ def clean_seed_urls(seed_urls: list) -> list:
     
     return cleaned_seeds
 
-
 def crawler(
             seed_urls: str = 'request_input',
             visit_limit: int = 5, 
@@ -1161,6 +1160,38 @@ def crawl_google_scholar(
                             case_sensitive = False, 
                             ):
 
+    """
+    Crawls from a Google Scholar search. Returns details like links found,  HTML scraped, and site metadata in a Pandas DataFrame.
+    
+    Parameters
+    ---------- 
+    query : str
+        query to search Google Scholar. Defaults to requesting from user input.
+    page_limit : int
+        maximum number of Google Scholar results pages to scrape. Defaults to 20.
+    by_citations : bool
+        whether to crawl citations. Defaults to True.
+    by_recommended : bool
+        whether to crawl Google Scholar recommendation links. Defaults to True.
+    crawl_depth : int
+        the maximum crawl depth the crawler will reach before stopping. Defaults to 3.
+    crawl_limit : int
+        the maximum number of websites the crawler will visit before stopping. Defaults to 100.
+    discovery_limit : int
+        the maximum number of results the crawler will discover before stopping. Defaults to 1000.
+    select_keywords : list
+        list of keywords which sites must contain to be crawled.
+    exclude_keywords : list
+        list of keywords which sites must *not* contain to be crawled.
+    case_sensitive : bool 
+        whether or not to ignore string characters' case.
+    
+    Returns
+    -------
+    df : pandas.DataFrame 
+        a Pandas DataFrame containing the results of a crawl.
+    """
+
     if query == 'request_input':
         query = input('Search query: ')
 
@@ -1279,7 +1310,6 @@ def crawl_google_scholar(
     df = df.reset_index().drop('index', axis=1)
     
     return df
-
 
 def network_from_crawl_result(crawl_df: pd.DataFrame) -> Graph:
     
@@ -1806,7 +1836,6 @@ def site_similarity_network(comparisons_df: pd.DataFrame, measure: str = 'html_d
         
     return network
     
-
 def similarity_network_from_crawl_result(crawl_df: pd.DataFrame, measure: str = 'html_distance') -> Graph:
     
     """
@@ -1973,7 +2002,6 @@ def similarity_network_from_crawl(
     
     return network
     
-
 def network_from_search_crawl(
                             query: str = 'request_input',
                             visit_limit: int = 5, 
@@ -2040,8 +2068,6 @@ def network_from_search_crawl(
     
     return network
     
-    
-
 def similarity_network_from_search_crawl(
                             query: str = 'request_input',
                             measure: str = 'html_distance',
