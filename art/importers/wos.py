@@ -33,6 +33,10 @@ configuration.api_key['ClarivateApiKeyAuth'] = '7a6bd360df2d18446f24bc26c85ab72f
 
 def extract_source(source_dict):
 
+    """
+    Extracts publication source from Web of Science API result.
+    """
+
     source = None
 
     if (type(source_dict) == list) and (len(source_dict)>0):
@@ -46,6 +50,10 @@ def extract_source(source_dict):
     return source
 
 def extract_cite_counts(citations_dict):
+
+    """
+    Extracts citation counts from Web of Science API result.
+    """
 
     count = None
 
@@ -61,6 +69,10 @@ def extract_cite_counts(citations_dict):
 
 def extract_isbn(identifiers):
 
+    """
+    Extracts publication ISBN from Web of Science API result.
+    """
+
     isbn = None
 
     if (type(identifiers) == list) and (len(identifiers)>0):
@@ -74,6 +86,10 @@ def extract_isbn(identifiers):
     return isbn
 
 def extract_issn(identifiers):
+
+    """
+    Extracts publication ISSN from Web of Science API result.
+    """
 
     issn = None
 
@@ -89,6 +105,10 @@ def extract_issn(identifiers):
 
 def extract_doi(identifiers):
 
+    """
+    Extracts publication DOI from Web of Science API result.
+    """
+
     doi = None
 
     if (type(identifiers) == list) and (len(identifiers)>0):
@@ -102,6 +122,10 @@ def extract_doi(identifiers):
     return doi
 
 def extract_keywords(keywords_dict):
+
+    """
+    Extracts publication keywords from Web of Science API result.
+    """
 
     kws = None
 
@@ -117,6 +141,10 @@ def extract_keywords(keywords_dict):
 
 def extract_related(links_dict):
 
+    """
+    Extracts related publications from Web of Science API result.
+    """
+
     link = None
 
     if (type(links_dict) == list) and (len(links_dict)>0):
@@ -130,6 +158,10 @@ def extract_related(links_dict):
     return link
 
 def extract_links(links_dict):
+
+    """
+    Extracts links from Web of Science API result.
+    """
 
     link = None
 
@@ -150,9 +182,11 @@ def extract_links(links_dict):
 
     return link
 
-
-
 def operator_logic(default_operator: str, string: str):
+
+    """
+    Takes Web of Science API search string, detects the logical operator used, and separates the operator and string. Returns a tuple.
+    """
 
     operator = default_operator
 
@@ -202,6 +236,36 @@ def query_builder(default_operator = 'AND',
                     topics = None
                     ):
     
+    """
+    Takes queries for specific search fields and returns a string which is formatted for input into the Web of Science API.
+
+    Parameters
+    ----------
+    default_operator : str
+        default logical operator to build search. Defaults to 'AND'.
+    all_fields : str
+    title : str
+    year : str
+    author : str
+    author_identifier : str
+    affiliation : str
+    doctype : str
+    doi : str
+    issn : str
+    isbn : str
+    pubmed_id : str
+    source_title : str
+    volume : str
+    page : str
+    issue : str
+    topics : str
+
+    Returns
+    -------
+    query : str
+        a query formatted for input into the Web of Science API.
+    """
+
     query = ''
     
     if (all_fields is not None) and (type(all_fields) == str): # type: ignore
@@ -285,6 +349,27 @@ def search_engine(query: str = 'request_input',
            detail = None
            ):
     
+    """
+    Core functionality for making Web of Science publication search API calls.
+
+    Parameters
+    ----------
+    query: str
+        a query formatted for input into the Web of Science API.
+    database : str 
+    limit : int
+    page : int
+    sort_field : str
+    modified_time_span
+    tc_modified_time_span
+    detail
+
+    Returns
+    -------
+    api_response : DocumentsList
+        Web of Science API response.
+    """
+
     if query == 'request_input':
         query = input('Search query: ')
 
@@ -329,6 +414,43 @@ def search(
            detail = None
            ):
     
+    """
+        Searches Web of Science API for published works. Returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        all_fields : str
+        title : str
+        year : str
+        author : str
+        author_identifier : str
+        affiliation : str
+        doctype : str
+        doi : str
+        issn : str
+        isbn : str
+        pubmed_id : str
+        source_title : str
+        volume : str
+        page : str
+        issue : str
+        topics : str
+        default_operator : str
+            default logical operator to build search. Defaults to 'AND'.
+        database : str 
+        limit : int
+        page : int
+        sort_field : str
+        modified_time_span
+        tc_modified_time_span
+        detail
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from Web of Science API search.
+    """
+
     query = query_builder(default_operator = default_operator,
                     all_fields = all_fields,
                     title = title,
@@ -403,6 +525,20 @@ def search(
 
 def journals_search_engine(issn: str = 'request_input'):
 
+    """
+    Core functionality for making Web of Science journal search API calls.
+
+    Parameters
+    ----------
+    issn: str
+        an ISSN to search.
+
+    Returns
+    -------
+    api_response : JournalsList
+        Web of Science API response.
+    """
+
     if issn == 'request_input':
         issn = input('ISSN to search: ')
     
@@ -424,6 +560,19 @@ def search_journals(
             query = 'request_input'
            ):
     
+    """
+        Searches Web of Science API for journals. Returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        query : str
+            search query.
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from Web of Science API search.
+    """
 
     api_response = journals_search_engine(issn=query)
     

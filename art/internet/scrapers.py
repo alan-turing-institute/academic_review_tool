@@ -50,6 +50,10 @@ can_scrape = [
 
 def get_final_url(url):
 
+    """
+    Follows URL redirects and returns the final URL destination.
+    """
+
     global headers
     req = Request(url=url, headers=headers)
 
@@ -57,12 +61,27 @@ def get_final_url(url):
     return resp.geturl()
 
 def bs_find(tag, content, soup):
+
+    """
+    Easy-to-use function for using BeautifulSoup soup.find method. Returns a tuple containing the code and result.
+    """
+
     return ('soup.find(attrs={"'+tag+'":"'+content + '"})', soup.find(attrs={tag:content}))
 
 def bs_find_all(tag, content, soup):
+
+    """
+    Easy-to-use function for using BeautifulSoup soup.find_all method. Returns a tuple containing the code and result.
+    """
+
     return ('soup.find_all(attrs={"'+tag+'":"'+content + '"})', soup.find_all(attrs={tag:content}))
 
 def bs_name_content(content_tag, soup):
+
+    """
+    Easyto-use function for using BeautifulSoup soup.find method to identify name content. Returns a tuple containing the code and result.
+    """
+
     return ('soup.find(attrs={"name":"'+content_tag + '"}).attrs["content"]', soup.find(attrs={'name':content_tag}).attrs['content'])
 
 def get_url_source(url = 'request_input'):
@@ -99,6 +118,10 @@ def get_url_source(url = 'request_input'):
 
 def url_to_soup(url = 'request_input'):
     
+    """
+    Takes URL, scapes the site, and returns as a BeautifulSoup object.
+    """
+
     if url == 'request_input':
         url = input('URL: ')
     
@@ -767,6 +790,10 @@ def crawler_scraper(current_url: str, full: bool) -> tuple:
 
 def scrape_frontiers(url):
 
+    """
+    Bespoke web scraper to scrape and parse Frontiers article webpages. Takes a Frontiers URL and returns a Pandas DataFrame.
+    """
+
     if ('frontiersin.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Frontiers webpage')
     
@@ -881,6 +908,10 @@ def scrape_frontiers(url):
 
 def scrape_arxiv(url):
     
+    """
+    Bespoke web scraper to scrape and parse ArXiv article webpages. Takes an ArXiv URL and returns a Pandas DataFrame.
+    """
+
     if ('arxiv.org' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Arxiv webpage')
     
@@ -984,6 +1015,10 @@ def scrape_arxiv(url):
 
 def scrape_springer(url):
     
+    """
+    Bespoke web scraper to scrape and parse Springer article webpages. Takes a Springer URL and returns a Pandas DataFrame.
+    """
+
     if ('springer' not in url) and ('doi.org' not in url):
         raise ValueError('URL must be for a Springer webpage')
     
@@ -1145,6 +1180,10 @@ def scrape_springer(url):
 
 def scrape_nature(url = 'request_input'):
     
+    """
+    Bespoke web scraper to scrape and parse Nature article webpages. Takes a Nature URL and returns a Pandas DataFrame.
+    """
+
     if url == 'request_input':
         url = input('URL: ')
     
@@ -1244,6 +1283,10 @@ def scrape_nature(url = 'request_input'):
     return result
 
 def scrape_ieee(url):
+
+    """
+    Bespoke web scraper to scrape and parse IEEE article webpages. Takes an IEEE URL and returns a Pandas DataFrame.
+    """
 
     if type(url) !=str:
         raise TypeError('URL must be a string')
@@ -1357,6 +1400,10 @@ def scrape_ieee(url):
 
 def scrape_pubmed(url):
 
+    """
+    Bespoke web scraper to scrape and parse PubMed article webpages. Takes a PubMed URL and returns a Pandas DataFrame.
+    """
+
     if type(url) !=str:
         raise TypeError('URL must be a string')
     
@@ -1456,6 +1503,10 @@ def scrape_pubmed(url):
     return result
 
 def scrape_pmc(url):
+
+    """
+    Bespoke web scraper to scrape and parse PMC article webpages. Takes a PMC URL and returns a Pandas DataFrame.
+    """
 
     if type(url) !=str:
         raise TypeError('URL must be a string')
@@ -1570,6 +1621,10 @@ def scrape_pmc(url):
 
 def scrape_ssrn(url = 'request_input'):
 
+    """
+    Bespoke web scraper to scrape and parse SSRN article webpages. Takes an SSRN URL and returns a Pandas DataFrame.
+    """
+
     if url == 'request_input':
         url = input('URL: ')
     
@@ -1652,6 +1707,10 @@ def scrape_ssrn(url = 'request_input'):
 
 def scrape_heinonline(url):
 
+    """
+    Bespoke web scraper to scrape and parse HeinOnline article webpages. Takes a HeinOnline URL and returns a Pandas DataFrame.
+    """
+
     if type(url) !=str:
         raise TypeError('URL must be a string')
     
@@ -1720,6 +1779,10 @@ def scrape_heinonline(url):
     return result
 
 def scrape_mdpi(url):
+
+    """
+    Bespoke web scraper to scrape and parse MDPI article webpages. Takes an MDPI URL and returns a Pandas DataFrame.
+    """
 
     if type(url) !=str:
         raise TypeError('URL must be a string')
@@ -1803,6 +1866,10 @@ def scrape_mdpi(url):
     return result
 
 def scrape_acm(url = 'request_input'):
+
+    """
+    Bespoke web scraper to scrape and parse ACM article webpages. Takes an ACM URL and returns a Pandas DataFrame.
+    """
 
     if url == 'request_input':
         url = input('URL: ')
@@ -1897,6 +1964,22 @@ def scrape_acm(url = 'request_input'):
 
 def parse_muse_from_source(source = 'request_input', link = None):
     
+    """
+    Parses source HTML from a Project MUSE article webpage and returns a Pandas DataFrame.
+
+    Parameters
+    ----------
+    source : str
+        source HTML.
+    link : str
+        link to webpage.
+
+    Returns
+    -------
+    result : pandas.DataFrame
+        a Pandas DataFrame containing parsed Project MUSE data.
+    """
+
     if source == 'request_input':
         source = input('HTML: ')
     
@@ -2032,6 +2115,10 @@ def parse_muse_from_source(source = 'request_input', link = None):
 
 def scrape_muse(url = 'request_input'):
     
+    """
+    Bespoke web scraper to scrape and parse Project MUSE article webpages. Takes a Project MUSE URL and returns a Pandas DataFrame.
+    """
+
     if url == 'request_input':
         url = input('URL: ')
     
@@ -2051,6 +2138,22 @@ def scrape_muse(url = 'request_input'):
     return result
 
 def parse_proquest_from_source(source, link = None):
+
+    """
+    Parses source HTML from a ProQuest article webpage and returns a Pandas DataFrame.
+
+    Parameters
+    ----------
+    source : str
+        source HTML.
+    link : str
+        link to webpage.
+
+    Returns
+    -------
+    result : pandas.DataFrame
+        a Pandas DataFrame containing parsed ProQuest data.
+    """
 
     if type(source) !=str:
         raise TypeError('Source must be a string')
@@ -2192,6 +2295,10 @@ def parse_proquest_from_source(source, link = None):
 
 def scrape_proquest(url = 'request_input'):
     
+    """
+    Bespoke web scraper to scrape and parse ProQuest article webpages. Takes a ProQuest URL and returns a Pandas DataFrame.
+    """
+
     if url == 'request_input':
         url = input('URL: ')
     
@@ -2211,6 +2318,22 @@ def scrape_proquest(url = 'request_input'):
     return result
 
 def parse_jstor_from_source(source = 'request_input', link = None):
+
+    """
+    Parses source HTML from a JSTOR article webpage and returns a Pandas DataFrame.
+
+    Parameters
+    ----------
+    source : str
+        source HTML.
+    link : str
+        link to webpage.
+
+    Returns
+    -------
+    result : pandas.DataFrame
+        a Pandas DataFrame containing parsed JSTOR data.
+    """
 
     if source == 'request_input':
         source = input('Source code: ')
@@ -2334,6 +2457,10 @@ def parse_jstor_from_source(source = 'request_input', link = None):
 
 def scrape_jstor(url = 'request_input'):
     
+    """
+    Bespoke web scraper to scrape and parse JSTOR article webpages. Takes a JSTOR URL and returns a Pandas DataFrame.
+    """
+
     if url == 'request_input':
         url = input('URL: ')
     
@@ -2354,6 +2481,22 @@ def scrape_jstor(url = 'request_input'):
 
 def parse_google_scholar_source(source = 'request_input'):
     
+    """
+    Parses source HTML from a Google Scholar webpage and returns a Pandas DataFrame.
+
+    Parameters
+    ----------
+    source : str
+        source HTML.
+    link : str
+        link to webpage.
+
+    Returns
+    -------
+    result : pandas.DataFrame
+        a Pandas DataFrame containing parsed JSTOR data.
+    """
+
     if source == 'request_input':
         source = '"""' + input('Source code: ') + '"""'
     
@@ -2450,6 +2593,19 @@ def parse_google_scholar_source(source = 'request_input'):
 
 def search_google_scholar(query = 'request_input', pages = 1, open_source = False):
     
+    """
+    Runs a Google Scholar search in the default web browser.
+
+    Parameters
+    ----------
+    query : str
+        query to search Google Scholar. Defaults to requesting from user input.
+    pages : int
+        maximum number of Google Scholar pages to return
+    open_source : bool
+        whether to open the webpage source code. Defaults to False.
+    """
+
     if query == None:
         query = input('Query: ')
     query = urllib.parse.quote_plus(query) # type: ignore
@@ -2464,6 +2620,10 @@ def search_google_scholar(query = 'request_input', pages = 1, open_source = Fals
 
 def open_google_scholar_links(source = None):
     
+    """
+    Takes Google Scholar source HTML and opens each link to a result in the default browser.
+    """
+
     if source == None:
         source = '"""' + input('Source code: ') + '"""'
 
@@ -2474,6 +2634,10 @@ def open_google_scholar_links(source = None):
 
 def scrape_google_scholar(url):
     
+    """
+    Bespoke web scraper to scrape and parse Google Scholar record webpages. Takes a Google Scholar URL and returns a Pandas DataFrame.
+    """
+
     if type(url) != str:
         raise TypeError('Query must be a string')
     
@@ -2492,6 +2656,8 @@ def scrape_google_scholar(url):
 
 def scrape_google_scholar_search(query):
     
+    """Scrapes Google Scholar from a search query. Returns a Pandas DataFrame."""
+
     if type(query) != str:
         raise TypeError('Query must be a string')
     
@@ -2504,6 +2670,22 @@ def scrape_google_scholar_search(query):
 
 def iterate_scholar_pages(scholar_page, page_limit = 20):
     
+    """
+    Iteratively scrapes Google Scholar search pages.
+
+    Parameters
+    ----------
+    scholar_page : str
+        URL for Google Scholar search.
+    page_limit : int
+        maximum number of pages to scrape.
+    
+    Returns
+    -------
+    df : pandas.DataFrame
+        a Pandas DataFrame containing scraped Google Scholar results.
+    """
+
     global results_cols
     df = pd.DataFrame(columns = results_cols, dtype=object)
 
@@ -2534,6 +2716,10 @@ def iterate_scholar_pages(scholar_page, page_limit = 20):
 
 def scrape_doi(doi):
 
+    """
+    Bespoke web scraper to scrape and parse webpages from a DOI or doi.org URL. Takes a DOI or doi.org URL and returns a Pandas DataFrame.
+    """
+
     if doi.startswith('www.doi.org/') ==  True:
         doi = doi.replace('www.doi.org/', 'https://doi.org/')
 
@@ -2549,6 +2735,34 @@ def scrape_doi(doi):
         raise ValueError('Bad DOI code or URL. Please check.')
 
 def scrape_article(url = 'request_input') -> pd.DataFrame:
+
+    """
+        Scrapes article data from a given URL and adds to Results.
+
+        Parameters
+        ----------
+        url : str
+            url of article to scrape. Defaults to requesting from user input.
+        
+        Notes
+        -----
+        This function is capable of scraping:
+            * Frontiers
+            * ArXiv
+            * Springer
+            * Nature
+            * IEEE
+            * PubMed
+            * PMC
+            * SSRN
+            * HeinOnline
+            * MDPI
+            * ACM
+            * Project Muse
+            * Proquest
+            * JSTOR
+            * Google Scholar
+    """
 
     if url == 'request_input':
             url = input('URL: ')
@@ -2612,5 +2826,4 @@ def scrape_article(url = 'request_input') -> pd.DataFrame:
     
 
 
-# Automated scraping not functional for CUP, OUP, SAGE, T&F, Science, Wiley, SciDirect, or ResearchGate sites due to bot blockers. 
-## See notebook for scripts for parsing CUP, OUP, SAGE, T&F, Science, Wiley, SciDirect, and ResearchGate
+# Automated scraping not functional for CUP, OUP, SAGE, T&F, Science, Wiley, SciDirect, or ResearchGate sites due to bot blockers.

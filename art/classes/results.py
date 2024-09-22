@@ -17,6 +17,20 @@ from nltk.tokenize import word_tokenize # type: ignore
 from pybtex.database import BibliographyData, Entry #type: ignore
 
 def generate_work_id(work_data: pd.Series):
+    
+        """
+            Takes a Pandas Series containing details about a published work and returns a unique identifier code (work ID).
+
+            Parameters
+            ----------
+            work_data : pandas.Series
+                a series containing data on a published work.
+
+            Returns
+            -------
+            work_id : str
+                a work ID.
+        """
 
         work_data = work_data.copy(deep=True).dropna()
 
@@ -108,18 +122,99 @@ def generate_work_id(work_data: pd.Series):
 
         return work_id
 
-
 class Results(pd.DataFrame):
 
     """
-    This is a Results object. It is a modified Pandas Dataframe object designed to store the results of an academic review.
+    This is a Results DataFrame. It is a modified Pandas Dataframe object designed to store the results of an academic review.
     
     Parameters
     ----------
-    
-    
+    dataframe : pandas.DataFrame
+        a Pandas DataFrame to convert to a Results DataFrame. Defaults to None.
+    index : list
+        list of indices for Results DataFrame. Defaults to an empty list.
+
     Attributes
     ----------
+    T : pandas.DataFrame
+    _AXIS_LEN : int
+    _AXIS_ORDERS : list
+    _AXIS_TO_AXIS_NUMBER : dict
+    _HANDLED_TYPES : tuple
+    __annotations__ : dict
+    __array_priority__ : int
+    _attrs : dict
+    _constructor : type
+    _constructor_sliced : type
+    _hidden_attrs : frozenset
+    _info_axis : pandas.Index
+    _info_axis_name : str
+    _info_axis_number : int
+    _internal_names : set
+    _is_homogeneous_type : bool
+    _is_mixed_type : bool
+    _is_view : bool
+    _item_cache : dict
+    _metadata : list
+    _series : dict
+    _stat_axis : pandas.Index
+    _stat_axis_name : str
+    _stat_axis_number : int
+    _typ : str
+    _values : numpy.ndarray
+    attrs : dict
+    axes : list
+    columns : pandas.Index
+    dtypes : pandas.Series
+    empty : bool
+    flags : pandas.Flags
+    index : pandas.Index
+    ndim : int
+    shape : tuple
+    size : numpy.int64
+    values : numpy.ndarray
+
+    Columns
+    -------
+    * **work_id**: a unique identifier assigned to each result.
+    * **title**: the result's title.
+    * **authors**: any authors associated with the result.
+    * **date**: any date(s) or year(s) associated with the result.
+    * **source**: the name of the journal, conference, book, website, or other publication in which the result is contained (if any).
+    * **type**: result type (e.g. article, chapter, book, website).
+    * **editors**:  any authors associated with the result.
+    * **publisher**: the name of the result's publisher (if any).
+    * **publisher_location**: any locations or addresses associated with the result's publisher.
+    * **funder**:  any funders associated with the result.
+    * **keywords**:  any keywords associated with the result.
+    * **abstract**: the result's abstract (if available).
+    * **description**: the result's abstract (if available).
+    * **extract**: the result's extract (if available).
+    * **full_text**: the result's full text (if available).
+    * **access_type**: the result's access type (e.g. open access, restricted access)
+    * **authors_data**: unformatted data on any authors associated with the result.
+    * **author_count**: the number of authors associated with the result.
+    * **author_affiliations**: any affiliations associated with the result's authors.
+    * **editors_data**: unformatted data on any editors associated with the result.
+    * **citations**: any citations/references/links associated with the result.
+    * **citation_count**: the number of citations/references/links associated with the result.
+    * **citations_data**: unformatted data on any citations/references/links associated with the result.
+    * **cited_by**: a list of publications that cite/reference/link to the result.
+    * **cited_by_count**: the number of publications that cite/reference/link to the result.
+    * **cited_by_data**: unformatted data on publications that cite/reference/link to the result.
+    * **recommendations**: data on recommended publications associated with the result.
+    * **crossref_score**: a bibliometric score assigned by CrossRef (if available).
+    * **repository**: the repository from which the result was retrieved (if available).
+    * **language**: the language(s) of the result.
+    * **doi**: the Digital Object Identifier (DOI) assigned to the result.
+    * **isbn**: the International Standard Book Number (ISBN) assigned to the result.
+    * **issn**: the International Standard Serial Number (ISSN) assigned to the result or its source.
+    * **pii**: any Publisher Item Identifiers (PII) assigned to the result.
+    * **scopus_id**: the Scopus identifier assigned to the result.
+    * **wos_id**: the Web of Science (WoS) identifier assigned to the result.
+    * **pubmed_id**: the PubMed Identifier (PMID) assigned to the result.
+    * **other_ids**: any other identifiers assigned to the result.
+    * **link**: a URL or other link to the result.
     """
 
     def __init__(self, dataframe = None, index = []):
@@ -129,6 +224,10 @@ class Results(pd.DataFrame):
         
         Parameters
         ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to convert to a Results DataFrame. Defaults to None.
+        index : list
+            list of indices for Results DataFrame. Defaults to an empty list.
         """
 
         if dataframe is None:
@@ -148,6 +247,11 @@ class Results(pd.DataFrame):
 
     def drop_empty_rows(self):
 
+        """
+        Drops rows that contain no data.
+        """
+
+
         ignore_cols = ['work_id', 'authors', 'funder', 'citations']
 
         df = self.dropna(axis=0, how='all')
@@ -160,10 +264,23 @@ class Results(pd.DataFrame):
 
         return self
 
+    def remove_duplicates(self, drop_empty_rows = True, use_api = False):
 
+        """
+        Removes duplicate results.
 
-
-    def remove_duplicates(self, drop_empty_rows = True, update_from_api = False):
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        use_api : bool
+            whether to update the results data using all available APIs. Defaults to False.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -173,7 +290,7 @@ class Results(pd.DataFrame):
         df = deduplicate(self)
         results = Results.from_dataframe(dataframe = df, drop_duplicates=False)
 
-        if update_from_api == True:
+        if use_api == True:
             results.update_from_dois()
         
         results.update_work_ids()
@@ -185,9 +302,11 @@ class Results(pd.DataFrame):
 
         return self
 
-        
-
     def get(self, work_id: str):
+
+        """
+        Retrieves result using a work ID.
+        """
 
         indexes = self[self['work_id'] == work_id].index.to_list()
         if len(indexes) > 0:
@@ -198,6 +317,15 @@ class Results(pd.DataFrame):
 
     def add_pdf(self, path = 'request_input'):
         
+        """
+        Reads a PDF file from a file path or URL and adds its data to the Results DataFrame.
+
+        Parameters
+        ----------
+        path : str
+            a filepath or URL that directs to a PDF file. Defaults to requesting from user input.
+        """
+
         if path == 'request_input':
             path = input('Path to PDF (URL or filepath): ')
 
@@ -213,7 +341,18 @@ class Results(pd.DataFrame):
 
         return self
     
-    def add_row(self, data, drop_duplicates=True):
+    def add_row(self, data: pd.Series, drop_duplicates: bool = True):
+
+        """
+        Adds a Pandas Series to the Results DataFrame as a new row.
+
+        Parameters
+        ----------
+        data : pandas.Series
+            a row to add.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to True.
+        """
 
         if type(data) != pd.Series:
             raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
@@ -238,6 +377,10 @@ class Results(pd.DataFrame):
         
     def get_unique_id(self, work_id, index):
 
+        """
+        Checks whether work ID is used more than once in the Results DataFrame. If yes, returns a unique ID.
+        """
+
         if (type(work_id) == str) and (work_id != ''):
             try:
                 work_id = str(work_id.split('#')[0])
@@ -256,6 +399,21 @@ class Results(pd.DataFrame):
 
     def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = True, drop_duplicates = False, update_work_ids = True):
         
+        """
+        Adds a Pandas DataFrame to the Results DataFrame.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to add to the Results DataFrame.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        update_work_ids : bool
+            whether to update results entries' work IDs. Defaults to True.
+        """
+
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
             raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
 
@@ -288,6 +446,23 @@ class Results(pd.DataFrame):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def add_doi(self, doi: str = 'request_input', drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
+
+        """
+        Looks up a DOI using the CrossRef API and adds to the Results DataFrame.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
+
+
         df = lookup_doi(doi=doi, timeout=timeout)
         self.add_dataframe(dataframe=df)
 
@@ -297,13 +472,36 @@ class Results(pd.DataFrame):
         if drop_empty_rows == True:
             self.drop_empty_rows()
 
+    def add_dois(self, dois_list: list = [], drop_empty_rows = True, rate_limit: float = 0.05, timeout = 60):
 
+        """
+        Looks up a list of DOIs using the CrossRef API and adds to Results DataFrame.
 
-    def add_dois(self, dois_list: list = [], drop_empty_rows = True, rate_limit: float = 0.1, timeout = 60):
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
+
         df = lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
-        self.add_dataframe(dataframe=df, drop_empty_rows = True)
+        self.add_dataframe(dataframe=df, drop_empty_rows = drop_empty_rows)
 
     def correct_dois(self, drop_duplicates = False):
+
+        """
+        Checks all entries in Results DataFrame for correctly formatted DOIs. If none is found, checks whether URL contains a valid DOI and, if so, uses this. Additionally, strips existing DOIs of unnecessary strings.
+
+        Parameters
+        ----------
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        """
 
         no_doi = self[self['doi'].isna()]
         has_link = no_doi[~no_doi['link'].isna()]
@@ -319,11 +517,24 @@ class Results(pd.DataFrame):
 
     def generate_work_ids(self):
 
+        """
+        Assigns a unique identifier (work ID) for each published work in the Results DataFrame.
+        """
+
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
             self.loc[i, 'work_id'] = work_id
 
     def update_work_ids(self, drop_duplicates = False):
+
+        """
+        Checks each published work in the Results DataFrame to ensure the work ID is up-to-date. If not, generates and assigns a new work ID.
+
+        Parameters
+        ----------
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to True.
+        """
 
         for i in self.index:
             work_id = generate_work_id(self.loc[i])
@@ -334,9 +545,23 @@ class Results(pd.DataFrame):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=False)
 
-
     def update_from_doi(self, index, drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
         
+        """
+        Updates a given result using the CrossRef API if it has a DOI associated.
+
+        Parameters
+        ----------
+        index : int or str
+            row index position for the result to update.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
+
         try:
             old_series = self.loc[index]
             doi = old_series['doi']
@@ -362,8 +587,20 @@ class Results(pd.DataFrame):
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
-
     def update_from_dois(self, drop_empty_rows = True, drop_duplicates = False, timeout: int = 60):
+
+        """
+        Updates results that have DOIs associated using the CrossRef API.
+
+        Parameters
+        ----------
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         self.correct_dois(drop_duplicates=False)
 
@@ -377,6 +614,10 @@ class Results(pd.DataFrame):
             self.drop_empty_rows()
 
     def __add__(self, results_obj):
+
+        """
+        Defines addition behaviour for Results DataFrames. Returns a left-wise inner join between the two DataFrames. 
+        """
 
         left = self.copy(deep=True)
         right = results_obj.copy(deep=True)
@@ -399,10 +640,38 @@ class Results(pd.DataFrame):
         return left
 
     def to_dataframe(self):
+
+        """
+        Converts Results object to a Pandas DataFrame.
+
+        Returns
+        -------
+        dataframe : pandas.DataFrame
+            the Results object converted to a Pandas DataFrame.
+        """
+
         return self.copy(deep=True)
     
     def from_dataframe(dataframe, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
+        """
+        Converts a Pandas DataFrame to a Results object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to convert to a Results object.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        
+        Returns
+        -------
+        results_table : Results
+            a Results object.
+        """
+
         dataframe = dataframe.copy(deep=True).reset_index().drop('index', axis=1)
         results_table = Results(index = dataframe.index)
         results_table.columns = results_table.columns.astype(str).str.lower().str.replace(' ', '_')
@@ -420,6 +689,15 @@ class Results(pd.DataFrame):
         return results_table
 
     def to_pybtex(self):
+
+        """
+        Converts the Results DataFrame to a Pybtex BibliographyData object.
+
+        Returns
+        -------
+        bib_data : pybtex.BibliographyData
+            a Pybtex BibliographyData object.
+        """
 
         res_dict = {}
 
@@ -552,18 +830,46 @@ class Results(pd.DataFrame):
 
         return bib_data
 
-
-
     def to_bibtex(self):
+
+        """
+        Converts the Results DataFrame to a Bibtex-formatted (.bib) bibliography string.
+
+        Returns
+        -------
+        bib_data : str
+            the Results DataFrame in Bibtex (.bib) bibliography file formatting.
+        """
 
         bib_data = self.to_pybtex()
         return bib_data.to_string('bibtex')
     
     def to_yaml(self):
+
+        """
+        Converts the Results DataFrame to a YAML-formatted (.yaml) bibliography string.
+
+        Returns
+        -------
+        bib_data : str
+            the Results DataFrame in YAML (.yaml) bibliography file formatting.
+        """
+
         bib_data = self.to_pybtex()
         return bib_data.to_string('yaml')
     
     def export_bibtex(self, file_name = 'request_input', folder_path = 'request_input'):
+
+        """
+        Exports the Results DataFrame as a Bibtex-formatted (.bib) bibliography file.
+
+        Parameters
+        ----------
+        file_name : str
+            name of file to create. Defaults to requesting from user input.
+        folder_path : str
+            location to create file. Defaults to requesting from user input.
+        """
 
         if file_name == 'request_input':
             file_name = input('File name: ')
@@ -583,8 +889,18 @@ class Results(pd.DataFrame):
         with open(filepath, 'w') as file:
             file.write(bib_bytes)
     
-
     def export_yaml(self, file_name = 'request_input', folder_path = 'request_input'):
+
+        """
+        Exports the Results DataFrame as a YAML-formatted (.yaml) bibliography file.
+
+        Parameters
+        ----------
+        file_name : str
+            name of file to create. Defaults to requesting from user input.
+        folder_path : str
+            location to create file. Defaults to requesting from user input.
+        """
 
         if file_name == 'request_input':
             file_name = input('File name: ')
@@ -606,6 +922,15 @@ class Results(pd.DataFrame):
         
     def clear_rows(self):
 
+        """
+        Deletes all rows.
+
+        Returns
+        -------
+        self : Results
+            a blank Results DataFrame.
+        """
+
         results = Results()
         self.__dict__.update(results.__dict__)
 
@@ -613,18 +938,56 @@ class Results(pd.DataFrame):
 
     def import_bibtex(self, file_path = 'request_input'):
 
+        """
+        Reads a Bibtex (.bib) bibliography file and adds its data to the Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            location of the Bibtex (.bib) bibliography file to read.
+        """
+
         df = import_bibtex(file_path = file_path)
         self.add_dataframe(dataframe=df, drop_duplicates=False, drop_empty_rows=False)
     
     def from_bibtex(file_path = 'request_input'):
+
+        """
+        Reads a Bibtex (.bib) bibliography file and returns as a Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            location of the Bibtex (.bib) bibliography file to read.
+        
+        Returns
+        -------
+        results : Results
+            a Results DataFrame.
+        """
 
         results = Results()
         results.import_bibtex(file_path=file_path)
 
         return results
 
-
     def import_excel(self, file_path = 'request_input', sheet_name = None):
+
+        """
+        Reads an Excel (.xlsx) file and adds its data to the Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of Excel sheet to read.
+
+        Returns
+        -------
+        self : Results
+            a Results DataFrame.
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -651,6 +1014,22 @@ class Results(pd.DataFrame):
 
     def from_excel(file_path = 'request_input', sheet_name = None): # type: ignore
 
+        """
+        Reads an Excel (.xlsx) file and returns as a Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of Excel sheet to read.
+
+        Returns
+        -------
+        results_table : Results
+            a Results DataFrame.
+        """
+
         results_table = Results()
         results_table = results_table.import_excel(file_path, sheet_name).replace(np.nan, None) # type: ignore
         results_table.format_authors() # type: ignore
@@ -659,6 +1038,20 @@ class Results(pd.DataFrame):
         return results_table
 
     def import_csv(self, file_path = 'request_input'):
+
+            """
+            Reads a CSV (.csv) file and adds its data to the Results DataFrame.
+
+            Parameters
+            ----------
+            file_path : str
+                directory path of file to import. Defaults to requesting from user input.
+
+            Returns
+            -------
+            self : Results
+                a Results object.
+            """
 
             if file_path == 'request_input':
                 file_path = input('File path: ')
@@ -681,13 +1074,40 @@ class Results(pd.DataFrame):
     
     def from_csv(file_path = 'request_input'): # type: ignore
 
+        """
+        Reads a CSV (.csv) file and returns as a Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+
+        Returns
+        -------
+        results_table : Results
+            a Results object.
+        """
+
         results_table = Results()
         results_table.import_csv(file_path).replace(np.nan, None) # type: ignore
-
 
         return results_table
 
     def import_json(self, file_path = 'request_input'):
+
+        """
+        Reads a JSON (.json) file and adds its data to the Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
 
         if file_path == 'request_input':
                 file_path = input('File path: ')
@@ -712,12 +1132,45 @@ class Results(pd.DataFrame):
     
     def from_json(file_path = 'request_input'): # type: ignore
 
+        """
+        Reads a JSON (.json) file and returns as a Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+
+        Returns
+        -------
+        results_table : Results
+            a Results object.
+        """
+
         results_table = Results()
         results_table.import_json(file_path).replace(np.nan, None) # type: ignore
         
         return results_table
     
     def import_file(self, file_path = 'request_input', sheet_name = None):
+
+        """
+        Reads a file, determines its file type, and adds its data to the Results object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of an Excel sheet to read (if one exists).
+
+        Notes
+        -----
+        Can read:
+            * .xlsx
+            * .csv
+            * .json
+            * .bib
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -735,11 +1188,33 @@ class Results(pd.DataFrame):
             
             if suffix.strip('.') == 'json':
                 return self.import_json(file_path)
+
+            if suffix.strip('.') == 'bib':
+                return self.import_bibtex(file_path)
         
         else:
             raise ValueError('File does not exist')
     
     def from_file(file_path = 'request_input', sheet_name = None): # type: ignore
+
+        """
+        Reads a file, determines its file type, and returns its data as a Results object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of an Excel sheet to read (if one exists).
+
+        Notes
+        -----
+        Can read:
+            * .xlsx
+            * .csv
+            * .json
+            * .bib
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -765,11 +1240,89 @@ class Results(pd.DataFrame):
 
     def import_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True):
 
+        """
+        Reads a file outputted by JSTOR's Constellate portal and adds its data to the Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        update_work_ids : bool
+            whether to add and/or update work IDs. Defaults to True.
+        
+        Notes
+        -----
+        Can read:
+            * .csv
+            * .json
+        """
+
         df = import_jstor(file_path = file_path)
         self.add_dataframe(dataframe=df, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_work_ids = update_work_ids)
 
+    def from_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True):
+
+        """
+        Reads a file outputted by JSTOR's Constellate portal and returns as a Results DataFrame.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        update_work_ids : bool
+            whether to add and/or update work IDs. Defaults to True.
+        
+        Returns
+        -------
+        results : Results
+            a Results object.   
+
+        Notes
+        -----
+        Can read:
+            * .csv
+            * .json
+        """
+
+        results = Results()
+        results.import_jstor(file_path = file_path, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_work_ids = update_work_ids)
+        
+        return results
+
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
         
+        """
+        Searches a given field in the Results DataFrame for a string.
+
+        Parameters
+        ----------
+        field : str
+            name of field to search. Defaults to requesting from user input.
+        any_kwds : str or list
+            one or more keywords to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        all_kwds : str or list
+            one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
+        not_kwds : str or list
+            one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
+        case_sensitive : bool
+            whether to pay attention to the case of string data. Defaults to False.
+        output : str
+            the type of object to return. Defaults to Results.
+
+        Returns
+        -------
+        output : Results or pandas.DataFrame
+            search results.
+        """
+
         if field == 'request_input':
             field = input('Field: ')
         
@@ -850,6 +1403,30 @@ class Results(pd.DataFrame):
 
     def search(self, fields = 'all', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
 
+        """
+        Searches for a string throughout the Results DataFrame.
+
+        Parameters
+        ----------
+        fields : str or list
+            names of one or fields to search. Defaults to 'all'.
+        any_kwds : str or list
+            one or more keywords to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        all_kwds : str or list
+            one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
+        not_kwds : str or list
+            one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
+        case_sensitive : bool
+            whether to pay attention to the case of string data. Defaults to False.
+        output : str
+            the class of object to output. Defaults to Results.
+
+        Returns
+        -------
+        output : Results or pandas.DataFrame
+            search results.
+        """
+
         if any_kwds == 'request_input':
             any_kwds = input('Any keywords: ')
             any_kwds = any_kwds.strip().split(',')
@@ -912,7 +1489,11 @@ class Results(pd.DataFrame):
                 return output_df
     
     def get_keywords(self):
-    
+        
+        """
+        Returns a Pandas Series containing all keywords associated with results in the Results DataFrame.
+        """
+
         output = []
 
         for i in self['keywords']:
@@ -922,24 +1503,60 @@ class Results(pd.DataFrame):
             if type(i) == list:
                 output = output + i
 
-        output = pd.Series(output).str.strip().str.lower()
+        output = pd.Series(output).dropna()
+        output = output.astype(str)
+        output = output.str.strip().str.lower()
         output = output.drop(output[output.values == 'none'].index).reset_index().drop('index', axis=1)[0] # type: ignore
         
         return output
     
-    def get_keywords_list(self):        
+    def get_keywords_list(self):
+
+        """
+        Returns a list containing all keywords associated with results in the Results DataFrame.
+        """
+
         return self.get_keywords().to_list()
     
     def get_keywords_set(self):
+
+        """
+        Returns a set containing all unique keywords associated with results in the Results DataFrame.
+        """
+
         return set(self.get_keywords_list())
     
     def keyword_frequencies(self):
+
+        """
+        Returns a Pandas Series containing the frequencies of all keywords associated with results in the Results DataFrame.
+        """
+
         return self.get_keywords().value_counts()
 
     def keyword_stats(self):
+
+        """
+        Returns a Pandas Series containing summary statistics for the frequency of keywords associated with results in the Results DataFrame.
+        """
+
         return self.keyword_frequencies().describe()
     
     def get_titles_words(self, ignore_stopwords = True):
+
+        """
+        Returns a list containing all words used in all titles across the Results DataFrame.
+
+        Parameters
+        ----------
+        ignore_stopwords : bool
+            whether to remove stopwords from the list. Uses the 'all' dataset from the art.datasets.stopwords.stopwords dictionary. Defaults to True.
+
+        Returns
+        -------
+        output : list
+            a list containing all words used in all titles across the Results DataFrame.
+        """
 
         df = self.copy(deep=True)
         df['title'] = df['title'].astype(str).str.lower().str.strip()
@@ -960,16 +1577,70 @@ class Results(pd.DataFrame):
         return output
     
     def get_titles_words_set(self, ignore_stopwords = True):
+
+        """
+        Returns a set containing unique words used in titles across the Results DataFrame.
+
+        Parameters
+        ----------
+        ignore_stopwords : bool
+            whether to remove stopwords from the set. Uses the 'all' dataset from the art.datasets.stopwords.stopwords dictionary. Defaults to True.
+
+        Returns
+        -------
+        output : set
+            a set containing unique words used in titles across the Results DataFrame.
+        """
+
         return set(self.get_titles_words(ignore_stopwords = ignore_stopwords))
     
     def title_word_frequencies(self, ignore_stopwords = True):
+
+        """
+        Returns a Pandas Series containing the frequencies of words used in titles across the Results DataFrame.
+
+        Parameters
+        ----------
+        ignore_stopwords : bool
+            whether to ignore stopwords. Uses the 'all' dataset from the art.datasets.stopwords.stopwords dictionary. Defaults to True.
+
+        Returns
+        -------
+        frequencies : pandas.Series
+            a Pandas Series containing the frequencies of words used in titles across the Results DataFrame.
+        """
+
         return pd.Series(self.get_titles_words(ignore_stopwords = ignore_stopwords)).value_counts()
                                                
     def title_words_stats(self, ignore_stopwords = True):
+
+        """
+        Returns a Pandas Series containing summary statistics for the frequency of words used in titles across the Results DataFrame.
+
+        Parameters
+        ----------
+        ignore_stopwords : bool
+            whether to ignore stopwords. Uses the 'all' dataset from the art.datasets.stopwords.stopwords dictionary. Defaults to True.
+
+        Returns
+        -------
+        frequencies : pandas.Series
+            a Pandas Series containing summary statistics for the frequency of words used in titles across the Results DataFrame.
+        """
+
         return self.title_word_frequencies(ignore_stopwords = ignore_stopwords).describe()
     
-    def drop_containing_keywords(self, keywords):
+    def drop_containing_keywords(self, keywords: list):
         
+        """
+        Removes all rows which contain any of the inputted keywords.
+
+        Parameters
+        ----------
+        keywords : list
+            a list of keywords to search for.
+        """
+
         if type(keywords) == str:
             keywords = [keywords]
 
@@ -977,6 +1648,20 @@ class Results(pd.DataFrame):
         return self.drop(index = results, axis=0).reset_index().drop('index', axis=1)
 
     def filter_by_keyword_frequency(self, cutoff = 3):
+
+        """
+        Filters the Results DataFrame to show only results which contain keywords that meet a frequency cutoff. 
+
+        Parameters
+        ----------
+        cutoff : int
+            a frequency cutoff for keywords.
+        
+        Returns
+        -------
+        output : Results or pandas.DataFrame
+            the filtered DataFrame.
+        """
 
         keywords_freq = self.keyword_frequencies()
 
@@ -996,12 +1681,48 @@ class Results(pd.DataFrame):
         return self.loc[output.index]
     
     def has_citations_data(self):
+
+        """
+        Returns all Results entries which contain citations data.
+        """
+
         return self[~self['citations_data'].isna()]
 
     def has(self, column):
+
+        """
+        Returns all Results entries which contain data in the inputted column.
+
+        Parameters
+        ----------
+        column : str
+            name of column to filter on.
+        
+        Returns
+        -------
+        self : Results
+            the masked Results DataFrame.
+        """
+
         return self[~self[column].isna()]
     
     def contains(self, query: str = 'request_input', ignore_case: bool = True) -> bool:
+
+        """
+        Checks if the Results DataFrame contains an inputted string. Returns True if yes; else, returns False.
+
+        Parameters
+        ----------
+        query : str
+            a string to check for. Defaults to requesting from user input.
+        ignore_case : bool
+            whether to ignore the case of string data. Defaults to True.
+        
+        Returns
+        -------
+        result : bool
+            whether the Results DataFrame contains the string.
+        """
 
         if query == 'request_input':
             query = input('Search query').strip()
@@ -1080,6 +1801,22 @@ class Results(pd.DataFrame):
 
     def mask_affiliations(self, query: str = 'request_input', ignore_case: bool = True):
 
+        """
+        Filters the Results DataFrame for entries which contain an inputted string in their affiliations data.
+
+        Parameters
+        ----------
+        query : str
+            a string to search for. Defaults to requesting from user input.
+        ignore_case : bool
+            whether to ignore the case of string data. Defaults to True.
+
+        Returns
+        -------
+        output : Results or pandas.DataFrame
+            the filtered DataFrame.
+        """
+
         if query == 'request_input':
             query = input('Search query: ').strip()
 
@@ -1102,6 +1839,22 @@ class Results(pd.DataFrame):
 
     def mask_entities(self, column, query: str = 'request_input', ignore_case: bool = True):
 
+        """
+        Filters the Results DataFrame for entries which contain an inputted string in their authors or funders data.
+
+        Parameters
+        ----------
+        query : str
+            a string to search for. Defaults to requesting from user input.
+        ignore_case : bool
+            whether to ignore the case of string data. Defaults to True.
+
+        Returns
+        -------
+        output : Results or pandas.DataFrame
+            the filtered DataFrame.
+        """
+
         if query == 'request_input':
             query = input('Search query').strip()
 
@@ -1122,6 +1875,10 @@ class Results(pd.DataFrame):
         return masked
 
     def format_funders(self, use_api: bool = False):
+
+        """
+        Formats all funders data as Funders objects.
+        """
 
         try:
             funders = self['funder'].apply(format_funders) # type: ignore

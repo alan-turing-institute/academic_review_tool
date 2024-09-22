@@ -55,7 +55,6 @@ def search_web(
     else:
         open_url(url = url)
          
-            
 def multi_search_web(iteration_terms: list = 'request_input',
                         query: str = 'request_input',
                         search_engine: str = 'Google',
@@ -137,7 +136,6 @@ def search_website(query: str = 'request_input', url = 'request_input', view_sou
     # Opening web search
     search_web(query, search_engine = 'Google', view_source = view_source)
     
-
 def search_social_media(query: str = 'request_input', platform: str = 'Twitter', view_source = False):
     
     """
@@ -201,7 +199,6 @@ def search_social_media(query: str = 'request_input', platform: str = 'Twitter',
     # Running search
     search_web(query, search_engine = 'Google', view_source = view_source)
         
-
 def search_twitter(query: str = 'request_input'):
     
     """
@@ -210,7 +207,6 @@ def search_twitter(query: str = 'request_input'):
     
     search_social_media(query = query, platform = 'Twitter')
 
-    
 def search_images(query: str = 'request_input',
                search_engine: str = 'Google Images'
               ):
@@ -251,8 +247,6 @@ def search_images(query: str = 'request_input',
     # Opening search
     return webbrowser.open(url)
         
-        
-
 def reverse_image_search(url = 'request_input',
                search_engine: str = 'Google Images'
               ):

@@ -15,6 +15,20 @@ from nltk.tokenize import word_tokenize # type: ignore
 
 def generate_funder_id(funder_data: pd.Series):
 
+        """
+            Takes a Pandas Series containing funder details and returns a unique identifier code.
+
+            Parameters
+            ----------
+            funder_data : pandas.Series
+                a series containing funder data
+
+            Returns
+            -------
+            funder_id : str
+                a funder ID.
+        """
+
         funder_data = funder_data.copy(deep=True).dropna().astype(str).str.lower()
 
         funder_id = 'F:'
@@ -71,14 +85,41 @@ def generate_funder_id(funder_data: pd.Series):
 class Funder(Entity):
 
     """
-    This is a Funder object. It is designed to store data about an individual funder and their publications.
+    This is a Funder object. It is designed to store data about an individual Funder and their publications.
     
     Parameters
     ----------
-    
+    funder_id : str
+        a unique identifier assigned to the funder. Defaults to None.
+    name : str
+        the funder's name. Defaults to None.
+    alt_names : list
+        a list of alternate names. Defaults to an empty list.
+    location : str
+        an address associted with the funder. Defaults to None.
+    email : str
+        the funder's email address. Defaults to None.
+    uri : str
+        a DOI or other unique identifier assigned to the funder. Defaults to None.
+    crossref_id : str
+        a CrossRef identifier assigned to the funder. Defaults to None.
+    work_count : int
+        the number of publications associated with the fudner. Defaults to None.
+    tokens : list
+        a list of strings associated with the funder. Defaults to None.
+    website : str
+        the funder's website. Defaults to None
+    other_links : str or list
+        any other links associated with the funder. Defaults to None.
+    use_api : bool
+        whether to update funder data using APIs (e.g. CrossRef). Defaults to None.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Funder's data.
+    publications : Results
+        a Results dataframe containing data on the Funder's publications.
     """
 
     def __init__(self,
@@ -97,10 +138,34 @@ class Funder(Entity):
                  ):
         
         """
-        Initialises funder instance.
+        Initialises Funder instance.
         
         Parameters
         ----------
+        funder_id : str
+            a unique identifier assigned to the funder. Defaults to None.
+        name : str
+            the funder's name. Defaults to None.
+        alt_names : list
+            a list of alternate names. Defaults to an empty list.
+        location : str
+            an address associted with the funder. Defaults to None.
+        email : str
+            the funder's email address. Defaults to None.
+        uri : str
+            a DOI or other unique identifier assigned to the funder. Defaults to None.
+        crossref_id : str
+            a CrossRef identifier assigned to the funder. Defaults to None.
+        work_count : int
+            the number of publications associated with the funder. Defaults to None.
+        tokens : list
+            a list of strings associated with the funder. Defaults to None.
+        website : str
+            the funder's website. Defaults to None
+        other_links : str or list
+            any other links associated with the funder. Defaults to None.
+        use_api : bool
+            whether to update funder data using APIs (e.g. CrossRef). Defaults to None.
         """
 
         super().__init__()
@@ -167,12 +232,25 @@ class Funder(Entity):
 
     def generate_id(self):
 
+        """
+        Returns a unique identifier (funder ID) based on the Funder's data.
+
+        Returns
+        -------
+        funder_id : str
+            a funder ID.
+        """
+
         funder_data = self.summary.loc[0]
 
         funder_id = generate_funder_id(funder_data) # type: ignore
         return funder_id
 
     def update_id(self):
+
+        """
+        Replaces the Funder's existing unique identifier with a newly generated unique identifier based on the Funder's data.
+        """
 
         current_id = self.summary.loc[0, 'funder_id']
 
@@ -184,7 +262,17 @@ class Funder(Entity):
     def __getitem__(self, key):
         
         """
-        Retrieves funder attribute using a key.
+        Retrieves a Funder attribute or datapoint using a key. The key may be an attribute name, dataframe index position, or dataframe column name.
+
+        Parameters
+        ----------
+        key : object
+            an attribute name, dataframe index position, or dataframe column name.
+        
+        Returns
+        -------
+        value : object
+            an object associated with the inputted key.
         """
         
         if key in self.__dict__.keys():
@@ -198,9 +286,17 @@ class Funder(Entity):
 
     def __repr__(self) -> str:
         
+        """
+        Defines how Funder objects are represented in string form.
+        """
+
         return str(self.summary.loc[0, 'name'])
 
     def has_uri(self) -> bool:
+
+        """
+        Returns True if the Funder has a URI associated. Else, returns False.
+        """
 
         uri = self.summary.loc[0, 'uri']
 
@@ -210,6 +306,10 @@ class Funder(Entity):
             return False
 
     def add_dict(self, data: dict):
+
+        """
+        Adds a dictionary of funder data to the Funder's summary dataframe.
+        """
 
         if 'name' in data.keys():
             name = data['name']
@@ -221,6 +321,22 @@ class Funder(Entity):
     
     def from_dict(data: dict, use_api=False): # type: ignore
 
+        """
+        Takes a dictionary of funder data and returns a Funder object.
+
+        Parameters
+        ----------
+        data : dict
+            a dictionary of funder data. The dictionary must contain 'name' and/or 'doi' as keys.
+        use_api : bool
+            whether to update funder data using APIs (e.g. CrossRef). Defaults to None.
+
+        Returns
+        -------
+        funder : Funder
+            a Funder object.
+        """
+
         funder = Funder()
         funder.add_dict(data=data)
 
@@ -230,19 +346,64 @@ class Funder(Entity):
         return funder
         
     def add_series(self, series: pd.Series):
+
+        """
+        Adds a Pandas Series object to the Funder's summary dataframe.
+        """
+
         self.summary.loc[0] = series
 
     def from_series(data: pd.Series): # type: ignore
+
+        """
+        Takes a Pandas Series and returns a Funder object.
+
+        Parameters
+        ----------
+        data : pandas.Series
+            a Pandas Series with indices that match the names of columns in the Funder summary dataframe.
+
+        Returns
+        -------
+        funder : Funder
+            a Funder object.
+        """
+
         funder = Funder()
         funder.add_series(data)
 
         return funder
 
     def add_dataframe(self, dataframe: pd.DataFrame):
+
+        """
+        Adds data from a Pandas DataFrame to the Funder object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Funder's summary dataframe.
+        """
+
         series = dataframe.loc[0]
         self.add_series(series) # type: ignore
 
     def from_dataframe(data: pd.DataFrame): # type: ignore
+
+        """
+        Takes a Pandas DataFrame and returns a Funder object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Funder object's summary dataframe.
+
+        Returns
+        -------
+        funder : Funder
+            a Funder object.
+        """
+
         funder = Funder()
         funder.add_dataframe(data)
 
@@ -250,6 +411,15 @@ class Funder(Entity):
 
     def import_crossref_result(self, crossref_result: pd.Series):
         
+        """
+        Reads a CrossRef API result formatted as a pandas.Series and adds its data to the Funder object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Series
+            CrossRef API result.
+        """
+
         if 'name' in crossref_result.index:
             name = crossref_result['name']
         else:
@@ -301,6 +471,20 @@ class Funder(Entity):
     
     def from_crossref_result(crossref_result: pd.Series): # type: ignore
 
+        """
+        Reads a CrossRef API result formatted as a pandas.Series and returns as a Funder object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Series.
+            CrossRef API result.
+        
+        Returns
+        -------
+        funder : Funder
+            a Funder object.
+        """
+
         funder = Funder()
         funder.import_crossref_result(crossref_result=crossref_result)
 
@@ -308,29 +492,92 @@ class Funder(Entity):
 
     def import_crossref(self, crossref_id: str, timeout = 60):
 
+        """
+        Looks up a CrossRef funder ID and adds the result to the Funder object.
+
+        Parameters
+        ----------
+        crossref_id : str
+            CrossRef funder ID.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
+
         res = lookup_funder(crossref_id, timeout)
         self.import_crossref_result(res.loc[0]) # type: ignore
 
-    def from_crossref(crossref_id: str): # type: ignore
+    def from_crossref(crossref_id: str, timeout = 60): # type: ignore
         
+        """
+        Looks up a CrossRef funder ID and returns the result as a Funder object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Series.
+            CrossRef API result.
+        timeout : int
+            maximum time to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        
+        Returns
+        -------
+        funder : Funder
+            a Funder object.
+        """
+
         funder = Funder()
-        funder.import_crossref(crossref_id) # type: ignore
+        funder.import_crossref(crossref_id, timeout) # type: ignore
 
         return funder
     
     def import_uri(self, uri: str, timeout = 60):
+
+        """
+        Looks up a funder URI using the CrossRef API and adds the result to the Funder object.
+
+        Parameters
+        ----------
+        uri : str
+            funder URI.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
 
         res = lookup_funder(uri, timeout)
         self.import_crossref_result(res.loc[0]) # type: ignore
 
     def from_uri(uri: str): # type: ignore
         
+        """
+        Looks up a funder URI using the CrossRef API and returns the result as a Funder object.
+
+        Parameters
+        ----------
+        uri : str
+            funder URI.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        funder : Funder
+            a Funder object.
+        """
+
         funder = Funder()
         funder.import_uri(uri) # type: ignore
 
         return funder
 
     def update_from_crossref(self, timeout = 60):
+
+        """
+        Looks up the Funder's CrossRef funder ID. If one is found, uses to update the Funder object.
+
+        Parameters
+        ----------
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
 
         uid = self.summary.loc[0,'crossref_id']
         if uid == None:
@@ -344,6 +591,15 @@ class Funder(Entity):
 
     def update_from_uri(self, timeout = 60):
 
+        """
+        Looks up the Funder's URI using the CrossRef API. If one is found, uses to update the Funder object.
+
+        Parameters
+        ----------
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        """
+
         uid = self.summary.loc[0,'uri']
         if uid == None:
             uid = self.summary.loc[0,'crossref']
@@ -354,7 +610,8 @@ class Funder(Entity):
         if len(res) > 0:
             self.import_crossref_result(res.loc[0]) # type: ignore
     
-    def search_works(self, bibliographic: str = None, # type: ignore
+    def search_works(self, 
+                     bibliographic: str = None, # type: ignore
                      title: str = None, # type: ignore
                      author: str = None, # type: ignore
                      author_affiliation: str = None, # type: ignore
@@ -373,6 +630,56 @@ class Funder(Entity):
                     timeout: int = 60, 
                     add_to_publications = False) -> pd.DataFrame:
         
+        """
+        Searches for publications associated with the Funder using the CrossRef API.
+
+        Parameters
+        ----------
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, author names, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for author names containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            how long in seconds to wait for results before raising an error.
+        add_to_publications : bool
+            whether to add search results to the Funder object.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        result : pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         uid = self.summary.loc[0, 'crossref_id']
         if (uid == None) or (uid == ''):
             uid = self.summary.loc[0, 'uri']
@@ -409,14 +716,21 @@ class Funder(Entity):
 class Funders(Entities):
 
     """
-    This is a Funders object. It contains a collection of Funders objects and compiles data about them.
+    This is a Funders object. It contains a collection of Funder objects and a summary of data about them.
     
     Parameters
     ----------
-    
+    funders_data : list or dict
+        Optional: an iterable of funders data. Data on individual funders must be formatted as dictionaries.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Funders collection's data.
+    all : dict
+        a dictionary storing formatted Funder objects.
+    data : list
+        a list of any unformatted data associated with Funder objects in the collection.
     """
 
     def __init__(self, funders_data = None):
@@ -426,6 +740,8 @@ class Funders(Entities):
         
         Parameters
         ----------
+        funders_data : list or dict
+            Optional: an iterable of funders data. Data on individual funders must be formatted as dictionaries.
         """
 
         super().__init__()
@@ -481,7 +797,7 @@ class Funders(Entities):
     def __getitem__(self, key):
         
         """
-        Retrieves funders attribute using a key.
+        Retrieves Funders attribute using a key.
         """
         
         if key in self.__dict__.keys():
@@ -498,13 +814,45 @@ class Funders(Entities):
     
     def __repr__(self) -> str:
 
+        """
+        Defines how Funders objects are represented in string form.
+        """
+
         alphabetical = str(self.summary['name'].sort_values().to_list()).replace('[','').replace(']','')
         return alphabetical
     
     def __len__(self) -> int:
+
+        """
+        Returns the number of Funder objects in the Funders collection. Counts the number of Funder objects stored in the Funders.all dictionary.
+
+        Returns
+        -------
+        result : int
+            the number of Funder objects contained in the Funders.all dictionary.
+        """
+
         return len(self.all.keys())
 
     def merge(self, funders, drop_empty_rows = True, drop_duplicates = False):
+
+        """
+        Merges the Funders collection with another Funders collection.
+
+        Parameters
+        ----------
+        funders : Funders
+            the Funders collection to merge with.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        
+        Returns
+        -------
+        self : Funders
+            the merged Funders collection.
+        """
 
         left = self.summary.copy(deep=True)
         right = funders.summary.copy(deep=True)
@@ -553,10 +901,28 @@ class Funders(Entities):
 
         return self
 
-
     def add_funder(self, funder: Funder =  None, uri: str = None, crossref_id: int = None, data = None, use_api = True, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
-        
+        """
+        Adds a Funder or funder data to the Funders collection.
+
+        Parameters
+        ----------
+        funder : Funder
+            a Funder object to add.
+        uri : str
+            a URI identifier to look up. Defaults to None.
+        crossref_id : str
+            a CrossRef ID to look up. Defaults to None.
+        data : dict
+            Optional: a dictionary containing funder data. Dictionary keys must match the names of columns in the Funders.summary dataframe.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        use_api : bool
+            whether to update the Funder data using the CrossRef API. Defaults to False.
+        """
 
         if type(funder) == str:
 
@@ -617,9 +983,21 @@ class Funders(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-
     def add_funders_list(self, funders_list: list, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Adds a list containing Funder objects to the Funders collection.
+
+        Parameters
+        ----------
+        funders_list : list[Funder]
+            a list of Funder objects.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         for i in funders_list:
             if type(i) == Funder:
                 self.add_funder(funder = i)
@@ -631,6 +1009,15 @@ class Funders(Entities):
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
     def drop_empty_rows(self):
+
+        """
+        Drops rows that contain no data from Funders.summary dataframe.
+
+        Returns
+        -------
+        self : Funders
+            a Funders object.
+        """
 
         ignore_cols = ['funder_id', 'alt_names', 'publications', 'tokens', 'other_links']
 
@@ -646,6 +1033,22 @@ class Funders(Entities):
 
     def remove_duplicates(self, drop_empty_rows = True, sync = False):
 
+        """
+        Removes duplicate Funder entries from the Funders collection.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to True.
+        sync : bool
+            whether to synchronise the Funders.summary dataframe with the Funders.all dictionary. Defaults to False.
+        
+        Returns
+        -------
+        self : Funders
+            a Funders object.
+        """
+
         if drop_empty_rows == True:
             self.drop_empty_rows()
         
@@ -656,11 +1059,22 @@ class Funders(Entities):
         self.summary = deduplicate(self.summary)
 
         if sync == True:
-            self.sync_details(drop_duplicates=False, drop_empty_rows=False)
+            self.sync_summary(drop_duplicates=False, drop_empty_rows=False)
 
         return self
 
     def sync_all(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Updates the Funders.summary dataframe using the Funder objects in the Funders.all dictionary.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in self.all.keys():
             funder = self.all[i]
@@ -680,7 +1094,18 @@ class Funders(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-    def sync_details(self, drop_duplicates = False, drop_empty_rows=False):
+    def sync_summary(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Updates all Funder objects in the Funders.all dictionary using the Funders.summary dataframe.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         self.update_ids(sync=False)
 
@@ -717,9 +1142,19 @@ class Funders(Entities):
         if drop_duplicates == True:
             self.remove_duplicates(drop_empty_rows=drop_empty_rows)
 
-
     def sync(self, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Synchronises the Funders.summary dataframe with the Funder objects in the Funders.all dictionary.
+        
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         if drop_empty_rows == True:
             self.drop_empty_rows()
 
@@ -730,19 +1165,28 @@ class Funders(Entities):
         details_len = len(self.all)
 
         if all_len > details_len:
-            self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+            self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
             return
         else:
             if details_len > all_len:
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
             else:
-                self.sync_details(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+                self.sync_summary(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 self.sync_all(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
                 return
 
     def update_ids(self, sync=False):
         
+        """
+        Updates funder IDs for all rows in the Funders.summary dataframe.
+
+        Parameters
+        ----------
+        sync : bool
+            whether to synchronise the Funders.summary dataframe with the Funder objects in the Funders.all dictionary. Defaults to False.
+        """
+
         if sync == True:
             self.sync()
 
@@ -772,8 +1216,18 @@ class Funders(Entities):
                 funder.summary.loc[0, 'funder_id'] = new_id
                 self.all[new_id] = funder
 
-
     def update_from_crossref(self, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Looks up all Funders' CrossRef IDs and/or URIs using the CrossRef API. If found, uses to update the Funders collection.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         funder_ids = self.all.keys()
 
@@ -798,9 +1252,20 @@ class Funders(Entities):
 
         self.update_ids()
         
-
-
     def import_crossref_ids(self, crossref_ids: list, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Looks up a list of CrossRef funder IDs and/or URIs using the CrossRef API. Adds any data found to the Funders collection.
+
+        Parameters
+        ----------
+        crossref_ids : list[str]
+            list containing CrossRef funder IDs.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in crossref_ids:
 
@@ -815,21 +1280,63 @@ class Funders(Entities):
 
         self.update_ids()
 
-
     def from_crossref_ids(crossref_ids: list, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        """
+        Looks up a list of CrossRef funder IDs and/or URIs using the CrossRef API. Returns all data found as a Funders object.
+
+        Parameters
+        ----------
+        crossref_ids : list[str]
+            list containing CrossRef funder IDs.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+
+        Returns
+        -------
+        funders : Funders
+            a Funders object.
+        """
 
         funders = Funders()
         funders.import_crossref_ids(crossref_ids, drop_duplicates = drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return funders
 
-    def with_crossref(self):
+    def has_crossref(self):
+
+        """
+        Returns all rows in Funders.summary which contain CrossRef IDs.
+        """
+
         return self.summary[~self.summary['crossref_id'].isna()]
     
-    def with_uri(self):
+    def has_uri(self):
+
+        """
+        Returns all rows in Funders.summary which contain URIs.
+        """
+
         return self.summary[~self.summary['uri'].isna()]
 
     def import_crossref_result(self, crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False):
+
+        """
+        Reads a pandas.DataFrame containing CrossRef API results and adds the data to the Funders collection.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Dataframe
+            CrossRef API results.
+        use_api : bool
+            whether to update the Funders data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
 
         for i in crossref_result.index:
             
@@ -845,8 +1352,28 @@ class Funders(Entities):
 
         self.update_ids()
 
-
     def from_crossref_result(crossref_result: pd.DataFrame, use_api = False, drop_duplicates = False, drop_empty_rows=False): # type: ignore
+
+        """
+        Reads a pandas.DataFrame containing CrossRef API results and returns as a Funders object.
+
+        Parameters
+        ----------
+        crossref_result : pandas.Dataframe
+            CrossRef API results.
+        use_api : bool
+            whether to update the Funders data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+
+        Returns
+        -------
+        funders : Funders
+            a Funders object.
+        """
+
 
         funders = Funders()
         funders.import_crossref_result(crossref_result, use_api=use_api, drop_duplicates = drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -877,6 +1404,58 @@ class Funders(Entities):
                     timeout: int = 60, 
                     add_to_publications = False) -> pd.DataFrame:
         
+        """
+        Searches for publications associated with a Funder using the CrossRef API.
+
+        Parameters
+        ----------
+        funder_id : str
+            a funder ID to look up. Defaults to None.
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, author names, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for author names containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            how long in seconds to wait for results before raising an error.
+        add_to_publications : bool
+            whether to add search results to the Funder object.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        result : pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         if (funder_id != None) and (funder_id in self.all.keys()):
             funder = self.all[funder_id]
             result = funder.search_works(
@@ -951,6 +1530,21 @@ class Funders(Entities):
 
 def format_funders(funder_data, use_api = False, drop_duplicates = False, drop_empty_rows=False):
         
+        """
+        Formats a collection of funders data as a Funders object.
+
+        Parameters
+        ----------
+        funder_data : object
+            a collection of funders data.
+        use_api : bool
+            whether to update the Funders data using the CrossRef API. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        drop_duplicates : bool
+            whether to remove duplicated rows. Defaults to False.
+        """
+
         result = Funders()
 
         funder_type = type(funder_data)

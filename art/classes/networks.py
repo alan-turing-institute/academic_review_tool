@@ -1,4 +1,5 @@
 
+from networkx import degree
 from ..networks.network_functions import colinks_in, colinks_out
 
 from ..exporters.network_exporters import export_network, export_network_to_kumu
@@ -113,6 +114,10 @@ class Network(Graph):
 
     def __repr__(self):
 
+        """
+        Defines how Network objects are represented in string form.
+        """
+
         if self.is_directed() == True:
             dir = 'Directed'
         else:
@@ -155,52 +160,88 @@ class Network(Graph):
         return output
     
     def is_weighted(self) -> bool:
+
+        """
+        Checks whether edges have a 'weight' attribute. Returns True if yes; False if no.
+        """
+
         return 'weight' in self.es.attributes()
 
-    def degrees_dataframe(self, direction = 'all'):
+    def degrees(self):
         
         """
-        Returns the network's degree distribution as a dataframe.
+        Returns the network's degree distributions as a Pandas DataFrame.
         """
         
-        degrees_dataframe = pd.DataFrame(columns = ['vertex', 'degree'])
-        degrees = Network.degree(self, mode = direction)
+        isdir = self.is_directed()
+
+        if isdir == False:
+            degrees_dataframe = pd.DataFrame(columns = ['vertex', 'degree'])
+            total_degrees = Network.degree(self, mode = 'all')
+        else:
+
+            degrees_dataframe = pd.DataFrame(columns = ['vertex', 'total_degree', 'in_degree', 'out_degree'])
+            total_degrees = Network.degree(self, mode = 'all')
+            in_degrees = Network.degree(self, mode = 'in')
+            out_degrees = Network.degree(self, mode = 'out')
 
         index = 0
-        for item in self.vs['name']:
-            degrees_dataframe.loc[index] = [item, degrees[index]]
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
+            
+            degrees_dataframe.loc[index, 'vertex'] = item
+
+            if isdir == False:
+                degrees_dataframe.loc[index, 'degree'] = total_degrees[index]
+                degrees_dataframe = degrees_dataframe.sort_values('degree', ascending=False)
+            else:
+                degrees_dataframe.loc[index, 'total_degree'] = total_degrees[index]
+                degrees_dataframe.loc[index, 'in_degree'] = in_degrees[index]
+                degrees_dataframe.loc[index, 'out_degree'] = out_degrees[index]
+                degrees_dataframe = degrees_dataframe.sort_values('total_degree', ascending=False)
             index += 1
         
         degrees_dataframe.index.name = 'vertex_id'
-        degrees_dataframe = degrees_dataframe.sort_values('degree', ascending=False)
 
         return degrees_dataframe
 
     
-    def degree_stats(self, direction = 'all'):
+    def degrees_stats(self):
 
         """
-        Returns frequency statistics for the network's degree distribution.
+        Returns frequency statistics for the network's degree distributions in a Pandas DataFrame.
         """
         
-        df = self.degrees_dataframe(direction = direction)
+        deg_df = self.degrees()
 
-        if df is not None:
-            return df['degree'].describe()
+        if deg_df is not None:
+            cols = deg_df.columns.to_list()
+            cols.remove('vertex')
+            stats_df = pd.DataFrame(columns=cols)
+            for c in cols:
+                stats_df[c] = deg_df[c].describe()
+            return stats_df
         else:
             return None
     
     def betweenness_dataframe(self):
         
         """
-        Returns the network's betweenness centrality distribution as a dataframe.
+        Returns the network's betweenness centrality distribution as a Pandas DataFrame.
         """
         
         df = pd.DataFrame(columns = ['vertex', 'betweenness'])
 
         betweenness = Network.betweenness(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, betweenness[index]]
             index += 1
         
@@ -225,7 +266,7 @@ class Network(Graph):
     def eigencentralities_dataframe(self):
         
         """
-        Returns the network's eigenvector centrality distribution as a dataframe.
+        Returns the network's eigenvector centrality distribution as a Pandas DataFrame.
         """
         
         if self.is_directed() == True:
@@ -237,7 +278,11 @@ class Network(Graph):
 
             eigencentrality = Network.eigenvector_centrality(self)
             index = 0
-            for item in self.vs['name']:
+            for v in self.vs:
+                if 'name' in v.attributes().keys():
+                    item = v['name']
+                else:
+                    item = v.index
                 df.loc[index] = [item, eigencentrality[index]]
                 index += 1
             
@@ -263,14 +308,18 @@ class Network(Graph):
     def authority_scores_dataframe(self):
         
         """
-        Returns the network's authority scores distribution as a dataframe.
+        Returns the network's authority scores distribution as a Pandas DataFrame.
         """
         
         df = pd.DataFrame(columns = ['vertex', 'authority_score'])
 
         authority_scores = Network.authority_score(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, authority_scores[index]]
             index += 1
         
@@ -296,14 +345,18 @@ class Network(Graph):
     def hub_scores_dataframe(self):
 
         """
-        Returns the network's hub scores distribution as a dataframe.
+        Returns the network's hub scores distribution as a Pandas DataFrame.
         """
         
         df = pd.DataFrame(columns = ['vertex', 'hub_score'])
 
         hub_scores = Network.hub_score(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, hub_scores[index]]
             index += 1
         
@@ -329,14 +382,18 @@ class Network(Graph):
     def coreness_dataframe(self):
         
         """
-        Returns the network's coreness scores distribution as a dataframe.
+        Returns the network's coreness scores distribution as a Pandas DataFrame.
         """
         
         df = pd.DataFrame(columns = ['vertex', 'coreness'])
 
         coreness = Network.coreness(self)
         index = 0
-        for item in self.vs['name']:
+        for v in self.vs:
+            if 'name' in v.attributes().keys():
+                item = v['name']
+            else:
+                item = v.index
             df.loc[index] = [item, coreness[index]]
             index += 1
         
@@ -362,7 +419,18 @@ class Network(Graph):
 
     def community_detection(self, algorithm='fastgreedy'):
         
-        """Identifies communities in the network. Gives the option of using different algorithms."""
+        """Identifies communities in the network. Gives the option of using different algorithms.
+        
+        Parameters
+        ----------
+        algorithm : str
+            name of community detection algorithm. Options: 
+            1. betweenness
+            2. fastgreedy
+            3. eigenvector
+            4. spinglass
+            5. walktrap
+        """
 
         if (algorithm == None) or (algorithm == ''):
             algorithm = input('Algorithm must be specified. Options: 1. betweenness, 2. fastgreedy, 3. eigenvector, 4. spinglass, 5. walktrap.:')
@@ -447,89 +515,127 @@ class Network(Graph):
             return weighted_density
 
     
-    def weighted_degrees_dataframe(self, direction = 'all'):
+    def weighted_degrees(self):
 
-        """Returns the network's weighted degrees distribution as a dataframe."""
+        """Returns the network's weighted degree distributions as a Pandas Dataframe."""
         
+        # Checks if network is directed
+        isdir = self.is_directed()
         
         # Checks if network is weighted
 
         if 'weight' not in self.es.attributes():
-            degrees_dataframe = self.degrees_dataframe(direction = direction)
-            degrees_dataframe['weighted_degree'] = degrees_dataframe['degree']
-            degrees_dataframe = degrees_dataframe.drop('degree', axis = 1)
+
+            degrees_dataframe = self.degrees()
+
+            if isdir == False:
+                degrees_dataframe = degrees_dataframe.rename(columns={'degree':'weighted_degree'})
+            else:
+                degrees_dataframe = degrees_dataframe.rename(columns={'total_degree':'weighted_total_degree', 'in_degree': 'weighted_in_degree', 'out_degree': 'weighted_out_degree'})
+
             return degrees_dataframe
-            
-
+    
         else:
+            if isdir == False:
+                cols = ['vertex', 'weighted_degree']
+                directions = {'all': 'weighted_degree'}
+            else:
+                cols = ['vertex', 'weighted_total_degree', 'weighted_in_degree', 'weighted_out_degree']
+                directions = {'all': 'weighted_total_degree', 'in': 'weighted_in_degree', 'out': 'weighted_out_degree'}
 
-            degrees_dataframe = pd.DataFrame(columns = ['vertex', 'weighted_degree'])
+            degrees_dataframe = pd.DataFrame(columns = cols)
 
             index = 0
             for vertex in self.vs:
                 weighted_degree = 0
-                incident_edges = (Network.incident(self, vertex))
-                for edge in incident_edges:
-                    weight = self.es[edge]['weight']
-                    weighted_degree += weight
-                degrees_dataframe.loc[index] = [vertex['name'], weighted_degree]            
+                if 'name' in vertex.attributes().keys():
+                    degrees_dataframe.loc[index, 'vertex'] = vertex['name']
+                else:
+                    degrees_dataframe.loc[index, 'vertex'] = vertex.index
+                for d in directions.keys():
+                    colname = directions[d]
+                    incident_edges = (Network.incident(self, vertex, mode=d))
+                    for edge in incident_edges:
+                        weight = self.es[edge]['weight']
+                        weighted_degree += weight
+                    degrees_dataframe.loc[index, colname] = weighted_degree          
                 index += 1
 
-            degrees_dataframe = degrees_dataframe.sort_values('weighted_degree', ascending=False)
+            if isdir == False:
+                degrees_dataframe = degrees_dataframe.sort_values('weighted_degree', ascending=False)
+            else:
+                degrees_dataframe = degrees_dataframe.sort_values('weighted_total_degree', ascending=False)
+
+            degrees_dataframe.index.name = 'vertex_id'
 
             return degrees_dataframe
 
         
-    def weighted_degrees_stats(self, direction = 'all'):
+    def weighted_degrees_stats(self):
 
         """
-        Returns frequency statistics for the weighted degree distribution.
+        Returns frequency statistics for the weighted degree distributions as a Pandas DataFrame.
         """
-        
-        df = self.weighted_degrees_dataframe(direction = direction)
+
+        df = self.weighted_degrees()
 
         if df is not None:
-            return df['weighted_degree'].describe()
-
-        
-    def degrees_dist(self, weighted = False, direction = 'all'):
-
-        """
-        Returns either the weighted or unweighted degrees distribution as a dataframe.
-        """
-        
-        if weighted == True:
-            degrees_frame = self.weighted_degrees_dataframe(direction = direction)
-            freq_table = degrees_frame['weighted_degree'].value_counts()
-            dist_frame = pd.DataFrame({'weighted_degree':freq_table.index, 'counts':freq_table.values})
-
-            return dist_frame
-
+            cols = df.columns.to_list()
+            cols.remove('vertex')
+            stats_df = pd.DataFrame(columns=cols)
+            for c in cols:
+                stats_df[c] = df[c].describe()
+            return stats_df
         else:
-            degrees_frame = self.degrees_dataframe(direction = direction)
-            freq_table = degrees_frame['degree'].value_counts()
-            dist_frame = pd.DataFrame({'degree':freq_table.index, 'counts':freq_table.values})
+            return None
 
-            return dist_frame
+        
+    def degree_distributions(self, weighted = False, direction = 'all'):
+
+        """
+        Returns either the weighted or unweighted degree distributions as a Pandas Dataframe.
+        """
+
+        isdir = self.is_directed()
+        directions = {'all': 'weighted_total_degree', 'in': 'weighted_in_degree', 'out': 'weighted_out_degree'}
+
+        if weighted == True:
+            degrees_frame = self.weighted_degrees()
+        else:
+            degrees_frame = self.degrees()
+
+        cols = degrees_frame.columns.to_list()
+        cols.remove('vertex')
+
+        if isdir == False:
+            col = cols[0]
+        else:
+            col = directions[direction]
+        
+        freq_table = degrees_frame[col].value_counts()
+
+
+        dist_frame = pd.DataFrame({col:freq_table.index, 'frequency':freq_table.values}).sort_values(col, ascending=False)
+        return dist_frame
             
     
 
-    def all_centralities(self, sort_by = ['weighted_degree','degree', 'betweenness','eigencentrality','authority_score','hub_score']):
+    def all_centralities(self):
 
         """
-        Calculates all centrality measures for network. Returns as a dataframe.
+        Calculates all centrality measures for network. Returns as a Pandas Dataframe.
         """
         
         is_directed = self.is_directed()
         
         try:
-            degrees = self.degrees_dataframe().set_index('vertex').sort_index()
+            degrees = self.degrees().set_index('vertex').sort_index()
         except:
             degrees = pd.DataFrame()
             degrees.index.name = 'vertex'
         
         try:
-            weighted_degrees = self.weighted_degrees_dataframe().set_index('vertex').sort_index()
+            weighted_degrees = self.weighted_degrees().set_index('vertex').sort_index()
         except:
             weighted_degrees = pd.DataFrame()
             weighted_degrees.index.name = 'vertex'
@@ -570,22 +676,30 @@ class Network(Graph):
                                             hubs)
         
         if is_directed == True:
-            sort_by = ['weighted_degree','degree', 'betweenness','authority_score','hub_score']
-            
+            sort_by = ['weighted_total_degree', 'total_degree', 'betweenness']
+        else:
+            sort_by = ['weighted_degree', 'degree', 'betweenness', 'eigencentrality', 'authority_score','hub_score']
+        
+        if combined.index.dtype == 'float64':
+            combined.index = combined.index.astype(int)
+
         return combined.sort_values(sort_by, ascending=False)
 
     
     def get_neighbours(self,  vertex_name = 'request_input'):
         
-        """Returns vertex neighbours as a dataframe."""
+        """Returns vertex neighbours as a Pandas Dataframe."""
         
         if vertex_name == 'request_input':
-            vertex_name = input('Vertex name: ')
+            vertex_name = input('Vertex name or index: ')
 
         # Get vertex
-        vertex = self.vs.find(name = vertex_name)
+        if 'name' in self.vs.attributes():
+            vertex = self.vs.find(name = vertex_name)
+        else:
+            vertex = self.vs[vertex_name]
 
-        # Get vertex neighbours in a dataframe
+        # Get vertex neighbours in a Pandas DataFrame
 
         df = pd.DataFrame(columns = ['vertex_id', 'vertex_name'])
 
@@ -610,8 +724,14 @@ class Network(Graph):
         
         if vertex_name == 'request_input':
             vertex_name = input('Vertex name: ')
+        
+        # Get vertex
+        if 'name' in self.vs.attributes():
+            vertex = self.vs.find(name = vertex_name)
+        else:
+            vertex = self.vs[vertex_name]
 
-        degree = len(self.vs.find(name = vertex_name).neighbors())
+        degree = len(vertex.neighbors())
         degree = int(degree)
         
         return degree
@@ -624,7 +744,7 @@ class Network(Graph):
         if vertex_name == 'request_input':
             vertex_name = input('Vertex name: ')
 
-        df = self.weighted_degrees_dataframe(direction = direction)
+        df = self.weighted_degrees(direction = direction)
         masked = df[df['vertex'] == vertex_name]
         degree = int(masked['weighted_degree']) # type: ignore
 
@@ -649,7 +769,7 @@ class Network(Graph):
     def colinks(self, direction = 'out'):
         
         """
-        Runs a colink analysis on the network. Returns a dataframe.
+        Runs a colink analysis on the network. Returns a Pandas DataFrame.
         
         Parameters
         ----------
@@ -714,6 +834,8 @@ class Network(Graph):
     # Methods for exporting network to external files
     
     def to_igraph(self) -> Graph:
+
+        """Returns the Network as an igraph Graph object."""
 
         is_dir = self.is_directed()
 
@@ -1028,7 +1150,7 @@ class Networks(AttrSet):
     def degrees_df(self, network = 'request_input', direction = 'all'):
         
         """
-        Calculates the degree distribution of the network. Returns a dataframe.
+        Calculates the degree distribution of the network. Returns a Pandas DataFrame.
         
         Parameters
         ----------
@@ -1040,7 +1162,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            a dataframe containing the degree distribution of the graph.
+            a Pandas DataFrame containing the degree distribution of the graph.
         """
         
         if network == 'request_input':
@@ -1076,7 +1198,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            a dataframe of frequency statistics for the degree distribution of the
+            a Pandas DataFrame of frequency statistics for the degree distribution of the
             graph.
         """
         
@@ -1093,7 +1215,7 @@ class Networks(AttrSet):
     def betweenness_df(self, network = 'request_input', vertices=None, directed=True, cutoff=None, weights=None, sources=None, targets=None):
         
         """
-            Calculates or estimates the betweenness of vertices in a network. Returns a dataframe.
+            Calculates or estimates the betweenness of vertices in a network. Returns a Pandas DataFrame.
 
             Also supports calculating betweenness with shortest path length cutoffs or
             considering shortest paths only from certain source vertices or to certain
@@ -1126,7 +1248,7 @@ class Networks(AttrSet):
             Returns
             -------
             result : pandas.DataFrame
-                the (possibly cutoff-limited) betweenness of the given vertices in a dataframe.
+                the (possibly cutoff-limited) betweenness of the given vertices in a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1151,7 +1273,7 @@ class Networks(AttrSet):
     def betweenness_stats(self, network = 'request_input', vertices=None, directed=True, cutoff=None, weights=None, sources=None, targets=None):
         
         """
-            Returns frequency statistics for the betweenness of vertices in a network. Returns a dataframe.
+            Returns frequency statistics for the betweenness of vertices in a network. Returns a Pandas DataFrame.
 
             Parameters
             ----------
@@ -1180,7 +1302,7 @@ class Networks(AttrSet):
             Returns
             -------
             result : pandas.DataFrame
-                frequency statistics for betweenness of the given vertices in a dataframe.
+                frequency statistics for betweenness of the given vertices in a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1197,7 +1319,7 @@ class Networks(AttrSet):
     def eigencentralities_df(self, network = 'request_input', scale=True, weights=None, return_eigenvalue=False):
         
         """
-        Calculates the eigenvector centralities of the vertices in a graph. Returns a dataframe.
+        Calculates the eigenvector centralities of the vertices in a graph. Returns a Pandas DataFrame.
        
         Eigenvector centrality is a measure of the importance of a node in a
         network. It assigns relative scores to all nodes in the network based
@@ -1241,7 +1363,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            the eigenvector centralities in a dataframe.
+            the eigenvector centralities in a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1315,7 +1437,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.Series
-            frequency statistics for eigenvector centralities in a dataframe.
+            frequency statistics for eigenvector centralities in a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1331,7 +1453,7 @@ class Networks(AttrSet):
     def authority_scores_df(self, network = 'request_input', weights=None, scale=True, return_eigenvalue=False):
         
         """
-        Calculates Kleinberg's authority score for the vertices of the network. Returns a dataframe.
+        Calculates Kleinberg's authority score for the vertices of the network. Returns a Pandas DataFrame.
         
         Parameters
         ----------
@@ -1352,7 +1474,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            the authority scores as a dataframe.
+            the authority scores as a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1377,7 +1499,7 @@ class Networks(AttrSet):
     def authority_scores_stats(self, network = 'request_input', weights=None, scale=True, return_eigenvalue=False):
         
         """
-        Returns frequency statistics for Kleinberg's authority score for the vertices of the network. Returns a dataframe.
+        Returns frequency statistics for Kleinberg's authority score for the vertices of the network. Returns a Pandas DataFrame.
         
         Parameters
         ----------
@@ -1398,7 +1520,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            frequency statistics for authority scores as a dataframe.
+            frequency statistics for authority scores as a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1414,7 +1536,7 @@ class Networks(AttrSet):
     def hub_scores_df(self, network = 'request_input', weights=None, scale=True, return_eigenvalue=False):
         
         """
-        Calculates Kleinberg's hub score for the vertices of the graph. Returns a dataframe.
+        Calculates Kleinberg's hub score for the vertices of the graph. Returns a Pandas DataFrame.
        
         Parameters
         ----------
@@ -1435,7 +1557,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            the hub scores as a dataframe.
+            the hub scores as a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1460,7 +1582,7 @@ class Networks(AttrSet):
     def hub_scores_stats(self, network = 'request_input', weights=None, scale=True, return_eigenvalue=False):
         
         """
-        Returns frequency statistisc for Kleinberg's hub score for the vertices of the graph. Returns a dataframe.
+        Returns frequency statistisc for Kleinberg's hub score for the vertices of the graph. Returns a Pandas DataFrame.
        
         Parameters
         ----------
@@ -1482,7 +1604,7 @@ class Networks(AttrSet):
         Returns
         -------
         result : pandas.DataFrame
-            frequency statistics for hub scores as a dataframe.
+            frequency statistics for hub scores as a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1498,7 +1620,7 @@ class Networks(AttrSet):
     def coreness_df(self, network = 'request_input', mode='all'):
         
         """
-            Finds the coreness (shell index) of the vertices of the network. Returns a dataframe.
+            Finds the coreness (shell index) of the vertices of the network. Returns a Pandas DataFrame.
        
             The M{k}-core of a graph is a maximal subgraph in which each vertex
             has at least degree k. (Degree here means the degree in the
@@ -1686,7 +1808,7 @@ class Networks(AttrSet):
     
     def weighted_degrees_df(self, network = 'request_input', direction = 'all'):
 
-        """Calculates a network's weighted degrees and returns a dataframe."""
+        """Calculates a network's weighted degrees and returns a Pandas DataFrame."""
         
         if network == 'request_input':
                 network = input('Network name: ')
@@ -1739,7 +1861,7 @@ class Networks(AttrSet):
     def degree_distribution(self, network = 'request_input', weighted = False, direction = 'all'):
         
         """
-        Returns the network's weighted or unweighted degree distribution as a dataframe.
+        Returns the network's weighted or unweighted degree distribution as a Pandas DataFrame.
         """
         
         if network == 'request_input':
@@ -1761,74 +1883,22 @@ class Networks(AttrSet):
             
     
 
-    def all_centralities(self, network = 'request_input', sort_by = ['weighted_degree','degree', 'betweenness','eigencentrality','authority_score','hub_score']):
+    def all_centralities(self, network = 'request_input'):
         
         """
-        Calculates all centrality measures for network. Returns as a dataframe.
+        Calculates all centrality measures for network. Returns as a Pandas DataFrame.
         """
         
         if network == 'request_input':
                 network = input('Network name: ')
         
         network_obj = self.get_network(network)
-        is_directed = network_obj.is_directed()
-        
-        try:
-            degrees = self.degrees_df(network = network).set_index('vertex').sort_index()
-        except:
-            degrees = pd.DataFrame()
-            degrees.index.name = 'vertex'
-        
-        try:
-            weighted_degrees = self.weighted_degrees_df(network = network).set_index('vertex').sort_index()
-        except:
-            weighted_degrees = pd.DataFrame()
-            weighted_degrees.index.name = 'vertex'
-        
-        try:
-            eigencents = self.eigencentralities_df(network = network).set_index('vertex').sort_index() # type: ignore
-        except:
-            eigencents = pd.DataFrame()
-            eigencents.index.name = 'vertex'
-        
-        try:
-            betweenness = self.betweenness_df(network = network).set_index('vertex').sort_index()
-        except:
-            betweenness = pd.DataFrame()
-            betweenness.index.name = 'vertex'
-        
-        try:
-            auths = self.authority_scores_df(network = network).set_index('vertex').sort_index()
-        except:
-            auths = pd.DataFrame()
-            auths.index.name = 'vertex'
-        
-        try:
-            hubs = self.hub_scores_df(network = network).set_index('vertex').sort_index()
-        except:
-            hubs = pd.DataFrame()
-            hubs.index.name = 'vertex'
-        
-        combined = weighted_degrees.join(
-                                            degrees
-                                        ).join(
-                                            betweenness
-                                        ).join(
-                                            eigencents
-                                        ).join(
-                                            auths
-                                        ).join(
-                                            hubs)
-        
-        if is_directed == True:
-            sort_by = ['weighted_degree','degree', 'betweenness','authority_score','hub_score']
-            
-        return combined.sort_values(sort_by, ascending=False)
+        return network_obj.all_centralities()
 
     
     def get_neighbours(self,  network = 'request_input', vertex_name = 'request_input'):
         
-        """Returns vertex neighbours as a dataframe"""
+        """Returns vertex neighbours as a Pandas DataFrame"""
         
         if network == 'request_input':
             network = input('Network name: ')
@@ -1841,7 +1911,7 @@ class Networks(AttrSet):
         # Get vertex
         vertex = network_obj.vs.find(name = vertex_name)
 
-        # Get vertex neighbours in a dataframe
+        # Get vertex neighbours in a Pandas DataFrame
 
         df = pd.DataFrame(columns = ['vertex_id', 'vertex_name'])
 
@@ -1895,7 +1965,7 @@ class Networks(AttrSet):
     def get_item_all_degrees(self, item_id = 'request_input', weighted = False):
         
         """
-        Returns a dataframe of degrees for all vertices representing an item. Takes an item ID.
+        Returns a Pandas DataFrame of degrees for all vertices representing an item. Takes an item ID.
         """
         
         if item_id == 'request_input':

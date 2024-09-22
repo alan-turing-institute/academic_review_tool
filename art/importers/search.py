@@ -41,6 +41,88 @@ def search(default_query = None,
                     orcid = False
                     ):
     
+    """
+        Searches multiple APIs and returns the results as a Pandas DataFrame. API options:
+            * CrossRef
+            * Scopus
+            * Web of Science (WoS)
+            * ORCID
+
+        Parameters
+        ----------
+        default_query : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        all_fields : str
+            Scopus only: searches all fields. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        year : str
+            searches for matching publication years. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_identifier : str
+            searches for API-specific author IDs (e.g. CrossRef, Scopus, WoS, Orcid). Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        publisher : str
+             searches for publisher names containing string. Defaults to None.
+        funder : str
+            searches for funder names containing string. Defaults to None.
+        abstract : str
+            searches for abstracts containing string. Defaults to None.
+        keywords : str
+            searches for matching keywords. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        isbn : str
+            searches for matching ISBNs. Defaults to None.
+        pubmed_id : str
+            searches for matching PubMed IDs (PMIDs). Defaults to None.
+        source_title : str
+            searches for sources with titles (e.g. journals, books) containing string. Defaults to None.
+        volume : str
+            searches for journal entries with matching volume numbers. Defaults to None.
+        page : str
+            searches for entries with matching page numbers. Defaults to None.
+        issue : str
+            searches for journal entries with matching issue numbers. Defaults to None.
+        language : str
+            searches for entries by language Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        references : str
+            searches for entries with citations that contain matching strings. Defaults to None.
+        topics : str
+            searches for entries tagged with matching topic names and keywords. Defaults to None.
+        default_operator : str
+            the default Boolean operator to build searches. Defaults to 'AND'.
+        limit_per_api : int
+            sets limits for the number of results to return per API. Used to limit impact on API servers. Defaults to 20.
+        rate_limit : float
+            CrossRef only: time delay in seconds per result. Used to limit impact on API servers. Defaults to 0.05 seconds.
+        timeout : int
+            CrossRef only: maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        crossref : bool
+            whether to search using the CrossRef API. Defaults to True.
+        scopus : bool
+            whether to search using the Scopus API. Defaults to True.
+        wos : bool
+            whether to search using the Web of Science (WoS) API. Defaults to False.
+        orcid : bool
+            whether to search using the ORCID API. Defaults to False.
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            combined results from API searches.
+    """
+
     df = pd.DataFrame(dtype=object)
 
     if crossref == True:

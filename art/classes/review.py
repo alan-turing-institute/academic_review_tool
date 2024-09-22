@@ -16,12 +16,11 @@ from .properties import Properties
 from .affiliations import Affiliation, Affiliations, format_affiliations
 from .funders import Funders, format_funders
 from .results import Results, Funder, generate_work_id
-from .references import References, is_formatted_reference, extract_references
+from .references import References, is_formatted_reference, format_references
 from .activitylog import ActivityLog
 from .authors import Author, Authors, format_authors as orig_format_authors
 from .networks import Network, Networks
 from .citation_crawler import citation_crawler, academic_scraper
-
 
 import copy
 import pickle
@@ -35,6 +34,21 @@ from igraph import Graph # type: ignore
 
 def add_pdf(self, path = 'request_input'):
         
+        """
+        Imports a PDF file using a filepath and adds to the Results dataframe.
+        
+        Parameters
+        ----------
+        path : str
+            filepath for PDF. Requests input if none passed explicitly.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
+
+
         if path == 'request_input':
             path = input('Path to PDF (URL or filepath): ')
 
@@ -56,8 +70,22 @@ Results.add_pdf = add_pdf # type: ignore
 
 def add_row(self, data):
 
+        """
+        Adds inputted data as a row to Results dataframe.
+        
+        Parameters
+        ----------
+        data : pandas.Series
+            data to add to Results.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
+
         if type(data) != pd.Series:
-            raise TypeError(f'Results must be a Pandas.Series, not {type(data)}')
+            raise TypeError(f'Results must be a pandas.Series, not {type(data)}')
 
         data.index = data.index.astype(str).str.lower().str.replace(' ', '_')
         if len(data) != len(self.columns):
@@ -70,7 +98,6 @@ def add_row(self, data):
         work_id = generate_work_id(data)
         work_id = self.get_unique_id(work_id, index)
         data['work_id'] = work_id
-
         
         self.loc[index] = data
         self.format_authors()
@@ -79,8 +106,30 @@ Results.add_row = add_row # type: ignore
 
 def add_dataframe(self,  dataframe: pd.DataFrame, drop_duplicates = False, drop_empty_rows = False, update_work_ids = True, format_authors = False):
         
+        """
+        Merges inputted dataframe with Results dataframe.
+        
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            dataframe to add to Results.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_work_ids : bool
+            whether to update results work ID's.
+        format_authors : bool
+            whether to format author data.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
+
         if (type(dataframe) != pd.DataFrame) and (type(dataframe) != pd.Series):
-            raise TypeError(f'Results must be a Pandas.Series or Pandas.DataFrame, not {type(dataframe)}')
+            raise TypeError(f'Results must be a pandas.Series or pandas.DataFrame, not {type(dataframe)}')
 
         dataframe = dataframe.reset_index().drop('index', axis=1)
         dataframe.columns = dataframe.columns.astype(str).str.lower().str.replace(' ', '_')
@@ -116,16 +165,39 @@ def add_dataframe(self,  dataframe: pd.DataFrame, drop_duplicates = False, drop_
 Results.add_dataframe = add_dataframe # type: ignore
 
 def has_formatted_citations(self):
+        
+        """
+        Returns all results entries which contain properly formatted citations.
+        """
+
         return self[self['citations'].apply(is_formatted_reference)]
 
 Results.has_formatted_citations = has_formatted_citations # type: ignore
 
 def lacks_formatted_citations(self):
+        
+        """
+        Returns all results entries which lack properly formatted citations.
+        """
+
         return self[~self['citations'].apply(is_formatted_reference)]
 
 Results.lacks_formatted_citations = lacks_formatted_citations # type: ignore
 
 def format_citations(self, add_work_ids = False, update_from_doi = False, verbose = True):
+        
+        """
+        Formats all results entries' citations data as References objects.
+        
+        Parameters
+        ----------
+        add_work_ids : bool
+            whether to add new work ID's to results entries.
+        update_from_doi : bool
+            whether to update results data from DOI's.
+        verbose : bool
+            whether to print dialogue during formatting.
+        """
 
         self['citations'] = self['citations'].replace({np.nan: None})
         self['citations_data'] = self['citations_data'].replace({np.nan: None})
@@ -148,7 +220,7 @@ def format_citations(self, add_work_ids = False, update_from_doi = False, verbos
             indices = unformatted.index
             processing_count = 0
             for i in indices:
-                refs = extract_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
+                refs = format_references(self.loc[i, 'citations_data'], add_work_ids = add_work_ids, update_from_doi = update_from_doi)
                 refs_count  = None
 
                 if 'refs_count' in refs.__dict__.keys():
@@ -175,6 +247,10 @@ Results.format_citations = format_citations # type: ignore
 
 def format_authors(self):
 
+        """
+        Formats all results entries' authors data as Authors objects.
+        """
+
         if len(self[self['authors_data'].isna()]) < len(self['authors_data']):
             authors_data = self['authors_data']
         
@@ -190,6 +266,26 @@ def format_authors(self):
 Results.format_authors = format_authors # type: ignore
     
 def add_citations_to_results(self, add_work_ids = False, update_from_doi = False, drop_duplicates = False, drop_empty_rows = True):
+
+        """
+        Formats all results entries' citations and adds them to the Results object.
+        
+        Parameters
+        ----------
+        add_work_ids : bool
+            whether to add work ID's to newly added results entries. Defaults to False.
+        update_from_doi : bool
+            whether to update results data from DOI's. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove duplicate rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        
+        Returns
+        -------
+        self : Results
+            a Results object.
+        """
 
         if drop_empty_rows == True:
             self.drop_empty_rows()
@@ -227,7 +323,7 @@ Results.add_citations_to_results = add_citations_to_results # type: ignore
 class Review:
     
     """
-    This is a Review object. It stores the data from academic reviews.
+    This is a Review object. It stores data from academic reviews.
     
     Parameters
     ----------
@@ -237,6 +333,23 @@ class Review:
         file location associated with Review.
     file_type : str
         file type associated with Review file(s).
+    
+    Attributes
+    ----------
+    properties : Properties
+        metadata associated with this Review object.
+    results : Results
+        data on publications.
+    authors : Authors
+        data on authors.
+    funders : Funders
+        data on funders.
+    affiliations : Affiliations
+        data on authors' affiliate organisations.
+    networks : Networks
+        network objects derived from Review data.
+    activity_log : ActivityLog
+        metadata logging changes to the Review, including: additions, deletions, crawling, and searches.
     """
 
     results = Results()
@@ -290,7 +403,7 @@ class Review:
     def __repr__(self):
         
         """
-        Defines how Reviews are represented in string form.
+        Defines how Review objects are represented in string form.
         """
         
         output = f'\n\n{"-"*(13+len(self.properties.review_name))}\nReview name: {self.properties.review_name}\n{"-"*(13+len(self.properties.review_name))}\n\nProperties:\n-----------\n{self.properties}\n\nDescription:\n------------\n\n{self.description}\n\nResults:\n--------\n\n{self.results}\n\nAuthors:\n--------\n\n{self.authors.summary.head(10)}\n\nFunders:\n--------\n\n{self.funders.summary.head(10)}\n\n'
@@ -309,6 +422,11 @@ class Review:
         
         """
         Retrieves Review contents or results using an index/key.
+
+        Returns
+        -------
+        item : object
+            item associated with the inputted key.
         """
         
         if key in self.__dict__.keys():
@@ -349,18 +467,37 @@ class Review:
         
         """
         Returns the Review's attributes as a list.
+
+        Returns
+        -------
+        contents : list
+            the names of the Review object's attributes.
         """
         
         return self.__dict__.keys()
     
     def __len__(self):
 
+        """
+        Returns the number of entries in the Results table.
+
+        Returns
+        -------
+        result : int
+            the number of results entries contained in the Results dataframe.
+        """    
+        
         return len(self.results)
     
     def count_results(self):
         
         """
         Returns the number of entries in the Results table.
+
+        Returns
+        -------
+        result : int
+            the number of results entries contained in the Results dataframe.
         """
         
         return len(self.results)
@@ -369,6 +506,11 @@ class Review:
         
         """
         Returns the Review as a list.
+
+        Returns
+        -------
+        result : list
+            Review object formatted as a list.
         """
         
         return [i for i in self]
@@ -377,6 +519,11 @@ class Review:
         
         """
         Returns the Review as a dictionary.  Excludes the Review's 'properties' attribute.
+
+        Returns
+        -------
+        output_dict : dict
+            Review object formatted as a dictionary.
         """
         
         output_dict = {}
@@ -386,37 +533,94 @@ class Review:
         return output_dict
     
     def to_bibtex(self):
+        
+        """
+        Returns an object containing Results data in bibtex format.
+        """
+
         return self.results.to_bibtex()
     
     def to_yaml(self):
+
+        """
+        Returns an object containing Results data in .yaml format.
+        """
+
         return self.results.to_yaml()
     
     def export_bibtex(self, file_name = 'request_input', folder_path= 'request_input'):
+
+        """
+        Exports Results data as a .bib file.
+        
+        Parameters
+        ----------
+        file_name : str
+            name for export file. Defaults to requesting from user input.
+        folder_path : str
+            directory path for folder to export to. Defaults to requesting from user input.
+        """
+
         return self.results.export_bibtex(file_name=file_name, folder_path=folder_path)
 
     def export_yaml(self, file_name = 'request_input', folder_path= 'request_input'):
+
+        """
+        Exports Results data as a .yaml file.
+        
+        Parameters
+        ----------
+        file_name : str
+            name for export file. Defaults to requesting from user input.
+        folder_path : str
+            directory path for folder to export to. Defaults to requesting from user input.
+        """
+
         return self.results.export_yaml(file_name=file_name, folder_path=folder_path)
 
     def copy(self):
         
         """
-        Returns the a copy of the Review.
+        Returns the a copy of the Review object.
         """
         
         return copy.deepcopy(self)
     
-    def get_result(self, row_position, column_position = None):
+    def get_result(self, index_position, column_position = None):
         
         """
-        Returns a result when given its attribute name.
+        Returns a result when given its index position, with an option for specifying column position. 
+        Equivalent to pandas.DataFrame.loc[...]
+
+        Parameters
+        ----------
+        index_position : int
+            index position of result entry to return from Results dataframe.
+        column_position : object
+            name of column of datapoint to return from Results dataframe.
+        
+        Returns
+        -------
+        result : object
+            the selected object.
         """
         
         if column_position == None:
-            return self.results.loc[row_position]
+            return self.results.loc[index_position]
         else:
-            return self.results.loc[row_position, column_position]
+            return self.results.loc[index_position, column_position]
     
     def get_affiliations_dict(self):
+
+        """
+        Returns the all affiliations associated with Authors objects as a dictionary.
+
+        Returns
+        -------
+        result : Affiliations
+            Affiliations associated with Authors objects.
+        """
+
         return self.authors.affiliations()
 
     def get_name_str(self):
@@ -440,6 +644,22 @@ class Review:
     
     def add_pdf(self, path = 'request_input', update_formatting: bool = True):
         
+        """
+        Reads a PDF and adds its data to the Results dataframe.
+
+        Parameters
+        ----------
+        path : str
+            file path for PDF to read. Defaults to request from user input.
+        update_formatting : bool
+            whether to format the added data (e.g., citations, authors, funders, and affiliations)
+        
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         old_res_len = len(self.results)
         self.results.add_pdf(path) # type: ignore
         new_res_len = len(self.results)
@@ -453,11 +673,18 @@ class Review:
 
         self.update_properties()
 
+        return self
+
     def varstr(self):
         
         """
         Returns the Review's name as a string. Defaults to using its variable name; falls back to using its name property.
         
+        Returns
+        -------
+        string : str
+            the Review's name as a string.
+
         Notes
         -----
             * Searches global environment dictionary for objects sharing Review's ID. Returns key if found.
@@ -483,11 +710,54 @@ class Review:
             
         return string
     
-    def to_dataframe(self):
-        return self.results.to_dataframe() # type: ignore
+    def to_dataframe(self, attribute: str = 'results'):
+
+        """
+        Returns one of the Review's datasets as a Pandas DataFrame. Defaults to returning the Results dataset.
+        
+        Parameters
+        ----------
+        attribute : str
+            the name of the Review dataset to return.
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            the dataset as a pandas dataframe.
+        """
+
+        df = pd.DataFrame(dtype=object)
+
+        if attribute.lower() == 'results':
+            df = self.results.to_dataframe() # type: ignore
+        
+        if attribute.lower() == 'authors':
+            df = self.authors.to_dataframe() # type: ignore
+        
+        if attribute.lower() == 'funders':
+            df = self.funders.to_dataframe() # type: ignore
+        
+        if (attribute.lower() == 'affiliations') or (attribute.lower() == 'affils'):
+            df = self.affiliations.to_dataframe() # type: ignore
+
+        return df
 
     def from_dataframe(dataframe: pd.DataFrame): # type: ignore
         
+        """
+        Creates a Review object from a Pandas DataFrame.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame to use.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         review = Review()
         review.results = Results.from_dataframe(dataframe) # type: ignore
         review.format() # type: ignore
@@ -495,6 +765,10 @@ class Review:
         return review
 
     def format_funders(self):
+
+        """
+        Formats results entries' funders data into Funders objects and stores in Review's Funders attribute.
+        """
 
         self.results.format_funders() # type: ignore
 
@@ -528,6 +802,11 @@ class Review:
                     continue
 
     def format_affiliations(self):
+
+        """
+        Formats authors' affiliations data as Affiliations objects and stores in Review's Affiliations attribute.
+        """
+
         self.authors.format_affiliations()
 
         affils_data = self.authors.summary['affiliations'].to_list()
@@ -563,9 +842,30 @@ class Review:
                     continue
 
     def format_citations(self, add_work_ids = False, update_from_doi = False, verbose=True):
+
+        """
+        Formats results entries' citations data into References objects.
+
+        Parameters
+        ----------
+        add_work_ids : bool
+            whether to add work ID's to References entries.
+        """
+
         self.results.format_citations(add_work_ids = add_work_ids, update_from_doi=update_from_doi, verbose=verbose) # type: ignore
 
     def format_authors(self, drop_duplicates = False, drop_empty_rows=True):
+
+        """
+        Formats results entries' authors data into Authors objects and stores in Review's Authors attribute.
+
+        Parameters
+        ----------
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         self.results.format_authors() # type: ignore
 
@@ -589,6 +889,19 @@ class Review:
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
     
     def update_author_attrs(self, ignore_case: bool = True, drop_duplicates = False, drop_empty_rows=True):
+
+        """
+        Formats authors entries, identifies their publications, and stores these.
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         self.authors.sync(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -646,6 +959,15 @@ class Review:
         
     def update_funder_attrs(self, ignore_case: bool = True):
 
+        """
+        Formats funders entries, identifies their publications, and stores these.
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        """
+
         self.funders.sync_all()
 
         f_data = self.funders.summary[['funder_id', 'uri', 'crossref_id', 'website','name']]
@@ -701,6 +1023,15 @@ class Review:
 
     def update_affiliation_attrs(self, update_authors: bool = True, ignore_case: bool = True):
         
+        """
+        Formats affiliations entries, identifies their publications, and stores these.
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        """
+
         if update_authors == True:
             self.update_author_attrs(ignore_case=ignore_case)
 
@@ -760,11 +1091,46 @@ class Review:
                 
     def update_entity_attrs(self, ignore_case: bool = True):
         
+        """
+        Formats authors, funders, and affiliations entries; identifies their publications; and stores these
+
+        Parameters
+        ----------
+        ignore_case : bool
+            whether to ignore the case of string data.
+        """
+
         self.update_author_attrs(ignore_case=ignore_case)
         self.update_affiliation_attrs(update_authors=False, ignore_case=ignore_case)
         self.update_funder_attrs(ignore_case=ignore_case)
 
     def get_coauthors(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_authors: bool = True, drop_duplicates = False, drop_empty_rows=True):
+        
+        """
+        Returns a dictionary of co-authors.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author attributes.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_authors : bool
+            whether to store the dict of co-authors in the Review's Authors attribute.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+
+        Returns
+        -------
+        output : dict
+            a dictionary containing co-authors. 
+                * Keys: author IDs
+                * Values: co-authors
+        """
 
         if format == True:
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -815,6 +1181,32 @@ class Review:
 
     def get_cofunders(self, format: bool = True, update_attrs: bool = True, ignore_case: bool = True, add_to_funders: bool = True):
 
+        """
+        Returns a dictionary of co-funders.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update funder attributes.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_funders : bool
+            whether to store the dict of co-funders in the Review's Funders attribute.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+
+        Returns
+        -------
+        output : dict
+            a dictionary containing co-funders. 
+                * Keys: funder IDs
+                * Values: co-funders
+        """
+
         if format == True:
             self.format()
         
@@ -864,6 +1256,17 @@ class Review:
  
     def remove_duplicates(self, drop_empty_rows=True, use_api=False):
 
+        """
+        Removes duplicate data entries from results, authors, funders, and affiliations datasets.
+
+        Parameters
+        ----------
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        use_api : bool
+            whether to update data using CrossRef, Orcid, and other APIs.
+        """
+
         orig_res_len = len(self.results)
         self.results.remove_duplicates(drop_empty_rows=drop_empty_rows, update_from_api=use_api) # type: ignore
         new_res_len = len(self.results)
@@ -893,6 +1296,21 @@ class Review:
 
 
     def format(self, update_entities = False, drop_duplicates = False, drop_empty_rows=True, verbose=False):
+
+        """
+        Parses and formats all datasets (i.e., results, authors, funders and affiliations).
+
+        Parameters
+        ----------
+        update_attrs : bool
+            whether to update entity attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        verbose : bool
+            whether to print formatting dialogue.
+        """
 
         self.format_funders()
         self.format_citations(verbose=verbose)
@@ -925,6 +1343,19 @@ class Review:
 
     def add_citations_to_results(self, update_formatting: bool = True, drop_duplicates = False, drop_empty_rows = True):
         
+        """
+        Formats all results entries' citations and adds them to the Review's Results attribute.
+        
+        Parameters
+        ----------
+        update_formatting : bool
+            whether to format results, authors, funders, and affiliations data.
+        drop_empty_rows : bool
+            whether to remove duplicate rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        """
+
         self.results.add_citations_to_results(drop_duplicates = drop_duplicates, drop_empty_rows = drop_empty_rows) # type: ignore
 
         if drop_empty_rows == True:
@@ -952,7 +1383,20 @@ class Review:
 
     def update_from_orcid(self, update_formatting: bool = True, drop_duplicates = False, drop_empty_rows=True):
 
-        orcid_len = len(self.authors.with_orcid())
+        """
+        Updates Authors data using the Orcid API.
+
+        Parameters
+        ----------
+        update_formatting : bool
+            whether to format results, authors, funders, and affiliations data.
+        drop_empty_rows : bool
+            whether to remove duplicate rows. Defaults to False.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data. Defaults to False.
+        """
+
+        orcid_len = len(self.authors.has_orcid())
 
         old_auths_len = len(self.authors.summary)
         self.authors.update_from_orcid(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -967,6 +1411,28 @@ class Review:
             self.format()
         
     def add_dataframe(self, dataframe: pd.DataFrame, drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = True):
+
+        """
+        Merges inputted dataframe with Review's Results dataset.
+        
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            dataframe to add to Results.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_work_ids : bool
+            whether to update results entries' work ID's.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
 
         orig_len = len(self.results)
         self.results.add_dataframe(dataframe=dataframe, drop_empty_rows=drop_empty_rows, drop_duplicates=drop_duplicates) # type: ignore
@@ -995,8 +1461,25 @@ class Review:
         
         return self
 
-    def import_bibtex(self, file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+    def import_bibtex(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = False, update_entities = False):
         
+        """
+        Reads a Bibtex (.bib) bibliography file and adds its data to Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1010,19 +1493,74 @@ class Review:
         
         self.properties.file_location = file_path
         self.properties.update_file_type()
+
+        if drop_duplicates == True:
+            self.remove_duplicates(drop_empty_rows = drop_empty_rows)
+
+        if update_formatting == True:
+            self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+        
+        if update_entities == True: 
+            self.update_entity_attrs()
     
-    def from_bibtex(file_path = 'request_input', update_formatting: bool = False, update_entities = False):
+    def from_bibtex(file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_formatting: bool = False, update_entities = False):
+
+        """
+        Reads .bib file and returns a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
 
         review = Review(file_location=file_path)
-        review.import_bibtex(file_path=file_path, update_formatting=update_formatting, update_entities=update_entities)
+        review.import_bibtex(file_path=file_path, drop_empty_rows = drop_empty_rows, drop_duplicates = drop_duplicates, update_formatting=update_formatting, update_entities=update_entities)
 
         return review
 
     def import_excel(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Reads an Excel (.xlsx) file and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1062,14 +1600,40 @@ class Review:
 
         return self
     
-    def from_excel(file_path = 'request_input', sheet_name = None, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+    def from_excel(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
+        """
+        Reads an Excel (.xlsx) file and returns as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_entities : bool
+            whether to update entity attributes.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
         review = Review(file_location=file_path)
         review.results = Results.from_excel(file_path, sheet_name) # type: ignore
-        review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
+
+        if update_formatting == True:
+            review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         review.activity_log.add_activity(type='data import', activity='created Review from imported Excel file', location=['results', 'authors', 'funders', 'affiliations'])
         
@@ -1077,6 +1641,28 @@ class Review:
 
     def import_csv(self, file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Reads a CSV (.csv) file and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1118,11 +1704,34 @@ class Review:
     
     def from_csv(file_path = 'request_input', update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
+        """
+        Reads a CSV (.csv) file and returns as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
         review = Review(file_location=file_path)
         review.results = Results.from_csv(file_path) # type: ignore
+
         if update_formatting == True:
             review.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
@@ -1131,6 +1740,22 @@ class Review:
         return review
 
     def import_json(self, file_path = 'request_input', update_formatting: bool = True):
+
+        """
+        Reads a JSON (.json) file and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -1148,6 +1773,20 @@ class Review:
     
     def from_json(file_path = 'request_input'): # type: ignore
 
+        """
+        Reads a JSON (.json) file and returns as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1157,6 +1796,36 @@ class Review:
         return review
     
     def import_file(self, file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
+        
+        """
+        Reads a file, determines its file type, and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of an Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Notes
+        -----
+        Can read:
+            * .xlsx
+            * .csv
+            * .json
+            * .bib
+            * .yaml
+            * .txt
+            * .review
+        """
 
         if file_path == 'request_input':
             file_path = input('File path: ')
@@ -1179,6 +1848,41 @@ class Review:
 
     def from_file(file_path = 'request_input', sheet_name = None, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
         
+        """
+        Reads a file, determines its file type, and returns its data as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        sheet_name : str
+            optional: name of an Excel sheet to read.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+        
+        Returns
+        -------
+        review : Review
+            a Review object.
+
+        Notes
+        -----
+        Can read:
+            * .xlsx
+            * .csv
+            * .json
+            * .bib
+            * .yaml
+            * .txt
+            * .review
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1190,6 +1894,34 @@ class Review:
 
     def import_jstor(self, file_path = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True):
         
+        """
+        Reads a file outputted by JSTOR's Constellate portal and adds its data to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.    
+        
+        Notes
+        -----
+        Can read:
+            * .csv
+            * .json
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
 
@@ -1218,6 +1950,29 @@ class Review:
 
     def from_jstor(file_path: str = 'request_input', drop_empty_rows = False, drop_duplicates = False, update_work_ids = True, format_citations=True, format_authors = True, format_funders = True, format_affiliations=True): # type: ignore
 
+        """
+        Reads a file outputted by JSTOR's Constellate portal and returns its data as a Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of file to import. Defaults to requesting from user input.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Notes
+        -----
+        Can read:
+            * .csv
+            * .json
+        """
+
         if file_path == 'request_input':
             file_path = input('File path: ')
         
@@ -1227,9 +1982,56 @@ class Review:
         return review
 
     def search_field(self, field = 'request_input', any_kwds = 'request_input', all_kwds = None, not_kwds = None, case_sensitive = False, output = 'Results'):
+        
+        """
+        Searches a given field in the Results dataset for a string.
+
+        Parameters
+        ----------
+        field : str
+            name of field to search. Defaults to requesting from user input.
+        any_kwds : str or list
+            one or more keywords to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        all_kwds : str or list
+            one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
+        not_kwds : str or list
+            one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
+        case_sensitive : bool
+            whether to pay attention to the case of string data. Defaults to False.
+        output : str
+            the type of object to return. Defaults to Results.
+
+        Returns
+        -------
+        output : Results or pandas.DataFrame
+            search results.
+        """
+        
         return self.results.search_field(field = field, any_kwds = any_kwds, all_kwds = all_kwds, not_kwds = not_kwds, case_sensitive = case_sensitive, output = output) # type: ignore
 
     def search(self, any_kwds = 'request_input', all_kwds = None, not_kwds = None, fields = 'all', case_sensitive = False):
+
+        """
+        Searches for a string throughout Review.
+
+        Parameters
+        ----------
+        any_kwds : str or list
+            one or more keywords to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        all_kwds : str or list
+            one or more keywords to search for. Returns results where *all* matches are found. Defaults to None.
+        not_kwds : str or list
+            one or more keywords to search for. Returns results where *no* matches are found. Defaults to None.
+        fields : str or list
+            names of one or fields to search. Defaults to 'all'.
+        case_sensitive : bool
+            whether to pay attention to the case of string data. Defaults to False.
+
+        Returns
+        -------
+        output : pandas.DataFrame
+            search results.
+        """
 
         combined_query = str(any_kwds)
         if all_kwds is not None:
@@ -1271,7 +2073,7 @@ class Review:
         Parameters
         ----------
         folder_name : str 
-            name of folder to create. Defaults to using the object's variable name.
+            name of folder to create. Defaults to requesting from user input.
         folder_address : str 
             directory address to create folder in. defaults to requesting for user input.
         export_str_as : str 
@@ -1282,6 +2084,25 @@ class Review:
             file type for exporting Pandas objects. Defaults to 'csv'.
         export_network_as : str 
             file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
         """
         
         if folder_name == 'request_input':
@@ -1300,7 +2121,7 @@ class Review:
         Parameters
         ----------
         file_name : str
-            name of file to create. Defaults to using the object's variable name.
+            name of file to create. Defaults to requesting from user input.
         file_address : str
             directory address to create file in. defaults to requesting for user input.
         """
@@ -1335,7 +2156,7 @@ class Review:
         Parameters
         ----------
         file_name : str
-            name of file to create. Defaults to using the object's variable name.
+            name of file to create. Defaults to requesting from user input.
         file_address : str
             directory address to create file in. defaults to requesting for user input.
         """
@@ -1374,6 +2195,48 @@ class Review:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
+        """
+        Saves the Review to a new file with an inputted name at a specified location.
+        
+        Parameters
+        ----------
+        filetype : str
+            type of file to save. Defaults to 'review'.
+        file_name : str
+            name of file to create. Defaults to requesting from user input.
+        folder_address : str 
+            directory address of folder to create file in. defaults to requesting from user input.
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        filetype:
+            * txt or
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
+
         if file_name == 'request_input':
             file_name = input('File name: ')
         
@@ -1451,6 +2314,40 @@ class Review:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
+        """
+        Saves the Review to the filepath stored in its Properties attribute.
+        
+        Parameters
+        ----------
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
+
         file_path = self.properties.file_location
 
         if (file_path is None) or (file_path == ''):
@@ -1499,6 +2396,15 @@ class Review:
 
     def import_txt(self, file_path: str = 'request_input'):
 
+        """
+        Imports data from a pickled .txt file and adds to the Review object.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of .txt file to import.
+        """
+
         if file_path == 'request_input':
             file_path = input('File address: ')
         
@@ -1521,6 +2427,20 @@ class Review:
 
     def from_txt(file_path: str = 'request_input'): # type: ignore
 
+        """
+        Imports a Review from a pickled .txt file.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of .txt file to import.
+        
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         if file_path == 'request_input':
             file_path = input('File address: ')
         
@@ -1533,6 +2453,20 @@ class Review:
         return review
 
     def open(file_path: str = 'request_input'): # type: ignore
+
+        """
+        Imports a Review from a .review or .txt file.
+
+        Parameters
+        ----------
+        file_path : str
+            directory path of .txt file to import.
+        
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
 
         if file_path == 'request_input':
             file_path = input('File address: ')
@@ -1548,24 +2482,89 @@ class Review:
 
     def scrape_article(self, url = 'request_input'):
         
+        """
+        Scrapes article data from a given URL and adds to Results.
+
+        Parameters
+        ----------
+        url : str
+            url of article to scrape. Defaults to requesting from user input.
+        
+        Notes
+        -----
+        This function is capable of scraping:
+            * Frontiers
+            * ArXiv
+            * Springer
+            * Nature
+            * IEEE
+            * PubMed
+            * PMC
+            * SSRN
+            * HeinOnline
+            * MDPI
+            * ACM
+            * Project Muse
+            * Proquest
+            * JSTOR
+            * Google Scholar
+        """
+
         if url == 'request_input':
             url = input('URL: ')
 
         df = scrape_article(url)
-        self.activity_log.add_activity(type='web scraping', activity='scraped URL and added to results', location=['results'], url=url)
+        self.activity_log.add_activity(type='web scraping', activity=f'scraped {url} and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_doi(self, doi = 'request_input'):
         
+        """
+        Scrapes article data from a given DOI and adds to Results.
+
+        Parameters
+        ----------
+        doi : str
+            DOI of article to scrape. Defaults to requesting from user input.
+        
+        Notes
+        -----
+        This function is capable of scraping:
+            * Frontiers
+            * ArXiv
+            * Springer
+            * Nature
+            * IEEE
+            * PubMed
+            * PMC
+            * SSRN
+            * HeinOnline
+            * MDPI
+            * ACM
+            * Project Muse
+            * Proquest
+            * JSTOR
+            * Google Scholar
+        """
+
         if doi == 'request_input':
             doi = input('doi or URL: ')
 
         df = scrape_doi(doi)
         url = f'https://doi.org/{doi}'
-        self.activity_log.add_activity(type='web scraping', activity='scraped DOI and added to results', location=['results'], url=url)
+        self.activity_log.add_activity(type='web scraping', activity=f'scraped {url} and added to results', location=['results'], url=url)
         self.results.add_dataframe(df) # type: ignore
 
     def scrape_google_scholar(self, url = 'request_input'):
+
+        """
+        Scrapes article data from a given Google Scholar page and adds to Results.
+
+        Parameters
+        ----------
+        url : str
+            url of Google Scholar page to scrape. Defaults to requesting from user input.
+        """
 
         if url == 'request_input':
             url = input('URL: ')
@@ -1576,6 +2575,15 @@ class Review:
     
     def scrape_google_scholar_search(self, url = 'request_input'):
 
+        """
+        Scrapes article data from a given Google Scholar search and adds to Results. 
+
+        Parameters
+        ----------
+        url : str
+            url of Google Scholar search to scrape. Defaults to requesting from user input.
+        """
+
         if url == 'request_input':
             url = input('URL: ')
 
@@ -1584,6 +2592,21 @@ class Review:
         self.results.add_dataframe(df) # type: ignore
     
     def scrape(self, url = 'request_input', add_to_results=True, drop_empty_rows = True, drop_duplicates = False):
+
+        """
+        Scrapes website data from a given URL. 
+
+        Parameters
+        ----------
+        url : str
+            url to scrape. Defaults to requesting from user input.
+        add_to_results : bool
+            whether to add scraped data to Results.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        """
 
         if url == 'request_input':
             url = input('URL: ')
@@ -1617,11 +2640,61 @@ class Review:
                 select: list = None, # type: ignore
                 sample: int = None, # type: ignore
                 limit: int = None, # type: ignore
-                rate_limit: float = 0.1,
+                rate_limit: float = 0.05,
                 timeout = 60,
                 add_to_results = False
                 ) -> pd.DataFrame:
         
+        """
+        Searches CrossRef API and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        add_to_results : bool
+            whether to add search results to Review.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         df = search_works(bibliographic = bibliographic,
                 title = title,
                 author = author,
@@ -1704,6 +2777,91 @@ class Review:
                     drop_duplicates = False,
                     format=False):
         
+        """
+        Searches Scopus API and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        tile_abs_key_auth : str
+            a combined search. Searches for titles, abstracts, keywords, and author names. Defaults to None.
+        all_fields : str
+            searches all fields. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        year : str
+            searches for matching publication years. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_identifier : str
+            searches for Scopus author IDs. Defaults to None.
+        affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        publisher : str
+            searches for publisher names containing string. Defaults to None.
+        funder : str
+            searches for funder names containing string. Defaults to None.
+        abstract : str
+            searches for abstracts containing string. Defaults to None.
+        keywords : str
+            searches for matching keywords. Defaults to None.
+        doctype : str
+            searches for types of entries containing string. Defaults to None.
+        doi : str
+            searches for matching DOIs. Defaults to None.
+        issn : str
+            searches for matching ISSNs. Defaults to None.
+        isbn : str
+            searches for matching ISBNs. Defaults to None.
+        pubmed_id : str
+            searches for matching PubMed IDs (PMIDs). Defaults to None.
+        source_title : str
+            searches for source titles (e.g. journals, books) containing string. Defaults to None.
+        volume : str
+            searches for journal entries with matching volume numbers. Defaults to None.
+        page : str
+            searches for entries with matching page numbers. Defaults to None.
+        issue : str
+            searches for journal entries with matching issue numbers. Defaults to None.
+        language : str
+            searches for entries by language Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        references : str
+            searches for entries with citations that contain matching strings. Defaults to None.
+        default_operator : str
+            the default Boolean operator to build the search. Defaults to 'AND'
+        add_to_results : bool
+            whether to add search results to Review.
+        drop_duplicates : bool
+            whether to remove duplicated rows when adding to results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data when adding to results.
+        format : bool
+            whether to format results, authors, funders, and affiliations data when adding to results.
+        refresh : bool 
+        view : bool 
+        verbose : bool 
+        download : bool 
+        integrity_fields : None
+        integrity_action : str
+        subscriber : bool
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from Scopus API search.
+        
+        Options
+        -------
+        Options for default_operator:
+            * 'AND'
+            * 'AND NOT'
+            * 'NOT'
+            * 'OR'
+        """
+
         df = search_scopus(tile_abs_key_auth = tile_abs_key_auth,
                             all_fields = all_fields,
                             title = title,
@@ -1866,6 +3024,23 @@ class Review:
     #     return df
 
     def lookup_doi(self, doi = 'request_input', timeout = 60):
+
+        """
+        Looks up DOI using the CrossRef API.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from DOI lookup on CrossRef API.
+        """
+
         return lookup_doi(doi=doi, timeout=timeout)
     
     def lookup_scopus(self, 
@@ -1877,6 +3052,32 @@ class Review:
                       drop_duplicates = False,
                       drop_empty_rows = False
                       ):
+
+        """
+        Looks up publication using the Scopus API.
+
+        Parameters
+        ----------
+        uid : str
+            Scopus ID, DOI, ISBN, ISSN, or Pubmed ID (PMID) to look up. Defaults to requesting from user input.
+        refresh : bool
+            whether to refresh the Scopus session.
+        view : str
+            sets the amount of detail returned. Defaults to 'META'.
+        add_to_results : bool
+            whether to add results to Review.
+        drop_duplicates : bool
+            whether to remove duplicated rows when adding to results.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data when adding to results.
+        id_type : None
+
+
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from publication lookup on Scopus API.
+        """
 
         if uid == 'request_input':
             uid = input('ID: ')
@@ -1900,6 +3101,30 @@ class Review:
 
     def add_doi(self, doi = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Looks up DOI using the CrossRef API and adds to Review's results dataset.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         old_len = len(self.results)
         self.results.add_doi(doi=doi, timeout=timeout) # type: ignore
         new_len = len(self.results)
@@ -1936,16 +3161,85 @@ class Review:
 
     def from_doi(doi: str = 'request_input', timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
 
+        """
+        Looks up DOI using the CrossRef API and returns as a Review object.
+
+        Parameters
+        ----------
+        doi : str
+            DOI to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
+
         review = Review()
         review.add_doi(doi = doi, timeout = timeout, update_formatting = update_formatting, update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
         return review
 
-    def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60):
+    def lookup_dois(self, dois_list: list = [], rate_limit: float = 0.05, timeout = 60):
+
+        """
+        Looks up a list of DOIs using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            result of DOI lookups.
+        """
+
         return lookup_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout)
     
-    def add_dois(self, dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
+    def add_dois(self, dois_list: list = [], rate_limit: float = 0.05, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Looks up a list of DOIs using the CrossRef API and adds to Review's results dataset.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         old_len = len(self.results)
         self.results.add_dois(dois_list=dois_list, rate_limit=rate_limit, timeout=timeout) # type: ignore
         new_len = len(self.results)
@@ -1981,7 +3275,33 @@ class Review:
 
         return self
     
-    def from_dois(dois_list: list = [], rate_limit: float = 0.1, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+    def from_dois(dois_list: list = [], rate_limit: float = 0.05, timeout = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False): # type: ignore
+
+        """
+        Looks up a list of DOIs using the CrossRef API and returns as a Review object.
+
+        Parameters
+        ----------
+        dois_list : list
+            list of DOIs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+
+        Returns
+        -------
+        review : Review
+            a Review object.
+        """
 
         review = Review()
         review.add_dois(dois_list = dois_list, rate_limit=rate_limit, timeout = timeout, update_formatting = update_formatting, update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -1990,6 +3310,28 @@ class Review:
 
     def update_from_dois(self, timeout: int = 60, update_formatting: bool = True, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
         
+        """
+        Updates results entries that have DOIs associated using the CrossRef API.
+
+        Parameters
+        ----------
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_formatting : bool
+            whether to format author, funder, affiliations, and citations data.
+        update_entities : bool
+            whether to update entity attributes.
+        
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         has_doi = len(self.results.has('doi')) # type: ignore
         self.results.update_from_dois(timeout=timeout) # type: ignore
 
@@ -2024,6 +3366,28 @@ class Review:
 
     def sync_apis(self, timeout: int = 60, update_entities = False, drop_empty_rows = False, drop_duplicates = False):
 
+        """
+        Updates data using all APIs:
+        * CrossRef (for DOI)
+        * Orcid
+
+        Parameters
+        ----------
+        timeout : int
+            how long in seconds to wait for results before raising an error. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        update_entities : bool
+            whether to update entity attributes.
+        
+        Returns
+        -------
+        self : Review
+            a Review object.
+        """
+
         self.update_from_dois(timeout=timeout)
         self.update_from_orcid()
         self.format(update_entities=update_entities, drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
@@ -2031,12 +3395,67 @@ class Review:
         return self
 
     def lookup_journal(self, issn = 'request_input', timeout = 60):
+
+        """
+        Looks up a journal by its ISSN using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        issn : str
+            ISSN to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            journal records.
+        """
+
         return lookup_journal(issn = issn, timeout = timeout)
     
-    def lookup_journals(self, issns_list: list = [], rate_limit: float = 0.1, timeout: int = 60):
+    def lookup_journals(self, issns_list: list = [], rate_limit: float = 0.05, timeout: int = 60):
+
+        """
+        Looks up a list of journal ISSNs using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        issns_list : str
+            list of ISSNs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            journal records.
+        """
+
         return lookup_journals(issns_list = issns_list, rate_limit = rate_limit, timeout = timeout)
     
-    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60): # type: ignore
+    def search_journals(self, *args, limit: int = None, rate_limit: float = 0.05, timeout = 60): # type: ignore
+
+        """
+        Searches CrossRef API for journal records and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        *args
+            search fields.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         return search_journals(*args, limit = limit, rate_limit=rate_limit, timeout = timeout)
     
     def get_journal_entries(self,
@@ -2045,9 +3464,35 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout = 60):
         
+        """
+        Looks up a journal using the CrossRef API and returns associated entries as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        issn : str
+            ISSN to look up. Defaults to requesting from user input.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        add_to_results : bool
+            whether to add results to Review.
+        filter : dict
+        select : list
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            journal entry records.
+        """
+
         return get_journal_entries(issn = issn, filter = filter, select = select, sample = sample, limit = limit, rate_limit = rate_limit, timeout = timeout)
     
     def search_journal_entries(
@@ -2069,10 +3514,62 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout: int = 60,
                         add_to_results: bool = False) -> pd.DataFrame:
-        
+            
+            """
+            Searches for journal entries and articles associated with an ISSN using the CrossRef API.
+
+            Parameters
+            ----------
+            issn : str
+                ISSN to look up. Defaults to requesting from user input.
+            bibliographic : str
+                a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+            title : str
+                searches for titles containing string. Defaults to None.
+            author : str
+                searches for authors containing string. Defaults to None.
+            author_affiliation : str
+                searches for author affiliations containing string. Defaults to None.
+            editor : str
+                searches for editor names containing string. Defaults to None.
+            entry_type : str
+                searches for types of entries containing string. Defaults to None.
+            published_date : str
+                searches for matching publication dates. Defaults to None.
+            doi : str
+                searches for matching DOIs.
+            issn : str
+                searches for matching ISSNs.
+            publisher_name : str
+                searches for publisher names containing string. Defaults to None.
+            funder_name : str
+                searches for funder names containing string. Defaults to None.
+            source : str
+                searches for sources (e.g. journals, books) containing string. Defaults to None.
+            link : str
+                searches for entry links containing string. Defaults to None.
+            sample : int
+                optional: select which results to return.
+            limit : int
+                optional: set a limit to the number of results returned.
+            rate_limit : float
+                time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+            timeout : int
+                maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+            add_to_results : bool
+                whether to add search results to Review.
+            filter : dict
+            select : list
+            
+            Returns
+            -------
+            df : pandas.DataFrame
+                results from CrossRef API search.
+            """
+
             df = search_journal_entries(issn = issn,
                                           bibliographic = bibliographic,
                                           title=title,
@@ -2105,12 +3602,69 @@ class Review:
             return df
     
     def lookup_funder(self, funder_id = 'request_input', timeout = 60):
+
+        """
+        Looks up a funder using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        funder_id : str
+            CrossRef Funder ID to look up. Defaults to requesting from user input.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            funder records.
+        """
+
         return lookup_funder(funder_id = funder_id, timeout = timeout)
     
-    def lookup_funders(self, funder_ids: list = [], rate_limit: float = 0.1, timeout = 60):
+    def lookup_funders(self, funder_ids: list = [], rate_limit: float = 0.05, timeout = 60):
+
+        """
+        Looks up a list of funders using the CrossRef API. Returns a Pandas DataFrame.
+
+        Parameters
+        ----------
+        funder_ids : list
+            list of CrossRef Funder IDs to look up. Defaults to an empty list.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            funder records.
+        """
+
         return lookup_funders(funder_ids=funder_ids, rate_limit=rate_limit, timeout = timeout)
     
-    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.1, timeout = 60): # type: ignore
+    def search_funders(self, *args, limit: int = None, rate_limit: float = 0.05, timeout = 60): # type: ignore
+
+        """
+        Searches CrossRef API for funder records and returns the results as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        *args
+            search fields.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         return search_funders(*args, limit=limit, rate_limit=rate_limit, timeout=timeout)
     
     def get_funder_works(self,
@@ -2119,10 +3673,36 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout: int = 60,
                         add_to_results: bool = False):
         
+        """
+        Looks up a funder using the CrossRef API and returns associated publications as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        funder_id : str
+            CrossRef Funder ID to look up. Defaults to requesting from user input.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        add_to_results : bool
+            whether to add results to Review.
+        filter : dict
+        select : list
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            publication records.
+        """
+
         df = get_funder_works(funder_id=funder_id, filter=filter, select=select, sample=sample, limit=limit, rate_limit=rate_limit, timeout=timeout)
 
         if add_to_results == True:
@@ -2149,10 +3729,62 @@ class Review:
                         select: list = None, # type: ignore
                         sample: int = None, # type: ignore
                         limit: int = None, # type: ignore
-                        rate_limit: float = 0.1,
+                        rate_limit: float = 0.05,
                         timeout: int = 60,
                         add_to_results: bool = False):
-    
+
+        """
+        Searches for publications associated with a funder using the CrossRef API.
+
+        Parameters
+        ----------
+        funder_id : str
+            CrossRef Funder ID to look up. Defaults to requesting from user input.
+        bibliographic : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        published_date : str
+            searches for matching publication dates. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        publisher_name : str
+             searches for publisher names containing string. Defaults to None.
+        funder_name : str
+            searches for funder names containing string. Defaults to None.
+        source : str
+            searches for sources (e.g. journals, books) containing string. Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        sample : int
+            optional: select which results to return.
+        limit : int
+            optional: set a limit to the number of results returned.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on CrossRef servers. Defaults to 0.05 seconds.
+        timeout : int
+            maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        add_to_results : bool
+            whether to add search results to Review.
+        filter : dict
+        select : list
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            results from CrossRef API search.
+        """
+
         df = search_funder_works(
                                 funder_id=funder_id,
                                 bibliographic=bibliographic,
@@ -2183,6 +3815,22 @@ class Review:
         return df
 
     def search_orcid(self, query: str = 'request_input', add_to_authors: bool = True):
+
+        """
+        Searches for author records using the Orcid API.
+
+        Parameters
+        ----------
+        query : str
+            query to search. Allows for keywords and Boolean logic.
+        add_to_authors : bool
+            whether to add results to Review's authors dataset.
+        
+        Returns
+        -------
+        result : pandas.DataFrame
+            search result.
+        """
 
         if add_to_authors == True:
             self.activity_log.add_activity(type='API search', activity='searched ORCID for author and added to authors', location=['authors'], query=query)
@@ -2224,6 +3872,87 @@ class Review:
                     wos = False, 
                     add_to_results = False):
         
+        """
+        Searches multiple APIs and returns the results as a Pandas DataFrame. API options:
+            * CrossRef
+            * Scopus
+            * Web of Science (WoS)
+
+        Parameters
+        ----------
+        default_query : str
+            a combined search. Searches for titles, abstracts, authors, publishers, dates etc. Defaults to None.
+        all_fields : str
+            Scopus only: searches all fields. Defaults to None.
+        title : str
+            searches for titles containing string. Defaults to None.
+        year : str
+            searches for matching publication years. Defaults to None.
+        author : str
+            searches for authors containing string. Defaults to None.
+        author_identifier : str
+            searches for API-specific author IDs (e.g. CrossRef, Scopus, WoS, Orcid). Defaults to None.
+        entry_type : str
+            searches for types of entries containing string. Defaults to None.
+        affiliation : str
+            searches for author affiliations containing string. Defaults to None.
+        editor : str
+            searches for editor names containing string. Defaults to None.
+        publisher : str
+             searches for publisher names containing string. Defaults to None.
+        funder : str
+            searches for funder names containing string. Defaults to None.
+        abstract : str
+            searches for abstracts containing string. Defaults to None.
+        keywords : str
+            searches for matching keywords. Defaults to None.
+        doi : str
+            searches for matching DOIs.
+        issn : str
+            searches for matching ISSNs.
+        isbn : str
+            searches for matching ISBNs. Defaults to None.
+        pubmed_id : str
+            searches for matching PubMed IDs (PMIDs). Defaults to None.
+        source_title : str
+            searches for sources with titles (e.g. journals, books) containing string. Defaults to None.
+        volume : str
+            searches for journal entries with matching volume numbers. Defaults to None.
+        page : str
+            searches for entries with matching page numbers. Defaults to None.
+        issue : str
+            searches for journal entries with matching issue numbers. Defaults to None.
+        language : str
+            searches for entries by language Defaults to None.
+        link : str
+            searches for entry links containing string. Defaults to None.
+        references : str
+            searches for entries with citations that contain matching strings. Defaults to None.
+        topics : str
+            searches for entries tagged with matching topic names and keywords. Defaults to None.
+        default_operator : str
+            the default Boolean operator to build searches. Defaults to 'AND'.
+        limit_per_api : int
+            sets limits for the number of results to return per API. Used to limit impact on API servers. Defaults to 20.
+        rate_limit : float
+            CrossRef only: time delay in seconds per result. Used to limit impact on API servers. Defaults to 0.05 seconds.
+        timeout : int
+            CrossRef only: maximum time in seconds to wait for a response before aborting the CrossRef API call. Defaults to 60 seconds.
+        crossref : bool
+            whether to search using the CrossRef API.
+        scopus : bool
+            whether to search using the Scopus API.
+        wos : bool
+            whether to search using the Web of Science (WoS) API.
+        add_to_results : bool
+            whether to add search results to Review.
+        
+        Returns
+        -------
+        df : pandas.DataFrame
+            combined results from API searches.
+        """
+
         df = api_search(default_query = default_query,
                     all_fields = all_fields,
                     title = title,
@@ -2281,6 +4010,29 @@ class Review:
         
 
     def crawl_stored_citations(self, max_depth=3, processing_limit=1000, format = True, update_from_doi = False):
+
+        """
+        Crawls outward from results' citations to identify new results *only using data already stored in the Review*.
+
+        Parameters
+        ----------
+        max_depth : int
+            the maximum crawl depth the crawler will reach before stopping. 
+            Defaults to 3.
+        processing_limit : int
+            the maximum number of results the crawler will process before stopping. Defaults to 1000.
+        format : bool
+            whether to format results, authors, funders, and affiliations data. Defaults to True.
+        update_from_doi : bool
+            whether to use the CrossRef API to update entries that have DOIs associated.
+        
+        Notes
+        -----
+        Operational details:
+            * crawl type: utilises a breadth-first crawl.
+            * crawl depth: the number of iterations the crawler performs. For each iteration, all results from the previous iteration are loaded as seeds to crawl from.
+            * operation: for each iteration, the crawler takes all citations in the current dataset and -- if they have not been crawled already -- adds any citations data they contain to the results.
+        """
 
         iteration = 1
         processed_indexes = []
@@ -2353,8 +4105,8 @@ class Review:
     def crawl_citations(
                     self,
                     use_api: bool = True,
-                    crawl_limit: int = 5, 
-                    depth_limit: int = 2,
+                    crawl_limit: int = 1000, 
+                    depth_limit: int = 3,
                     be_polite: bool = True,
                     rate_limit: float = 0.05,
                     timeout: int = 60,
@@ -2364,43 +4116,45 @@ class Review:
                     ):
     
         """
-        Crawls a Result's object's entries, their citations, and so on.
+        Crawls all Results entries' citations to find new results. Returns a Pandas DataFrame.
         
         The crawler iterates through queue of works; extracts their citations; runs checks to validate each reference;
         based on these, selects a source to retrieve data from: 
-            (a) if has a valid doi: Crossref API.
-            (b) if no valid doi: bespoke web scraping for specific academic websites.
-            (c) else if a link is present: general web scraping.
-        
-        Retrieves data and adds the entries to the dataframe. 
-
-        Iterates through each set of added entries.
+        * if has a valid doi: Crossref API.
+        * if no valid doi: bespoke web scraping for specific academic websites.
+        * else if a link is present: general web scraping.
         
         Parameters
-        ---------- 
-        
-        
-        
+        ----------
+        use_api : bool
+            whether to lookup entries and update their data using APIs. Required for the crawler to find new and add new data. Defaults to True.
+        depth_limit : int
+            the maximum crawl depth the crawler will reach before stopping. Defaults to 3.
+        crawl_limit : int
+            the maximum number of results the crawler will process before stopping. Defaults to 1000.
+        be_polite : bool
+            whether to respect websites' crawler permissions, as set out by their robots.txt files.
+        rate_limit : float
+            time delay in seconds per result. Used to limit impact on API servers. Defaults to 0.05 seconds.
+        timeout : int
+            how long in seconds to wait for results before raising an error. Defaults to 60 seconds.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+
         Returns
         -------
-        result : object 
-            an object containing the results of a crawl.
+        result : pandas.DataFrame 
+            the crawl results.
         """
 
-        result = self.results.crawl_citations(
-                                            use_api = use_api,
-                                            crawl_limit = crawl_limit, 
-                                            depth_limit = depth_limit,
-                                            be_polite = be_polite,
-                                            rate_limit = rate_limit,
-                                            timeout = timeout,
-                                            add_to_results = add_to_results
-                                            ) # type: ignore
+        data = self.results
         
         self.format_citations()
 
         result = citation_crawler(
-                    data = self,  # type: ignore
+                    data = data,  # type: ignore
                     use_api = use_api,
                     crawl_limit = crawl_limit, 
                     depth_limit = depth_limit,
@@ -2419,27 +4173,37 @@ class Review:
             self.results.add_dataframe(df) # type: ignore
             self.format(drop_duplicates=drop_duplicates, drop_empty_rows=drop_empty_rows)
 
-        
         return result
 
-    def citations_dict(self, strip_ids = False):
+    def citations_dict(self) -> dict:
         
+        """
+        Returns a dictionary containing Results entries and their citations. 
+            * Keys: work_id
+            * Values: References object containing citations
+        """
+
         output = {}
 
         for i in self.results.index:
             data = self.results.loc[i]
             work_id = data['work_id']
-            work_id_stripped = work_id.split('#')[0].strip()
             citations = data['citations']
 
             if type(citations) == References:
                 citations.update_work_ids()
 
-            output[work_id_stripped] = citations
+            output[work_id] = citations
 
         return output
 
     def author_works_dict(self) -> dict:
+
+        """
+        Returns a dictionary containing Results entries and their associated authors. 
+            * Keys: work_id
+            * Values: authors data as a list or dictionary
+        """
 
         output = {}
 
@@ -2457,6 +4221,12 @@ class Review:
         return output
 
     def author_affiliations_dict(self) -> dict:
+
+        """
+        Returns a dictionary containing Author entries and their associated affiliations. 
+            * Keys: author_id
+            * Values: affiliations data as a list or dictionary
+        """
 
         output = {}
 
@@ -2476,6 +4246,12 @@ class Review:
         return output
 
     def funder_works_dict(self) -> dict:
+
+        """
+        Returns a dictionary containing Results entries and their associated funders. 
+            * Keys: work_id
+            * Values: funders data as a list or dictionary
+        """
 
         output = {}
 
@@ -2500,6 +4276,30 @@ class Review:
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
+
+        """
+        Generates a network representing co-authorship relationships.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing co-authorship relationships.
+        """
 
         if drop_empty_rows == True:
             self.authors.drop_empty_rows()
@@ -2560,11 +4360,31 @@ class Review:
     def cofunders_network(self, 
                                 format: bool = True, 
                                 update_attrs: bool = True,
-                                drop_duplicates = False,
-                                drop_empty_rows = True,
+                                # drop_duplicates = False,
+                                # drop_empty_rows = True,
                                 ignore_case: bool = True,
                                 add_to_networks: bool = True
                                 ) -> Network:
+
+        """
+        Generates a network representing co-funder relationships.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update funder attributes.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing co-funder relationships.
+        """
 
         co_funders = self.get_cofunders(format=format, update_attrs=update_attrs, ignore_case=ignore_case)
 
@@ -2620,6 +4440,30 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a network representing citations between publications.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing citations.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
         
@@ -2668,6 +4512,34 @@ class Review:
                             add_citations_to_results=True,
                             add_to_networks: bool = True):
 
+        """
+        Generates a network representing instances of co-citations between publications.
+
+        Parameters
+        ----------
+        refresh_citations : bool
+            whether to re-generate the underlying citations network. Defaults to False.
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_citations_to_results : bool
+            whether to add Results entries' citations as Results entries. Defaults to True.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing co-citation relationships.
+        """
+
         if refresh_citations == True:
 
             citation_network = self.citation_network(format=format,
@@ -2697,6 +4569,8 @@ class Review:
         if add_to_networks == True:
             self.activity_log.add_activity(type='network generation', activity=f'generated co-citations network and added to networks', location=['networks'])
             self.networks.__dict__['cocitations'] = network
+        
+        return network
 
     def bibcoupling_network(self, 
                            refresh_citations = False,
@@ -2707,6 +4581,34 @@ class Review:
                             add_citations_to_results=True,
                             add_to_networks: bool = True):
         
+        """
+        Generates a network representing bibliometric coupling between publications.
+
+        Parameters
+        ----------
+        refresh_citations : bool
+            whether to re-generate the underlying citations network. Defaults to False.
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_citations_to_results : bool
+            whether to add Results entries' citations as Results entries. Defaults to True.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing bibliometric coupling.
+        """
+
         if refresh_citations == True:
 
             citation_network = self.citation_network(format=format,
@@ -2736,6 +4638,8 @@ class Review:
             self.activity_log.add_activity(type='network generation', activity=f'generated bibliometric coupling network and added to networks', location=['networks'])
             self.networks.__dict__['bibcoupling'] = network
 
+        return network
+
     def author_works_network(self,
                                 format: bool = True, 
                                 update_attrs: bool = True,
@@ -2744,6 +4648,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a bipartite network representing relationships between authors and publications.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between authors and publications.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
             self.authors.drop_empty_rows() # type: ignore
@@ -2777,6 +4703,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a bipartite network representing relationships between funders and publications.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between funders and publications.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
         
@@ -2809,6 +4757,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates a bipartite network representing relationships between authors and affiliate organisations.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between authors and and affiliate organisations.
+        """
+
         if drop_empty_rows == True:
             self.authors.drop_empty_rows()
         
@@ -2839,6 +4809,28 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Network:
         
+        """
+        Generates an n-partite network representing relationships between publications, authors, funders, and affiliate organisations.
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        network : Network
+            a network representing relationships between publications, authors, funders, and affiliate organisations.
+        """
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
             self.authors.drop_empty_rows() # type: ignore
@@ -2887,6 +4879,43 @@ class Review:
                                 add_to_networks: bool = True
                                 ) -> Networks:
         
+        """
+        Generates all available networks:
+            * Citations
+            * Co-citations
+            * Bibliometric coupling
+            * Co-authors
+            * Co-funders
+            * Author-works (bipartite)
+            * Funder-works (bipartite)
+            * Author-affiliations (bipartite)
+            * Works, authors, funders and affiliations (n-partite)
+
+
+        Parameters
+        ----------
+        format : bool
+            whether to format results, authors, funders, and affiliations data.
+        update_attrs : bool
+            whether to update author, funder, and affiliations attributes.
+        drop_duplicates : bool
+            whether to remove duplicated rows.
+        drop_empty_rows : bool
+            whether to remove rows which do not contain any data.
+        ignore_case : bool
+            whether to ignore the case of string data.
+        add_citations_to_results : bool
+            whether to add Results entries' citations as Results entries. Defaults to True.
+        add_to_networks : bool
+            whether to store the network in the Review's Networks attribute.
+
+        Returns
+        -------
+        networks : Networks
+            a Networks object containing all available networks.
+        """
+
+
         if drop_empty_rows == True:
             self.results.drop_empty_rows() # type: ignore
             self.authors.drop_empty_rows() # type: ignore

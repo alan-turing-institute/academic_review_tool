@@ -1,7 +1,7 @@
 """Functions for parsing, cleaning, and normalising data."""
 
 # Importing packages
-
+from .basics import blockPrint, enablePrint
 from ..datasets import stopwords, html_stopwords 
 
 from typing import List, Dict, Tuple
@@ -17,9 +17,15 @@ import requests
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize # type: ignore
 
+blockPrint()
 nltk.download('punkt')
+enablePrint()
 
 def join_list_by_colon(item):
+
+    """
+    Takes list and returns as a string separated by a comma followed by a space. Used as input for Pandas.apply.
+    """
     
     if type(item) == list:
         return ', '.join(item)
@@ -29,6 +35,10 @@ def join_list_by_colon(item):
 
 def join_df_col_lists_by_colon(dataframe):
 
+    """
+    Takes a Pandas DataFrame and converts lists to strings separated by a comma followed by a space.
+    """
+
     for col in dataframe.columns:
         dataframe[col] = dataframe[col].apply(join_list_by_colon)
     
@@ -36,6 +46,10 @@ def join_df_col_lists_by_colon(dataframe):
 
 def split_str_by_colon(item):
     
+    """
+    Splits a string into a list by semi-colons. Used as input for Pandas.apply.
+    """
+
     if type(item) == str:
         return item.split(',')
     
@@ -1283,6 +1297,22 @@ def correct_series_of_lists(series: pd.Series) -> pd.Series:
 
 def merge_duplicate_ids(dataframe, merge_on: str):
 
+    """
+    Takes a DataFrame and merges rows with duplicate IDs.
+
+    Parameters
+    ----------
+    dataframe : Results, References or pandas.DataFrame
+        dataframe to process.
+    merge_on : str
+        name of column containing IDs to merge on.
+    
+    Returns
+    -------
+    dataframe : Results, References or pandas.DataFrame
+        processed DataFrame.
+    """
+
     df = dataframe.copy(deep=True)
     
     if merge_on in df.columns:
@@ -1377,10 +1407,26 @@ def merge_duplicate_ids(dataframe, merge_on: str):
 
 def merge_all_duplicate_ids(dataframe):
 
+    """
+    Takes a DataFrame and merges rows with duplicate bibliometric IDs. 
+
+    Parameters
+    ----------
+    dataframe : Results, References or pandas.DataFrame
+        dataframe to process.
+    
+    Returns
+    -------
+    dataframe : Results, References or pandas.DataFrame
+        processed DataFrame.
+    
+    Notes
+    -----
+    Bibliometric identifiers used to check for duplicate records: DOI, ISBN, ISSN, URI, ORCID, CrossRef ID, Scopus, Web of Science, PubMed, address, URL, website.
+    """
+
     id_names = ['doi', 'isbn', 'issn', 'uri', 'orcid', 'crossref_id', 'crossref', 'scopus_id', 'scopus', 'wos_id', 'wos', 'pubmed_id', 'address', 'link', 'website']
     df = dataframe.copy(deep=True)
-
-
 
     for i in id_names:
         if i in dataframe.columns:
@@ -1389,6 +1435,10 @@ def merge_all_duplicate_ids(dataframe):
     return dataframe
 
 def deduplicate(dataframe):
+
+    """
+    Deduplicates custom ART DataFrames (Results, References, Authors.summary, Funders.summary, Affiliations.summary) using unique identifiers.
+    """
 
     ignore_cols = ['work_id',
                    'author_id',

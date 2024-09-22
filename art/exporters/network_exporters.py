@@ -2,7 +2,6 @@
 
 from typing import List, Dict, Tuple
 import json
-import copy
 import igraph as ig # type: ignore
 from igraph import Graph # type: ignore
 from networkx.classes import Graph as NetworkX_Undir, DiGraph as NetworkX_Dir, MultiGraph as NetworkX_Multi # type: ignore
@@ -107,6 +106,8 @@ def export_network(network: Graph, file_name: str = 'request_input', folder_addr
         ):
             network = Graph.from_networkx(network)
         
+        file_type = file_type.strip('.')
+    
         # Writing GraphML file by default or if selected
         if (file_type == None) or (file_type == '') or (file_type.lower() == 'graphml'):
 

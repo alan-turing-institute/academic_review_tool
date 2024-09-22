@@ -6,6 +6,20 @@ import numpy as np
 
 def import_bibtex(file_path = 'request_input'):
 
+    """
+    Reads Bibtex bibliography (.bib) file and returns as a Pandas DataFrame.
+
+    Parameters
+    ----------
+    file_path : str
+        directory address for .bib file to read. Defaults to requesting from user input.
+    
+    Returns
+    -------
+    df : pandas.DataFrame
+        a Pandas DataFrame of the bibliographic data contained in the Bibtex file.
+    """
+
     if file_path == 'request_input':
         file_path = input('File path: ')
 

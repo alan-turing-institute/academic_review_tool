@@ -1,28 +1,22 @@
-from ..exporters.general_exporters import obj_to_folder, art_class_to_folder
+from ..exporters.general_exporters import art_class_to_folder
 
 import pandas as pd
-import numpy as np
 
 class Entity:
 
     """
-    This is an Entity object. It is designed to store data about an individual entity and their publications.
-    
-    Parameters
-    ----------
-    
+    This is an Entity object. It is intended as a superclass for Author, Funder, and Affiliation classes.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Entity's data.
     """
 
     def __init__(self):
         
         """
-        Initialises entity instance.
-        
-        Parameters
-        ----------
+        Initialises Entity instance.
         """
 
 
@@ -33,7 +27,7 @@ class Entity:
     def __getitem__(self, key):
         
         """
-        Retrieves entity attribute using a key.
+        Retrieves Entity attribute using a key.
         """
         
         if key in self.__dict__.keys():
@@ -43,25 +37,60 @@ class Entity:
             return self.summary.loc[0, key]
 
     def get(self, key):
+
+        """
+        Retrieves Entity attribute using a key.
+        """
+
         return self[key]
 
     def __repr__(self) -> str:
+
+        """
+        Defines how Entity objects are represented in string form.
+        """
+
         return str(self.summary.loc[0])
 
-    def search(self, query: str = 'request_input'):
+    def search(self, query: str = 'request_input', ignore_case: bool = True) -> pd.Series:
+
+        """
+        Searches Entity's summary data containing a matching string.
+
+        Parameters
+        ----------
+        query : str
+            a string to search for. Returns results where *any* matches are found. Defaults to requesting from user input.
+        ignore_case : bool
+            whether to ignore the case of string data. Defaults to True.
+
+        Returns
+        -------
+        output : pandas.Series
+            search results.
+        """
 
         if query == 'request_input':
             query = input('Search query').strip()
         
         query = query.strip().lower()
         
-        self_str = self.summary.copy(deep=True).loc[0].astype(str).str.lower()
+        self_str = self.summary.copy(deep=True).loc[0].astype(str)
+
+        if ignore_case == True:
+            query = query.lower()
+            self_str = self_str.str.lower()
+
         masked = self_str[self_str.str.contains(query)].index
         
         return self.summary.loc[0][masked]
         
 
     def has_uri(self) -> bool:
+
+        """
+        Returns True if the Entity has a URI associated.
+        """
 
         if 'uri' in self.summary.columns:
             uri = self.summary.loc[0, 'uri']
@@ -75,9 +104,22 @@ class Entity:
 
     def add_dict(self, data: dict):
 
-        if 'name' in data.keys():
-            name = data['name']
-            self.summary.loc[0, 'name'] = name
+        """
+        Adds data from a dictionary to the Entity object.
+
+        Parameters
+        ----------
+        data : dict
+            a dictionary with keys that match the names of columns in the Entity's summary dataframe.
+        """
+
+        cols = self.summary.columns.to_list()
+
+        for c in cols:
+
+            if c in data.keys():
+                value = data[c]
+                self.summary.loc[0, c] = value
 
         if 'DOI' in data.keys():
             uri = data['DOI'].replace('http', '').replace('https', '').replace('dx.', '').replace('doi.org/', '').strip()
@@ -85,25 +127,89 @@ class Entity:
     
     def from_dict(data: dict): # type: ignore
 
+        """
+        Takes a dictionary and returns an Entity.
+
+        Parameters
+        ----------
+        data : dict
+            a dictionary with keys that match the names of columns in the Entity's summary dataframe.
+
+        Returns
+        -------
+        entity : Entity
+            an Entity object.
+        """
+
         entity = Entity()
         entity.add_dict(data=data)
 
         return entity
         
     def add_series(self, series: pd.Series):
+
+        """
+        Adds data from a Pandas Series to the Entity object.
+
+        Parameters
+        ----------
+        series : pandas.Series
+            a Pandas Series with indices that match the names of columns in the Entity's summary dataframe.
+        """
+
         self.summary.loc[0] = series
 
     def from_series(data: pd.Series): # type: ignore
+
+        """
+        Takes a Pandas Series and returns an Entity.
+
+        Parameters
+        ----------
+        data : pandas.Series
+            a Pandas Series with indices that match the names of columns in the Entity's summary dataframe.
+
+        Returns
+        -------
+        entity : Entity
+            an Entity object.
+        """
+
         entity = Entity()
         entity.add_series(data)
 
         return entity
 
     def add_dataframe(self, dataframe: pd.DataFrame):
+
+        """
+        Adds data from a Pandas DataFrame to the Entity object.
+
+        Parameters
+        ----------
+        dataframe : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Entity's summary dataframe.
+        """
+
         series = dataframe.loc[0]
         self.add_series(series) # type: ignore
 
     def from_dataframe(data: pd.DataFrame): # type: ignore
+
+        """
+        Takes a Pandas DataFrame and returns an Entity.
+
+        Parameters
+        ----------
+        data : pandas.DataFrame
+            a Pandas DataFrame with columns that match the names of columns in the Entity's summary dataframe.
+
+        Returns
+        -------
+        entity : Entity
+            an Entity object.
+        """
+
         entity = Entity()
         entity.add_dataframe(data)
 
@@ -116,31 +222,68 @@ class Entity:
                       export_dict_as: str = 'json', 
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'
-                      ):
+                     ):
         
+        """
+        Exports the Entity object's contents to a folder.
+        
+        Parameters
+        ----------
+        folder_name : str 
+            name of folder to create. Defaults to requesting from user input.
+        folder_address : str 
+            directory address to create folder in. defaults to requesting for user input.
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
+
         art_class_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
     
 class Entities:
 
     """
-    This is an Entities object. It contains a collection of Entities objects and compiles data about them.
-    
-    Parameters
-    ----------
-    
+    This is an Entities object. It is intended to be a superclass for Authors, Funders, and Affiliations classes.
     
     Attributes
     ----------
+    summary : pandas.DataFrame
+        a dataframe summarising the Entites collection's data.
+    all : dict
+        a dictionary storing formatted Entity objects.
+    data : list
+        a list of any unformatted data associated with Entity objects in the collection.
     """
 
     def __init__(self):
         
         """
         Initialises Entities instance.
-        
-        Parameters
-        ----------
         """
 
         self.summary = pd.DataFrame(dtype = object)
@@ -154,7 +297,7 @@ class Entities:
     def __getitem__(self, key):
         
         """
-        Retrieves entities attribute using a key.
+        Retrieves Entities attribute using a key.
         """
         
         if key in self.__dict__.keys():
@@ -174,10 +317,24 @@ class Entities:
     
     def __repr__(self) -> str:
 
+        """
+        Defines how Entities objects are represented in string form.
+        """
+
         string = str(self.summary).replace('[','').replace(']','')
         return string
     
     def __len__(self) -> int:
+
+        """
+        Returns the number of Entity objects in the Entities collection.
+
+        Returns
+        -------
+        result : int
+            the number of Entity objects contained in the Entities collection.
+        """ 
+
         return len(self.all.keys())
 
     def export_folder(self, 
@@ -187,8 +344,45 @@ class Entities:
                       export_dict_as: str = 'json', 
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'
-                      ):
+                     ):
         
+        """
+        Exports the Entities collection to a folder.
+        
+        Parameters
+        ----------
+        folder_name : str 
+            name of folder to create. Defaults to requesting from user input.
+        folder_address : str 
+            directory address to create folder in. defaults to requesting for user input.
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
         
         art_class_to_folder(obj=self, folder_name=folder_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
@@ -201,11 +395,62 @@ class Entities:
                       export_pandas_as: str = 'csv', 
                       export_network_as: str = 'graphML'):
         
+        """
+        Saves the Entities collection to a new file of a user-selected filetype with an inputted name at a specified location.
+        
+        Parameters
+        ----------
+        filetype : str
+            type of file to save. Defaults to 'folder'.
+        file_name : str
+            name of file to create. Defaults to requesting from user input.
+        folder_address : str 
+            directory address of folder to create file in. defaults to requesting from user input.
+        export_str_as : str 
+            file type for exporting string objects. Defaults to 'txt'.
+        export_dict_as : str 
+            file type for exporting dictionary objects. Defaults to 'json'.
+        export_pandas_as : str 
+            file type for exporting Pandas objects. Defaults to 'csv'.
+        export_network_as : str 
+            file type for exporting network objects. Defaults to 'graphML'.
+
+        Options
+        -------
+        filetype:
+            * folder (Default)
+        export_str_as:
+            * txt or .txt (Default)
+        export_dict_as:
+            * json or .json (Default)
+            * txt or .txt
+        export_pandas_as:
+            * csv or .csv (Default)
+            * xlsx or .xlsx or Excel
+        export_network_as:
+            * graphML or .graphML (Default)
+            * gml or .gml
+            * leda
+            * lgl
+            * ncol
+            * pajek
+            * kumu (i.e., formatted .json)
+        """
+
         if filetype == 'folder':
             self.export_folder(folder_name=file_name, folder_address=folder_address, export_str_as=export_str_as, export_dict_as=export_dict_as, export_pandas_as=export_pandas_as, export_network_as=export_network_as)
 
 
     def drop(self, entity_id):
+        
+        """
+        Removes an Entity entry from the collection.
+
+        Parameters
+        ----------
+        entity_id : str
+            the ID of the Entity to remove. Can be an author_id, funder_id, or affiliation_id
+        """
 
         if entity_id in self.all.keys():
             del self.all[entity_id]
@@ -225,6 +470,20 @@ class Entities:
 
 
     def merge(self, entities):
+
+        """
+        Merges the Entities collection with another Entities collection.
+
+        Parameters
+        ----------
+        entities : Entities or Authors or Funders or Affiliations
+            the Entities collection to merge with.
+        
+        Returns
+        -------
+        self : Entities
+            the merged Entities collections.
+        """
 
         left = self.summary.copy(deep=True)
         right = entities.summary.copy(deep=True)
@@ -265,14 +524,32 @@ class Entities:
 
         return self
 
-    def with_crossref(self):
+    def has_crossref(self):
+
+        """
+        Returns summary data on all Entities entries which have CrossRef IDs.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            a masked dataframe.
+        """
 
         if 'crossref_id' in self.summary.columns:
             return self.summary[~self.summary['crossref_id'].isna()]
         else:
             return pd.DataFrame(index=self.summary.columns, dtype=object)
     
-    def with_uri(self):
+    def has_uri(self):
+
+        """
+        Returns summary data on all Entities entries which have URIs (e.g. DOIs).
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            a masked dataframe.
+        """
 
         if 'uri' in self.summary.columns:
             return self.summary[~self.summary['uri'].isna()]
@@ -280,6 +557,10 @@ class Entities:
             return pd.DataFrame(index=self.summary.columns, dtype=object)
     
     def contains(self, query: str = 'request_input', ignore_case: bool = True) -> bool:
+
+        """
+        Returns True if the Entities collection contains data that matches a string.
+        """
 
         if query == 'request_input':
             query = input('Search query').strip()
@@ -343,6 +624,20 @@ class Entities:
 
     def search_ids(self, query: str = 'request_input'):
 
+        """
+        Searches Entity ID fields for a string.
+
+        Parameters
+        ----------
+        query : str
+            a string to search for. Defaults to requesting from user input.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            search results.
+        """
+
         if query == 'request_input':
             query = input('Search query').strip()
         
@@ -366,6 +661,20 @@ class Entities:
 
     def search(self, query: str = 'request_input'):
         
+        """
+        Searches summary data fields for a string.
+
+        Parameters
+        ----------
+        query : str
+            a string to search for. Defaults to requesting from user input.
+
+        Returns
+        -------
+        result : pandas.DataFrame
+            search results.
+        """
+
         if query == 'request_input':
             query = input('Search query').strip()
         

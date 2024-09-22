@@ -5,6 +5,7 @@ import math
 from os import stat_result
 import os
 import sys
+import pickle
 
 results_cols = [
                             'work_id',
@@ -50,9 +51,19 @@ results_cols = [
 
 
 def blockPrint():
+
+    """
+    Blocks command line interface from printing text via print() and similar functions. Follow with enablePrint() to allow printing.
+    """
+
     sys.stdout = open(os.devnull, 'w')
 
 def enablePrint():
+    
+    """
+    Enables command line interface to print text via print() and similar functions. Must be used after blockPrint().
+    """
+
     sys.stdout = sys.__stdout__
 
 class Iterator:
@@ -99,7 +110,6 @@ class Iterator:
         
         raise StopIteration
 
-        
 def dict_to_str(item: dict) -> str:
     
     """
@@ -258,5 +268,20 @@ def stat_file_to_dict(self):
         pass    
     
     return dictionary
+
+def open_file(file_address: str = 'request_input'): # type: ignore
+
+        """
+        Reads saved ART files and returns as a Review object. Reviews must be formatted as .review or pickled .txt files.
+        """
+
+        if file_address == 'request_input':
+            file_address = input('File address: ')
+        
+        if (file_address.endswith('.txt')) or (file_address.endswith('.review')):
+            with open(file_address, 'rb') as f:
+                review = pickle.load(f)
+
+        return review
 
 stat_result.to_dict = stat_file_to_dict # type: ignore
