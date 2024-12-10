@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from nltk.tokenize import word_tokenize # type: ignore
-from pybtex.database import BibliographyData, Entry #type: ignore
+# from pybtex.database import BibliographyData, Entry #type: ignore
 
 def generate_work_id(work_data: pd.Series):
     
